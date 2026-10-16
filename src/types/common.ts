@@ -4,6 +4,11 @@ import type { NextIntlClientProvider } from 'next-intl';
 import type { IconProps } from '@tabler/icons-react';
 import type { ActionId, ActionImpl } from 'kbar';
 
+export type TranslateMaybeFn = {
+  (key: string): string;
+  has?: (key: string) => boolean;
+};
+
 export interface AppearanceProviderProps {
   children: ReactNode;
 }
@@ -65,6 +70,21 @@ export type Surface = 'ios' | 'android' | 'desktop';
 export interface InstallPromptProps {
   variant?: 'banner' | 'menu' | 'both';
   className?: string;
+}
+
+export interface InstallHelpDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  surface: Surface;
+  needsReinstall: boolean;
+  stillInstalledHint: boolean;
+  appsUrl: string;
+  canPrompt: boolean;
+  prompting: boolean;
+  onCopyAppsUrl: () => void;
+  onRemovedAndInstall: () => void;
+  onShowIosHowTo: () => void;
+  onTryNativeInstall: () => void;
 }
 
 export interface PwaShellProps {
@@ -198,6 +218,7 @@ export interface EntityComboboxProps<T extends EntityComboboxItem = EntityCombob
   renderTriggerLeading?: ReactNode;
   onAddNewClick?: () => void;
   addNewLabel?: string;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export interface HasStatusRecord {

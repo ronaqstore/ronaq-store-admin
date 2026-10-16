@@ -143,12 +143,19 @@ while (queue.length > 0) {
       }
     },
     CallExpression(p) {
-      // Dynamic imports: import(...)
+      // Legacy Babel: import() as CallExpression(Import)
       if (p.node.callee && p.node.callee.type === "Import") {
         const arg = p.node.arguments[0];
         if (arg && arg.type === "StringLiteral") {
           enqueue(resolveModule(currentPath, arg.value));
         }
+      }
+    },
+    ImportExpression(p) {
+      // Modern Babel: import() as ImportExpression
+      const src = p.node.source;
+      if (src && src.type === "StringLiteral") {
+        enqueue(resolveModule(currentPath, src.value));
       }
     },
   });

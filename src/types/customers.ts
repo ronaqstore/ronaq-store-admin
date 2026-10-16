@@ -55,3 +55,43 @@ export interface CustomersHeaderActionProps {
 export interface CustomerLedgerClientProps {
   id: string;
 }
+
+export interface CustomerLedgerEntryDTO {
+  id: string;
+  type: string;
+  date: string;
+  reference?: string | null;
+  notes?: string | null;
+  amount: number;
+  delta: number;
+  balance: number;
+  status: string;
+}
+
+export interface CustomerLedgerDTO {
+  customerId: string;
+  customerName: string;
+  openingBalance: number;
+  balance: number;
+  page: number;
+  pageSize: number;
+  total: number;
+  items: CustomerLedgerEntryDTO[];
+}
+
+export interface CustomerLedgerView {
+  id: string;
+  name: string;
+  phone: string | null;
+  address: string | null;
+  notes: string | null;
+  udhar: number;
+  ledger: Array<{
+    id: string;
+    date: string;
+    label: string;
+    amount: number;
+    running_balance: number;
+  }>;
+}
+

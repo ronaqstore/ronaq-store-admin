@@ -1,9 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { signOut } from 'next-auth/react';
-import { sessionQueryOptions } from '@/features/dukaan/api/queries';
+import { useSession, signOut } from 'next-auth/react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -79,13 +77,13 @@ function AccountMenuItems({ userName, shopName }: AccountMenuItemsProps) {
 
 export function UserNav() {
   const t = useT();
-  const { data, isPending } = useQuery(sessionQueryOptions());
+  const { data, status } = useSession();
 
-  if (isPending) {
+  if (status === 'loading') {
     return <Skeleton className='h-8 w-8 rounded-full' />;
   }
 
-  if (!data) return null;
+  if (!data?.user) return null;
 
   return (
     <DropdownMenu>
@@ -103,7 +101,10 @@ export function UserNav() {
         <ProfileAvatar className='h-8 w-8' />
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-56' align='end' sideOffset={8}>
-        <AccountMenuItems userName={data.user_name} shopName={data.shop_name} />
+        <AccountMenuItems
+          userName={data.user.name ?? t('user.user')}
+          shopName={data.user.shopName ?? ''}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );

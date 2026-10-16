@@ -11,10 +11,6 @@ export interface AppSidebarProps {
   role: SessionRole;
 }
 
-export interface AuthSessionBridgeProps {
-  children: React.ReactNode;
-}
-
 export interface AuthProviderProps {
   children: React.ReactNode;
 }

@@ -5,6 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Icons } from '@/components/icons';
+import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import type { EntityComboboxItem, EntityComboboxProps } from '@/types';
 
@@ -25,7 +26,8 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
   className,
   renderTriggerLeading,
   onAddNewClick,
-  addNewLabel
+  addNewLabel,
+  onOpenChange
 }: EntityComboboxProps<T>) {
   const [open, setOpen] = useState(false);
 
@@ -34,6 +36,7 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
   const handleSelect = (item: T) => {
     onSelect(item);
     setOpen(false);
+    onOpenChange?.(false);
     onSearchChange('');
   };
 
@@ -45,6 +48,7 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
+    onOpenChange?.(nextOpen);
     if (!nextOpen) onSearchChange('');
   };
 
@@ -137,7 +141,7 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
         <div className='max-h-60 overflow-y-auto p-1 text-sm'>
           {isLoading && items.length === 0 ? (
             <div className='flex items-center justify-center gap-2 py-6 text-sm font-normal text-muted-foreground'>
-              <Icons.spinner className='size-4 animate-spin text-primary' />
+              <Spinner className='text-primary' />
               <span>{loadingText}</span>
             </div>
           ) : items.length === 0 ? (

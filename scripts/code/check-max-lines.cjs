@@ -12,8 +12,6 @@ const srcRoot = path.join(__dirname, "../../src");
 const EXEMPT_PATTERNS = [
   "components/ui/",
   "next-env.d.ts",
-  "src/lib/dukaan/operations.ts",
-  "src/lib/dukaan/store.ts",
   "src/lib/dukaan/types.ts",
   "src/lib/api/types.ts",
 ];

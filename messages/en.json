@@ -151,6 +151,7 @@
     "cashLedger": "Cash Ledger",
     "suppliers": "Suppliers",
     "appearance": "Appearance",
+    "storeSettings": "Online Store",
     "shops": "Shops",
     "subscriptions": "Subscriptions",
     "shopName": "Shop Name",
@@ -530,7 +531,12 @@
       "searchPlaceholder": "Search products...",
       "status": "Status",
       "active": "Active",
-      "inactive": "Inactive"
+      "inactive": "Inactive",
+      "searchCategories": "Search categories...",
+      "searchBrands": "Search brands...",
+      "serialized": "Serialized",
+      "quantity": "Quantity",
+      "modelPlaceholder": "e.g. SM-A155F"
     },
     "category": {
       "editTitle": "Edit Category",
@@ -803,6 +809,10 @@
     "notifications": {
       "title": "Notifications",
       "description": "View and manage all your notifications."
+    },
+    "storeSettings": {
+      "title": "Online Store",
+      "description": "Public storefront profile, logo, and visibility"
     }
   },
   "dashboard": {
@@ -859,7 +869,39 @@
     "fullNamePlaceholder": "Muhammad Ali",
     "shopNamePlaceholder": "Ali Mobile & Tech",
     "cityPlaceholder": "Lahore",
-    "addressPlaceholder": "Shop 12, Hafeez Centre, Main Boulevard"
+    "addressPlaceholder": "Shop 12, Hafeez Centre, Main Boulevard",
+    "shopLogoOptional": "Shop logo (optional)",
+    "shopLogoHint": "JPEG, PNG or WebP. You can change this later in Online Store settings."
+  },
+  "storeSettings": {
+    "logoTitle": "Shop logo",
+    "logoHint": "Shown on your public storefront. Optional — a placeholder is used until you upload one.",
+    "uploadLogo": "Upload logo",
+    "changeLogo": "Change logo",
+    "removeLogo": "Remove logo",
+    "profileTitle": "Store profile",
+    "slugLabel": "Store URL slug",
+    "displayName": "Display name",
+    "about": "About",
+    "whatsapp": "WhatsApp number",
+    "phone": "Phone number",
+    "address": "Address",
+    "city": "City",
+    "openingHours": "Opening hours",
+    "googleMaps": "Google Maps URL",
+    "enableStore": "Store online",
+    "enableHint": "When on, customers can browse your public shop page.",
+    "showExactStock": "Show exact stock",
+    "showExactStockHint": "When off, customers only see In stock / Low / Out.",
+    "save": "Save settings",
+    "loadFailed": "Could not load store settings.",
+    "saved": "Store settings saved",
+    "saveFailed": "Failed to save store settings",
+    "logoUpdated": "Shop logo updated",
+    "logoUploadFailed": "Failed to upload logo",
+    "logoRemoved": "Shop logo removed",
+    "logoRemoveFailed": "Failed to remove logo",
+    "googleMapsPlaceholder": "Paste a Google Maps link"
   },
   "appearance": {
     "accentAria": "Select accent color",
@@ -952,7 +994,8 @@
     "againDesktopStep1Prefix": "Step 1 — paste this in the address bar and press Enter:",
     "againDesktopStep2": "Step 1 continued — find Ronaq Store → right-click → Uninstall (Remove from Chrome).",
     "againDesktopStep3": "Step 2 — come back to this page.",
-    "againDesktopStep4": "Step 2 continued — tap “Create new icon”. Keep Create desktop shortcut ON → Install.",
+    "againDesktopStep4": "Step 2 continued — tap “Create new icon”. Chrome’s Install window opens — keep Create desktop shortcut ON → Install.",
+
     "againAndroidStep1": "Step 1 — Chrome menu (⋮) → Uninstall app / Remove from Chrome.",
     "againAndroidStep2": "Confirm remove.",
     "againAndroidStep3": "Step 2 — come back to this page.",
@@ -1229,6 +1272,7 @@
     "inventory": "Inventory",
     "kanban": "Kanban",
     "notifications": "Notifications",
+    "overview": "Overview",
     "payments": "Payments",
     "productView": "Product View",
     "products": "Products",
@@ -1246,6 +1290,7 @@
     "subscriptions": "Subscriptions",
     "users": "Users",
     "appearance": "Appearance",
+    "storeSettings": "Online Store",
     "mobileShopManagement": "Mobile shop management",
     "platformDashboard": "Platform dashboard",
     "shopManagement": "Shop management"

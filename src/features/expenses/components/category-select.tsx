@@ -25,6 +25,7 @@ export function CategorySelectCombobox({
   onAddNewCategoryClick
 }: CategorySelectComboboxProps) {
   const t = useT();
+  const [open, setOpen] = useState(false);
   const [search, debouncedSearch, setSearch] = useDebouncedSearch();
   const [localCategory, setLocalCategory] = useState<ExpenseCategoryDTO | null>(
     selectedCategory ?? null
@@ -49,7 +50,8 @@ export function CategorySelectCombobox({
       });
     },
     initialPageParam: 1,
-    getNextPageParam
+    getNextPageParam,
+    enabled: open
   });
 
   const allCategories = useMemo(() => {
@@ -96,6 +98,7 @@ export function CategorySelectCombobox({
       renderTriggerLeading={<Icons.dashboard className='size-4 shrink-0 text-muted-foreground' />}
       onAddNewClick={onAddNewCategoryClick}
       addNewLabel={t('expenses.addNewCategory')}
+      onOpenChange={setOpen}
     />
   );
 }

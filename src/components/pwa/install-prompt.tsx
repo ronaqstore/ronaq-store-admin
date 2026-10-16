@@ -3,23 +3,18 @@
 import * as React from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog';
 import { Icons } from '@/components/icons';
+import { InstallHelpDialog } from '@/components/pwa/install-help-dialog';
 import { useTranslations } from 'next-intl';
 import { isIosInstallCandidate, isStandaloneDisplay } from '@/lib/pwa';
 import type { Surface, InstallPromptProps } from '@/types';
 export type { InstallPromptProps };
 import {
-  AUTO_PROMPT_KEY,
   bumpInstallVisitsOnce,
   canPromptNativeInstall,
   clearInstalledMark,
+  clearInstallReloadOnce,
+  consumeInstallReloadSlot,
   detectPwaAlreadyInstalled,
   ensureInstallListeners,
   getBrowserAppsUrl,
@@ -27,7 +22,9 @@ import {
   isInstallMarkedInstalled,
   isInstallPrompting,
   promptNativeInstall,
+  scheduleInstallPageReload,
   subscribeInstallState,
+  takeAutoPromptFlag,
   waitAndPromptNativeInstall
 } from '@/lib/pwa-install';
 import { cn } from '@/lib/utils';
@@ -52,29 +49,6 @@ function resolveSurface(): Surface {
   if (isIosInstallCandidate()) return 'ios';
   if (isDesktopInstallSurface()) return 'desktop';
   return 'android';
-}
-
-let inMemoryAutoPrompt = false;
-
-function takeAutoPromptFlag(): boolean {
-  try {
-    if (sessionStorage.getItem(AUTO_PROMPT_KEY) !== '1') return inMemoryAutoPrompt;
-    sessionStorage.removeItem(AUTO_PROMPT_KEY);
-    inMemoryAutoPrompt = false;
-    return true;
-  } catch {
-    const val = inMemoryAutoPrompt;
-    inMemoryAutoPrompt = false;
-    return val;
-  }
-}
-
-function setAutoPromptFlag(): void {
-  try {
-    sessionStorage.setItem(AUTO_PROMPT_KEY, '1');
-  } catch {
-    inMemoryAutoPrompt = true;
-  }
 }
 
 export function InstallPrompt({ variant = 'both', className }: InstallPromptProps) {
@@ -131,6 +105,7 @@ export function InstallPrompt({ variant = 'both', className }: InstallPromptProp
       setPrompting(false);
 
       if (outcome === 'accepted') {
+        clearInstallReloadOnce();
         setAlreadyInstalled(true);
         toast.success(t('pwa.installSuccess'));
         return;
@@ -146,7 +121,7 @@ export function InstallPrompt({ variant = 'both', className }: InstallPromptProp
         toast.message(t('pwa.useBrowserInstallMenu'));
       }
     })();
-  }, [standalone, surface]);
+  }, [standalone, surface, t]);
 
   React.useEffect(() => {
     if (!eligible || standalone) return;
@@ -174,6 +149,7 @@ export function InstallPrompt({ variant = 'both', className }: InstallPromptProp
   };
 
   const finishAccepted = () => {
+    clearInstallReloadOnce();
     setShowBanner(false);
     setHelpOpen(false);
     setAlreadyInstalled(true);
@@ -229,17 +205,42 @@ export function InstallPrompt({ variant = 'both', className }: InstallPromptProp
 
     clearInstalledMark();
     setAlreadyInstalled(false);
+    setPrompting(true);
 
-    if (canPromptNativeInstall()) {
-      tryNativeInstall();
-      return;
-    }
+    void (async () => {
+      const outcome = await waitAndPromptNativeInstall(3500);
+      setPrompting(false);
 
-    setAutoPromptFlag();
-    toast.message(t('pwa.reloadingForInstall'));
-    window.setTimeout(() => {
-      window.location.reload();
-    }, 400);
+      if (outcome === 'accepted') {
+        finishAccepted();
+        return;
+      }
+
+      if (outcome === 'dismissed') {
+        toast.message(t('pwa.installCancelled'));
+        return;
+      }
+
+      const stillThere = await detectPwaAlreadyInstalled();
+      setStillInstalledHint(stillThere);
+      if (stillThere) {
+        toast.error(t('pwa.stillInstalledToast'));
+        setNeedsReinstall(true);
+        setHelpOpen(true);
+        return;
+      }
+
+      if (consumeInstallReloadSlot()) {
+        toast.message(t('pwa.reloadingForInstall'));
+        scheduleInstallPageReload();
+        return;
+      }
+
+      clearInstallReloadOnce();
+      toast.message(t('pwa.useBrowserInstallMenu'));
+      setNeedsReinstall(true);
+      setHelpOpen(true);
+    })();
   };
 
   if (standalone) return null;
@@ -252,30 +253,6 @@ export function InstallPrompt({ variant = 'both', className }: InstallPromptProp
     : alreadyInstalled
       ? t('pwa.removeAndNewIcon')
       : t('pwa.installApp');
-
-  const helpTitle = needsReinstall
-    ? stillInstalledHint
-      ? t('pwa.stillInstalledTitle')
-      : t('pwa.removeAndNewTitle')
-    : surface === 'ios'
-      ? t('pwa.iosTitle')
-      : surface === 'desktop'
-        ? t('pwa.desktopTitle')
-        : t('pwa.androidTitle');
-
-  const helpBody = needsReinstall
-    ? stillInstalledHint
-      ? t('pwa.stillInstalledBody')
-      : surface === 'ios'
-        ? t('pwa.againBodyIos')
-        : surface === 'desktop'
-          ? t('pwa.removeAndNewBodyDesktop')
-          : t('pwa.removeAndNewBodyAndroid')
-    : surface === 'ios'
-      ? t('pwa.iosBody')
-      : surface === 'desktop'
-        ? t('pwa.desktopBody')
-        : t('pwa.androidBody');
 
   return (
     <>
@@ -333,104 +310,20 @@ export function InstallPrompt({ variant = 'both', className }: InstallPromptProp
         </div>
       ) : null}
 
-      <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
-        <DialogContent className='max-w-sm'>
-          <DialogHeader>
-            <DialogTitle>{helpTitle}</DialogTitle>
-            <DialogDescription>{helpBody}</DialogDescription>
-          </DialogHeader>
-
-          <ol className='text-muted-foreground list-decimal space-y-2 ps-4 text-sm'>
-            {needsReinstall ? (
-              surface === 'ios' ? (
-                <>
-                  <li>{t('pwa.againIosStep1')}</li>
-                  <li>{t('pwa.againIosStep2')}</li>
-                  <li>{t('pwa.againIosStep3')}</li>
-                </>
-              ) : surface === 'desktop' ? (
-                <>
-                  <li>
-                    {t('pwa.againDesktopStep1Prefix')}{' '}
-                    <span className='text-foreground font-medium'>{appsUrl}</span>
-                  </li>
-                  <li>{t('pwa.againDesktopStep2')}</li>
-                  <li>{t('pwa.againDesktopStep3')}</li>
-                  <li>{t('pwa.againDesktopStep4')}</li>
-                </>
-              ) : (
-                <>
-                  <li>{t('pwa.againAndroidStep1')}</li>
-                  <li>{t('pwa.againAndroidStep2')}</li>
-                  <li>{t('pwa.againAndroidStep3')}</li>
-                  <li>{t('pwa.againAndroidStep4')}</li>
-                </>
-              )
-            ) : surface === 'ios' ? (
-              <>
-                <li>{t('pwa.iosStep1')}</li>
-                <li>{t('pwa.iosStep2')}</li>
-                <li>{t('pwa.iosStep3')}</li>
-              </>
-            ) : surface === 'desktop' ? (
-              <>
-                <li>{t('pwa.desktopStep1')}</li>
-                <li>{t('pwa.desktopStep2')}</li>
-                <li>{t('pwa.desktopStep3')}</li>
-              </>
-            ) : (
-              <>
-                <li>{t('pwa.androidStep1')}</li>
-                <li>{t('pwa.androidStep2')}</li>
-                <li>{t('pwa.androidStep3')}</li>
-              </>
-            )}
-          </ol>
-
-          {needsReinstall && surface !== 'ios' ? (
-            <div className='mt-3 flex flex-col gap-2'>
-              <Button
-                type='button'
-                variant='outline'
-                className='w-full'
-                onClick={() => void copyAppsUrl()}
-              >
-                {t('pwa.copyAppsUrl')}
-              </Button>
-              <Button
-                type='button'
-                className='w-full'
-                isLoading={prompting}
-                onClick={onRemovedAndInstall}
-              >
-                {canPrompt ? t('pwa.createNewIcon') : t('pwa.reloadAndInstall')}
-              </Button>
-            </div>
-          ) : null}
-
-          {needsReinstall && surface === 'ios' ? (
-            <Button type='button' className='mt-3 w-full' onClick={() => openHelp(false)}>
-              {t('pwa.howToInstall')}
-            </Button>
-          ) : null}
-
-          {!needsReinstall && surface !== 'ios' ? (
-            <Button
-              type='button'
-              className='mt-2 w-full'
-              isLoading={prompting}
-              disabled={!canPrompt && !prompting}
-              onClick={tryNativeInstall}
-            >
-              {canPrompt || prompting ? t('pwa.installApp') : t('pwa.installUnavailable')}
-            </Button>
-          ) : null}
-
-          <p className='text-muted-foreground mt-2 text-center text-xs'>
-            {needsReinstall ? t('pwa.againFooter') : t('pwa.installFooter')}
-          </p>
-        </DialogContent>
-      </Dialog>
+      <InstallHelpDialog
+        open={helpOpen}
+        onOpenChange={setHelpOpen}
+        surface={surface}
+        needsReinstall={needsReinstall}
+        stillInstalledHint={stillInstalledHint}
+        appsUrl={appsUrl}
+        canPrompt={canPrompt}
+        prompting={prompting}
+        onCopyAppsUrl={() => void copyAppsUrl()}
+        onRemovedAndInstall={onRemovedAndInstall}
+        onShowIosHowTo={() => openHelp(false)}
+        onTryNativeInstall={tryNativeInstall}
+      />
     </>
   );
 }

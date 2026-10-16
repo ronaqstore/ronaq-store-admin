@@ -29,8 +29,16 @@ import type { SaleDTO } from '@/lib/api/types';
 import type { SaleRowActionsProps, SalesTableProps } from '@/types/sales';
 import { salesQueryOptions } from '../api/queries';
 import type { SalesListFilters } from '@/types';
-import { CancelSaleDialog } from './cancel-sale-dialog';
-import { ReturnSaleDialog } from './return-sale-dialog';
+import dynamic from 'next/dynamic';
+
+const CancelSaleDialog = dynamic(
+  () => import('./cancel-sale-dialog').then((mod) => mod.CancelSaleDialog),
+  { ssr: false }
+);
+const ReturnSaleDialog = dynamic(
+  () => import('./return-sale-dialog').then((mod) => mod.ReturnSaleDialog),
+  { ssr: false }
+);
 
 function SaleRowActions({ sale }: SaleRowActionsProps) {
   const t = useT();

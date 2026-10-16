@@ -39,6 +39,8 @@ const root = join(__dir, '..');
 const CHECKS = [
   { id: 'secrets',            cmd: ['node', 'scripts/code/check-secrets.cjs'] },
   { id: 'hardcoded-text',     cmd: ['node', 'scripts/code/check-hardcoded-text.cjs'] },
+  { id: 'locale-sync',        cmd: ['node', 'scripts/code/check-locale-sync.cjs'] },
+
   { id: 'arch-rules',         cmd: ['node', 'scripts/code/check-arch-rules.cjs'] },
   { id: 'structure',          cmd: ['node', 'scripts/code/check-structure.cjs'] },
   { id: 'metadata',           cmd: ['node', 'scripts/code/check-metadata.cjs'] },

@@ -20,6 +20,7 @@ export function CustomerSelectCombobox({
   disabled
 }: CustomerSelectComboboxProps) {
   const t = useT();
+  const [open, setOpen] = useState(false);
   const [search, debouncedSearch, setSearch] = useDebouncedSearch();
   const [localCustomer, setLocalCustomer] = useState<CustomerDTO | null>(selectedCustomer ?? null);
 
@@ -42,7 +43,8 @@ export function CustomerSelectCombobox({
       });
     },
     initialPageParam: 1,
-    getNextPageParam
+    getNextPageParam,
+    enabled: open
   });
 
   const allCustomers = useMemo(() => {
@@ -88,6 +90,7 @@ export function CustomerSelectCombobox({
       emptyText={t('payments.noCustomersFound')}
       clearSelectionTitle={t('payments.clearCustomer')}
       disabled={disabled}
+      onOpenChange={setOpen}
     />
   );
 }

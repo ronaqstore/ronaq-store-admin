@@ -41,7 +41,8 @@
     "jscpd",
     "@babel/parser",
     "@babel/traverse",
-    "lint-staged"
+    "lint-staged",
+    "recharts"
   ],
 
   "ignoreExportsUsedInFile": true,

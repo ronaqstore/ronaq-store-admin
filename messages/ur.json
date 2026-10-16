@@ -151,6 +151,7 @@
     "cashLedger": "کیش کھاتہ",
     "suppliers": "سپلائرز",
     "appearance": "ظاہری شکل",
+    "storeSettings": "آن لائن اسٹور",
     "shops": "دکانیں",
     "subscriptions": "سبسکرپشنز",
     "shopName": "دکان کا نام",
@@ -375,7 +376,10 @@
       "productHeader": "پروڈکٹ",
       "qtyHeader": "مقدار",
       "unitCostHeader": "یونٹ لاگت",
-      "lineHeader": "کل لاگت"
+      "lineHeader": "کل لاگت",
+      "imei1": "IMEI1 (ہر لائن پر ایک، تعداد = مقدار)",
+      "imei2Optional": "IMEI2 (اختیاری، وہی تعداد)",
+      "optionalSecondImei": "اختیاری دوسرا IMEI…"
     },
     "sale": {
       "newTitle": "نئی فروخت",
@@ -442,7 +446,20 @@
       "receiptGroup": "گروپ",
       "cancelledStatus": "(منسوخ)",
       "cashWarning": "نقد {current} → {projected}۔ تصدیق کریں؟",
-      "cancelledInfo": "منسوخ: {reason} ({date})"
+      "cancelledInfo": "منسوخ: {reason} ({date})",
+      "saleBelowCostWarning": "ایک یا زیادہ آئٹمز لاگت سے کم پر فروخت ہوئے (اجازت ہے)",
+      "imeiPair": "IMEI1 / IMEI2",
+      "pickImei": "IMEI منتخب کریں",
+      "paymentMethod": "ادائیگی کا طریقہ",
+      "subtotal": "ذیلی کل {subtotal}",
+      "total": "کل {total}",
+      "udhar": "ادھار {udhar}",
+      "summary": "ذیلی کل {subtotal} · کل {total} · ادھار {udhar}",
+      "cancelTitle": "فروخت منسوخ کریں",
+      "cancelWithReason": "وجہ کے ساتھ منسوخ کریں",
+      "confirmCancel": "منسوخی کی تصدیق",
+      "back": "واپس",
+      "pdfPrintReceipt": "PDF / رسید پرنٹ"
     },
     "product": {
       "productCreated": "مصنوعہ کامیابی سے بنایا گیا",
@@ -513,7 +530,13 @@
       "searchPlaceholder": "مصنوعات تلاش کریں...",
       "status": "حیثیت",
       "active": "فعال",
-      "inactive": "غیر فعال"
+      "inactive": "غیر فعال",
+      "searchCategories": "اقسام تلاش کریں...",
+      "searchBrands": "برانڈز تلاش کریں...",
+      "serialized": "سیریل نمبر والا",
+      "quantity": "مقدار",
+      "title": "مصنوعات",
+      "modelPlaceholder": "مثال: SM-A155F"
     },
     "category": {
       "editTitle": "کیٹیگری میں ترمیم کریں",
@@ -786,6 +809,10 @@
     "notifications": {
       "title": "اطلاعات",
       "description": "اپنی تمام اطلاعات دیکھیں اور ان کا انتظام کریں۔"
+    },
+    "storeSettings": {
+      "title": "آن لائن اسٹور",
+      "description": "عوامی اسٹور فرنٹ پروفائل، لوگو، اور مرئیت"
     }
   },
   "dashboard": {
@@ -842,7 +869,39 @@
     "fullNamePlaceholder": "محمد علی",
     "shopNamePlaceholder": "علی موبائل اینڈ ٹیک",
     "cityPlaceholder": "لاہور",
-    "addressPlaceholder": "دکان نمبر 12، حفیظ سینٹر، مین بلیوارڈ"
+    "addressPlaceholder": "دکان نمبر 12، حفیظ سینٹر، مین بلیوارڈ",
+    "shopLogoOptional": "دکان کا لوگو (اختیاری)",
+    "shopLogoHint": "JPEG، PNG یا WebP۔ بعد میں آن لائن اسٹور سیٹنگز سے تبدیل کر سکتے ہیں۔"
+  },
+  "storeSettings": {
+    "logoTitle": "دکان کا لوگو",
+    "logoHint": "آپ کے پبلک اسٹور پر دکھائی دے گا۔ اختیاری — اپلوڈ تک پلیس ہولڈر استعمال ہوگا۔",
+    "uploadLogo": "لوگو اپلوڈ کریں",
+    "changeLogo": "لوگو تبدیل کریں",
+    "removeLogo": "لوگو ہٹائیں",
+    "profileTitle": "اسٹور پروفائل",
+    "slugLabel": "اسٹور URL",
+    "displayName": "ڈسپلے نام",
+    "about": "تعارف",
+    "whatsapp": "واٹس ایپ نمبر",
+    "phone": "فون نمبر",
+    "address": "پتہ",
+    "city": "شہر",
+    "openingHours": "اوقات کار",
+    "googleMaps": "گوگل میپس URL",
+    "enableStore": "اسٹور آن لائن",
+    "enableHint": "آن ہونے پر گاہک آپ کا پبلک صفحہ دیکھ سکتے ہیں۔",
+    "showExactStock": "درست اسٹاک دکھائیں",
+    "showExactStockHint": "آف ہونے پر صرف دستیاب / کم / ختم دکھے گا۔",
+    "save": "سیٹنگز محفوظ کریں",
+    "loadFailed": "اسٹور سیٹنگز لوڈ نہیں ہو سکیں۔",
+    "saved": "اسٹور سیٹنگز محفوظ ہو گئیں",
+    "saveFailed": "اسٹور سیٹنگز محفوظ نہیں ہو سکیں",
+    "logoUpdated": "دکان کا لوگو اپڈیٹ ہو گیا",
+    "logoUploadFailed": "لوگو اپلوڈ نہیں ہو سکا",
+    "logoRemoved": "دکان کا لوگو ہٹا دیا گیا",
+    "logoRemoveFailed": "لوگو نہیں ہٹایا جا سکا",
+    "googleMapsPlaceholder": "گوگل میپس لنک پیسٹ کریں"
   },
   "appearance": {
     "accentAria": "ایکسنٹ کلر منتخب کریں",
@@ -935,7 +994,8 @@
     "againDesktopStep1Prefix": "قدم ۱ — ایڈریس بار میں پیسٹ کریں اور Enter دبائیں:",
     "againDesktopStep2": "قدم ۱ جاری — رونق اسٹور تلاش کریں → دائیں کلک → ان انسٹال (Chrome سے ہٹائیں)۔",
     "againDesktopStep3": "قدم ۲ — اس صفحے پر واپس آئیں۔",
-    "againDesktopStep4": "قدم ۲ جاری — “نیا آئیکن بنائیں” دبائیں۔ ڈیسک ٹاپ شارٹ کٹ بنائیں آن رکھیں → انسٹال۔",
+    "againDesktopStep4": "قدم ۲ جاری — “نیا آئیکن بنائیں” دبائیں۔ Chrome کی Install ونڈو کھلے گی — ڈیسک ٹاپ شارٹ کٹ بنائیں آن رکھیں → انسٹال۔",
+
     "againAndroidStep1": "قدم ۱ — Chrome مینو (⋮) → ایپ ان انسٹال / Chrome سے ہٹائیں۔",
     "againAndroidStep2": "ہٹانے کی تصدیق کریں۔",
     "againAndroidStep3": "قدم ۲ — اس صفحے پر واپس آئیں۔",
@@ -1212,6 +1272,7 @@
     "inventory": "انوینٹری",
     "kanban": "کانبن",
     "notifications": "اطلاعات",
+    "overview": "جائزہ",
     "payments": "ادائیگیاں",
     "productView": "پروڈکٹ ویو",
     "products": "پروڈکٹس",
@@ -1229,6 +1290,7 @@
     "subscriptions": "سبسکرپشنز",
     "users": "صارفین",
     "appearance": "ظاہری شکل",
+    "storeSettings": "آن لائن اسٹور",
     "mobileShopManagement": "موبائل دکان کا انتظام",
     "platformDashboard": "پلیٹ فارم ڈیش بورڈ",
     "shopManagement": "دکان کا انتظام"

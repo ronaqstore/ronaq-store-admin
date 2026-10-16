@@ -20,9 +20,7 @@ if (fs.existsSync(srcRoot)) {
     // Exempt files where currency conversion and precision logic is defined
     if (
       relPath.includes("lib/money") ||
-      relPath.includes("lib/dukaan/numbers.ts") ||
-      relPath.includes("lib/dukaan/operations.ts") ||
-      relPath.includes("constants/mock-api")
+      relPath.includes("lib/dukaan/numbers.ts")
     ) {
       return;
     }

@@ -67,18 +67,6 @@ export interface AuthResponseBody {
   data?: AuthResponseData;
 }
 
-export interface SessionUserPayload {
-  id: string;
-  name?: string | null;
-  role: AuthAccountRole;
-  shopId: string | null;
-  shopName: string | null;
-}
-
-export interface DukaanSessionSource {
-  user: SessionUserPayload;
-}
-
 export interface AuthRoleHolder {
   role?: string;
 }

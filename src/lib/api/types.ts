@@ -488,6 +488,8 @@ export interface ProductListFilters {
   brandId?: string;
   trackingType?: TrackingType | string;
   isActive?: 'true' | 'false' | boolean | string;
+  sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'defaultSellingPrice';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export * from '@/types/supplier-payment';
@@ -519,22 +521,10 @@ export interface RouteProductImageContext {
   params: Promise<RouteProductImageParams>;
 }
 
-export interface RouteUserIdContext {
-  params: Promise<{ id: string }>;
-}
-
 export interface ProxyErrorResult {
   handled: boolean;
   data?: unknown;
   status?: number;
-}
-
-export interface PaginatedListPayload<T> {
-  items?: T[];
-  total?: number;
-  page?: number;
-  pageSize?: number;
-  [key: string]: unknown;
 }
 
 export interface UpstreamErrorBody {

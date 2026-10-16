@@ -2,13 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Image from 'next/image';
-import {
-  IconPhoto as ImageIcon,
-  IconLoader2,
-  IconPlus,
-  IconTrash,
-  IconUpload
-} from '@tabler/icons-react';
+import { IconPlus, IconTrash, IconUpload } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -82,13 +76,9 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
           variant='outline'
           size='sm'
           onClick={() => fileInputRef.current?.click()}
-          disabled={isIconUploading || uploadMutation.isPending}
+          isLoading={isIconUploading || uploadMutation.isPending}
         >
-          {isIconUploading || uploadMutation.isPending ? (
-            <IconLoader2 className='me-2 h-4 w-4 animate-spin' />
-          ) : (
-            <IconPlus className='me-2 h-4 w-4' />
-          )}
+          <IconPlus className='me-2 h-4 w-4' />
           {isIconUploading || uploadMutation.isPending ? t('uploading') : t('uploadImage')}
         </Button>
         <input
@@ -101,7 +91,15 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
       </div>
       {images.length === 0 ? (
         <div className='flex flex-col items-center justify-center rounded-lg border border-dashed py-8 text-muted-foreground'>
-          <ImageIcon className='mb-2 h-8 w-8' />
+          <div className='relative mb-3 h-20 w-20 overflow-hidden rounded-lg bg-muted'>
+            <Image
+              src='/placeholders/product.svg'
+              alt=''
+              fill
+              unoptimized
+              className='object-contain p-2'
+            />
+          </div>
           <p className='text-sm'>{t('noImages')}</p>
         </div>
       ) : (

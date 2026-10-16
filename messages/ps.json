@@ -151,6 +151,7 @@
     "cashLedger": "نغدي کتاب",
     "suppliers": "عرضه کوونکي",
     "appearance": "بڼه",
+    "storeSettings": "آنلاین دوکان",
     "shops": "دوکانونه",
     "subscriptions": "ګډونونه",
     "shopName": "د دوکان نوم",
@@ -375,7 +376,10 @@
       "productHeader": "محصول",
       "qtyHeader": "شمیر",
       "unitCostHeader": "د یوه بیه",
-      "lineHeader": "ټولټال لګښت"
+      "lineHeader": "ټولټال لګښت",
+      "imei1": "IMEI1 (په هر کرښه کې یو، شمېر = مقدار)",
+      "imei2Optional": "IMEI2 (اختیاري، هماغه شمېر)",
+      "optionalSecondImei": "اختیاري دوهم IMEI…"
     },
     "sale": {
       "newTitle": "نوی پلور",
@@ -442,7 +446,20 @@
       "receiptGroup": "ډله",
       "cancelledStatus": "(لغوه شوی)",
       "cashWarning": "نغدې {current} → {projected}. تایید کړئ؟",
-      "cancelledInfo": "لغوه شوی: {reason} ({date})"
+      "cancelledInfo": "لغوه شوی: {reason} ({date})",
+      "saleBelowCostWarning": "یو یا څو توکي د لګښت نه کم پلورل شوي (اجازه لري)",
+      "imeiPair": "IMEI1 / IMEI2",
+      "pickImei": "IMEI وټاکئ",
+      "paymentMethod": "د تادیې طریقه",
+      "subtotal": "فرعي مجموعه {subtotal}",
+      "total": "ټول {total}",
+      "udhar": "قرض {udhar}",
+      "summary": "فرعي مجموعه {subtotal} · ټول {total} · قرض {udhar}",
+      "cancelTitle": "پلور لغوه کړئ",
+      "cancelWithReason": "د دلیل سره لغوه کړئ",
+      "confirmCancel": "د لغوه کولو تایید",
+      "back": "شاته",
+      "pdfPrintReceipt": "PDF / رسید چاپ"
     },
     "product": {
       "productCreated": "مصنوعہ کامیابی سے بنایا گیا",
@@ -518,7 +535,8 @@
       "searchPlaceholder": "محصولات ولټوئ...",
       "status": "حالت",
       "active": "فعال",
-      "inactive": "غیر فعال"
+      "inactive": "غیر فعال",
+      "modelPlaceholder": "مثال: SM-A155F"
     },
     "category": {
       "editTitle": "کټګوري ایډیټ کړئ",
@@ -791,6 +809,10 @@
     "notifications": {
       "title": "خبرتیاکنې",
       "description": "خپل ټولې خبرتیاکنې وګورئ او اداره کړئ."
+    },
+    "storeSettings": {
+      "title": "آنلاین دوکان",
+      "description": "عامه پلورنځي پروفایل، لوګو، او لید"
     }
   },
   "dashboard": {
@@ -847,7 +869,39 @@
     "fullNamePlaceholder": "محمد علي",
     "shopNamePlaceholder": "علي موبایل او ټیک",
     "cityPlaceholder": "پېښور",
-    "addressPlaceholder": "دوکان نمبر ۱۲، کارخانو مارکېټ"
+    "addressPlaceholder": "دوکان نمبر ۱۲، کارخانو مارکېټ",
+    "shopLogoOptional": "د دوکان لوگو (اختیاري)",
+    "shopLogoHint": "JPEG، PNG یا WebP. وروسته یې په آنلاین دوکان ترتیباتو کې بدلولی شئ."
+  },
+  "storeSettings": {
+    "logoTitle": "د دوکان لوگو",
+    "logoHint": "ستاسو په عامه دوکان کې ښکاري. اختیاري — تر اپلوډ پورې پلیس هولډر کارېږي.",
+    "uploadLogo": "لوگو اپلوډ کړئ",
+    "changeLogo": "لوگو بدل کړئ",
+    "removeLogo": "لوگو لرې کړئ",
+    "profileTitle": "د دوکان پروفایل",
+    "slugLabel": "د دوکان URL",
+    "displayName": "ښودل شوی نوم",
+    "about": "په اړه",
+    "whatsapp": "واټساپ شمېره",
+    "phone": "تلیفون شمېره",
+    "address": "پته",
+    "city": "ښار",
+    "openingHours": "د کار وختونه",
+    "googleMaps": "ګوګل میپس URL",
+    "enableStore": "دوکان آنلاین",
+    "enableHint": "چې فعال وي پیرودونکي ستاسو عامه پاڼه لیدلی شي.",
+    "showExactStock": "سم سټاک وښایئ",
+    "showExactStockHint": "چې بند وي یوازې شته / کم / ختم ښکاري.",
+    "save": "ترتیبات خوندي کړئ",
+    "loadFailed": "د دوکان ترتیبات ونه لوستل شول.",
+    "saved": "د دوکان ترتیبات خوندي شوې",
+    "saveFailed": "د دوکان ترتیبات ونه خوندي شوې",
+    "logoUpdated": "د دوکان لوگو تازه شو",
+    "logoUploadFailed": "لوگو اپلوډ نشو",
+    "logoRemoved": "د دوکان لوگو لرې شو",
+    "logoRemoveFailed": "لوگو لرې نشو",
+    "googleMapsPlaceholder": "د ګوګل میپس لینک پیسټ کړئ"
   },
   "appearance": {
     "accentAria": "ګرزن رنګ وټاکئ",
@@ -940,7 +994,7 @@
     "againDesktopStep1Prefix": "ګام ۱ — په اډریس بار کې پیسټ کړئ او Enter:",
     "againDesktopStep2": "ګام ۱ ادامه — رونق سټور ومومئ → ښي کلیک → له نصب څخه لرې کول (له Chrome لرې کړئ).",
     "againDesktopStep3": "ګام ۲ — دې پاڼې ته بیرته راشئ.",
-    "againDesktopStep4": "ګام ۲ ادامه — «نوی آیکون جوړ کړئ» وکښئ. ډیسکټاپ شارټ‌کټ جوړول چالان وساتئ → نصب.",
+    "againDesktopStep4": "ګام ۲ ادامه — «نوی آیکون جوړ کړئ» وکښئ. د Chrome نصب کړکۍ پرانیستل کیږي — ډیسکټاپ شارټ‌کټ جوړول چالان وساتئ → نصب.",
     "againAndroidStep1": "ګام ۱ — د Chrome مینو (⋮) → اپ له نصب څخه لرې کړئ / له Chrome لرې کړئ.",
     "againAndroidStep2": "لرې کول تایید کړئ.",
     "againAndroidStep3": "ګام ۲ — دې پاڼې ته بیرته راشئ.",
@@ -1217,6 +1271,7 @@
     "inventory": "موجودي",
     "kanban": "کانبان",
     "notifications": "خبرتیاوې",
+    "overview": "کتنه",
     "payments": "تادیات",
     "productView": "د محصول لیدنه",
     "products": "محصولات",
@@ -1234,6 +1289,7 @@
     "subscriptions": "ګډونونه",
     "users": "کاروونکي",
     "appearance": "بڼه",
+    "storeSettings": "آنلاین دوکان",
     "mobileShopManagement": "د موبایل دوکان اداره",
     "platformDashboard": "د پلېټفارم ډشبورډ",
     "shopManagement": "د دوکان اداره"

@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Icons } from '@/components/icons';
+import { Spinner } from '@/components/ui/spinner';
 import { PresetReasonPills } from '@/components/common/preset-reason-pills';
 import { useT } from '@/i18n/use-t';
 import { cn } from '@/lib/utils';
@@ -100,7 +101,7 @@ export function BaseCancelDialog({
                 ))}
                 {isLoadingImpact && (
                   <div className='flex items-center justify-center gap-2 py-2 text-muted-foreground'>
-                    <Icons.spinner className='size-3.5 animate-spin text-primary' />
+                    <Spinner className='size-3.5 text-primary' />
                     <span>{loadingImpactText || ''}</span>
                   </div>
                 )}

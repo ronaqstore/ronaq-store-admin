@@ -10,7 +10,9 @@ export async function GET(request: NextRequest) {
       'categoryId',
       'brandId',
       'trackingType',
-      'isActive'
+      'isActive',
+      'sortBy',
+      'sortOrder'
     ]
   });
 }

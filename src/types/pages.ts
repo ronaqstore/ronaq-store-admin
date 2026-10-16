@@ -28,36 +28,9 @@ export interface DashboardLayoutProps {
   children: ReactNode;
 }
 
-export interface AreaStatsErrorProps {
-  error: Error;
-  reset: () => void;
-}
-
-export interface BarStatsErrorProps {
-  error: Error;
-  reset: () => void;
-}
-
-export interface PieStatsErrorProps {
-  error: Error;
-  reset: () => void;
-}
-
-export interface SalesErrorProps {
-  error: Error;
-  reset: () => void;
-}
-
 export interface OverviewErrorProps {
   error: Error;
   reset: () => void;
-}
-
-export interface OverViewLayoutProps {
-  sales: ReactNode;
-  pie_stats: ReactNode;
-  bar_stats: ReactNode;
-  area_stats: ReactNode;
 }
 
 export interface PlatformLayoutProps {

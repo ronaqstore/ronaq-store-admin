@@ -41,6 +41,7 @@ export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
   >(sortableColumnIds, 'createdAt', ['type'], 'createdAt', 'desc');
 
   const [searchParam] = useQueryState('search', parseAsString);
+  const [productNameParam] = useQueryState('productName', parseAsString);
   const [typeParam] = useQueryState('type', parseAsString);
 
   const rawType = (filters as Record<string, unknown>).type ?? typeParam;
@@ -63,7 +64,7 @@ export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
     inventoryAdjustmentsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
-      search: searchParam || undefined,
+      search: searchParam || productNameParam || undefined,
       type: typeFilter,
       sortBy,
       sortOrder

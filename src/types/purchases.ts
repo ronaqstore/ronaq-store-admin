@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { CancelPurchaseInput, PurchaseDTO } from '@/lib/api/types';
-import type { Product } from '@/lib/dukaan/types';
+import type { TrackingType } from '@/lib/api/types';
+
 
 export interface PurchasesListFilters {
   page?: number;
@@ -42,7 +43,7 @@ export interface PurchaseLineItem {
   imeis_text: string;
   imei2_text: string;
   condition: 'NEW' | 'USED';
-  tracking_type?: Product['tracking_type'];
+  tracking_type?: TrackingType;
 }
 
 export interface PurchaseFormValues {
@@ -60,7 +61,7 @@ export type PurchaseLineDraft = {
   imeis_text: string;
   imei2_text: string;
   condition: 'NEW' | 'USED';
-  tracking_type?: Product['tracking_type'];
+  tracking_type?: TrackingType;
 };
 
 export interface PurchaseCreateFormProps {

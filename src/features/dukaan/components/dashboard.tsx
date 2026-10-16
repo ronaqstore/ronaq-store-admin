@@ -1,10 +1,11 @@
 'use client';
 
 import { useSuspenseQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { Link } from '@/i18n/navigation';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatPkr } from '@/lib/dukaan/numbers';
-import { dashboardQueryOptions, sessionQueryOptions } from '../api/queries';
+import { dashboardQueryOptions } from '../api/queries';
 import { useT } from '@/i18n/use-t';
 import type { DashboardKpiLink } from '@/types/dukaan';
 
@@ -20,9 +21,12 @@ const KPI_LINKS: DashboardKpiLink[] = [
 
 export function DukaanDashboard() {
   const t = useT();
+  const { data: session } = useSession();
   const { data: kpis } = useSuspenseQuery(dashboardQueryOptions());
-  const { data: session } = useSuspenseQuery(sessionQueryOptions());
-  const firstName = session.user_name.split(' ')[0] || session.user_name;
+  const userName = session?.user?.name ?? '';
+  const shopName = session?.user?.shopName ?? '';
+  const firstName = userName.split(' ')[0] || userName || t('user.user');
+
 
   return (
     <div className='flex flex-1 flex-col gap-4'>
@@ -31,7 +35,7 @@ export function DukaanDashboard() {
           {t('dashboard.hi', { name: firstName })}
         </h2>
         <p className='text-muted-foreground text-sm'>
-          {t('dashboard.snapshot', { shop: session.shop_name })}
+          {t('dashboard.snapshot', { shop: shopName })}
         </p>
       </div>
 

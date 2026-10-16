@@ -1,4 +1,7 @@
-import NotificationsPage from '@/features/notifications/components/notifications-page';
+import PageContainer from '@/components/layout/page-container';
+import NotificationsPage, {
+  NotificationsHeaderAction
+} from '@/features/notifications/components/notifications-page';
 import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata() {
@@ -9,5 +12,13 @@ export async function generateMetadata() {
 }
 
 export default function Page() {
-  return <NotificationsPage />;
+  return (
+    <PageContainer
+      pageTitle='pages.notifications.title'
+      pageDescription='pages.notifications.description'
+      pageHeaderAction={<NotificationsHeaderAction />}
+    >
+      <NotificationsPage />
+    </PageContainer>
+  );
 }

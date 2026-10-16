@@ -6,7 +6,6 @@ import type {
   RouteIdContext,
   RouteSupplierIdContext,
   RouteProductImageContext,
-  PaginatedListPayload,
   UpstreamErrorBody,
   ProxyOptions
 } from './types';
@@ -15,7 +14,6 @@ export type {
   RouteIdContext,
   RouteSupplierIdContext,
   RouteProductImageContext,
-  PaginatedListPayload,
   ProxyOptions
 };
 

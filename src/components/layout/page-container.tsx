@@ -1,26 +1,12 @@
-'use client';
-
 import type { PageContainerProps } from '@/types';
 export type { PageContainerProps };
 import { Heading } from '../ui/heading';
 import { DataTableSkeleton } from '@/components/ui/table/data-table-skeleton';
 import { cn } from '@/lib/utils';
-import { useT, translateMaybe } from '@/i18n/use-t';
+import { getTranslations } from 'next-intl/server';
+import { translateMaybe } from '@/i18n/translate-maybe';
 
-function PageSkeleton() {
-  const t = useT();
-  return (
-    <div
-      role='status'
-      aria-label={t('common.loadingPage')}
-      className='flex min-h-0 flex-1 flex-col'
-    >
-      <DataTableSkeleton rowCount={3} />
-    </div>
-  );
-}
-
-export default function PageContainer({
+export default async function PageContainer({
   children,
   isLoading = false,
   access = true,
@@ -29,10 +15,9 @@ export default function PageContainer({
   pageDescription,
   infoContent,
   pageHeaderAction,
-
   fill = false
 }: PageContainerProps) {
-  const t = useT();
+  const t = await getTranslations();
   const title = pageTitle ? translateMaybe(pageTitle, t) : '';
   const description = pageDescription ? translateMaybe(pageDescription, t) : '';
 
@@ -46,9 +31,19 @@ export default function PageContainer({
     );
   }
 
-  const content = isLoading ? <PageSkeleton /> : children;
+  const content = isLoading ? (
+    <div
+      role='status'
+      aria-label={t('common.loadingPage')}
+      className='flex min-h-0 flex-1 flex-col'
+    >
+      <DataTableSkeleton rowCount={3} />
+    </div>
+  ) : (
+    children
+  );
 
-  const hasHeader = pageTitle || pageHeaderAction;
+  const hasHeader = Boolean(pageTitle || pageHeaderAction);
 
   return (
     <div className='flex min-h-0 min-w-0 flex-1 flex-col'>
@@ -70,7 +65,8 @@ export default function PageContainer({
         className={cn(
           'flex min-h-0 min-w-0 flex-1 flex-col',
           hasHeader ? 'px-4 md:px-6' : 'px-4 pt-4 md:px-6 md:pt-6',
-          'pb-[max(1rem,calc(5.5rem+env(safe-area-inset-bottom)))] sm:pb-4',
+          'pb-[max(1rem,calc(5.5rem+env(safe-area-inset-bottom)))] lg:pb-4',
+
           fill ? 'overflow-hidden' : 'overflow-y-auto overscroll-y-contain'
         )}
       >

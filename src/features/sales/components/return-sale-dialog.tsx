@@ -107,7 +107,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
     }));
   };
 
-  const handleRunPreview = () => {
+  const getSelectedReturnItems = (): ReturnItemInput[] | null => {
     const selectedItems: ReturnItemInput[] = sale.items
       .filter((item) => itemStates[item.id]?.selected)
       .map((item) => ({
@@ -118,8 +118,14 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
 
     if (selectedItems.length === 0) {
       toast.error(t('sales.returnDialog.selectAtLeastOne'));
-      return;
+      return null;
     }
+    return selectedItems;
+  };
+
+  const handleRunPreview = () => {
+    const selectedItems = getSelectedReturnItems();
+    if (!selectedItems) return;
 
     preview.mutate({
       id: sale.id,
@@ -137,18 +143,8 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
       return;
     }
 
-    const selectedItems: ReturnItemInput[] = sale.items
-      .filter((item) => itemStates[item.id]?.selected)
-      .map((item) => ({
-        saleItemId: item.id,
-        quantity: itemStates[item.id].quantity,
-        condition: itemStates[item.id].condition
-      }));
-
-    if (selectedItems.length === 0) {
-      toast.error(t('sales.returnDialog.selectAtLeastOne'));
-      return;
-    }
+    const selectedItems = getSelectedReturnItems();
+    if (!selectedItems) return;
 
     recordReturn.mutate({
       id: sale.id,

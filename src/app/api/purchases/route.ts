@@ -1,11 +1,7 @@
 import { NextRequest } from 'next/server';
 import { proxyToBackend } from '@/lib/api/proxy';
-import type { PurchaseDTO, PaginatedListPayload } from '@/lib/api/types';
 
 export async function GET(request: NextRequest) {
-  const sortBy = request.nextUrl.searchParams.get('sortBy');
-  const sortOrder = request.nextUrl.searchParams.get('sortOrder');
-
   return proxyToBackend(request, '/purchases', {
     allowedParams: [
       'page',
@@ -18,20 +14,7 @@ export async function GET(request: NextRequest) {
       'to',
       'sortBy',
       'sortOrder'
-    ],
-    transformResponse: (payload: unknown) => {
-      const data = payload as PaginatedListPayload<PurchaseDTO> | null;
-      if (!data || !Array.isArray(data.items)) return payload;
-      let items = [...data.items];
-      if (sortBy === 'status') {
-        items.sort((a: PurchaseDTO, b: PurchaseDTO) => {
-          const sA = (a.status || '').toLowerCase();
-          const sB = (b.status || '').toLowerCase();
-          return sortOrder === 'desc' ? sB.localeCompare(sA) : sA.localeCompare(sB);
-        });
-      }
-      return { ...data, items };
-    }
+    ]
   });
 }
 

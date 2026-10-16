@@ -259,6 +259,17 @@ for (const absPath of allFiles) {
       }
     },
 
+    ImportExpression(p) {
+      // Dynamic import("...") — treat module as fully consumed (named + default)
+      if (!shouldCheckExports) return;
+      const src = p.node.source;
+      if (!src || src.type !== "StringLiteral") return;
+      const resolved = resolveModule(absPath, src.value);
+      if (!resolved) return;
+      if (!directImports.has(resolved)) directImports.set(resolved, new Set());
+      directImports.get(resolved).add("*");
+    },
+
     ExportDefaultDeclaration(p) {
       if (shouldCheckExports) {
         exports.set("default", {
@@ -269,6 +280,7 @@ for (const absPath of allFiles) {
         });
       }
     },
+
 
     ExportNamedDeclaration(p) {
       if (!shouldCheckExports) return;

@@ -17,9 +17,10 @@ import {
 } from '@/components/ui/table';
 import { useT } from '@/i18n/use-t';
 import { useAppForm } from '@/lib/form';
-import { dukaan } from '@/lib/dukaan';
 import { createClientRequestId, formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import { customerQueryOptions, dukaanKeys } from '@/features/dukaan/api/queries';
+import { createPayment } from '@/features/payments/api/service';
+import { todayIsoDate } from '@/lib/dates';
 import { createReceivePaymentSchema } from '../schemas/customer-schema';
 import { CustomerDialog } from './customer-dialog';
 import { CustomersTable } from './customers-table';
@@ -63,20 +64,16 @@ export function CustomerLedgerClient({ id }: CustomerLedgerClientProps) {
 
   const pay = useMutation({
     mutationFn: (amount: number) =>
-      dukaan.receiveCustomerPayment({
-        customer_id: id,
+      createPayment({
+        customerId: id,
         amount: toPaisa(amount),
-        client_request_id: clientRequestId
+        clientRequestId,
+        paymentDate: todayIsoDate()
       }),
-    onSuccess: (res) => {
-      const group = res.payments[0]?.receipt_group_id;
-      toast.success(
-        group
-          ? t('dukaan.party.paymentRecordedWithGroup', { group: group.slice(0, 12) })
-          : t('dukaan.party.paymentRecorded')
-      );
+    onSuccess: () => {
+      toast.success(t('dukaan.party.paymentRecorded'));
       setClientRequestId(createClientRequestId());
-      void qc.invalidateQueries({ queryKey: dukaanKeys.all });
+      void qc.invalidateQueries({ queryKey: dukaanKeys.customer(id) });
     },
     onError: (e: Error) => toast.error(e.message)
   });
@@ -128,26 +125,28 @@ export function CustomerLedgerClient({ id }: CustomerLedgerClientProps) {
         </Button>
       </form>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t('dukaan.party.date')}</TableHead>
-            <TableHead>{t('dukaan.party.entry')}</TableHead>
-            <TableHead>{t('dukaan.party.amount')}</TableHead>
-            <TableHead>{t('dukaan.party.running')}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.ledger.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell>{row.date.slice(0, 10)}</TableCell>
-              <TableCell>{row.label}</TableCell>
-              <TableCell>{formatPkr(row.amount)}</TableCell>
-              <TableCell>{formatPkr(row.running_balance)}</TableCell>
+      <div className='overflow-x-auto'>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('dukaan.party.date')}</TableHead>
+              <TableHead>{t('dukaan.party.entry')}</TableHead>
+              <TableHead>{t('dukaan.party.amount')}</TableHead>
+              <TableHead>{t('dukaan.party.running')}</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {data.ledger.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell>{row.date.slice(0, 10)}</TableCell>
+                <TableCell>{row.label}</TableCell>
+                <TableCell>{formatPkr(row.amount)}</TableCell>
+                <TableCell>{formatPkr(row.running_balance)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

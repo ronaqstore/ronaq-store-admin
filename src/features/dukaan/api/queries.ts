@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
-import { dukaan } from '@/lib/dukaan';
 import type { ListFilters } from '@/lib/dukaan';
+import { getDashboardKpis } from './service';
+import { getCustomerLedgerView } from '@/features/customers/api/service';
 
 export const dukaanKeys = {
   all: ['dukaan'] as const,
@@ -16,7 +17,6 @@ export const dukaanKeys = {
   purchases: (f?: ListFilters) => [...dukaanKeys.all, 'purchases', f] as const,
   purchase: (id: string) => [...dukaanKeys.all, 'purchase', id] as const,
   stock: (f?: ListFilters) => [...dukaanKeys.all, 'stock', f] as const,
-  units: (productId?: string) => [...dukaanKeys.all, 'units', productId] as const,
   sales: (f?: ListFilters) => [...dukaanKeys.all, 'sales', f] as const,
   sale: (id: string) => [...dukaanKeys.all, 'sale', id] as const,
   supplierPayments: (f?: ListFilters) => [...dukaanKeys.all, 'supplierPayments', f] as const,
@@ -27,26 +27,14 @@ export const dukaanKeys = {
   payments: (f?: ListFilters) => [...dukaanKeys.all, 'payments', f] as const
 };
 
-export const dashboardQueryOptions = () =>
+export const dashboardQueryOptions = (token?: string) =>
   queryOptions({
     queryKey: dukaanKeys.dashboard(),
-    queryFn: () => dukaan.getDashboardKpis()
+    queryFn: () => getDashboardKpis('today', token)
   });
 
-export const customerQueryOptions = (id: string) =>
+export const customerQueryOptions = (id: string, token?: string) =>
   queryOptions({
     queryKey: dukaanKeys.customer(id),
-    queryFn: () => dukaan.getCustomer(id)
-  });
-
-export const unitsQueryOptions = (productId?: string) =>
-  queryOptions({
-    queryKey: dukaanKeys.units(productId),
-    queryFn: () => dukaan.listInStockUnits(productId)
-  });
-
-export const sessionQueryOptions = () =>
-  queryOptions({
-    queryKey: dukaanKeys.session(),
-    queryFn: () => dukaan.getSessionInfo()
+    queryFn: () => getCustomerLedgerView(id, token)
   });

@@ -42,6 +42,7 @@ export * from './categories';
 export * from './customers';
 export * from './dukaan';
 export * from './overview';
+export * from './dashboard';
 export * from './platform-admin';
 export * from './data-table';
 export * from './forms';
@@ -49,3 +50,5 @@ export * from './layout';
 export * from './common';
 export * from './pages';
 export * from './party';
+export * from './picker';
+
