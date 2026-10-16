@@ -21,6 +21,7 @@ export function SupplierSelectCombobox({
   disabled
 }: SupplierSelectComboboxProps) {
   const t = useT();
+  const [open, setOpen] = useState(false);
   const [search, debouncedSearch, setSearch] = useDebouncedSearch();
   const [localSupplier, setLocalSupplier] = useState<SupplierDTO | null>(selectedSupplier ?? null);
 
@@ -39,7 +40,8 @@ export function SupplierSelectCombobox({
         isActive: true,
         search: debouncedSearch || undefined
       });
-    }
+    },
+    enabled: open
   });
 
   const suppliers = data?.items ?? [];
@@ -82,6 +84,7 @@ export function SupplierSelectCombobox({
       emptyText={t('supplierPayments.noSuppliersFound')}
       clearSelectionTitle={t('supplierPayments.clearSelection')}
       disabled={disabled}
+      onOpenChange={setOpen}
     />
   );
 }

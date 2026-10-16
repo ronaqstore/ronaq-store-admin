@@ -1,6 +1,6 @@
 import PageContainer from '@/components/layout/page-container';
 import { ExpensesClient } from '@/features/expenses';
-import { expenseCategoriesQueryOptions, expensesQueryOptions } from '@/features/expenses';
+import { expensesQueryOptions } from '@/features/expenses';
 import { getQueryClient } from '@/lib/query-client';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
 import { Suspense } from 'react';
@@ -20,10 +20,12 @@ export default async function Page() {
   const qc = getQueryClient();
 
   if (token) {
-    await Promise.all([
-      qc.prefetchQuery(expensesQueryOptions({ pageSize: 20 }, token)),
-      qc.prefetchQuery(expenseCategoriesQueryOptions({ pageSize: 50, isActive: true }, token))
-    ]);
+    await qc.prefetchQuery(
+      expensesQueryOptions(
+        { page: 1, pageSize: 20, sortBy: 'expenseDate', sortOrder: 'desc' },
+        token
+      )
+    );
   }
 
   return (

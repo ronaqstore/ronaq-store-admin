@@ -1,7 +1,5 @@
 import PageContainer from '@/components/layout/page-container';
 import { PurchasesListClient, purchasesQueryOptions } from '@/features/purchases';
-import { suppliersQueryOptions } from '@/features/suppliers';
-import { productsQueryOptions } from '@/features/products';
 import { getQueryClient } from '@/lib/query-client';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
 import { Suspense } from 'react';
@@ -21,11 +19,12 @@ export default async function Page() {
   const qc = getQueryClient();
 
   if (token) {
-    await Promise.all([
-      qc.prefetchQuery(purchasesQueryOptions({ limit: 100 }, token)),
-      qc.prefetchQuery(suppliersQueryOptions({ limit: 100 }, token)),
-      qc.prefetchQuery(productsQueryOptions({ page: 1, pageSize: 100 }, token))
-    ]);
+    await qc.prefetchQuery(
+      purchasesQueryOptions(
+        { page: 1, pageSize: 20, sortBy: 'purchaseDate', sortOrder: 'desc' },
+        token
+      )
+    );
   }
 
   return (

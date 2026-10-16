@@ -3,7 +3,7 @@ import { proxyToBackend } from '@/lib/api/proxy';
 
 export async function GET(request: NextRequest) {
   return proxyToBackend(request, '/brands', {
-    allowedParams: ['page', 'pageSize', 'search']
+    allowedParams: ['page', 'pageSize', 'search', 'isActive', 'sortBy', 'sortOrder']
   });
 }
 

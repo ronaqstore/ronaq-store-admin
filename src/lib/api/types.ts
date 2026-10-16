@@ -488,6 +488,8 @@ export interface ProductListFilters {
   brandId?: string;
   trackingType?: TrackingType | string;
   isActive?: 'true' | 'false' | boolean | string;
+  sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'defaultSellingPrice';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export * from '@/types/supplier-payment';

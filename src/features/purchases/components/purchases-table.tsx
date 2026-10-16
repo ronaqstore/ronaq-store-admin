@@ -131,25 +131,28 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
     (filters as Record<string, unknown>).status ?? statusParam
   );
 
+  const backendSortBy =
+    sortBy === 'purchaseDate' ||
+    sortBy === 'purchaseNo' ||
+    sortBy === 'totalAmount' ||
+    sortBy === 'createdAt' ||
+    sortBy === 'updatedAt' ||
+    sortBy === 'status'
+      ? sortBy
+      : 'purchaseDate';
+
   const { data } = useQuery(
     purchasesQueryOptions({
       page: params.page,
       pageSize: params.perPage,
       search: search || undefined,
       status: statusFilter,
-      sortBy,
+      sortBy: backendSortBy,
       sortOrder
     })
   );
 
-  let items = data?.items ?? [];
-  if (sortBy === 'status' && items.length > 1) {
-    items = [...items].sort((a, b) => {
-      const sA = (a.status || '').toLowerCase();
-      const sB = (b.status || '').toLowerCase();
-      return sortOrder === 'desc' ? sB.localeCompare(sA) : sA.localeCompare(sB);
-    });
-  }
+  const items = data?.items ?? [];
   const total = data?.total ?? 0;
   const pageCount = getPageCount(total);
 

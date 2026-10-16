@@ -109,15 +109,17 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
   >(sortableColumnIds, 'expenseDate', ['status'], 'expenseDate');
 
   const [searchParam] = useQueryState('search', parseAsString);
+  const [categoryNameParam] = useQueryState('categoryName', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
 
   const statusFilter = parseActiveCancelledStatus(statusParam);
+  const search = searchParam || categoryNameParam || undefined;
 
   const { data, isLoading, isFetching } = useQuery(
     expensesQueryOptions({
       page: params.page,
       pageSize: params.perPage,
-      search: searchParam || undefined,
+      search,
       status: statusFilter,
       sortBy,
       sortOrder

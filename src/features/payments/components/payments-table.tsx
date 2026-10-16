@@ -127,15 +127,17 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
   >(sortableColumnIds, 'paymentDate', ['status'], 'paymentDate');
 
   const [searchParam] = useQueryState('search', parseAsString);
+  const [customerNameParam] = useQueryState('customerName', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
 
   const statusFilter = parseActiveCancelledStatus(statusParam);
+  const search = searchParam || customerNameParam || undefined;
 
   const { data, isLoading, isFetching } = useQuery(
     paymentsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
-      search: searchParam || undefined,
+      search,
       status: statusFilter,
       sortBy,
       sortOrder

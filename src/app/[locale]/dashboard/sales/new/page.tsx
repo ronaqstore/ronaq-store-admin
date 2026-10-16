@@ -1,8 +1,5 @@
 import PageContainer from '@/components/layout/page-container';
 import { SalesListClient, salesQueryOptions } from '@/features/sales';
-import { customersQueryOptions } from '@/features/customers';
-import { productsQueryOptions } from '@/features/products';
-import { unitsQueryOptions } from '@/features/dukaan/api/queries';
 import { getQueryClient } from '@/lib/query-client';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
 import { Suspense } from 'react';
@@ -22,12 +19,9 @@ export default async function Page() {
   const qc = getQueryClient();
 
   if (token) {
-    await Promise.all([
-      qc.prefetchQuery(salesQueryOptions({ limit: 100 }, token)),
-      qc.prefetchQuery(productsQueryOptions({ page: 1, pageSize: 100 }, token)),
-      qc.prefetchQuery(customersQueryOptions({ limit: 100 }, token)),
-      qc.prefetchQuery(unitsQueryOptions())
-    ]);
+    await qc.prefetchQuery(
+      salesQueryOptions({ page: 1, pageSize: 20, sortBy: 'createdAt', sortOrder: 'desc' }, token)
+    );
   }
 
   return (

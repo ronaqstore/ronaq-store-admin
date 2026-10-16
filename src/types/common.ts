@@ -198,6 +198,7 @@ export interface EntityComboboxProps<T extends EntityComboboxItem = EntityCombob
   renderTriggerLeading?: ReactNode;
   onAddNewClick?: () => void;
   addNewLabel?: string;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export interface HasStatusRecord {

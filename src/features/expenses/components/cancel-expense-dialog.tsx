@@ -144,14 +144,10 @@ export function CancelExpenseDialog({
             <Button
               type='submit'
               variant='destructive'
-              disabled={cancel.isPending}
+              isLoading={cancel.isPending}
               className='gap-1.5'
             >
-              {cancel.isPending ? (
-                <Icons.spinner className='size-4 animate-spin' />
-              ) : (
-                <Icons.check className='size-4' />
-              )}
+              <Icons.check className='size-4' />
               {t('expenses.confirm')}
             </Button>
           </DialogFooter>

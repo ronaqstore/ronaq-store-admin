@@ -18,7 +18,12 @@ import {
   buildSimpleEntityMobileItem,
   buildSimpleEntityDetail
 } from '@/components/common/party-table-helpers';
-import { DUKAAN_DEFAULT_PAGE_SIZE, useDukaanListParams } from '@/components/data-table/list-params';
+import {
+  DUKAAN_DEFAULT_PAGE_SIZE,
+  parseBooleanFacet,
+  useDukaanListParams
+} from '@/components/data-table/list-params';
+import { useQueryState, parseAsString } from 'nuqs';
 import { CategoryDialog } from './category-dialog';
 
 function CategoryCellAction({ data }: CategoryCellActionProps) {
@@ -74,10 +79,27 @@ const categoryMobileItem = buildSimpleEntityMobileItem<CategoryDTO>(Icons.folder
 const categoryDetail = buildSimpleEntityDetail<CategoryDTO>(t('table.col.category'));
 
 export function CategoriesTable({ toolbarAction }: CategoriesTableProps) {
-  const columnIds = ['name', 'isActive'];
-  const { params, filters } = useDukaanListParams(columnIds);
+  const sortableColumnIds = ['name', 'createdAt', 'updatedAt'];
+  const { params, filters, sortBy, sortOrder } = useDukaanListParams(
+    sortableColumnIds,
+    'name',
+    ['isActive'],
+    'name',
+    'asc'
+  );
+  const [isActiveParam] = useQueryState('isActive', parseAsString);
+  const isActiveFilter = parseBooleanFacet(
+    (filters as Record<string, unknown>).isActive ?? isActiveParam
+  );
   const { data } = useSuspenseQuery(
-    categoriesQueryOptions({ page: params.page, pageSize: params.perPage, search: filters.search })
+    categoriesQueryOptions({
+      page: params.page,
+      pageSize: params.perPage,
+      search: filters.search,
+      isActive: isActiveFilter,
+      sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | undefined,
+      sortOrder
+    })
   );
   const pageCount = Math.max(1, Math.ceil(data.total / params.perPage));
   const { table } = useDataTable({

@@ -19,7 +19,12 @@ export default async function Page() {
   const qc = getQueryClient();
 
   if (token) {
-    await qc.prefetchQuery(supplierPaymentsQueryOptions({ pageSize: 20 }, token));
+    await qc.prefetchQuery(
+      supplierPaymentsQueryOptions(
+        { page: 1, pageSize: 20, sortBy: 'paymentDate', sortOrder: 'desc' },
+        token
+      )
+    );
   }
 
   return (

@@ -5,6 +5,9 @@ export interface CategoryListFilters {
   page?: number;
   pageSize?: number;
   search?: string;
+  isActive?: boolean;
+  sortBy?: 'name' | 'createdAt' | 'updatedAt';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface CategoryDialogProps {

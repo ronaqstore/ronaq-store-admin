@@ -215,10 +215,16 @@ const productDetail: DetailConfig<ProductDTO> = {
 };
 
 export function ProductsTable({ toolbarAction }: ProductsTableProps) {
-  const columnIds = ['name', 'categoryName', 'brandName', 'isActive'];
-  const { params, filters } = useDukaanListParams(columnIds);
+  const sortableColumnIds = ['name', 'createdAt', 'updatedAt', 'defaultSellingPrice'];
+  const { params, filters, sortBy, sortOrder } = useDukaanListParams(sortableColumnIds, 'name');
   const { data } = useSuspenseQuery(
-    productsQueryOptions({ page: params.page, pageSize: params.perPage, search: filters.search })
+    productsQueryOptions({
+      page: params.page,
+      pageSize: params.perPage,
+      search: filters.search,
+      sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | 'defaultSellingPrice' | undefined,
+      sortOrder
+    })
   );
   const pageCount = Math.max(1, Math.ceil(data.total / params.perPage));
   const { table } = useDataTable({

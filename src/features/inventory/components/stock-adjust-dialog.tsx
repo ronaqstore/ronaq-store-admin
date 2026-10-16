@@ -23,7 +23,6 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { DialogCancelButton } from '@/components/common/dialog-actions';
-import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import type { StockAdjustDialogProps } from '@/types/inventory';
 import { createInventoryAdjustment } from '../api/service';
@@ -34,7 +33,10 @@ import { ValidationError } from '@/lib/errors';
 export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockAdjustDialogProps) {
   const qc = useQueryClient();
   const t = useT();
-  const { data: stockData } = useQuery(inventoryStockQueryOptions({ limit: 100 }));
+  const { data: stockData } = useQuery({
+    ...inventoryStockQueryOptions({ limit: 100 }),
+    enabled: open
+  });
   const products = stockData?.items ?? [];
 
   const [productId, setProductId] = useState<string>(initialProduct?.id ?? '');
@@ -272,8 +274,11 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
 
           <DialogFooter className='gap-2 sm:gap-0'>
             <DialogCancelButton onClick={() => onOpenChange(false)} disabled={mutation.isPending} />
-            <Button type='submit' disabled={mutation.isPending || !reason.trim()}>
-              {mutation.isPending && <Icons.spinner className='me-2 h-4 w-4 animate-spin' />}
+            <Button
+              type='submit'
+              disabled={!reason.trim()}
+              isLoading={mutation.isPending}
+            >
               {t('inventory.recordChange')}
             </Button>
           </DialogFooter>

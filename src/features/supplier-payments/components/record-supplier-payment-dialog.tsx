@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Icons } from '@/components/icons';
+import { Spinner } from '@/components/ui/spinner';
 import { formatPkr, toPaisa, fromPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import { useT } from '@/i18n/use-t';
@@ -206,7 +207,7 @@ export function RecordSupplierPaymentDialog({
             <div className='rounded-xl border border-border/70 bg-muted/40 p-3.5 text-sm'>
               {payableLoading ? (
                 <div className='flex items-center gap-2 text-muted-foreground'>
-                  <Icons.spinner className='size-4 animate-spin text-primary' />
+                  <Spinner className='text-primary' />
                   <span>{t('supplierPayments.loadingPayable')}</span>
                 </div>
               ) : payableData ? (

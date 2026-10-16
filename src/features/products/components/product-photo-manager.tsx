@@ -2,13 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Image from 'next/image';
-import {
-  IconPhoto as ImageIcon,
-  IconLoader2,
-  IconPlus,
-  IconTrash,
-  IconUpload
-} from '@tabler/icons-react';
+import { IconPhoto as ImageIcon, IconPlus, IconTrash, IconUpload } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -82,13 +76,9 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
           variant='outline'
           size='sm'
           onClick={() => fileInputRef.current?.click()}
-          disabled={isIconUploading || uploadMutation.isPending}
+          isLoading={isIconUploading || uploadMutation.isPending}
         >
-          {isIconUploading || uploadMutation.isPending ? (
-            <IconLoader2 className='me-2 h-4 w-4 animate-spin' />
-          ) : (
-            <IconPlus className='me-2 h-4 w-4' />
-          )}
+          <IconPlus className='me-2 h-4 w-4' />
           {isIconUploading || uploadMutation.isPending ? t('uploading') : t('uploadImage')}
         </Button>
         <input

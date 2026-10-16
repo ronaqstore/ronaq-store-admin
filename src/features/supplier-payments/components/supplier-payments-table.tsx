@@ -117,15 +117,17 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
   >(sortableColumnIds, 'paymentDate', ['status'], 'paymentDate');
 
   const [searchParam] = useQueryState('search', parseAsString);
+  const [supplierNameParam] = useQueryState('supplierName', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
 
   const statusFilter = parseActiveCancelledStatus(statusParam);
+  const search = searchParam || supplierNameParam || undefined;
 
   const { data, isLoading, isFetching } = useQuery(
     supplierPaymentsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
-      search: searchParam || undefined,
+      search,
       status: statusFilter,
       sortBy,
       sortOrder

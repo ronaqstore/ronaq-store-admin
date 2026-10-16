@@ -1,8 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { IconLoader2 } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
+import { Spinner } from '@/components/ui/spinner';
 import type { LoadMoreProps } from './types';
 
 export function LoadMore<TData>({ table, step = 20 }: LoadMoreProps<TData>) {
@@ -51,7 +51,7 @@ export function LoadMore<TData>({ table, step = 20 }: LoadMoreProps<TData>) {
           aria-live='polite'
           aria-busy='true'
         >
-          <IconLoader2 className='size-5 animate-spin text-primary' />
+          <Spinner className='size-5 text-primary' />
           <span className='text-xs font-medium'>{t('common.loading')}</span>
         </div>
       ) : null}

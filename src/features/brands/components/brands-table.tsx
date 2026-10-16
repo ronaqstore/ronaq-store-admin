@@ -18,7 +18,12 @@ import {
   buildSimpleEntityMobileItem,
   buildSimpleEntityDetail
 } from '@/components/common/party-table-helpers';
-import { DUKAAN_DEFAULT_PAGE_SIZE, useDukaanListParams } from '@/components/data-table/list-params';
+import {
+  DUKAAN_DEFAULT_PAGE_SIZE,
+  parseBooleanFacet,
+  useDukaanListParams
+} from '@/components/data-table/list-params';
+import { useQueryState, parseAsString } from 'nuqs';
 import { BrandDialog } from './brand-dialog';
 
 function BrandCellAction({ data }: BrandCellActionProps) {
@@ -74,10 +79,27 @@ const brandMobileItem = buildSimpleEntityMobileItem<BrandDTO>(Icons.tag);
 const brandDetail = buildSimpleEntityDetail<BrandDTO>(t('table.col.brand'));
 
 export function BrandsTable({ toolbarAction }: BrandsTableProps) {
-  const columnIds = ['name', 'isActive'];
-  const { params, filters } = useDukaanListParams(columnIds);
+  const sortableColumnIds = ['name', 'createdAt', 'updatedAt'];
+  const { params, filters, sortBy, sortOrder } = useDukaanListParams(
+    sortableColumnIds,
+    'name',
+    ['isActive'],
+    'name',
+    'asc'
+  );
+  const [isActiveParam] = useQueryState('isActive', parseAsString);
+  const isActiveFilter = parseBooleanFacet(
+    (filters as Record<string, unknown>).isActive ?? isActiveParam
+  );
   const { data } = useSuspenseQuery(
-    brandsQueryOptions({ page: params.page, pageSize: params.perPage, search: filters.search })
+    brandsQueryOptions({
+      page: params.page,
+      pageSize: params.perPage,
+      search: filters.search,
+      isActive: isActiveFilter,
+      sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | undefined,
+      sortOrder
+    })
   );
   const pageCount = Math.max(1, Math.ceil(data.total / params.perPage));
   const { table } = useDataTable({

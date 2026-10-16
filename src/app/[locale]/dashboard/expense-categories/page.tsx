@@ -20,7 +20,12 @@ export default async function Page() {
   const qc = getQueryClient();
 
   if (token) {
-    await qc.prefetchQuery(expenseCategoriesQueryOptions({ page: 1, limit: 20 }, token));
+    await qc.prefetchQuery(
+      expenseCategoriesQueryOptions(
+        { page: 1, pageSize: 20, sortBy: 'name', sortOrder: 'asc' },
+        token
+      )
+    );
   }
 
   return (
