@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 import { Icons } from '@/components/icons';
-import PageContainer from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
 import { NotificationCard } from '@/components/ui/notification-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,11 +16,24 @@ const actionRoutes: Record<string, string> = {
   'open-chat': '/dashboard/chat'
 };
 
-export default function NotificationsPage() {
-  const { notifications, markAsRead, markAllAsRead, unreadCount } = useNotificationStore();
-  const router = useRouter();
+export function NotificationsHeaderAction() {
+  const { markAllAsRead, unreadCount } = useNotificationStore();
   const t = useTranslations();
   const count = unreadCount();
+
+  if (count <= 0) return null;
+
+  return (
+    <Button type='button' variant='outline' size='sm' onClick={markAllAsRead}>
+      {t('notifications.markAllAsRead')}
+    </Button>
+  );
+}
+
+export default function NotificationsPage() {
+  const { notifications, markAsRead } = useNotificationStore();
+  const router = useRouter();
+  const t = useTranslations();
 
   const unreadNotifications = notifications.filter((n) => n.status === 'unread');
   const readNotifications = notifications.filter((n) => n.status === 'read');
@@ -64,39 +76,27 @@ export default function NotificationsPage() {
   };
 
   return (
-    <PageContainer
-      pageTitle='pages.notifications.title'
-      pageDescription='pages.notifications.description'
-      pageHeaderAction={
-        count > 0 ? (
-          <Button type='button' variant='outline' size='sm' onClick={markAllAsRead}>
-            {t('notifications.markAllAsRead')}
-          </Button>
-        ) : undefined
-      }
-    >
-      <Tabs defaultValue='all'>
-        <TabsList>
-          <TabsTrigger value='all'>
-            {t('notifications.tabAll')} ({notifications.length})
-          </TabsTrigger>
-          <TabsTrigger value='unread'>
-            {t('notifications.tabUnread')} ({unreadNotifications.length})
-          </TabsTrigger>
-          <TabsTrigger value='read'>
-            {t('notifications.tabRead')} ({readNotifications.length})
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value='all' className='mt-4'>
-          {renderList(notifications)}
-        </TabsContent>
-        <TabsContent value='unread' className='mt-4'>
-          {renderList(unreadNotifications)}
-        </TabsContent>
-        <TabsContent value='read' className='mt-4'>
-          {renderList(readNotifications)}
-        </TabsContent>
-      </Tabs>
-    </PageContainer>
+    <Tabs defaultValue='all'>
+      <TabsList>
+        <TabsTrigger value='all'>
+          {t('notifications.tabAll')} ({notifications.length})
+        </TabsTrigger>
+        <TabsTrigger value='unread'>
+          {t('notifications.tabUnread')} ({unreadNotifications.length})
+        </TabsTrigger>
+        <TabsTrigger value='read'>
+          {t('notifications.tabRead')} ({readNotifications.length})
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value='all' className='mt-4'>
+        {renderList(notifications)}
+      </TabsContent>
+      <TabsContent value='unread' className='mt-4'>
+        {renderList(unreadNotifications)}
+      </TabsContent>
+      <TabsContent value='read' className='mt-4'>
+        {renderList(readNotifications)}
+      </TabsContent>
+    </Tabs>
   );
 }

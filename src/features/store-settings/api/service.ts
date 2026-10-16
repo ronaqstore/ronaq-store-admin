@@ -2,7 +2,10 @@ import { apiRequest } from '@/lib/api/client';
 import { appFetch } from '@/lib/api/app-fetch';
 import type { StoreSettingsDTO, UpdateStoreSettingsInput } from '@/types/store-settings';
 
-export async function getStoreSettings(): Promise<StoreSettingsDTO> {
+export async function getStoreSettings(token?: string): Promise<StoreSettingsDTO> {
+  if (token) {
+    return apiRequest<StoreSettingsDTO>('/store/settings', undefined, token);
+  }
   return appFetch<StoreSettingsDTO>('/api/store/settings');
 }
 

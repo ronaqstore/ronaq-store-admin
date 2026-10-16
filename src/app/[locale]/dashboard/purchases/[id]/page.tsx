@@ -4,6 +4,7 @@ import { purchaseQueryOptions } from '@/features/purchases';
 import { getQueryClient } from '@/lib/query-client';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
 import { Suspense } from 'react';
+import { DataTableSkeleton } from '@/components/ui/table/data-table-skeleton';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/auth';
 import type { IdPageProps } from '@/types';
@@ -30,7 +31,7 @@ export default async function Page({ params }: IdPageProps) {
       pageDescription='pages.purchaseDetail.description'
     >
       <HydrationBoundary state={dehydrate(qc)}>
-        <Suspense>
+        <Suspense fallback={<DataTableSkeleton rowCount={4} columnCount={3} />}>
           <PurchaseDetailClient id={id} />
         </Suspense>
       </HydrationBoundary>

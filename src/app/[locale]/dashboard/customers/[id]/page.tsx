@@ -1,6 +1,5 @@
 import PageContainer from '@/components/layout/page-container';
-import { CustomerLedgerClient } from '@/features/customers';
-import { Suspense } from 'react';
+import { CustomerLedgerClient, CustomerLedgerPrefetchRoute } from '@/features/customers';
 import { getTranslations } from 'next-intl/server';
 import type { IdPageProps } from '@/types';
 
@@ -19,9 +18,9 @@ export default async function Page({ params }: IdPageProps) {
       pageTitle='pages.customerLedger.title'
       pageDescription='pages.customerLedger.description'
     >
-      <Suspense>
+      <CustomerLedgerPrefetchRoute id={id}>
         <CustomerLedgerClient id={id} />
-      </Suspense>
+      </CustomerLedgerPrefetchRoute>
     </PageContainer>
   );
 }

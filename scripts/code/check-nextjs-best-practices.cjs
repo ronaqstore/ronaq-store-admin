@@ -9,14 +9,119 @@ const { parseFile } = require("./lib/parseFile.cjs");
 
 const r = new Reporter("Next.js Built-in Features & Best Practices Audit", { emoji: "▲" });
 
-const srcRoot = path.join(__dirname, "../../src");
+const rootDir = path.join(__dirname, "../..");
+const srcRoot = path.join(rootDir, "src");
+
+const REQUIRED_LOADING = ["src/app/[locale]/dashboard/loading.tsx"];
+
+const PREFETCH_ROUTE_PAGES = [
+  "src/app/[locale]/dashboard/customers/[id]/page.tsx",
+  "src/app/[locale]/dashboard/settings/store/page.tsx",
+];
+
+function normalizeRel(relPathRaw) {
+  return relPathRaw.split(path.sep).join("/");
+}
+
+function isUseClient(code) {
+  return code.includes("'use client'") || code.includes('"use client"');
+}
+
+function isNullOnlyPage(code) {
+  const stripped = code
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/.*$/gm, "")
+    .replace(/import[\s\S]*?from\s+['"][^'"]+['"];?/g, "")
+    .replace(/export\s+async\s+function\s+generateMetadata[\s\S]*?\n}/g, "")
+    .replace(/export\s+const\s+metadata[\s\S]*?;/g, "")
+    .trim();
+  return /return\s+null\s*;?\s*}\s*$/.test(stripped) || /=>\s*null\s*;?\s*$/.test(stripped);
+}
+
+function usesPrefetchOrHydration(code) {
+  return (
+    /PrefetchHydrationBoundary/.test(code) ||
+    /HydrationBoundary/.test(code) ||
+    /dehydrate\(/.test(code) ||
+    /PrefetchRoute/.test(code)
+  );
+}
+
+REQUIRED_LOADING.forEach((reqPath) => {
+  const full = path.join(rootDir, reqPath);
+  if (!fs.existsSync(full)) {
+    r.addViolation(
+      reqPath,
+      0,
+      `Missing required route loading UI: ${reqPath}`,
+      {
+        fix: "Add dashboard/loading.tsx so navigations inside the authenticated shell stream a fallback.",
+      }
+    );
+  }
+});
+
+PREFETCH_ROUTE_PAGES.forEach((reqPath) => {
+  const full = path.join(rootDir, reqPath);
+  if (!fs.existsSync(full)) return;
+  const code = fs.readFileSync(full, "utf8");
+  if (!usesPrefetchOrHydration(code)) {
+    r.addViolation(
+      reqPath,
+      1,
+      "Authenticated detail/settings page must prefetch on the server (`PrefetchHydrationBoundary` / `HydrationBoundary`)",
+      {
+        fix: "Wrap the client tree with PrefetchHydrationBoundary and prefetch the query options with the session token.",
+      }
+    );
+  }
+  if (isUseClient(code)) {
+    r.addViolation(
+      reqPath,
+      1,
+      '"use client" on page — App Router pages must stay Server Components',
+      { fix: "Keep the page as an RSC and move interactivity into a client feature component." }
+    );
+  }
+});
+
+const pageContainerPath = path.join(srcRoot, "components/layout/page-container.tsx");
+if (fs.existsSync(pageContainerPath)) {
+  const code = fs.readFileSync(pageContainerPath, "utf8");
+  if (isUseClient(code)) {
+    r.addViolation(
+      "src/components/layout/page-container.tsx",
+      1,
+      "`PageContainer` must stay a Server Component — a client shell forces an early client boundary on every dashboard page",
+      {
+        fix: "Keep PageContainer as an async RSC (getTranslations). Put interactive header actions in a thin client child.",
+      }
+    );
+  }
+}
+
+const overviewDir = path.join(srcRoot, "app/[locale]/dashboard/overview");
+if (fs.existsSync(overviewDir)) {
+  const entries = fs.readdirSync(overviewDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.isDirectory() && entry.name.startsWith("@")) {
+      r.addViolation(
+        `src/app/[locale]/dashboard/overview/${entry.name}`,
+        0,
+        "Dead or unused overview parallel-route slot — remove `@slot` folders unless they render real streamed UI",
+        {
+          fix: "Delete unused @sales/@pie_stats/@bar_stats/@area_stats trees, or render real widgets from those pages.",
+        }
+      );
+    }
+  }
+}
 
 if (fs.existsSync(srcRoot)) {
   walkTree(srcRoot, (absPath, relPathRaw) => {
     if (!/\.(ts|tsx|js|jsx)$/.test(absPath)) return;
 
-    const relPath = relPathRaw.split(path.sep).join("/");
-    // Exempt shadcn primitives, next-env, and i18n core configuration
+    const relPath = normalizeRel(relPathRaw);
     if (
       relPath.includes("components/ui/") ||
       relPath.includes("next-env.d.ts") ||
@@ -26,6 +131,41 @@ if (fs.existsSync(srcRoot)) {
     }
 
     const code = fs.readFileSync(absPath, "utf8");
+    const base = path.basename(absPath);
+
+    if (base === "page.tsx") {
+      if (isUseClient(code)) {
+        r.addViolation(
+          relPath,
+          1,
+          '"use client" on page — App Router pages must stay Server Components for metadata and RSC data fetching',
+          { fix: "Remove 'use client' from the page and extract interactive UI into a client component." }
+        );
+      }
+      if (isNullOnlyPage(code)) {
+        r.addViolation(
+          relPath,
+          1,
+          "Stub page returns only `null` — remove dead parallel-route theater or render real content",
+          { fix: "Delete unused slot pages or stream real UI from the page." }
+        );
+      }
+    }
+
+    if (
+      relPath.startsWith("src/app/[locale]/dashboard/") &&
+      base === "page.tsx" &&
+      /<Suspense[\s>]/.test(code) &&
+      !/<Suspense[^>]*fallback=/.test(code) &&
+      !/fallback=\{/.test(code)
+    ) {
+      r.addViolation(
+        relPath,
+        1,
+        "Bare `<Suspense>` without `fallback` on a dashboard page — provide a skeleton (e.g. DataTableSkeleton)",
+        { fix: "Add fallback={<DataTableSkeleton ... />} or rely on a segment loading.tsx and remove empty Suspense." }
+      );
+    }
 
     let ast;
     try {
@@ -36,12 +176,10 @@ if (fs.existsSync(srcRoot)) {
     }
 
     traverse(ast, {
-      // 1. Audit Imports: Check for next/link or React.lazy
       ImportDeclaration(p) {
         const source = p.node.source.value;
         const line = p.node.loc ? p.node.loc.start.line : 0;
 
-        // Bypassing next-intl localized navigation
         if (source === "next/link") {
           r.addViolation(
             relPath,
@@ -51,10 +189,13 @@ if (fs.existsSync(srcRoot)) {
           );
         }
 
-        // Unlocalized useRouter or usePathname from next/navigation
         if (source === "next/navigation") {
           const forbiddenRoutingHooks = p.node.specifiers
-            .filter((spec) => spec.type === "ImportSpecifier" && ["useRouter", "usePathname"].includes(spec.imported.name))
+            .filter(
+              (spec) =>
+                spec.type === "ImportSpecifier" &&
+                ["useRouter", "usePathname"].includes(spec.imported.name)
+            )
             .map((spec) => spec.imported.name);
 
           if (forbiddenRoutingHooks.length > 0 && !relPath.startsWith("src/app/not-found.tsx")) {
@@ -62,12 +203,13 @@ if (fs.existsSync(srcRoot)) {
               relPath,
               line,
               `Forbidden direct \`${forbiddenRoutingHooks.join(", ")}\` from \`next/navigation\` — use localized \`{ ${forbiddenRoutingHooks.join(", ")} }\` from \`@/i18n/navigation\` to maintain locale routing`,
-              { fix: `Change import to: import { ${forbiddenRoutingHooks.join(", ")} } from '@/i18n/navigation';` }
+              {
+                fix: `Change import to: import { ${forbiddenRoutingHooks.join(", ")} } from '@/i18n/navigation';`,
+              }
             );
           }
         }
 
-        // Using React.lazy instead of next/dynamic
         if (source === "react") {
           const hasLazy = p.node.specifiers.some(
             (spec) => spec.type === "ImportSpecifier" && spec.imported.name === "lazy"
@@ -87,7 +229,6 @@ if (fs.existsSync(srcRoot)) {
         const name = p.node.name && p.node.name.name;
         const line = p.node.loc ? p.node.loc.start.line : 0;
 
-        // 2. Raw <img> instead of Next.js <Image>
         if (name === "img") {
           r.addViolation(
             relPath,
@@ -97,7 +238,6 @@ if (fs.existsSync(srcRoot)) {
           );
         }
 
-        // 3. Raw <script> tag in components (excluding root layout inline theme script)
         if (name === "script" && !relPath.endsWith("src/app/layout.tsx")) {
           r.addViolation(
             relPath,
@@ -107,7 +247,6 @@ if (fs.existsSync(srcRoot)) {
           );
         }
 
-        // 4. In-component <head> or <title> in App Router
         if (name === "head" || name === "title") {
           if (!relPath.endsWith("src/app/layout.tsx") && !relPath.includes("components/icons")) {
             r.addViolation(
@@ -125,5 +264,5 @@ if (fs.existsSync(srcRoot)) {
 
 r.finish({
   fixTip:
-    "Next.js Best Practices: Use `@/i18n/navigation` for routing, `<Image>` from `next/image`, and `next/dynamic`.",
+    "Next.js Best Practices: RSC pages + PrefetchHydrationBoundary, Server Component PageContainer, loading.tsx, `@/i18n/navigation`, and `<Image>` from `next/image`.",
 });

@@ -6,7 +6,7 @@ import type {
   ReturnPreviewInput,
   CreateReturnInput
 } from '@/lib/api/types';
-import type { Product } from '@/lib/dukaan/types';
+import type { TrackingType } from '@/lib/api/types';
 
 export interface SaleOverdraftPrompt {
   confirmOverdraft?: boolean;
@@ -93,7 +93,7 @@ export interface SaleLineItem {
   quantity: number;
   unit_price: number;
   inventory_unit_id?: string;
-  tracking_type?: Product['tracking_type'];
+  tracking_type?: TrackingType;
 }
 
 export interface SaleFormValues {

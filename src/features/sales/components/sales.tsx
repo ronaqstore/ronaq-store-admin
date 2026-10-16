@@ -29,7 +29,6 @@ import {
 } from '@/components/ui/table';
 import { useT } from '@/i18n/use-t';
 import { useAppForm } from '@/lib/form';
-import { dukaan } from '@/lib/dukaan';
 import { formatIsoDate, todayIsoDate } from '@/lib/dates';
 import {
   createClientRequestId,
@@ -38,14 +37,25 @@ import {
   fromPaisa,
   toPaisa
 } from '@/lib/dukaan/numbers';
-import type { Product } from '@/lib/dukaan/types';
 import type { SubFieldApi } from '@/types/forms';
+import type { PickerFetchFilters, ProductPickerItem } from '@/types/picker';
+
 import { listCustomers } from '@/features/customers/api/service';
+import { listProducts } from '@/features/products/api/service';
+import { mapProductToPicker, toPickerPage } from '@/lib/api/picker';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
+import dynamic from 'next/dynamic';
 import { SalesTable } from './sales-table';
-import { CancelSaleDialog } from './cancel-sale-dialog';
-import { ReturnSaleDialog } from './return-sale-dialog';
 import { saleKeys, saleQueryOptions } from '../api/queries';
+
+const CancelSaleDialog = dynamic(
+  () => import('./cancel-sale-dialog').then((mod) => mod.CancelSaleDialog),
+  { ssr: false }
+);
+const ReturnSaleDialog = dynamic(
+  () => import('./return-sale-dialog').then((mod) => mod.ReturnSaleDialog),
+  { ssr: false }
+);
 import { createSaleMutation } from '../api/mutations';
 import type { CreateSaleInput, CreateSaleItemInput, SaleDTO } from '@/lib/api/types';
 import type {
@@ -182,7 +192,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
     idx: number,
     subField: SubFieldApi,
     id: string,
-    product: Product | null
+    product: ProductPickerItem | null
   ) => {
     subField.handleChange(id);
     form.setFieldValue(
@@ -193,6 +203,18 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
     form.setFieldValue(`lines[${idx}].inventory_unit_id`, '');
     form.setFieldValue(`lines[${idx}].quantity`, 1);
   };
+
+  const fetchProductPage = async (filters: PickerFetchFilters) =>
+    toPickerPage(
+      await listProducts({
+        page: filters.page ?? 1,
+        pageSize: filters.limit ?? 20,
+        search: filters.search,
+        isActive: true
+      }),
+      mapProductToPicker
+    );
+
 
   return (
     <form className='space-y-4' onSubmit={handleSubmit}>
@@ -278,7 +300,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
                         const isInvalid =
                           subField.state.meta.isTouched && !subField.state.meta.isValid;
                         return (
-                          <FormEntitySelect<Product>
+                          <FormEntitySelect<ProductPickerItem>
                             name={subField.name}
                             label={t('dukaan.sale.product')}
                             required
@@ -290,10 +312,11 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
                             isInvalid={isInvalid}
                             errors={subField.state.meta.errors}
                             queryKey={['products', 'picker']}
-                            fetchPage={(filters) => dukaan.listProducts(filters)}
+                            fetchPage={fetchProductPage}
                             placeholder={t('dukaan.sale.selectProduct')}
                             searchPlaceholder={t('dukaan.sale.searchProducts')}
                           />
+
                         );
                       }}
                     />

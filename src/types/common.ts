@@ -4,6 +4,11 @@ import type { NextIntlClientProvider } from 'next-intl';
 import type { IconProps } from '@tabler/icons-react';
 import type { ActionId, ActionImpl } from 'kbar';
 
+export type TranslateMaybeFn = {
+  (key: string): string;
+  has?: (key: string) => boolean;
+};
+
 export interface AppearanceProviderProps {
   children: ReactNode;
 }

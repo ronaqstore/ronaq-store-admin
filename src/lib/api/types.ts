@@ -521,10 +521,6 @@ export interface RouteProductImageContext {
   params: Promise<RouteProductImageParams>;
 }
 
-export interface RouteUserIdContext {
-  params: Promise<{ id: string }>;
-}
-
 export interface ProxyErrorResult {
   handled: boolean;
   data?: unknown;

@@ -37,7 +37,7 @@ const jscpdCmd = [
   "--min-tokens",
   "75",
   "--ignore",
-  "**/node_modules/**,**/.next/**,**/src/components/ui/**,**/src/styles/**,**/src/constants/mock*/**,**/src/lib/dukaan/operations.ts",
+  "**/node_modules/**,**/.next/**,**/src/components/ui/**,**/src/styles/**",
   "--reporters",
   "json",
   "--output",

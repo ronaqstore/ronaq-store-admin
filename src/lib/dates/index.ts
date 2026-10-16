@@ -2,10 +2,6 @@ export function todayIsoDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function nowIso(): string {
-  return new Date().toISOString();
-}
-
 export function formatIsoDate(iso?: string | null, fallback = '—'): string {
   if (!iso) return fallback;
   return iso.slice(0, 10) || fallback;

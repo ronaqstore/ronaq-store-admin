@@ -792,6 +792,10 @@
     "notifications": {
       "title": "خبرتیاکنې",
       "description": "خپل ټولې خبرتیاکنې وګورئ او اداره کړئ."
+    },
+    "storeSettings": {
+      "title": "آنلاین دوکان",
+      "description": "عامه پلورنځي پروفایل، لوګو، او لید"
     }
   },
   "dashboard": {
@@ -1250,6 +1254,7 @@
     "inventory": "موجودي",
     "kanban": "کانبان",
     "notifications": "خبرتیاوې",
+    "overview": "کتنه",
     "payments": "تادیات",
     "productView": "د محصول لیدنه",
     "products": "محصولات",

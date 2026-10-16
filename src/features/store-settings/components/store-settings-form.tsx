@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { Spinner } from '@/components/ui/spinner';
 import { Icons } from '@/components/icons';
 import { shopLogoSrc } from '@/constants/placeholders';
 import { formatEmpty } from '@/lib/format-empty';
@@ -24,7 +23,7 @@ import {
 export function StoreSettingsForm() {
   const t = useTranslations();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { data, isLoading, isError } = useQuery(storeSettingsQueryOptions());
+  const { data } = useSuspenseQuery(storeSettingsQueryOptions());
   const updateMutation = useUpdateStoreSettings();
   const uploadMutation = useUploadShopLogo();
   const removeMutation = useRemoveShopLogo();
@@ -41,7 +40,6 @@ export function StoreSettingsForm() {
   const [showExactStock, setShowExactStock] = useState(false);
 
   useEffect(() => {
-    if (!data) return;
     setDisplayName(data.displayName ?? '');
     setAbout(data.about ?? '');
     setWhatsappNumber(data.whatsappNumber ?? '');
@@ -79,23 +77,45 @@ export function StoreSettingsForm() {
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className='flex min-h-48 items-center justify-center'>
-        <Spinner className='size-6' />
-      </div>
-    );
-  }
+  const handlePickLogo = () => {
+    fileInputRef.current?.click();
+  };
 
-  if (isError || !data) {
-    return (
-      <Card>
-        <CardContent className='py-8 text-sm text-muted-foreground'>
-          {t('storeSettings.loadFailed')}
-        </CardContent>
-      </Card>
-    );
-  }
+  const handleRemoveLogo = () => {
+    removeMutation.mutate();
+  };
+
+  const handleDisplayNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDisplayName(e.target.value);
+  };
+
+  const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCity(e.target.value);
+  };
+
+  const handleAboutChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setAbout(e.target.value);
+  };
+
+  const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setWhatsappNumber(e.target.value);
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhoneNumber(e.target.value);
+  };
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAddress(e.target.value);
+  };
+
+  const handleHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOpeningHours(e.target.value);
+  };
+
+  const handleMapsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setGoogleMapsUrl(e.target.value);
+  };
 
   const logoSrc = shopLogoSrc(data.logoUrl);
 
@@ -120,7 +140,7 @@ export function StoreSettingsForm() {
             <Button
               type='button'
               variant='outline'
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handlePickLogo}
               isLoading={uploadMutation.isPending}
             >
               <Icons.upload className='me-2 h-4 w-4' />
@@ -130,7 +150,7 @@ export function StoreSettingsForm() {
               <Button
                 type='button'
                 variant='ghost'
-                onClick={() => removeMutation.mutate()}
+                onClick={handleRemoveLogo}
                 isLoading={removeMutation.isPending}
               >
                 {t('storeSettings.removeLogo')}
@@ -158,26 +178,17 @@ export function StoreSettingsForm() {
           <div className='grid gap-4 sm:grid-cols-2'>
             <div className='space-y-2'>
               <Label htmlFor='displayName'>{t('storeSettings.displayName')}</Label>
-              <Input
-                id='displayName'
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-              />
+              <Input id='displayName' value={displayName} onChange={handleDisplayNameChange} />
             </div>
             <div className='space-y-2'>
               <Label htmlFor='city'>{t('storeSettings.city')}</Label>
-              <Input id='city' value={city} onChange={(e) => setCity(e.target.value)} />
+              <Input id='city' value={city} onChange={handleCityChange} />
             </div>
           </div>
 
           <div className='space-y-2'>
             <Label htmlFor='about'>{t('storeSettings.about')}</Label>
-            <Textarea
-              id='about'
-              value={about}
-              onChange={(e) => setAbout(e.target.value)}
-              rows={3}
-            />
+            <Textarea id='about' value={about} onChange={handleAboutChange} rows={3} />
           </div>
 
           <div className='grid gap-4 sm:grid-cols-2'>
@@ -186,7 +197,7 @@ export function StoreSettingsForm() {
               <Input
                 id='whatsapp'
                 value={whatsappNumber}
-                onChange={(e) => setWhatsappNumber(e.target.value)}
+                onChange={handleWhatsappChange}
                 placeholder='923001234567'
               />
             </div>
@@ -195,7 +206,7 @@ export function StoreSettingsForm() {
               <Input
                 id='phone'
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                onChange={handlePhoneChange}
                 placeholder='0300-1234567'
               />
             </div>
@@ -203,28 +214,20 @@ export function StoreSettingsForm() {
 
           <div className='space-y-2'>
             <Label htmlFor='address'>{t('storeSettings.address')}</Label>
-            <Input
-              id='address'
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
+            <Input id='address' value={address} onChange={handleAddressChange} />
           </div>
 
           <div className='grid gap-4 sm:grid-cols-2'>
             <div className='space-y-2'>
               <Label htmlFor='hours'>{t('storeSettings.openingHours')}</Label>
-              <Input
-                id='hours'
-                value={openingHours}
-                onChange={(e) => setOpeningHours(e.target.value)}
-              />
+              <Input id='hours' value={openingHours} onChange={handleHoursChange} />
             </div>
             <div className='space-y-2'>
               <Label htmlFor='maps'>{t('storeSettings.googleMaps')}</Label>
               <Input
                 id='maps'
                 value={googleMapsUrl}
-                onChange={(e) => setGoogleMapsUrl(e.target.value)}
+                onChange={handleMapsChange}
                 placeholder={t('storeSettings.googleMapsPlaceholder')}
               />
             </div>

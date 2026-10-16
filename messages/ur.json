@@ -787,6 +787,10 @@
     "notifications": {
       "title": "اطلاعات",
       "description": "اپنی تمام اطلاعات دیکھیں اور ان کا انتظام کریں۔"
+    },
+    "storeSettings": {
+      "title": "آن لائن اسٹور",
+      "description": "عوامی اسٹور فرنٹ پروفائل، لوگو، اور مرئیت"
     }
   },
   "dashboard": {
@@ -1245,6 +1249,7 @@
     "inventory": "انوینٹری",
     "kanban": "کانبن",
     "notifications": "اطلاعات",
+    "overview": "جائزہ",
     "payments": "ادائیگیاں",
     "productView": "پروڈکٹ ویو",
     "products": "پروڈکٹس",

@@ -1,14 +1,19 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { FloatingActionButton } from '@/components/common/floating-action-button';
 import { TablePageBody } from '@/components/layout/table-page-body';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { useT } from '@/i18n/use-t';
-import { ProductDialog } from './product-dialog';
 import { ProductsTable } from './products-table';
 import type { ProductsHeaderActionProps } from '@/types/products';
+
+const ProductDialog = dynamic(
+  () => import('./product-dialog').then((mod) => mod.ProductDialog),
+  { ssr: false }
+);
 
 export function ProductsHeaderAction({ onAdd }: ProductsHeaderActionProps) {
   const t = useT();

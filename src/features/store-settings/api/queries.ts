@@ -6,9 +6,9 @@ export const storeSettingsKeys = {
   detail: () => [...storeSettingsKeys.all, 'detail'] as const
 };
 
-export function storeSettingsQueryOptions() {
+export function storeSettingsQueryOptions(token?: string) {
   return queryOptions({
     queryKey: storeSettingsKeys.detail(),
-    queryFn: getStoreSettings
+    queryFn: () => getStoreSettings(token)
   });
 }

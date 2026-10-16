@@ -6,7 +6,8 @@ import { Icons } from '@/components/icons';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { getNavGroupsForRole } from '@/config/nav-config';
 import { useFilteredNavGroups } from '@/hooks/use-nav';
-import { useIsPhone } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 import type { NavItem, MobileBottomNavProps } from '@/types';
 import { useT, translateMaybe } from '@/i18n/use-t';
 import { cn } from '@/lib/utils';
@@ -42,7 +43,7 @@ function isActivePath(pathname: string, url: string): boolean {
 
 export function MobileBottomNav({ role }: MobileBottomNavProps) {
   const t = useT();
-  const isPhone = useIsPhone();
+  const isMobile = useIsMobile();
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = React.useState(false);
   const groups = useFilteredNavGroups(getNavGroupsForRole(role), role);
@@ -56,7 +57,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
   const primarySet = new Set(primary.map((item) => item.url));
   const moreItems = allItems.filter((item) => item.url && !primarySet.has(item.url));
 
-  if (!isPhone) return null;
+  if (!isMobile) return null;
 
   return (
     <>
@@ -65,6 +66,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
         className={cn(
           'bg-background/95 fixed inset-x-0 bottom-0 z-40 border-t border-border backdrop-blur-md',
           'pb-[env(safe-area-inset-bottom)] lg:hidden'
+
         )}
       >
         <ul className='mx-auto flex h-14 max-w-lg items-stretch justify-around px-1'>

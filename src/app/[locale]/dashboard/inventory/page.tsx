@@ -3,6 +3,7 @@ import { InventoryListClient, inventoryStockQueryOptions } from '@/features/inve
 import { getQueryClient } from '@/lib/query-client';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
 import { Suspense } from 'react';
+import { DataTableSkeleton } from '@/components/ui/table/data-table-skeleton';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/auth';
 
@@ -29,7 +30,7 @@ export default async function Page() {
       pageDescription='pages.inventory.description'
     >
       <HydrationBoundary state={dehydrate(qc)}>
-        <Suspense>
+        <Suspense fallback={<DataTableSkeleton rowCount={5} columnCount={5} />}>
           <InventoryListClient />
         </Suspense>
       </HydrationBoundary>

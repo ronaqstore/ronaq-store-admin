@@ -3,11 +3,13 @@
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant standalone (@media (display-mode: standalone));
 
 /* Base UI exposes orientation as data-orientation="…"; the base-nova
    components style it via these shorthand variants. */
 @custom-variant data-horizontal (&[data-orientation='horizontal']);
 @custom-variant data-vertical (&[data-orientation='vertical']);
+
 
 @import './theme.css';
 
@@ -46,8 +48,17 @@
     body {
       overscroll-behavior: none;
       overscroll-behavior-y: none;
+      min-height: 100dvh;
+      -webkit-tap-highlight-color: transparent;
     }
   }
+
+  button,
+  a,
+  [role='button'] {
+    touch-action: manipulation;
+  }
+
 
   /* Hide scrollbars globally; scrolling still works */
   * {

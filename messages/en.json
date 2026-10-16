@@ -804,6 +804,10 @@
     "notifications": {
       "title": "Notifications",
       "description": "View and manage all your notifications."
+    },
+    "storeSettings": {
+      "title": "Online Store",
+      "description": "Public storefront profile, logo, and visibility"
     }
   },
   "dashboard": {
@@ -1262,6 +1266,7 @@
     "inventory": "Inventory",
     "kanban": "Kanban",
     "notifications": "Notifications",
+    "overview": "Overview",
     "payments": "Payments",
     "productView": "Product View",
     "products": "Products",

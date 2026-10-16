@@ -2,6 +2,7 @@
 
 import type { ColumnDef } from '@tanstack/react-table';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -27,8 +28,12 @@ import { formatPkr } from '@/lib/dukaan/numbers';
 import { formatEmpty } from '@/lib/format-empty';
 import { productImageSrc } from '@/constants/placeholders';
 import { DUKAAN_DEFAULT_PAGE_SIZE, useDukaanListParams } from '@/components/data-table/list-params';
-import { ProductDialog } from './product-dialog';
 import type { ProductCellActionProps, ProductsTableProps } from '@/types/products';
+
+const ProductDialog = dynamic(
+  () => import('./product-dialog').then((mod) => mod.ProductDialog),
+  { ssr: false }
+);
 
 function ProductCellAction({ data }: ProductCellActionProps) {
   const t = useT();

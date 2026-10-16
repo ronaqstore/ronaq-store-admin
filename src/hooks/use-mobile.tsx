@@ -19,11 +19,3 @@ export function useIsMobile() {
     () => false
   );
 }
-
-export function useIsPhone() {
-  return React.useSyncExternalStore(
-    (onStoreChange) => subscribeMaxWidth(639, onStoreChange),
-    () => getMaxWidthSnapshot(639),
-    () => false
-  );
-}

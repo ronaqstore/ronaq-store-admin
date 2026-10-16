@@ -4,7 +4,9 @@ import type {
   CustomerListFilters,
   CreateCustomerInput,
   UpdateCustomerInput,
-  CustomerMutationResult
+  CustomerMutationResult,
+  CustomerLedgerDTO,
+  CustomerLedgerView
 } from '@/types';
 import { appFetch } from '@/lib/api/app-fetch';
 
@@ -25,6 +27,61 @@ export async function listCustomers(
 
   return appFetch<PaginatedResponse<CustomerDTO>>(`/api/customers${qs}`);
 }
+
+export async function getCustomerById(id: string, token?: string): Promise<CustomerDTO> {
+  if (token) {
+    return apiRequest<CustomerDTO>(`/customers/${id}`, undefined, token);
+  }
+  return appFetch<CustomerDTO>(`/api/customers/${id}`);
+}
+
+export async function getCustomerLedger(
+  id: string,
+  filters: { page?: number; pageSize?: number } = {},
+  token?: string
+): Promise<CustomerLedgerDTO> {
+  const qs = buildQueryString({
+    page: filters.page ?? 1,
+    pageSize: filters.pageSize ?? 100
+  });
+
+  if (token) {
+    return apiRequest<CustomerLedgerDTO>(`/customers/${id}/ledger${qs}`, undefined, token);
+  }
+  return appFetch<CustomerLedgerDTO>(`/api/customers/${id}/ledger${qs}`);
+}
+
+function ledgerLabel(type: string, reference?: string | null, status?: string): string {
+  const base = reference ? `${type} ${reference}` : type;
+  return status && status !== 'ACTIVE' ? `${base} (${status})` : base;
+}
+
+export async function getCustomerLedgerView(
+  id: string,
+  token?: string
+): Promise<CustomerLedgerView> {
+  const [customer, ledger] = await Promise.all([
+    getCustomerById(id, token),
+    getCustomerLedger(id, { page: 1, pageSize: 100 }, token)
+  ]);
+
+  return {
+    id: customer.id,
+    name: customer.name,
+    phone: customer.phone,
+    address: customer.address,
+    notes: customer.notes,
+    udhar: ledger.balance,
+    ledger: ledger.items.map((row) => ({
+      id: row.id,
+      date: row.date,
+      label: ledgerLabel(row.type, row.reference, row.status),
+      amount: row.delta,
+      running_balance: row.balance
+    }))
+  };
+}
+
 
 export async function createCustomer(input: CreateCustomerInput): Promise<CustomerDTO> {
   return appFetch<CustomerDTO>('/api/customers', {
