@@ -1,5 +1,5 @@
-export const APP_NAME = 'Dukaan Pro';
-export const APP_SHORT_NAME = 'Dukaan';
+export const APP_NAME = 'Ronaq Store';
+export const APP_SHORT_NAME = 'Ronaq';
 export const APP_DESCRIPTION =
   'Shop management for purchases, sales, inventory, cash, customers and suppliers.';
 export const APP_ID = '/';

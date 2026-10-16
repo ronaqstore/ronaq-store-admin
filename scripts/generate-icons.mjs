@@ -58,7 +58,7 @@ async function screenshot(width, height, name) {
     <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
       <rect width="100%" height="100%" fill="#0f172a"/>
       <rect x="8%" y="12%" width="84%" height="76%" rx="24" fill="#1e293b"/>
-      <text x="50%" y="48%" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="${Math.round(width / 18)}" font-weight="700">Dukaan Pro</text>
+      <text x="50%" y="48%" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="${Math.round(width / 18)}" font-weight="700">Ronaq Store</text>
       <text x="50%" y="58%" text-anchor="middle" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="${Math.round(width / 40)}">Replace this screenshot</text>
     </svg>`;
   const dest = join(root, 'public', 'screenshots', name);

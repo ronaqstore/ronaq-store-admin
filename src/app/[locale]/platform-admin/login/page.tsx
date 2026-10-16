@@ -4,11 +4,11 @@ import { PlatformAdminLoginForm } from '@/features/auth/components/platform-admi
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Platform Admin Sign In — Dukaan Pro',
-  description: 'Sign in to the Dukaan Pro platform admin panel to manage shops and subscriptions.',
+  title: 'Platform Admin Sign In — Ronaq Store',
+  description: 'Sign in to the Ronaq Store platform admin panel to manage shops and subscriptions.',
   openGraph: {
-    title: 'Platform Admin Sign In — Dukaan Pro',
-    description: 'Sign in to the Dukaan Pro platform admin panel to manage shops and subscriptions.'
+    title: 'Platform Admin Sign In — Ronaq Store',
+    description: 'Sign in to the Ronaq Store platform admin panel to manage shops and subscriptions.'
   }
 };
 

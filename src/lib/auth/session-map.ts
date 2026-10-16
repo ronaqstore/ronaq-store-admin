@@ -10,6 +10,6 @@ export function toDukaanSession(session: DukaanSessionSource): MockSession {
     shop_id: session.user.shopId ?? DEMO_SHOP_ID,
     role: session.user.role,
     user_name: session.user.name ?? 'User',
-    shop_name: isPlatform ? 'Dukaan Pro Platform' : (session.user.shopName ?? DEMO_SHOP_NAME)
+    shop_name: isPlatform ? 'Ronaq Store Platform' : (session.user.shopName ?? DEMO_SHOP_NAME)
   };
 }

@@ -24,7 +24,7 @@ export function getSession(): MockSession {
       shop_id: '01a135d4-b352-74fd-951f-616058efb005',
       role: 'OWNER',
       user_name: 'Shop Owner',
-      shop_name: 'Dukan Pro Mobile Shop'
+      shop_name: 'Ronaq Store Mobile Shop'
     };
   }
 
@@ -49,7 +49,7 @@ export function getCurrentShop(): Shop {
   if (!shop) {
     const newShop: Shop = {
       id: shop_id,
-      name: session.shop_name || 'Dukan Pro Mobile Shop',
+      name: session.shop_name || 'Ronaq Store Mobile Shop',
       phone: '03115514151',
       address: 'Main Market, Pakistan',
       status: 'ACTIVE',

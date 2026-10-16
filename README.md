@@ -1,6 +1,6 @@
-# Dukaan Pro
+# Ronaq Store Admin
 
-Shop management dashboard for mobile/retail dukaan (purchases, sales, inventory, cash, customers, suppliers).
+Shop management dashboard for mobile/retail shops (purchases, sales, inventory, cash, customers, suppliers).
 
 ## Stack
 

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Overview — Dukaan Pro',
+  title: 'Overview — Ronaq Store',
   description: 'Store overview, analytics, sales, and inventory metrics.'
 };
 

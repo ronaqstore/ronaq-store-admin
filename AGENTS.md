@@ -1,12 +1,12 @@
-# AGENTS.md — Dukaan Pro Frontend Reference
+# AGENTS.md — Ronaq Store Admin Reference
 
-This document is the **single source of truth** for AI coding agents and developers working on `dukan-pro-frontend`. It details the architecture, conventions, folder layout, domain feature anatomy, backend API contracts, and business workflow blueprints for integration with the NestJS backend (`dukan-pro-backend`).
+This document is the **single source of truth** for AI coding agents and developers working on `ronaq-store-admin`. It details the architecture, conventions, folder layout, domain feature anatomy, backend API contracts, and business workflow blueprints for integration with the NestJS backend (`ronaq-store-backend`).
 
 ---
 
 ## 1. Project Overview & Philosophy
 
-**Dukaan Pro** is a multi-tenant SaaS POS (Point of Sale) and inventory management system purpose-built for Pakistani mobile phone retailers.
+**Ronaq Store** is a multi-tenant SaaS POS (Point of Sale) and inventory management system purpose-built for Pakistani mobile phone retailers.
 
 - **Primary User Classes**:
   1. **Shop Owner (`OWNER` role)**: Manages one physical shop — catalog, inward purchases (with IMEI tracking), POS sales, Udhar (customer credit), supplier payables, expenses, cash drawer, business reports, and online storefront. Every request is strictly shop-scoped.
