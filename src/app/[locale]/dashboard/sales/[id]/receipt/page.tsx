@@ -19,7 +19,10 @@ export default async function Page({ params }: IdPageProps) {
   const session = await auth();
   const token = session?.accessToken;
   const qc = getQueryClient();
-  void qc.prefetchQuery(saleQueryOptions(id, token));
+
+  if (token) {
+    await qc.prefetchQuery(saleQueryOptions(id, token));
+  }
 
   return (
     <div className='p-6'>

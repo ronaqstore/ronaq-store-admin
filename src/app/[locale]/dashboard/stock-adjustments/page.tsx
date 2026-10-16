@@ -21,15 +21,17 @@ export default async function Page() {
   const qc = getQueryClient();
 
   if (token) {
-    await qc.prefetchQuery(
-      inventoryAdjustmentsQueryOptions(
-        { page: 1, pageSize: 20, sortBy: 'createdAt', sortOrder: 'desc' },
-        token
-      )
-    );
+    await Promise.all([
+      qc.prefetchQuery(
+        inventoryAdjustmentsQueryOptions(
+          { page: 1, pageSize: 20, sortBy: 'createdAt', sortOrder: 'desc' },
+          token
+        )
+      ),
+      qc.prefetchQuery(productsQueryOptions({ page: 1, pageSize: 100 }, token)),
+      qc.prefetchQuery(unitsQueryOptions())
+    ]);
   }
-  void qc.prefetchQuery(productsQueryOptions({ page: 1, pageSize: 100 }, token));
-  void qc.prefetchQuery(unitsQueryOptions());
 
   return (
     <PageContainer

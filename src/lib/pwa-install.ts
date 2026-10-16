@@ -1,3 +1,4 @@
+import { env } from '@/config/env';
 import { isStandaloneDisplay } from '@/lib/pwa';
 import type { BeforeInstallPromptEvent, NavigatorWithRelatedApps } from '@/types/common';
 
@@ -71,6 +72,10 @@ export function ensureInstallListeners(): void {
   }
 
   window.addEventListener('beforeinstallprompt', (e) => {
+    if (env.NODE_ENV === 'development') {
+      return;
+    }
+
     e.preventDefault();
     deferred = e as BeforeInstallPromptEvent;
 

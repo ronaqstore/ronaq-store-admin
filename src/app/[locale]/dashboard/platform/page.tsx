@@ -24,9 +24,9 @@ function PlatformDashboardSkeleton() {
   );
 }
 
-export default function PlatformPage() {
+export default async function PlatformPage() {
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(platformOverviewQueryOptions());
+  await queryClient.prefetchQuery(platformOverviewQueryOptions());
 
   return (
     <PageContainer

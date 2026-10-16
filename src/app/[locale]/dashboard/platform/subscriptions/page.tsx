@@ -20,7 +20,7 @@ export async function generateMetadata() {
 export default async function PlatformSubscriptionsPage() {
   const queryClient = getQueryClient();
   const t = await getTranslations('platform');
-  void queryClient.prefetchQuery(platformSubscriptionsQueryOptions({ page: 1, limit: 10 }));
+  await queryClient.prefetchQuery(platformSubscriptionsQueryOptions({ page: 1, limit: 10 }));
 
   return (
     <PageContainer

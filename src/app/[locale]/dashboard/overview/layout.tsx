@@ -37,8 +37,13 @@ export default async function OverViewLayout({
   }
 
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(dashboardQueryOptions());
-  void queryClient.prefetchQuery(sessionQueryOptions());
+
+  if (session?.user) {
+    await Promise.all([
+      queryClient.prefetchQuery(dashboardQueryOptions()),
+      queryClient.prefetchQuery(sessionQueryOptions())
+    ]);
+  }
 
   return (
     <PageContainer pageTitle='pages.dashboard.title' pageDescription='pages.dashboard.description'>

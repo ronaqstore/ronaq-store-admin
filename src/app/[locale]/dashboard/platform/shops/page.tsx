@@ -17,9 +17,9 @@ export async function generateMetadata() {
   };
 }
 
-export default function PlatformShopsPage() {
+export default async function PlatformShopsPage() {
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(platformShopsQueryOptions({ page: 1, limit: 10 }));
+  await queryClient.prefetchQuery(platformShopsQueryOptions({ page: 1, limit: 10 }));
 
   return (
     <PageContainer

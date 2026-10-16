@@ -19,11 +19,15 @@ export default async function Page() {
   const session = await auth();
   const token = session?.accessToken;
   const qc = getQueryClient();
+
   if (token) {
-    await qc.prefetchQuery(purchasesQueryOptions({ limit: 100 }, token));
+    await Promise.all([
+      qc.prefetchQuery(purchasesQueryOptions({ limit: 100 }, token)),
+      qc.prefetchQuery(suppliersQueryOptions({ limit: 100 }, token)),
+      qc.prefetchQuery(productsQueryOptions({ page: 1, pageSize: 100 }, token))
+    ]);
   }
-  void qc.prefetchQuery(suppliersQueryOptions({ limit: 100 }));
-  void qc.prefetchQuery(productsQueryOptions({ page: 1, pageSize: 100 }));
+
   return (
     <PageContainer
       fill
