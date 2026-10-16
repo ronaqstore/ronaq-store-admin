@@ -16,7 +16,6 @@ export const dukaanKeys = {
   purchases: (f?: ListFilters) => [...dukaanKeys.all, 'purchases', f] as const,
   purchase: (id: string) => [...dukaanKeys.all, 'purchase', id] as const,
   stock: (f?: ListFilters) => [...dukaanKeys.all, 'stock', f] as const,
-  units: (productId?: string) => [...dukaanKeys.all, 'units', productId] as const,
   sales: (f?: ListFilters) => [...dukaanKeys.all, 'sales', f] as const,
   sale: (id: string) => [...dukaanKeys.all, 'sale', id] as const,
   supplierPayments: (f?: ListFilters) => [...dukaanKeys.all, 'supplierPayments', f] as const,
@@ -37,12 +36,6 @@ export const customerQueryOptions = (id: string) =>
   queryOptions({
     queryKey: dukaanKeys.customer(id),
     queryFn: () => dukaan.getCustomer(id)
-  });
-
-export const unitsQueryOptions = (productId?: string) =>
-  queryOptions({
-    queryKey: dukaanKeys.units(productId),
-    queryFn: () => dukaan.listInStockUnits(productId)
   });
 
 export const sessionQueryOptions = () =>

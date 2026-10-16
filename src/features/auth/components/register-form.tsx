@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import Image from 'next/image';
 import { z } from 'zod';
 import { signIn } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
@@ -9,17 +10,23 @@ import { useAppForm } from '@/lib/form';
 import { FieldGroup } from '@/components/ui/field';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { isValidPkMobile, normalizePhone } from '@/lib/auth/phone';
 import { SHOP_HOME } from '@/lib/auth/routes';
-import { registerOwnerAccount } from '@/features/auth/api/service';
+import { registerOwnerAccountWithOptionalLogo } from '@/features/auth/api/service';
+import { shopLogoSrc } from '@/constants/placeholders';
 import type { RegisterFormValues, RegisterFormProps } from '@/types/auth';
 
 export function RegisterForm({ title, description, footer }: RegisterFormProps) {
   const t = useTranslations();
   const router = useRouter();
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const registerSchema = z
     .object({
@@ -59,14 +66,17 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
       const normalizedPhone = normalizePhone(value.phone);
 
       try {
-        await registerOwnerAccount({
-          fullName: value.fullName.trim(),
-          phone: normalizedPhone,
-          password: value.password,
-          shopName: value.shopName.trim(),
-          city: value.city.trim(),
-          address: value.address?.trim() || undefined
-        });
+        await registerOwnerAccountWithOptionalLogo(
+          {
+            fullName: value.fullName.trim(),
+            phone: normalizedPhone,
+            password: value.password,
+            shopName: value.shopName.trim(),
+            city: value.city.trim(),
+            address: value.address?.trim() || undefined
+          },
+          logoFile
+        );
 
         setSuccess(t('auth.registerSuccess'));
 
@@ -93,6 +103,22 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     form.handleSubmit();
+  };
+
+  const handlePickLogoClick = () => {
+    logoInputRef.current?.click();
+  };
+
+  const handleClearLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    if (logoInputRef.current) logoInputRef.current.value = '';
+  };
+
+  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setLogoFile(file);
+    setLogoPreview(file ? URL.createObjectURL(file) : null);
   };
 
   return (
@@ -213,6 +239,48 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
                 />
               )}
             />
+
+            <div className='space-y-2'>
+              <Label>{t('auth.shopLogoOptional')}</Label>
+              <p className='text-xs text-muted-foreground'>{t('auth.shopLogoHint')}</p>
+              <div className='flex items-center gap-3'>
+                <div className='relative h-16 w-16 overflow-hidden rounded-xl border bg-muted'>
+                  <Image
+                    src={logoPreview || shopLogoSrc(null)}
+                    alt=''
+                    fill
+                    unoptimized
+                    className='object-cover'
+                  />
+                </div>
+                <Button
+                  type='button'
+                  variant='outline'
+                  size='sm'
+                  onClick={handlePickLogoClick}
+                >
+                  <Icons.upload className='me-2 h-4 w-4' />
+                  {logoFile ? t('storeSettings.changeLogo') : t('storeSettings.uploadLogo')}
+                </Button>
+                {logoFile ? (
+                  <Button
+                    type='button'
+                    variant='ghost'
+                    size='sm'
+                    onClick={handleClearLogo}
+                  >
+                    {t('storeSettings.removeLogo')}
+                  </Button>
+                ) : null}
+                <input
+                  ref={logoInputRef}
+                  type='file'
+                  accept='image/jpeg,image/png,image/webp'
+                  className='hidden'
+                  onChange={handleLogoFileChange}
+                />
+              </div>
+            </div>
           </FieldGroup>
 
           <form.AppForm>

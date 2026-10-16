@@ -882,15 +882,6 @@ async function listStock(filters: ListFilters = {}) {
   return paginate(items, filters);
 }
 
-export async function listInStockUnits(productId?: string) {
-  await delay();
-  const sid = shopId();
-  return getStore().inventory_units.filter(
-    (u) =>
-      u.shop_id === sid && u.status === 'IN_STOCK' && (!productId || u.product_id === productId)
-  );
-}
-
 async function adjustStock(input: AdjustStockInput) {
   await delay();
   const sid = shopId();

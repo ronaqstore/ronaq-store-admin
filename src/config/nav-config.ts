@@ -152,6 +152,13 @@ const shopNavGroups: NavGroup[] = [
     label: 'nav.group.settings',
     items: [
       {
+        title: 'nav.storeSettings',
+        url: '/dashboard/settings/store',
+        icon: 'building',
+        isActive: false,
+        items: []
+      },
+      {
         title: 'nav.appearance',
         url: '/dashboard/settings/appearance',
         icon: 'palette',

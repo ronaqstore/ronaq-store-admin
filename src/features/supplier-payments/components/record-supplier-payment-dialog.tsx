@@ -14,7 +14,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Icons } from '@/components/icons';
 import { Spinner } from '@/components/ui/spinner';
 import { formatPkr, toPaisa, fromPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';

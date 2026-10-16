@@ -3,6 +3,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import {
@@ -23,6 +24,8 @@ import { productsQueryOptions, productsQueryKeys } from '../api/queries';
 import { deleteProduct } from '../api/service';
 import type { ProductDTO } from '@/lib/api/types';
 import { formatPkr } from '@/lib/dukaan/numbers';
+import { formatEmpty } from '@/lib/format-empty';
+import { productImageSrc } from '@/constants/placeholders';
 import { DUKAAN_DEFAULT_PAGE_SIZE, useDukaanListParams } from '@/components/data-table/list-params';
 import { ProductDialog } from './product-dialog';
 import type { ProductCellActionProps, ProductsTableProps } from '@/types/products';
@@ -76,6 +79,26 @@ function ProductCellAction({ data }: ProductCellActionProps) {
 
 const productColumns: ColumnDef<ProductDTO>[] = [
   {
+    id: 'image',
+    accessorKey: 'imageUrl',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title={staticT('tableColumns.image')} />
+    ),
+    meta: { label: 'tableColumns.image', type: 'text', priority: 1 },
+    cell: ({ row }) => (
+      <div className='relative h-10 w-10 overflow-hidden rounded-md border bg-muted'>
+        <Image
+          src={productImageSrc(row.original.imageUrl)}
+          alt={formatEmpty(row.original.name)}
+          fill
+          unoptimized
+          className='object-cover'
+          sizes='40px'
+        />
+      </div>
+    )
+  },
+  {
     id: 'name',
     accessorKey: 'name',
     header: ({ column }) => (
@@ -93,9 +116,11 @@ const productColumns: ColumnDef<ProductDTO>[] = [
     enableColumnFilter: true,
     cell: ({ row }) => (
       <div className='flex flex-col'>
-        <span className='font-medium'>{row.original.name}</span>
+        <span className='font-medium'>{formatEmpty(row.original.name)}</span>
         <span className='text-xs text-muted-foreground'>
-          {row.original.sku ? `SKU: ${row.original.sku}` : row.original.brandName || ''}
+          {row.original.sku
+            ? `SKU: ${row.original.sku}`
+            : formatEmpty(row.original.brandName)}
         </span>
       </div>
     )
@@ -107,7 +132,7 @@ const productColumns: ColumnDef<ProductDTO>[] = [
       <DataTableColumnHeader column={column} title={staticT('dukaan.product.category')} />
     ),
     meta: { label: 'dukaan.product.category', type: 'text', priority: 2 },
-    cell: ({ row }) => <span>{row.original.categoryName || '—'}</span>
+    cell: ({ row }) => <span>{formatEmpty(row.original.categoryName)}</span>
   },
   {
     id: 'brandName',
@@ -116,7 +141,7 @@ const productColumns: ColumnDef<ProductDTO>[] = [
       <DataTableColumnHeader column={column} title={staticT('dukaan.product.brand')} />
     ),
     meta: { label: 'dukaan.product.brand', type: 'text', priority: 3 },
-    cell: ({ row }) => <span>{row.original.brandName || '—'}</span>
+    cell: ({ row }) => <span>{formatEmpty(row.original.brandName)}</span>
   },
   {
     id: 'defaultSellingPrice',
@@ -196,8 +221,8 @@ const productDetail: DetailConfig<ProductDTO> = {
       title: 'Product Details',
       fields: [
         { label: 'Name', value: row.name },
-        { label: 'Category', value: row.categoryName || '—' },
-        { label: 'Brand', value: row.brandName || '—' },
+        { label: 'Category', value: formatEmpty(row.categoryName) },
+        { label: 'Brand', value: formatEmpty(row.brandName) },
         { label: 'Selling Price', value: formatPkr(row.defaultSellingPrice) },
         { label: 'Stock', value: String(row.quantityOnHand ?? 0) },
         {

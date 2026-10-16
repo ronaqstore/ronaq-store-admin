@@ -26,13 +26,6 @@ export async function listCustomers(
   return appFetch<PaginatedResponse<CustomerDTO>>(`/api/customers${qs}`);
 }
 
-export async function getCustomer(id: string, token?: string): Promise<CustomerDTO> {
-  if (token) {
-    return apiRequest<CustomerDTO>(`/customers/${id}`, undefined, token);
-  }
-  return appFetch<CustomerDTO>(`/api/customers/${id}`);
-}
-
 export async function createCustomer(input: CreateCustomerInput): Promise<CustomerDTO> {
   return appFetch<CustomerDTO>('/api/customers', {
     method: 'POST',

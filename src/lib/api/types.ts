@@ -531,14 +531,6 @@ export interface ProxyErrorResult {
   status?: number;
 }
 
-export interface PaginatedListPayload<T> {
-  items?: T[];
-  total?: number;
-  page?: number;
-  pageSize?: number;
-  [key: string]: unknown;
-}
-
 export interface UpstreamErrorBody {
   message?: string | string[];
   error?: string;
