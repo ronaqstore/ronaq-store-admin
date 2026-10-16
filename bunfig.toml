@@ -1,0 +1,8 @@
+# Bun install config for Dukaan Pro.
+# Vercel uses Bun when bun.lock is present.
+#
+# minimumReleaseAge blocks packages published within the last N seconds.
+# Keep this at 0 for CI/Vercel so freshly added deps (Next, Serwist, etc.)
+# can resolve. Raise it locally only if you want a supply-chain delay.
+[install]
+minimumReleaseAge = 0

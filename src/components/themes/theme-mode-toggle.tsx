@@ -1,0 +1,70 @@
+'use client';
+
+import { Icons } from '@/components/icons';
+import { useTheme } from 'next-themes';
+import * as React from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Kbd } from '@/components/ui/kbd';
+import { startThemeTransition } from '@/lib/theme-transition';
+import { useT } from '@/i18n/use-t';
+
+export function ThemeModeToggle() {
+  const { setTheme, resolvedTheme } = useTheme();
+  const t = useT();
+
+  const handleThemeToggle = React.useCallback(
+    (e?: React.MouseEvent) => {
+      const newMode = resolvedTheme === 'dark' ? 'light' : 'dark';
+
+      startThemeTransition(() => setTheme(newMode), e);
+    },
+    [resolvedTheme, setTheme]
+  );
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== 'd' || !e.shiftKey || !(e.metaKey || e.ctrlKey)) return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        target?.isContentEditable
+      ) {
+        return;
+      }
+      e.preventDefault();
+      handleThemeToggle();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleThemeToggle]);
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            type='button'
+            variant='secondary'
+            size='icon'
+            aria-label={t('appearance.theme')}
+            className='group/toggle size-8'
+            onClick={handleThemeToggle}
+          />
+        }
+      >
+        <Icons.brightness />
+        <span className='sr-only'>{t('appearance.theme')}</span>
+      </TooltipTrigger>
+      <TooltipContent>
+        {t('appearance.theme')} <Kbd>⌘</Kbd>
+        <Kbd>⇧</Kbd>
+        <Kbd>D</Kbd> <Kbd>D</Kbd>
+        <Kbd>D</Kbd>
+      </TooltipContent>
+    </Tooltip>
+  );
+}

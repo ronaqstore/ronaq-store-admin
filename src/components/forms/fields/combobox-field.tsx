@@ -1,0 +1,110 @@
+'use client';
+
+import * as React from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from '@/components/ui/command';
+import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Icons } from '@/components/icons';
+import { cn } from '@/lib/utils';
+import { useFieldContext, useFieldInvalid } from '@/lib/form-context';
+import { useT } from '@/i18n/use-t';
+import type { ComboboxFieldProps } from '@/types';
+
+export function ComboboxField({
+  label,
+  description,
+  required,
+  options,
+  placeholder,
+  searchPlaceholder,
+  emptyMessage
+}: ComboboxFieldProps) {
+  const field = useFieldContext<string>();
+  const isInvalid = useFieldInvalid();
+  const t = useT();
+  const effPlaceholder = placeholder ?? t('select.option');
+  const effSearchPlaceholder = searchPlaceholder ?? t('search.option');
+  const effEmptyMessage = emptyMessage ?? t('search.noResults');
+  const [open, setOpen] = React.useState(false);
+  const selected = options.find((o) => o.value === field.state.value);
+  const listboxId = `${field.name}-listbox`;
+
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+    if (!next) field.handleBlur();
+  };
+
+  const handleSelect = (next: string) => {
+    field.handleChange(next);
+    setOpen(false);
+  };
+
+  return (
+    <Field data-invalid={isInvalid}>
+      <FieldLabel htmlFor={field.name}>
+        {label}
+        {required && ' *'}
+      </FieldLabel>
+      <Popover open={open} onOpenChange={handleOpenChange}>
+        <PopoverTrigger
+          render={
+            <Button
+              type='button'
+              id={field.name}
+              variant='outline'
+              role='combobox'
+              aria-controls={listboxId}
+              aria-expanded={open}
+              aria-invalid={isInvalid}
+              aria-describedby={isInvalid ? `${field.name}-error` : undefined}
+              className={cn(
+                'w-full justify-between font-normal',
+                !selected && 'text-muted-foreground'
+              )}
+            />
+          }
+        >
+          {selected?.label ?? effPlaceholder}
+          <Icons.chevronsUpDown className='ms-2 h-4 w-4 shrink-0 opacity-50' />
+        </PopoverTrigger>
+        <PopoverContent className='w-(--anchor-width) p-0'>
+          <Command>
+            <CommandInput placeholder={effSearchPlaceholder} />
+            <CommandList id={listboxId}>
+              <CommandEmpty>{effEmptyMessage}</CommandEmpty>
+              <CommandGroup>
+                {options.map((opt) => (
+                  <CommandItem
+                    key={opt.value}
+                    value={opt.value}
+                    disabled={opt.disabled}
+                    keywords={[opt.label]}
+                    onSelect={handleSelect}
+                  >
+                    <Icons.check
+                      className={cn(
+                        'me-2 h-4 w-4',
+                        field.state.value === opt.value ? 'opacity-100' : 'opacity-0'
+                      )}
+                    />
+                    {opt.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      {description && <FieldDescription>{description}</FieldDescription>}
+      {isInvalid && <FieldError id={`${field.name}-error`} errors={field.state.meta.errors} />}
+    </Field>
+  );
+}

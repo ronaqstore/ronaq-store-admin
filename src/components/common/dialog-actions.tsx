@@ -1,0 +1,40 @@
+'use client';
+
+import { Icons } from '@/components/icons';
+import { Button } from '@/components/ui/button';
+import { useT } from '@/i18n/use-t';
+import type { DialogCancelButtonProps, DialogPrimaryButtonProps } from '@/types';
+
+export function DialogCancelButton({ onClick, disabled }: DialogCancelButtonProps) {
+  const t = useT();
+  return (
+    <Button type='button' variant='outline' disabled={disabled} onClick={onClick}>
+      <Icons.close className='me-2 h-4 w-4' />
+      {t('common.cancel')}
+    </Button>
+  );
+}
+
+const PRIMARY_ICON = {
+  add: Icons.add,
+  edit: Icons.edit,
+  save: Icons.check
+} as const;
+
+export function DialogPrimaryButton({
+  mode,
+  disabled,
+  loading = false,
+  type = 'submit',
+  onClick,
+  variant = 'default'
+}: DialogPrimaryButtonProps) {
+  const t = useT();
+  const Icon = PRIMARY_ICON[mode];
+  return (
+    <Button type={type} variant={variant} disabled={disabled} isLoading={loading} onClick={onClick}>
+      <Icon className='me-2 h-4 w-4' />
+      {t(`common.${mode}` as const)}
+    </Button>
+  );
+}

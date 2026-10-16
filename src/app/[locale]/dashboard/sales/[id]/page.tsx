@@ -1,0 +1,37 @@
+import PageContainer from '@/components/layout/page-container';
+import { SaleDetailClient } from '@/features/sales';
+import { saleQueryOptions } from '@/features/sales';
+import { getQueryClient } from '@/lib/query-client';
+import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
+import { Suspense } from 'react';
+import { getTranslations } from 'next-intl/server';
+import { auth } from '@/auth';
+import type { IdPageProps } from '@/types';
+
+export async function generateMetadata() {
+  const t = await getTranslations('metadata');
+  return {
+    title: t('saleDetail')
+  };
+}
+
+export default async function Page({ params }: IdPageProps) {
+  const { id } = await params;
+  const session = await auth();
+  const token = session?.accessToken;
+  const qc = getQueryClient();
+  void qc.prefetchQuery(saleQueryOptions(id, token));
+
+  return (
+    <PageContainer
+      pageTitle='pages.saleDetail.title'
+      pageDescription='pages.saleDetail.description'
+    >
+      <HydrationBoundary state={dehydrate(qc)}>
+        <Suspense>
+          <SaleDetailClient id={id} />
+        </Suspense>
+      </HydrationBoundary>
+    </PageContainer>
+  );
+}
