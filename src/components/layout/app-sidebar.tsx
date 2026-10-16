@@ -27,6 +27,7 @@ import * as React from 'react';
 import { Icons } from '@/components/icons';
 import { useLocale, useTranslations } from 'next-intl';
 import { isRtlLocale, type AppLocale } from '@/i18n/request';
+import { translateMaybe } from '@/i18n/translate-maybe';
 
 function filterNavGroups(
   groups: NavGroup[],
@@ -53,11 +54,6 @@ function filterNavGroups(
       return { ...group, items };
     })
     .filter((group) => group.items.length > 0);
-}
-
-function translateMaybe(key: string, t: ReturnType<typeof useTranslations>): string {
-  const translated = t(key);
-  return translated.startsWith('MISSING_MESSAGE') ? key : translated;
 }
 
 export default function AppSidebar({ role }: AppSidebarProps) {

@@ -531,7 +531,12 @@
       "searchPlaceholder": "Search products...",
       "status": "Status",
       "active": "Active",
-      "inactive": "Inactive"
+      "inactive": "Inactive",
+      "searchCategories": "Search categories...",
+      "searchBrands": "Search brands...",
+      "serialized": "Serialized",
+      "quantity": "Quantity",
+      "modelPlaceholder": "e.g. SM-A155F"
     },
     "category": {
       "editTitle": "Edit Category",

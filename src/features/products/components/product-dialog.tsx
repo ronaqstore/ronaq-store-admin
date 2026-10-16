@@ -319,7 +319,9 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                       children={(field) => (
                         <field.TextField
                           label={t('model')}
-                          placeholder={trackingType === 'SERIALIZED' ? 'e.g. SM-A155F' : undefined}
+                          placeholder={
+                            trackingType === 'SERIALIZED' ? t('modelPlaceholder') : undefined
+                          }
                         />
                       )}
                     />

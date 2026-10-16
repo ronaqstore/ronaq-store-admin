@@ -376,7 +376,10 @@
       "productHeader": "پروڈکٹ",
       "qtyHeader": "مقدار",
       "unitCostHeader": "یونٹ لاگت",
-      "lineHeader": "کل لاگت"
+      "lineHeader": "کل لاگت",
+      "imei1": "IMEI1 (ہر لائن پر ایک، تعداد = مقدار)",
+      "imei2Optional": "IMEI2 (اختیاری، وہی تعداد)",
+      "optionalSecondImei": "اختیاری دوسرا IMEI…"
     },
     "sale": {
       "newTitle": "نئی فروخت",
@@ -443,7 +446,20 @@
       "receiptGroup": "گروپ",
       "cancelledStatus": "(منسوخ)",
       "cashWarning": "نقد {current} → {projected}۔ تصدیق کریں؟",
-      "cancelledInfo": "منسوخ: {reason} ({date})"
+      "cancelledInfo": "منسوخ: {reason} ({date})",
+      "saleBelowCostWarning": "ایک یا زیادہ آئٹمز لاگت سے کم پر فروخت ہوئے (اجازت ہے)",
+      "imeiPair": "IMEI1 / IMEI2",
+      "pickImei": "IMEI منتخب کریں",
+      "paymentMethod": "ادائیگی کا طریقہ",
+      "subtotal": "ذیلی کل {subtotal}",
+      "total": "کل {total}",
+      "udhar": "ادھار {udhar}",
+      "summary": "ذیلی کل {subtotal} · کل {total} · ادھار {udhar}",
+      "cancelTitle": "فروخت منسوخ کریں",
+      "cancelWithReason": "وجہ کے ساتھ منسوخ کریں",
+      "confirmCancel": "منسوخی کی تصدیق",
+      "back": "واپس",
+      "pdfPrintReceipt": "PDF / رسید پرنٹ"
     },
     "product": {
       "productCreated": "مصنوعہ کامیابی سے بنایا گیا",
@@ -514,7 +530,13 @@
       "searchPlaceholder": "مصنوعات تلاش کریں...",
       "status": "حیثیت",
       "active": "فعال",
-      "inactive": "غیر فعال"
+      "inactive": "غیر فعال",
+      "searchCategories": "اقسام تلاش کریں...",
+      "searchBrands": "برانڈز تلاش کریں...",
+      "serialized": "سیریل نمبر والا",
+      "quantity": "مقدار",
+      "title": "مصنوعات",
+      "modelPlaceholder": "مثال: SM-A155F"
     },
     "category": {
       "editTitle": "کیٹیگری میں ترمیم کریں",

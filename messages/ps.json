@@ -376,7 +376,10 @@
       "productHeader": "محصول",
       "qtyHeader": "شمیر",
       "unitCostHeader": "د یوه بیه",
-      "lineHeader": "ټولټال لګښت"
+      "lineHeader": "ټولټال لګښت",
+      "imei1": "IMEI1 (په هر کرښه کې یو، شمېر = مقدار)",
+      "imei2Optional": "IMEI2 (اختیاري، هماغه شمېر)",
+      "optionalSecondImei": "اختیاري دوهم IMEI…"
     },
     "sale": {
       "newTitle": "نوی پلور",
@@ -443,7 +446,20 @@
       "receiptGroup": "ډله",
       "cancelledStatus": "(لغوه شوی)",
       "cashWarning": "نغدې {current} → {projected}. تایید کړئ؟",
-      "cancelledInfo": "لغوه شوی: {reason} ({date})"
+      "cancelledInfo": "لغوه شوی: {reason} ({date})",
+      "saleBelowCostWarning": "یو یا څو توکي د لګښت نه کم پلورل شوي (اجازه لري)",
+      "imeiPair": "IMEI1 / IMEI2",
+      "pickImei": "IMEI وټاکئ",
+      "paymentMethod": "د تادیې طریقه",
+      "subtotal": "فرعي مجموعه {subtotal}",
+      "total": "ټول {total}",
+      "udhar": "قرض {udhar}",
+      "summary": "فرعي مجموعه {subtotal} · ټول {total} · قرض {udhar}",
+      "cancelTitle": "پلور لغوه کړئ",
+      "cancelWithReason": "د دلیل سره لغوه کړئ",
+      "confirmCancel": "د لغوه کولو تایید",
+      "back": "شاته",
+      "pdfPrintReceipt": "PDF / رسید چاپ"
     },
     "product": {
       "productCreated": "مصنوعہ کامیابی سے بنایا گیا",
@@ -519,7 +535,8 @@
       "searchPlaceholder": "محصولات ولټوئ...",
       "status": "حالت",
       "active": "فعال",
-      "inactive": "غیر فعال"
+      "inactive": "غیر فعال",
+      "modelPlaceholder": "مثال: SM-A155F"
     },
     "category": {
       "editTitle": "کټګوري ایډیټ کړئ",
