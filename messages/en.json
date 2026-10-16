@@ -994,7 +994,8 @@
     "againDesktopStep1Prefix": "Step 1 — paste this in the address bar and press Enter:",
     "againDesktopStep2": "Step 1 continued — find Ronaq Store → right-click → Uninstall (Remove from Chrome).",
     "againDesktopStep3": "Step 2 — come back to this page.",
-    "againDesktopStep4": "Step 2 continued — tap “Create new icon”. Keep Create desktop shortcut ON → Install.",
+    "againDesktopStep4": "Step 2 continued — tap “Create new icon”. Chrome’s Install window opens — keep Create desktop shortcut ON → Install.",
+
     "againAndroidStep1": "Step 1 — Chrome menu (⋮) → Uninstall app / Remove from Chrome.",
     "againAndroidStep2": "Confirm remove.",
     "againAndroidStep3": "Step 2 — come back to this page.",

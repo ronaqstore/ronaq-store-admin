@@ -1,17 +1,20 @@
-import { env } from '@/config/env';
 import { isStandaloneDisplay } from '@/lib/pwa';
 import type { BeforeInstallPromptEvent, NavigatorWithRelatedApps } from '@/types/common';
+
 
 type Listener = () => void;
 
 const INSTALLED_FLAG_KEY = 'pwa-app-installed';
 export const AUTO_PROMPT_KEY = 'pwa-auto-prompt-install';
+const RELOAD_ONCE_KEY = 'pwa-install-reload-once';
 
 let deferred: BeforeInstallPromptEvent | null = null;
 let installed = false;
 let prompting = false;
 let visitsBumped = false;
 let bound = false;
+let inMemoryAutoPrompt = false;
+let inMemoryReloadOnce = false;
 const listeners = new Set<Listener>();
 
 function emit(): void {
@@ -72,10 +75,6 @@ export function ensureInstallListeners(): void {
   }
 
   window.addEventListener('beforeinstallprompt', (e) => {
-    if (env.NODE_ENV === 'development') {
-      return;
-    }
-
     e.preventDefault();
     deferred = e as BeforeInstallPromptEvent;
 
@@ -87,6 +86,7 @@ export function ensureInstallListeners(): void {
     }
     emit();
   });
+
 
   window.addEventListener('appinstalled', () => {
     installed = true;
@@ -216,4 +216,55 @@ export async function waitAndPromptNativeInstall(
       }
     }, 150);
   });
+}
+
+export function takeAutoPromptFlag(): boolean {
+  try {
+    if (sessionStorage.getItem(AUTO_PROMPT_KEY) !== '1') return inMemoryAutoPrompt;
+    sessionStorage.removeItem(AUTO_PROMPT_KEY);
+    inMemoryAutoPrompt = false;
+    return true;
+  } catch {
+    const val = inMemoryAutoPrompt;
+    inMemoryAutoPrompt = false;
+    return val;
+  }
+}
+
+export function setAutoPromptFlag(): void {
+  try {
+    sessionStorage.setItem(AUTO_PROMPT_KEY, '1');
+  } catch {
+    inMemoryAutoPrompt = true;
+  }
+}
+
+export function clearInstallReloadOnce(): void {
+  inMemoryReloadOnce = false;
+  try {
+    sessionStorage.removeItem(RELOAD_ONCE_KEY);
+  } catch {
+    inMemoryReloadOnce = false;
+  }
+}
+
+export function consumeInstallReloadSlot(): boolean {
+  try {
+    if (sessionStorage.getItem(RELOAD_ONCE_KEY) === '1') {
+      return false;
+    }
+    sessionStorage.setItem(RELOAD_ONCE_KEY, '1');
+    return true;
+  } catch {
+    if (inMemoryReloadOnce) return false;
+    inMemoryReloadOnce = true;
+    return true;
+  }
+}
+
+export function scheduleInstallPageReload(): void {
+  setAutoPromptFlag();
+  window.setTimeout(() => {
+    window.location.reload();
+  }, 400);
 }

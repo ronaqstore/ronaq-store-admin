@@ -30,12 +30,12 @@ async function png(size, name, { maskable = false } = {}) {
   let pipeline = source.clone().resize(size, size, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } });
 
   if (maskable) {
-    // Safe zone: content in center 80% with padded background
     const pad = Math.round(size * 0.1);
     const inner = size - pad * 2;
+    const brandBg = { r: 5, g: 150, b: 105, alpha: 1 };
     const resized = await source
       .clone()
-      .resize(inner, inner, { fit: 'contain', background: { r: 15, g: 23, b: 42, alpha: 1 } })
+      .resize(inner, inner, { fit: 'contain', background: brandBg })
       .png()
       .toBuffer();
     pipeline = sharp({
@@ -43,7 +43,7 @@ async function png(size, name, { maskable = false } = {}) {
         width: size,
         height: size,
         channels: 4,
-        background: { r: 15, g: 23, b: 42, alpha: 1 }
+        background: brandBg
       }
     }).composite([{ input: resized, top: pad, left: pad }]);
   }
@@ -54,12 +54,20 @@ async function png(size, name, { maskable = false } = {}) {
 }
 
 async function screenshot(width, height, name) {
+  const titleSize = Math.round(width / 18);
+  const subSize = Math.round(width / 40);
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-      <rect width="100%" height="100%" fill="#0f172a"/>
-      <rect x="8%" y="12%" width="84%" height="76%" rx="24" fill="#1e293b"/>
-      <text x="50%" y="48%" text-anchor="middle" fill="#38bdf8" font-family="system-ui,sans-serif" font-size="${Math.round(width / 18)}" font-weight="700">Ronaq Store</text>
-      <text x="50%" y="58%" text-anchor="middle" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="${Math.round(width / 40)}">Replace this screenshot</text>
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop stop-color="#047857"/>
+          <stop offset="1" stop-color="#0F766E"/>
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#bg)"/>
+      <rect x="8%" y="12%" width="84%" height="76%" rx="28" fill="#064E3B" opacity="0.55"/>
+      <text x="50%" y="48%" text-anchor="middle" fill="#ECFDF5" font-family="system-ui,sans-serif" font-size="${titleSize}" font-weight="700">Ronaq Store</text>
+      <text x="50%" y="58%" text-anchor="middle" fill="#A7F3D0" font-family="system-ui,sans-serif" font-size="${subSize}">Shop management · رڼا</text>
     </svg>`;
   const dest = join(root, 'public', 'screenshots', name);
   await sharp(Buffer.from(svg)).png().toFile(dest);

@@ -1,9 +1,48 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <rect width="512" height="512" rx="96" fill="#0f172a"/>
-  <rect x="96" y="128" width="320" height="256" rx="32" fill="#38bdf8"/>
-  <rect x="128" y="176" width="96" height="24" rx="8" fill="#0f172a"/>
-  <rect x="128" y="224" width="160" height="16" rx="8" fill="#0f172a" opacity="0.55"/>
-  <rect x="128" y="260" width="128" height="16" rx="8" fill="#0f172a" opacity="0.35"/>
-  <circle cx="352" cy="288" r="40" fill="#0f172a"/>
-  <path d="M336 288h32M352 272v32" stroke="#38bdf8" stroke-width="10" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="ronaqBg" x1="64" y1="32" x2="448" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#047857"/>
+      <stop offset="0.45" stop-color="#059669"/>
+      <stop offset="1" stop-color="#0F766E"/>
+    </linearGradient>
+    <linearGradient id="ronaqShine" x1="120" y1="80" x2="280" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ronaqGold" x1="300" y1="120" x2="400" y2="280" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FDE68A"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#ronaqBg)"/>
+  <rect width="512" height="512" rx="112" fill="url(#ronaqShine)"/>
+
+  <!-- Radiance spokes (رڼا / ronaq = brilliance) -->
+  <g opacity="0.22" stroke="#ECFDF5" stroke-width="10" stroke-linecap="round">
+    <path d="M256 78v36"/>
+    <path d="M256 398v36"/>
+    <path d="M78 256h36"/>
+    <path d="M398 256h36"/>
+    <path d="M132 132l26 26"/>
+    <path d="M354 354l26 26"/>
+    <path d="M380 132l-26 26"/>
+    <path d="M158 354l-26 26"/>
+  </g>
+
+  <!-- Faceted R monogram -->
+  <path
+    fill="#FFFFFF"
+    d="M148 128h132c58 0 98 36 98 88 0 38-20 66-52 78l64 90h-62l-58-82h-58v82h-64V128zm64 52v72h66c26 0 42-14 42-36s-16-36-42-36h-66z"
+  />
+  <!-- Gold facet cut (prosperity / ronaq glow) -->
+  <path fill="url(#ronaqGold)" d="M280 148l48 28-18 34-48-24z" opacity="0.95"/>
+
+  <!-- Phone silhouette integrated at lower right of R -->
+  <g transform="translate(318 286)">
+    <rect x="0" y="0" width="72" height="118" rx="14" fill="#ECFDF5"/>
+    <rect x="8" y="12" width="56" height="80" rx="6" fill="#047857"/>
+    <circle cx="36" cy="104" r="6" fill="#047857"/>
+    <rect x="26" y="6" width="20" height="4" rx="2" fill="#047857" opacity="0.55"/>
+  </g>
 </svg>

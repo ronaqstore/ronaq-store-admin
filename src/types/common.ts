@@ -72,6 +72,21 @@ export interface InstallPromptProps {
   className?: string;
 }
 
+export interface InstallHelpDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  surface: Surface;
+  needsReinstall: boolean;
+  stillInstalledHint: boolean;
+  appsUrl: string;
+  canPrompt: boolean;
+  prompting: boolean;
+  onCopyAppsUrl: () => void;
+  onRemovedAndInstall: () => void;
+  onShowIosHowTo: () => void;
+  onTryNativeInstall: () => void;
+}
+
 export interface PwaShellProps {
   children: ReactNode;
 }
