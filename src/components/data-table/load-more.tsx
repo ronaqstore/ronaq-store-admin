@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
-import { Spinner } from '@/components/ui/spinner';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { LoadMoreProps } from './types';
 
 export function LoadMore<TData>({ table, step = 20 }: LoadMoreProps<TData>) {
@@ -47,12 +47,12 @@ export function LoadMore<TData>({ table, step = 20 }: LoadMoreProps<TData>) {
       {canLoadMore ? (
         <div
           ref={sentinelRef}
-          className='flex items-center justify-center gap-2 py-2 text-muted-foreground'
+          className='flex w-full max-w-sm flex-col gap-2 py-2'
           aria-live='polite'
           aria-busy='true'
         >
-          <Spinner className='size-5 text-primary' />
-          <span className='text-xs font-medium'>{t('common.loading')}</span>
+          <Skeleton className='h-10 w-full' />
+          <Skeleton className='h-10 w-[92%]' />
         </div>
       ) : null}
     </div>

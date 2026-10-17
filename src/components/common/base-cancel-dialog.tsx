@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Icons } from '@/components/icons';
-import { Spinner } from '@/components/ui/spinner';
+import { Skeleton } from '@/components/ui/skeleton';
 import { PresetReasonPills } from '@/components/common/preset-reason-pills';
 import { useT } from '@/i18n/use-t';
 import { cn } from '@/lib/utils';
@@ -28,7 +28,6 @@ export function BaseCancelDialog({
   blockedReason,
   closeLabel,
   isLoadingImpact,
-  loadingImpactText,
   impactItems = [],
   overdraftAlert,
   presetReasons,
@@ -99,12 +98,13 @@ export function BaseCancelDialog({
                     </span>
                   </div>
                 ))}
-                {isLoadingImpact && (
-                  <div className='flex items-center justify-center gap-2 py-2 text-muted-foreground'>
-                    <Spinner className='size-3.5 text-primary' />
-                    <span>{loadingImpactText || ''}</span>
+                {isLoadingImpact ? (
+                  <div className='space-y-2 py-1' aria-busy='true'>
+                    <Skeleton className='h-4 w-full' />
+                    <Skeleton className='h-4 w-[88%]' />
+                    <Skeleton className='h-4 w-[72%]' />
                   </div>
-                )}
+                ) : null}
               </div>
             )}
 
