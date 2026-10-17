@@ -72,6 +72,7 @@ export function useReorderProductImages(productId: string) {
     mutationFn: (items: ProductImageReorderItem[]) => reorderProductImages(productId, items),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productsQueryKeys.imageList(productId) });
+      queryClient.invalidateQueries({ queryKey: productsQueryKeys.lists() });
       toast.success(t('imageReordered'));
     },
     onError: (error: Error) => {

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { DataTableDateFilter } from '@/components/ui/table/data-table-date-filter';
+import { DataTableAsyncFacetedFilter } from '@/components/ui/table/data-table-async-faceted-filter';
 import { DataTableFacetedFilter } from '@/components/ui/table/data-table-faceted-filter';
 import { DataTableSliderFilter } from '@/components/ui/table/data-table-slider-filter';
 import { DataTableViewOptions } from '@/components/ui/table/data-table-view-options';
@@ -210,6 +211,16 @@ function DataTableToolbarFilter<TData>({ column }: DataTableToolbarFilterProps<T
       );
     case 'select':
     case 'multiSelect':
+      if (columnMeta.asyncOptions) {
+        return (
+          <DataTableAsyncFacetedFilter
+            column={column}
+            title={label}
+            config={columnMeta.asyncOptions}
+            multiple={columnMeta.variant === 'multiSelect'}
+          />
+        );
+      }
       return (
         <DataTableFacetedFilter
           column={column}

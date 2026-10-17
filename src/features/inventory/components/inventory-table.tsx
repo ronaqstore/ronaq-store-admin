@@ -167,6 +167,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       meta: {
         label: 'table.col.tracking',
         variant: 'select',
+        icon: Icons.box,
         options: TRACKING_OPTIONS,
         priority: 2,
         mobile: 'subtitle'
@@ -221,6 +222,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       meta: {
         label: 'status.lowStock',
         variant: 'select',
+        icon: Icons.warning,
         options: LOW_STOCK_OPTIONS,
         priority: 1,
         mobile: 'badge'

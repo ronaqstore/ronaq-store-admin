@@ -177,6 +177,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
       meta: {
         label: 'table.col.type',
         variant: 'select',
+        icon: Icons.cash,
         options: CASH_TYPE_OPTIONS,
         priority: 1,
         mobile: 'title'
@@ -206,6 +207,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
       meta: {
         label: 'table.col.dir',
         variant: 'select',
+        icon: Icons.trendingUp,
         options: [
           { label: 'In (IN)', value: 'IN' },
           { label: 'Out (OUT)', value: 'OUT' }

@@ -85,7 +85,7 @@ export function PartyCellAction({
             ? [
                 {
                   label: deactivateConfirmLabel ?? t('common.deactivate'),
-                  icon: Icons.trash,
+                  icon: Icons.close,
                   className: 'text-amber-600 focus:text-amber-700 dark:text-amber-400',
                   onClick: () => setDeactivateOpen(true)
                 }

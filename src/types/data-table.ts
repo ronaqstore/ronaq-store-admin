@@ -9,6 +9,7 @@ declare module '@tanstack/react-table' {
     placeholderKey?: string;
     variant?: FilterVariant;
     options?: Option[] | ((t: (key: string) => string) => Option[]);
+    asyncOptions?: AsyncFacetedFilterConfig;
     range?: [number, number];
     unit?: string;
     icon?: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -40,6 +41,32 @@ export interface Option {
   value: string;
   count?: number;
   icon?: React.FC<React.SVGProps<SVGSVGElement>>;
+}
+
+export interface AsyncFacetedFilterItem {
+  id: string;
+  name: string;
+  isActive?: boolean;
+  is_active?: boolean;
+}
+
+export interface AsyncFacetedFilterPage {
+  items: AsyncFacetedFilterItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface AsyncFacetedFilterConfig {
+  queryKey: readonly unknown[];
+  fetchPage: (filters: {
+    page: number;
+    pageSize: number;
+    search?: string;
+  }) => Promise<AsyncFacetedFilterPage>;
+  searchPlaceholder?: string;
+  searchPlaceholderKey?: string;
+  activeOnly?: boolean;
 }
 
 export type FilterVariant = DataTableConfig['filterVariants'][number];

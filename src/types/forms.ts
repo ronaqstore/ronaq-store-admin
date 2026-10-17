@@ -100,6 +100,7 @@ export type TextFieldProps = BaseFieldProps &
 export interface NamedEntity {
   id: string;
   name: string;
+  isActive?: boolean;
   is_active?: boolean;
 }
 

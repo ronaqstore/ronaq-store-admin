@@ -10,6 +10,13 @@ export interface CategoryListFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface UpdateCategoryInput {
+  name?: string;
+  isActive?: boolean;
+}
+
+export type UpdateCategoryArg = string | UpdateCategoryInput;
+
 export interface CategoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;

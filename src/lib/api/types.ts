@@ -434,6 +434,7 @@ export interface ProductDTO {
   barcode?: string | null;
   description?: string | null;
   imageUrl?: string | null;
+  imageUrls?: string[];
   defaultPurchasePrice: number;
   defaultSellingPrice: number;
   lowStockThreshold: number;

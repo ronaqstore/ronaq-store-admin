@@ -10,7 +10,7 @@ import { useT } from '@/i18n/use-t';
 import { t } from '@/i18n';
 import { SimpleEntityCellAction } from '@/components/common/simple-entity-cell-action';
 import { brandsQueryOptions, brandKeys } from '../api/queries';
-import { deleteBrand } from '../api/service';
+import { deactivateBrand, reactivateBrand } from '../api/service';
 import type { BrandDTO } from '@/lib/api/types';
 import type { BrandCellActionProps, BrandsTableProps } from '@/types';
 import {
@@ -32,10 +32,13 @@ function BrandCellAction({ data }: BrandCellActionProps) {
   return (
     <SimpleEntityCellAction
       id={data.id}
-      deleteTitle={t('dukaan.brand.deleteTitle')}
-      deleteDescription={t('dukaan.brand.deleteDescription')}
-      deleteSuccess={t('dukaan.brand.deleted')}
-      onDelete={deleteBrand}
+      isActive={data.isActive}
+      deactivateTitle={t('dukaan.brand.deactivateTitle')}
+      deactivateDescription={t('dukaan.brand.deactivateDescription')}
+      deactivateSuccess={t('dukaan.brand.deactivated')}
+      activateSuccess={t('dukaan.brand.activated')}
+      onDeactivate={deactivateBrand}
+      onActivate={reactivateBrand}
       invalidateQueryKey={brandKeys.all}
       renderDialog={(open, onOpenChange) => (
         <BrandDialog open={open} onOpenChange={onOpenChange} brand={data} />

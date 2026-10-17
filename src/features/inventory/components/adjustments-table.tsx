@@ -142,6 +142,7 @@ export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
       meta: {
         label: 'table.col.type',
         variant: 'select',
+        icon: Icons.adjustments,
         options: TYPE_OPTIONS,
         priority: 2,
         mobile: 'badge'

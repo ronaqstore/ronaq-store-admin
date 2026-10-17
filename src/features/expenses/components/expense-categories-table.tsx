@@ -204,6 +204,7 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
       meta: {
         label: 'table.col.status',
         variant: 'select',
+        icon: Icons.circle,
         options: [
           { label: 'Active', value: 'true' },
           { label: 'Inactive', value: 'false' }

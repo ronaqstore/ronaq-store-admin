@@ -34,10 +34,10 @@ export function ErrorView({ error, reset }: AppErrorProps) {
   }, [error]);
 
   return (
-    <div className='flex h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4 text-center'>
+    <div className='flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-4 p-6 text-center'>
       <div className='space-y-2'>
         <h1 className='text-2xl font-bold tracking-tight'>{t('common.somethingWentWrong')}</h1>
-        <p className='text-muted-foreground text-sm max-w-md'>
+        <p className='text-muted-foreground max-w-md text-sm'>
           {error.message || t('common.unexpectedError')}
         </p>
       </div>

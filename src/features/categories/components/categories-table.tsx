@@ -10,7 +10,7 @@ import { useT } from '@/i18n/use-t';
 import { t } from '@/i18n';
 import { SimpleEntityCellAction } from '@/components/common/simple-entity-cell-action';
 import { categoriesQueryOptions, categoryKeys } from '../api/queries';
-import { deleteCategory } from '../api/service';
+import { deactivateCategory, reactivateCategory } from '../api/service';
 import type { CategoryDTO } from '@/lib/api/types';
 import type { CategoryCellActionProps, CategoriesTableProps } from '@/types';
 import {
@@ -32,10 +32,13 @@ function CategoryCellAction({ data }: CategoryCellActionProps) {
   return (
     <SimpleEntityCellAction
       id={data.id}
-      deleteTitle={t('dukaan.category.deleteTitle')}
-      deleteDescription={t('dukaan.category.deleteDescription')}
-      deleteSuccess={t('dukaan.category.deleted')}
-      onDelete={deleteCategory}
+      isActive={data.isActive}
+      deactivateTitle={t('dukaan.category.deactivateTitle')}
+      deactivateDescription={t('dukaan.category.deactivateDescription')}
+      deactivateSuccess={t('dukaan.category.deactivated')}
+      activateSuccess={t('dukaan.category.activated')}
+      onDeactivate={deactivateCategory}
+      onActivate={reactivateCategory}
       invalidateQueryKey={categoryKeys.all}
       renderDialog={(open, onOpenChange) => (
         <CategoryDialog open={open} onOpenChange={onOpenChange} category={data} />

@@ -325,6 +325,7 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
       meta: {
         label: 'table.col.status',
         variant: 'select',
+        icon: Icons.circle,
         options: [
           { label: 'Active', value: 'ACTIVE' },
           { label: 'Cancelled', value: 'CANCELLED' }

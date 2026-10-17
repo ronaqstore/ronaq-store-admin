@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { DataTableAsyncFacetedFilter } from '@/components/ui/table/data-table-async-faceted-filter';
 import { DataTableFacetedFilter } from '@/components/ui/table/data-table-faceted-filter';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
@@ -177,12 +178,21 @@ function FilterBlock<TData>({ column }: FilterBlockProps<TData>) {
     return (
       <div className='grid gap-2'>
         <Label>{label}</Label>
-        <DataTableFacetedFilter
-          column={column}
-          title={label}
-          options={options}
-          multiple={meta.variant === 'multiSelect'}
-        />
+        {meta.asyncOptions ? (
+          <DataTableAsyncFacetedFilter
+            column={column}
+            title={label}
+            config={meta.asyncOptions}
+            multiple={meta.variant === 'multiSelect'}
+          />
+        ) : (
+          <DataTableFacetedFilter
+            column={column}
+            title={label}
+            options={options}
+            multiple={meta.variant === 'multiSelect'}
+          />
+        )}
       </div>
     );
   }

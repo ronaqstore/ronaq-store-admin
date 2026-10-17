@@ -125,7 +125,7 @@ export function DataTableSliderFilter<TData>({ column, title }: DataTableSliderF
         {columnFilterValue ? (
           <DataTableFilterClear title={title} onReset={onReset} />
         ) : (
-          <Icons.plusCircle />
+          <Icons.adjustments className='size-4' />
         )}
         <span>{title}</span>
         {columnFilterValue ? (

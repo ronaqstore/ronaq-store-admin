@@ -41,8 +41,12 @@ export async function updateProduct(id: string, input: UpdateProductInput): Prom
   });
 }
 
-export async function deleteProduct(id: string): Promise<unknown> {
-  return appFetch<unknown>(`/api/products/${id}`, { method: 'DELETE' });
+export async function deactivateProduct(id: string): Promise<ProductDTO> {
+  return updateProduct(id, { isActive: false });
+}
+
+export async function reactivateProduct(id: string): Promise<ProductDTO> {
+  return updateProduct(id, { isActive: true });
 }
 
 export async function listProductImages(
@@ -71,7 +75,7 @@ export async function reorderProductImages(
   return appFetch<unknown>(`/api/products/${productId}/images/order`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ items })
+    body: JSON.stringify({ imageIds: items.map((item) => item.id) })
   });
 }
 

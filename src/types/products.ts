@@ -39,6 +39,10 @@ export interface ProductCellActionProps {
   data: ProductDTO;
 }
 
+export interface ProductImagesFieldProps {
+  row: ProductDTO;
+}
+
 export interface ProductsTableProps {
   toolbarAction?: ReactNode;
 }

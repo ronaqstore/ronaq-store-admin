@@ -232,7 +232,14 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                       errors={field.state.meta.errors}
                       queryKey={['categories', 'infinite-select']}
                       fetchPage={async (filters) => {
-                        const res = await listCategories(filters);
+                        const res = await listCategories({
+                          page: filters.page,
+                          pageSize: filters.pageSize ?? filters.limit ?? 20,
+                          search: filters.search,
+                          isActive: true,
+                          sortBy: 'name',
+                          sortOrder: 'asc'
+                        });
                         return {
                           items: res.items,
                           total: res.total,
@@ -240,6 +247,12 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                           limit: res.pageSize
                         };
                       }}
+                      selectedLabel={product?.categoryName ?? undefined}
+                      extraItems={
+                        product?.categoryId && product.categoryName
+                          ? [{ id: product.categoryId, name: product.categoryName }]
+                          : []
+                      }
                       placeholder={t('selectCategory')}
                       searchPlaceholder={t('searchCategories')}
                     />
@@ -262,7 +275,14 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                       errors={field.state.meta.errors}
                       queryKey={['brands', 'infinite-select']}
                       fetchPage={async (filters) => {
-                        const res = await listBrands(filters);
+                        const res = await listBrands({
+                          page: filters.page,
+                          pageSize: filters.pageSize ?? filters.limit ?? 20,
+                          search: filters.search,
+                          isActive: true,
+                          sortBy: 'name',
+                          sortOrder: 'asc'
+                        });
                         return {
                           items: res.items,
                           total: res.total,
@@ -270,6 +290,12 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                           limit: res.pageSize
                         };
                       }}
+                      selectedLabel={product?.brandName ?? undefined}
+                      extraItems={
+                        product?.brandId && product.brandName
+                          ? [{ id: product.brandId, name: product.brandName }]
+                          : []
+                      }
                       placeholder={t('selectBrand')}
                       searchPlaceholder={t('searchBrands')}
                     />

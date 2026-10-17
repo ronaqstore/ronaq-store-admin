@@ -144,7 +144,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
 
     return filterableColumns.reduce<Record<string, Parser<string> | Parser<string[]>>>(
       (acc, column) => {
-        if (column.meta?.options) {
+        if (column.meta?.options || column.meta?.asyncOptions) {
           acc[column.id ?? ''] = parseAsArrayOf(parseAsString, ARRAY_SEPARATOR).withOptions(
             queryStateOptions
           );

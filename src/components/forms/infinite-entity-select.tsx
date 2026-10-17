@@ -59,10 +59,14 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
       const result = await fetchPage({
         page: pageParam,
         limit: PAGE_SIZE,
+        pageSize: PAGE_SIZE,
+        ...(activeOnly ? { isActive: true, is_active: 'true' } : {}),
         ...(debouncedSearch ? { search: debouncedSearch } : {})
       });
       const items = activeOnly
-        ? result.items.filter((item) => item.is_active !== false)
+        ? result.items.filter(
+            (item) => item.isActive !== false && item.is_active !== false
+          )
         : result.items;
       return { ...result, items };
     },

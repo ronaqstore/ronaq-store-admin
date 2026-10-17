@@ -90,6 +90,7 @@ const columns: ColumnDef<PlatformShop>[] = [
     meta: {
       label: 'platform.allStatuses',
       variant: 'multiSelect',
+      icon: Icons.building,
       options: platformAccessStatusOptions,
       type: 'status',
       priority: 1

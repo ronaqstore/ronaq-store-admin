@@ -71,6 +71,8 @@ export function DataTableFacetedFilter<TData, TValue>({
     [column]
   );
 
+  const FilterIcon = column?.columnDef.meta?.icon ?? Icons.adjustments;
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
@@ -79,7 +81,7 @@ export function DataTableFacetedFilter<TData, TValue>({
         {selectedValues?.size > 0 ? (
           <DataTableFilterClear title={title} onReset={onReset} />
         ) : (
-          <Icons.plusCircle />
+          <FilterIcon className='size-4' />
         )}
         {title}
         {selectedValues?.size > 0 && (

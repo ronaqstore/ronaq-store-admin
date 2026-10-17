@@ -273,6 +273,7 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
       meta: {
         label: 'table.col.status',
         variant: 'select',
+        icon: Icons.circle,
         options: STATUS_OPTIONS,
         priority: 1,
         mobile: 'badge'

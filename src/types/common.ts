@@ -265,10 +265,13 @@ export interface SimpleEntityDialogBodyProps extends SimpleEntityDialogProps {}
 
 export interface SimpleEntityCellActionProps {
   id: string;
-  deleteTitle: string;
-  deleteDescription: string;
-  deleteSuccess: string;
-  onDelete: (id: string) => Promise<unknown>;
+  isActive: boolean;
+  deactivateTitle: string;
+  deactivateDescription: string;
+  deactivateSuccess: string;
+  activateSuccess: string;
+  onDeactivate: (id: string) => Promise<unknown>;
+  onActivate: (id: string) => Promise<unknown>;
   invalidateQueryKey: readonly unknown[];
   renderDialog: (open: boolean, onOpenChange: (open: boolean) => void) => ReactNode;
 }
