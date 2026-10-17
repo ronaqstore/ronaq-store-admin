@@ -5,10 +5,7 @@ import type { ShopStatusBadgeProps, ShopStatusConfig } from '@/types';
 import { PLATFORM_ACCESS_STATUS_LABEL_KEY } from '../constants/filters';
 import type { PlatformShopAccessStatus } from '../api/types';
 
-const STATUS_CONFIG: Record<
-  PlatformShopAccessStatus,
-  Omit<ShopStatusConfig, 'labelKey'> & { labelKey: string }
-> = {
+const STATUS_CONFIG: Record<PlatformShopAccessStatus, ShopStatusConfig> = {
   ACTIVE: {
     labelKey: PLATFORM_ACCESS_STATUS_LABEL_KEY.ACTIVE,
     className:

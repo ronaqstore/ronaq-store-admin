@@ -26,5 +26,3 @@ export const createShopFormSchema = (t: Translator) =>
       error: t('platform.validation.subscriptionRequired')
     })
   });
-
-export type CreateShopFormValues = z.infer<ReturnType<typeof createShopFormSchema>>;

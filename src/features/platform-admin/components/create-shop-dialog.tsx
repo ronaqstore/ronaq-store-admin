@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -19,7 +19,7 @@ import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dia
 import { platformKeys } from '../api/queries';
 import { createPlatformShop } from '../api/service';
 import { createShopFormSchema } from '../schemas/create-shop-schema';
-import type { CreateShopDialogProps } from '@/types';
+import type { CreateShopDialogBodyProps, CreateShopDialogProps } from '@/types';
 
 function defaultSubscriptionEndsAt(): Date {
   const d = new Date();
@@ -40,7 +40,7 @@ export function CreateShopDialog({ open, onOpenChange }: CreateShopDialogProps) 
   );
 }
 
-function CreateShopDialogBody({ onOpenChange }: { onOpenChange: (open: boolean) => void }) {
+function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
   const t = useT();
   const qc = useQueryClient();
   const [setupUrl, setSetupUrl] = useState<string | null>(null);
@@ -81,6 +81,11 @@ function CreateShopDialogBody({ onOpenChange }: { onOpenChange: (open: boolean) 
     }
   });
 
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    void form.handleSubmit();
+  };
+
   const copySetupUrl = async () => {
     if (!setupUrl) return;
     try {
@@ -112,13 +117,7 @@ function CreateShopDialogBody({ onOpenChange }: { onOpenChange: (open: boolean) 
           </DialogFooter>
         </div>
       ) : (
-        <form
-          className='space-y-4 pt-2'
-          onSubmit={(e) => {
-            e.preventDefault();
-            void form.handleSubmit();
-          }}
-        >
+        <form className='space-y-4 pt-2' onSubmit={handleSubmit}>
           <FieldGroup>
             <form.AppField name='shopName'>
               {(field) => (

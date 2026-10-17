@@ -17,6 +17,10 @@ export interface CreateShopDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+export interface CreateShopDialogBodyProps {
+  onOpenChange: (open: boolean) => void;
+}
+
 export interface RenewSubscriptionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;

@@ -21,7 +21,11 @@ import { useT } from '@/i18n/use-t';
 import { t as staticT } from '@/i18n/static-t';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
 import { formatIsoDate } from '@/lib/dates';
-import type { PlatformShop, PlatformShopAccessStatus } from '../api/types';
+import type {
+  PlatformShop,
+  PlatformShopAccessStatus,
+  ShopRowActionsProps
+} from '../api/types';
 import { platformKeys, platformShopsQueryOptions } from '../api/queries';
 import { updateShopSubscription } from '../api/service';
 import {
@@ -134,7 +138,7 @@ function statusLabel(status: PlatformShopAccessStatus): string {
   return staticT(PLATFORM_ACCESS_STATUS_LABEL_KEY[status]);
 }
 
-function ShopRowActions({ shop }: { shop: PlatformShop }) {
+function ShopRowActions({ shop }: ShopRowActionsProps) {
   const t = useT();
   const qc = useQueryClient();
   const [renewOpen, setRenewOpen] = useState(false);

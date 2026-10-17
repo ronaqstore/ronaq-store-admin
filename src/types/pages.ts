@@ -47,6 +47,10 @@ export interface LocaleLayoutProps {
   params: Promise<{ locale: string }>;
 }
 
+export interface LocaleParamsPageProps {
+  params: Promise<{ locale: string }>;
+}
+
 export interface RootPageProps {
   searchParams: Promise<{ to?: string }>;
 }

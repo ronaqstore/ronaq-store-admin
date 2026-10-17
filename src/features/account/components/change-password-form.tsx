@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FieldGroup } from '@/components/ui/field';
@@ -40,6 +40,11 @@ export function ChangePasswordForm() {
     }
   });
 
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    void form.handleSubmit();
+  };
+
   return (
     <Card className='mx-auto w-full max-w-lg'>
       <CardHeader>
@@ -47,13 +52,7 @@ export function ChangePasswordForm() {
         <CardDescription>{t('account.changePasswordDescription')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <form
-          className='space-y-4'
-          onSubmit={(e) => {
-            e.preventDefault();
-            void form.handleSubmit();
-          }}
-        >
+        <form className='space-y-4' onSubmit={handleSubmit}>
           <FieldGroup>
             <form.AppField name='currentPassword'>
               {(field) => (

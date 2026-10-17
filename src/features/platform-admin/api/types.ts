@@ -26,6 +26,10 @@ export interface PlatformOverview {
   suspendedShops: number;
 }
 
+export interface ShopRowActionsProps {
+  shop: PlatformShop;
+}
+
 export interface PlatformShopFilters {
   page?: number;
   pageSize?: number;

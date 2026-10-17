@@ -1,5 +1,6 @@
 'use client';
 
+import { type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -88,6 +89,11 @@ function RenewSubscriptionDialogBody({
     }
   });
 
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    void form.handleSubmit();
+  };
+
   return (
     <DialogContent className='w-full sm:max-w-md'>
       <DialogHeader>
@@ -97,13 +103,7 @@ function RenewSubscriptionDialogBody({
         </DialogDescription>
       </DialogHeader>
 
-      <form
-        className='space-y-4 pt-2'
-        onSubmit={(e) => {
-          e.preventDefault();
-          void form.handleSubmit();
-        }}
-      >
+      <form className='space-y-4 pt-2' onSubmit={handleSubmit}>
         <FieldGroup>
           <form.AppField name='subscriptionEndsAt'>
             {(field) => (

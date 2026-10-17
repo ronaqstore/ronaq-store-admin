@@ -32,11 +32,7 @@ function ProfileAvatar({ className }: ProfileAvatarProps) {
   );
 }
 
-function AccountMenuItems({
-  userName,
-  shopName,
-  showShopSettings
-}: AccountMenuItemsProps & { showShopSettings: boolean }) {
+function AccountMenuItems({ userName, shopName, showShopSettings }: AccountMenuItemsProps) {
   const t = useT();
   const [signingOut, setSigningOut] = React.useState(false);
 
