@@ -105,7 +105,12 @@ function ChangePasswordDialogBody({ onOpenChange }: ChangePasswordDialogBodyProp
 
         <DialogFooter>
           <DialogCancelButton onClick={() => onOpenChange(false)} disabled={saving} />
-          <DialogPrimaryButton mode='save' loading={saving} disabled={saving} />
+          <DialogPrimaryButton
+            mode='save'
+            label={t('account.changePasswordAction')}
+            loading={saving}
+            disabled={saving}
+          />
         </DialogFooter>
       </form>
     </DialogContent>

@@ -165,7 +165,7 @@ function ExpenseCategoryDialogBody({
         <DialogFooter className='gap-2 sm:gap-2.5 pt-2'>
           <DialogCancelButton onClick={() => onOpenChange(false)} disabled={isPending} />
           <DialogPrimaryButton
-            mode='save'
+            mode={isEdit ? 'edit' : 'add'}
             loading={isPending}
             disabled={isPending || !name.trim()}
           />

@@ -3,7 +3,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { DialogCancelButton } from '@/components/common/dialog-actions';
+import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { useT } from '@/i18n/use-t';
 import type { StockAdjustDialogProps } from '@/types/inventory';
 import { createInventoryAdjustment } from '../api/service';
@@ -274,13 +273,12 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
 
           <DialogFooter className='gap-2 sm:gap-0'>
             <DialogCancelButton onClick={() => onOpenChange(false)} disabled={mutation.isPending} />
-            <Button
-              type='submit'
+            <DialogPrimaryButton
+              mode='save'
+              label={t('inventory.recordChange')}
               disabled={!reason.trim()}
-              isLoading={mutation.isPending}
-            >
-              {t('inventory.recordChange')}
-            </Button>
+              loading={mutation.isPending}
+            />
           </DialogFooter>
         </form>
       </DialogContent>

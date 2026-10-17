@@ -24,6 +24,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Icons } from '@/components/icons';
+import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { useT } from '@/i18n/use-t';
 import { formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import type { ReturnPreviewDTO, ReturnItemInput } from '@/lib/api/types';
@@ -365,21 +366,16 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
           </div>
 
           <DialogFooter className='gap-2 sm:gap-0'>
-            <Button
-              type='button'
-              variant='outline'
-              disabled={recordReturn.isPending}
+            <DialogCancelButton
               onClick={() => onOpenChange(false)}
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button
-              type='submit'
               disabled={recordReturn.isPending}
-              isLoading={recordReturn.isPending}
-            >
-              {t('sales.returnDialog.submit')}
-            </Button>
+            />
+            <DialogPrimaryButton
+              mode='add'
+              label={t('sales.returnDialog.submit')}
+              disabled={recordReturn.isPending}
+              loading={recordReturn.isPending}
+            />
           </DialogFooter>
         </form>
       </DialogContent>

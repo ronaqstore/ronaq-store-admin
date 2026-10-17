@@ -232,7 +232,7 @@ export function RecordExpenseDialog({
                 disabled={recordMutation.isPending}
               />
               <DialogPrimaryButton
-                mode='save'
+                mode='add'
                 loading={recordMutation.isPending}
                 disabled={recordMutation.isPending || (!!overdraftPrompt && !confirmOverdraft)}
               />

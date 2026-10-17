@@ -30,7 +30,7 @@ export function BasePartyDialog({
   namePlaceholder,
   successCreated,
   successUpdated,
-  primaryButtonMode = 'save',
+  primaryButtonMode,
   onSave,
   invalidateQueryKey,
   schema
@@ -72,7 +72,7 @@ function BasePartyDialogBody({
   namePlaceholder,
   successCreated,
   successUpdated,
-  primaryButtonMode = 'save',
+  primaryButtonMode,
   onSave,
   invalidateQueryKey,
   schema
@@ -80,6 +80,7 @@ function BasePartyDialogBody({
   const qc = useQueryClient();
   const t = useT();
   const isEdit = Boolean(party);
+  const resolvedPrimaryMode = primaryButtonMode ?? (isEdit ? 'edit' : 'add');
 
   const save = useMutation({
     mutationFn: async (value: BasePartyFormState) => {
@@ -170,7 +171,7 @@ function BasePartyDialogBody({
         </div>
         <DialogFooter className='mx-0 mb-0 shrink-0 gap-2 sm:gap-2.5'>
           <DialogCancelButton onClick={() => onOpenChange(false)} disabled={save.isPending} />
-          <DialogPrimaryButton mode={primaryButtonMode} loading={save.isPending} />
+          <DialogPrimaryButton mode={resolvedPrimaryMode} loading={save.isPending} />
         </DialogFooter>
       </form>
     </DialogContent>

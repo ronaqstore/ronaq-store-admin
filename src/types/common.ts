@@ -22,6 +22,7 @@ export type DialogPrimaryMode = 'add' | 'edit' | 'save';
 
 export interface DialogPrimaryButtonProps {
   mode: DialogPrimaryMode;
+  label?: string;
   disabled?: boolean;
   loading?: boolean;
   type?: 'submit' | 'button';

@@ -23,6 +23,7 @@ const PRIMARY_ICON = {
 
 export function DialogPrimaryButton({
   mode,
+  label,
   disabled,
   loading = false,
   type = 'submit',
@@ -34,7 +35,7 @@ export function DialogPrimaryButton({
   return (
     <Button type={type} variant={variant} disabled={disabled} isLoading={loading} onClick={onClick}>
       <Icon className='me-2 h-4 w-4' />
-      {t(`common.${mode}` as const)}
+      {label ?? t(`common.${mode}` as const)}
     </Button>
   );
 }

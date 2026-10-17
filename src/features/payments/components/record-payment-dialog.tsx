@@ -253,7 +253,7 @@ export function RecordPaymentDialog({
               disabled={recordMutation.isPending}
             />
             <DialogPrimaryButton
-              mode='save'
+              mode='add'
               disabled={recordMutation.isPending || !customerId || !amountStr}
               loading={recordMutation.isPending}
             />

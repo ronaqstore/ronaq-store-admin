@@ -392,7 +392,7 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
           <div className='mt-2 flex justify-end gap-3'>
             <DialogCancelButton onClick={() => setWarning(null)} disabled={save.isPending} />
             <DialogPrimaryButton
-              mode='save'
+              mode='add'
               type='button'
               loading={save.isPending}
               onClick={() => submitPurchase(form.state.values, true)}
@@ -402,7 +402,7 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
       ) : (
         <DialogFooter className='mx-0 mb-0 px-0'>
           {onDone ? <DialogCancelButton onClick={onDone} disabled={save.isPending} /> : null}
-          <DialogPrimaryButton mode='save' loading={save.isPending} />
+          <DialogPrimaryButton mode='add' loading={save.isPending} />
         </DialogFooter>
       )}
     </form>
