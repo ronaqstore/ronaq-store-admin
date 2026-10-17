@@ -159,6 +159,13 @@ const shopNavGroups: NavGroup[] = [
         items: []
       },
       {
+        title: 'nav.account',
+        url: '/dashboard/settings/account',
+        icon: 'account',
+        isActive: false,
+        items: []
+      },
+      {
         title: 'nav.appearance',
         url: '/dashboard/settings/appearance',
         icon: 'palette',

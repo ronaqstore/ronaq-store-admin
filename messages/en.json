@@ -152,6 +152,7 @@
     "suppliers": "Suppliers",
     "appearance": "Appearance",
     "storeSettings": "Online Store",
+    "account": "Account",
     "shops": "Shops",
     "subscriptions": "Subscriptions",
     "shopName": "Shop Name",
@@ -261,6 +262,7 @@
     "active": "Active",
     "trial": "Trial",
     "expired": "Expired",
+    "suspended": "Suspended",
     "cancelled": "Cancelled",
     "inactive": "Inactive",
     "serialized": "Serialized",
@@ -755,7 +757,7 @@
     },
     "shops": {
       "title": "Shop Management",
-      "description": "Manage all tenant mobile shops and subscriptions"
+      "description": "Create shops, renew subscriptions, and suspend access"
     },
     "subscriptions": {
       "title": "Subscriptions"
@@ -813,6 +815,10 @@
     "storeSettings": {
       "title": "Online Store",
       "description": "Public storefront profile, logo, and visibility"
+    },
+    "account": {
+      "title": "Account",
+      "description": "Change your login password"
     }
   },
   "dashboard": {
@@ -902,6 +908,24 @@
     "logoRemoved": "Shop logo removed",
     "logoRemoveFailed": "Failed to remove logo",
     "googleMapsPlaceholder": "Paste a Google Maps link"
+  },
+  "account": {
+    "changePasswordTitle": "Change password",
+    "changePasswordDescription": "Update the password you use to sign in to your shop.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "newPasswordHint": "At least 8 characters, with one letter and one number.",
+    "currentPasswordRequired": "Enter your current password",
+    "newPasswordMin": "New password must be at least 8 characters",
+    "newPasswordMax": "New password is too long",
+    "newPasswordLetter": "New password must contain at least one letter",
+    "newPasswordDigit": "New password must contain at least one number",
+    "confirmPasswordRequired": "Confirm your new password",
+    "passwordMismatch": "New passwords do not match",
+    "passwordMustDiffer": "New password must be different from the current one",
+    "passwordChanged": "Password changed successfully",
+    "passwordChangeFailed": "Could not change password"
   },
   "appearance": {
     "accentAria": "Select accent color",
@@ -1170,10 +1194,13 @@
     "active": "Active",
     "onTrial": "On Trial",
     "expired": "Expired",
+    "suspended": "Suspended",
     "monthlyRevenue": "Monthly Revenue",
     "platformOverview": "Platform overview",
-    "platformOverviewDescription": "Manage shops, subscriptions, and platform settings.",
+    "platformOverviewDescription": "Shop counts and access status across the platform.",
     "manageShopsSubscriptions": "Manage shops and subscriptions across the platform.",
+    "manageShopsDescription": "Onboard shops and manage their subscription access.",
+    "shopsPageDescription": "Create shops, renew subscriptions, and suspend access.",
     "assignPlan": "Assign plan",
     "viewShop": "View shop",
     "assignPlanButton": "Assign Plan",
@@ -1189,10 +1216,60 @@
     "nextDueDate": "Next Due Date",
     "nextDue": "Next due",
     "subscription": "Subscription",
+    "subscriptionEnds": "Subscription ends",
+    "createdAt": "Created",
+    "storeSlug": "Store slug",
+    "password": "Password",
+    "passwordSet": "Password set",
+    "passwordPending": "Setup pending",
     "amount": "Amount",
     "plan": "Plan",
     "searchSubscriptions": "Search subscriptions…",
-    "assignManagePlans": "Assign and manage shop subscription plans."
+    "assignManagePlans": "Assign and manage shop subscription plans.",
+    "createShopTitle": "Create new shop",
+    "createShopDescription": "Onboard a shop and owner. You will get a one-time password setup link to send on WhatsApp.",
+    "createShopSuccess": "Shop “{name}” created",
+    "createShopFailed": "Could not create shop",
+    "setupLinkOnce": "Forward this setup link once on WhatsApp. It cannot be recovered later — reissue if lost.",
+    "copySetupLink": "Copy setup link",
+    "setupLinkCopied": "Setup link copied",
+    "setupLinkCopyFailed": "Could not copy setup link",
+    "setupLinkIssued": "Setup link issued",
+    "setupLinkFailed": "Could not issue setup link",
+    "reissueSetupLink": "Reissue setup link",
+    "noOwner": "This shop has no owner yet",
+    "renewTitle": "Renew subscription",
+    "renewDescription": "Set a new end date for {name}. This also reactivates the shop if it was suspended.",
+    "renewAction": "Renew",
+    "renewSuccess": "Subscription renewed for {name}",
+    "renewFailed": "Could not renew subscription",
+    "suspendAction": "Suspend shop",
+    "suspendSuccess": "{name} suspended",
+    "suspendFailed": "Could not suspend shop",
+    "reactivateAction": "Reactivate shop",
+    "reactivateSuccess": "{name} reactivated",
+    "reactivateFailed": "Could not reactivate shop",
+    "fields": {
+      "shopName": "Shop name",
+      "shopNamePlaceholder": "e.g. Khalid Mobile Center",
+      "shopPhone": "Shop phone",
+      "shopAddress": "Shop address",
+      "shopAddressPlaceholder": "e.g. Main Bazaar, Lahore",
+      "ownerName": "Owner name",
+      "ownerNamePlaceholder": "e.g. Khalid Mehmood",
+      "ownerPhone": "Owner phone (login)",
+      "phonePlaceholder": "03XXXXXXXXX",
+      "subscriptionEndsAt": "Subscription ends"
+    },
+    "validation": {
+      "shopNameMin": "Shop name must be at least 2 characters",
+      "shopNameMax": "Shop name is too long",
+      "ownerNameMin": "Owner name must be at least 2 characters",
+      "ownerNameMax": "Owner name is too long",
+      "ownerPhoneMin": "Enter a valid owner phone",
+      "ownerPhoneMax": "Phone is too long",
+      "subscriptionRequired": "Pick a subscription end date"
+    }
   },
   "roles": {
     "developer": "Developer",
@@ -1291,6 +1368,7 @@
     "users": "Users",
     "appearance": "Appearance",
     "storeSettings": "Online Store",
+    "account": "Account",
     "mobileShopManagement": "Mobile shop management",
     "platformDashboard": "Platform dashboard",
     "shopManagement": "Shop management"

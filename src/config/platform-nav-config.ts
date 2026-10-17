@@ -23,13 +23,6 @@ export const platformNavGroups: NavGroup[] = [
         icon: 'building',
         isActive: false,
         items: []
-      },
-      {
-        title: 'nav.subscriptions',
-        url: '/dashboard/platform/subscriptions',
-        icon: 'creditCard',
-        isActive: false,
-        items: []
       }
     ]
   },

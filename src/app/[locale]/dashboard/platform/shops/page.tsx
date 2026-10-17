@@ -4,6 +4,7 @@ import {
   PlatformShopsListClient
 } from '@/features/platform-admin/components/shops-page-client';
 import { platformShopsQueryOptions } from '@/features/platform-admin/api/queries';
+import { DUKAAN_DEFAULT_PAGE_SIZE } from '@/components/data-table/list-params';
 import { getQueryClient } from '@/lib/query-client';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
 import { Suspense } from 'react';
@@ -19,13 +20,20 @@ export async function generateMetadata() {
 
 export default async function PlatformShopsPage() {
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery(platformShopsQueryOptions({ page: 1, limit: 10 }));
+  await queryClient.prefetchQuery(
+    platformShopsQueryOptions({
+      page: 1,
+      pageSize: DUKAAN_DEFAULT_PAGE_SIZE,
+      sortBy: 'createdAt',
+      sortOrder: 'desc'
+    })
+  );
 
   return (
     <PageContainer
       fill
       pageTitle='pages.shops.title'
-      pageDescription='pages.shops.description'
+      pageDescription='platform.shopsPageDescription'
       pageHeaderAction={<CreateShopHeaderAction />}
     >
       <HydrationBoundary state={dehydrate(queryClient)}>

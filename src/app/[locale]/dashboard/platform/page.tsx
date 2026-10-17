@@ -17,7 +17,7 @@ export async function generateMetadata() {
 function PlatformDashboardSkeleton() {
   return (
     <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
-      {Array.from({ length: 7 }).map((_, i) => (
+      {Array.from({ length: 4 }).map((_, i) => (
         <Skeleton key={i} className='h-28 rounded-xl' />
       ))}
     </div>
@@ -31,7 +31,7 @@ export default async function PlatformPage() {
   return (
     <PageContainer
       pageTitle='pages.platform.title'
-      pageDescription='platform.manageShopsSubscriptions'
+      pageDescription='platform.manageShopsDescription'
     >
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense fallback={<PlatformDashboardSkeleton />}>
