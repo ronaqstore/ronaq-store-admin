@@ -1,145 +1,46 @@
-import {
-  Architects_Daughter,
-  DM_Sans,
-  Fira_Code,
-  Geist,
-  Geist_Mono,
-  Instrument_Sans,
-  Inter,
-  JetBrains_Mono,
-  Merriweather,
-  Mulish,
-  Playfair_Display,
-  Noto_Sans_Mono,
-  Outfit,
-  Source_Code_Pro,
-  Space_Mono
-} from 'next/font/google';
+import { GeistMono } from 'geist/font/mono';
+import { GeistSans } from 'geist/font/sans';
 
+import '@fontsource/architects-daughter/400.css';
+import '@fontsource/dm-sans/400.css';
+import '@fontsource/dm-sans/500.css';
+import '@fontsource/dm-sans/700.css';
+import '@fontsource/fira-code/400.css';
+import '@fontsource/fira-code/500.css';
+import '@fontsource/fira-code/700.css';
+import '@fontsource/instrument-sans/400.css';
+import '@fontsource/instrument-sans/500.css';
+import '@fontsource/instrument-sans/600.css';
+import '@fontsource/instrument-sans/700.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
+import '@fontsource/jetbrains-mono/400.css';
+import '@fontsource/jetbrains-mono/500.css';
+import '@fontsource/jetbrains-mono/700.css';
+import '@fontsource/merriweather/300.css';
+import '@fontsource/merriweather/400.css';
+import '@fontsource/merriweather/700.css';
+import '@fontsource/mulish/400.css';
+import '@fontsource/mulish/500.css';
+import '@fontsource/mulish/700.css';
+import '@fontsource/noto-sans-mono/400.css';
+import '@fontsource/noto-sans-mono/500.css';
+import '@fontsource/noto-sans-mono/700.css';
+import '@fontsource/outfit/400.css';
+import '@fontsource/outfit/500.css';
+import '@fontsource/outfit/700.css';
+import '@fontsource/playfair-display/400.css';
+import '@fontsource/playfair-display/500.css';
+import '@fontsource/playfair-display/700.css';
+import '@fontsource/source-code-pro/400.css';
+import '@fontsource/source-code-pro/500.css';
+import '@fontsource/source-code-pro/700.css';
+import '@fontsource/space-mono/400.css';
+import '@fontsource/space-mono/700.css';
+
+import '@/styles/font-variables.css';
 import { cn } from '@/lib/utils';
 
-const fontSans = Geist({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-sans'
-});
-
-const fontMono = Geist_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-mono'
-});
-
-const fontSourceCodePro = Source_Code_Pro({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-source-code-pro'
-});
-
-const fontInstrument = Instrument_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-instrument'
-});
-
-const fontNotoMono = Noto_Sans_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-noto-mono'
-});
-
-const fontMullish = Mulish({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-mullish'
-});
-
-const fontInter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-inter'
-});
-
-const fontArchitectsDaughter = Architects_Daughter({
-  subsets: ['latin'],
-  weight: '400',
-  display: 'swap',
-  preload: false,
-  variable: '--font-architects-daughter'
-});
-
-const fontDMSans = DM_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-dm-sans'
-});
-
-const fontFiraCode = Fira_Code({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-fira-code'
-});
-
-const fontOutfit = Outfit({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-outfit'
-});
-
-const fontSpaceMono = Space_Mono({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-space-mono'
-});
-
-const fontJetBrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-jetbrains-mono'
-});
-
-const fontMerriweather = Merriweather({
-  subsets: ['latin'],
-  weight: ['300', '400', '700'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-merriweather'
-});
-
-const fontPlayfairDisplay = Playfair_Display({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-playfair-display'
-});
-
-export const fontVariables = cn(
-  fontSans.variable,
-  fontMono.variable,
-  fontSourceCodePro.variable,
-  fontInstrument.variable,
-  fontNotoMono.variable,
-  fontMullish.variable,
-  fontInter.variable,
-  fontArchitectsDaughter.variable,
-  fontDMSans.variable,
-  fontFiraCode.variable,
-  fontOutfit.variable,
-  fontSpaceMono.variable,
-  fontJetBrainsMono.variable,
-  fontMerriweather.variable,
-  fontPlayfairDisplay.variable
-);
+export const fontVariables = cn(GeistSans.variable, GeistMono.variable);

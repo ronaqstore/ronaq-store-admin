@@ -1,0 +1,17 @@
+:root {
+  --font-sans: var(--font-geist-sans), 'Geist Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), 'Geist Mono', ui-monospace, monospace;
+  --font-source-code-pro: 'Source Code Pro', ui-monospace, monospace;
+  --font-instrument: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-noto-mono: 'Noto Sans Mono', ui-monospace, monospace;
+  --font-mullish: 'Mulish', ui-sans-serif, system-ui, sans-serif;
+  --font-inter: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-architects-daughter: 'Architects Daughter', cursive;
+  --font-dm-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-fira-code: 'Fira Code', ui-monospace, monospace;
+  --font-outfit: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-space-mono: 'Space Mono', ui-monospace, monospace;
+  --font-jetbrains-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-merriweather: 'Merriweather', ui-serif, Georgia, serif;
+  --font-playfair-display: 'Playfair Display', ui-serif, Georgia, serif;
+}

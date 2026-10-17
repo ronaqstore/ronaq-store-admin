@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { Button } from '@/components/ui/button';
-import { useT } from '@/i18n/use-t';
+import { t as staticT } from '@/i18n/static-t';
 import type { AppErrorProps } from '@/types/pages';
 
 function isChunkLoadError(error: Error): boolean {
@@ -15,8 +15,6 @@ function isChunkLoadError(error: Error): boolean {
 }
 
 export function ErrorView({ error, reset }: AppErrorProps) {
-  const t = useT();
-
   useEffect(() => {
     Sentry.captureException(error);
     if (isChunkLoadError(error)) {
@@ -36,17 +34,17 @@ export function ErrorView({ error, reset }: AppErrorProps) {
   return (
     <div className='flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-4 p-6 text-center'>
       <div className='space-y-2'>
-        <h1 className='text-2xl font-bold tracking-tight'>{t('common.somethingWentWrong')}</h1>
+        <h1 className='text-2xl font-bold tracking-tight'>{staticT('common.somethingWentWrong')}</h1>
         <p className='text-muted-foreground max-w-md text-sm'>
-          {error.message || t('common.unexpectedError')}
+          {error.message || staticT('common.unexpectedError')}
         </p>
       </div>
       <div className='flex gap-2'>
         <Button type='button' onClick={reset} variant='default'>
-          {t('common.tryAgain')}
+          {staticT('common.tryAgain')}
         </Button>
         <Button type='button' onClick={() => window.location.reload()} variant='outline'>
-          {t('common.reloadPage')}
+          {staticT('common.reloadPage')}
         </Button>
       </div>
     </div>

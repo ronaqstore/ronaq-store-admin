@@ -4,6 +4,7 @@ export type { RootLayoutProps };
 import { getTranslations, setRequestLocale, getLocale } from 'next-intl/server';
 import { isLocale } from '@/i18n/request';
 import { cookies } from 'next/headers';
+import Script from 'next/script';
 import NextTopLoader from 'nextjs-toploader';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
@@ -174,10 +175,17 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       data-appearance-density={densityToApply}
       data-appearance-digits={digitsToApply}
     >
-      <head suppressHydrationWarning>
-        <script
+      <body
+        suppressHydrationWarning
+        className={cn(
+          'bg-background overflow-x-hidden overscroll-none font-sans antialiased',
+          'standalone:overscroll-none',
+          fontVariables
+        )}
+      >
+        <Script
           id='theme-and-extension-attribute-bootstrap'
-          suppressHydrationWarning
+          strategy='beforeInteractive'
           dangerouslySetInnerHTML={{
             __html: `
               try {
@@ -255,15 +263,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             `
           }}
         />
-      </head>
-      <body
-        suppressHydrationWarning
-        className={cn(
-          'bg-background overflow-x-hidden overscroll-none font-sans antialiased',
-          'standalone:overscroll-none',
-          fontVariables
-        )}
-      >
         <NextTopLoader color='var(--primary)' showSpinner={false} />
         <NuqsAdapter>
           <ThemeProvider
