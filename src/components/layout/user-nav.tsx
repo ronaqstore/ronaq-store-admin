@@ -63,13 +63,9 @@ function AccountMenuItems({ userName, shopName, showShopSettings }: AccountMenuI
         <>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem render={<Link href='/dashboard/settings/store' />}>
-              <Icons.building className='me-2 h-4 w-4' />
-              {t('nav.storeSettings')}
-            </DropdownMenuItem>
-            <DropdownMenuItem render={<Link href='/dashboard/settings/account' />}>
-              <Icons.account className='me-2 h-4 w-4' />
-              {t('nav.account')}
+            <DropdownMenuItem render={<Link href='/dashboard/settings' />}>
+              <Icons.settings className='me-2 h-4 w-4' />
+              {t('nav.settings')}
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </>

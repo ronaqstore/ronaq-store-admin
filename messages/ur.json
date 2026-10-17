@@ -151,6 +151,7 @@
     "cashLedger": "کیش کھاتہ",
     "suppliers": "سپلائرز",
     "appearance": "ظاہری شکل",
+    "settings": "سیٹنگز",
     "storeSettings": "آن لائن اسٹور",
     "account": "اکاؤنٹ",
     "shops": "دکانیں",
@@ -812,13 +813,17 @@
       "title": "اطلاعات",
       "description": "اپنی تمام اطلاعات دیکھیں اور ان کا انتظام کریں۔"
     },
+    "settings": {
+      "title": "سیٹنگز",
+      "description": "اکاؤنٹ سیکیورٹی اور آپ کا پبلک اسٹور فرنٹ"
+    },
     "storeSettings": {
       "title": "آن لائن اسٹور",
-      "description": "عوامی اسٹور فرنٹ پروفائل، لوگو، اور مرئیت"
+      "description": "اپنے پبلک اسٹور فرنٹ کی برانڈنگ، پروفائل اور مرئیت کا انتظام کریں"
     },
     "account": {
       "title": "اکاؤنٹ",
-      "description": "اپنا لاگ اِن پاس ورڈ تبدیل کریں"
+      "description": "اپنا پروفائل دیکھیں اور لاگ اِن محفوظ رکھیں"
     }
   },
   "dashboard": {
@@ -880,12 +885,20 @@
     "shopLogoHint": "JPEG، PNG یا WebP۔ بعد میں آن لائن اسٹور سیٹنگز سے تبدیل کر سکتے ہیں۔"
   },
   "storeSettings": {
+    "title": "آن لائن اسٹور",
+    "subtitle": "اپنے پبلک اسٹور فرنٹ کی برانڈنگ، پروفائل اور مرئیت کا انتظام کریں۔",
     "logoTitle": "دکان کا لوگو",
     "logoHint": "آپ کے پبلک اسٹور پر دکھائی دے گا۔ اختیاری — اپلوڈ تک پلیس ہولڈر استعمال ہوگا۔",
     "uploadLogo": "لوگو اپلوڈ کریں",
     "changeLogo": "لوگو تبدیل کریں",
     "removeLogo": "لوگو ہٹائیں",
     "profileTitle": "اسٹور پروفائل",
+    "profileCardDescription": "گاہک آپ کے پبلک شاپ صفحے پر یہ تفصیلات دیکھتے ہیں۔",
+    "editProfile": "پروفائل ترمیم کریں",
+    "editProfileTitle": "اسٹور پروفائل ترمیم کریں",
+    "editProfileDescription": "اپنے پبلک اسٹور فرنٹ پر دکھائی جانے والی تفصیلات اپڈیٹ کریں۔",
+    "visibilityTitle": "مرئیت",
+    "visibilityDescription": "کنٹرول کریں کہ آپ کا اسٹور آن لائن ہے یا نہیں اور اسٹاک کیسے دکھے گا۔",
     "slugLabel": "اسٹور URL",
     "displayName": "ڈسپلے نام",
     "about": "تعارف",
@@ -910,6 +923,13 @@
     "googleMapsPlaceholder": "گوگل میپس لنک پیسٹ کریں"
   },
   "account": {
+    "title": "اکاؤنٹ",
+    "subtitle": "اپنا پروفائل دیکھیں اور لاگ اِن محفوظ رکھیں۔",
+    "profileTitle": "پروفائل",
+    "profileDescription": "اس ورک اسپیس میں آپ کی دکان کے مالک کی شناخت۔",
+    "securityTitle": "سیکیورٹی",
+    "securityDescription": "اپنے شاپ ڈیش بورڈ تک رسائی محفوظ رکھیں۔",
+    "changePasswordHint": "ایک مضبوط پاس ورڈ منتخب کریں جو آپ کہیں اور استعمال نہ کرتے ہوں۔",
     "changePasswordTitle": "پاس ورڈ تبدیل کریں",
     "changePasswordDescription": "وہ پاس ورڈ تبدیل کریں جس سے آپ دکان میں سائن اِن کرتے ہیں۔",
     "currentPassword": "موجودہ پاس ورڈ",
@@ -1367,6 +1387,7 @@
     "subscriptions": "سبسکرپشنز",
     "users": "صارفین",
     "appearance": "ظاہری شکل",
+    "settings": "سیٹنگز",
     "storeSettings": "آن لائن اسٹور",
     "account": "اکاؤنٹ",
     "mobileShopManagement": "موبائل دکان کا انتظام",

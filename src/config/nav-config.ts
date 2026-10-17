@@ -152,16 +152,9 @@ const shopNavGroups: NavGroup[] = [
     label: 'nav.group.settings',
     items: [
       {
-        title: 'nav.storeSettings',
-        url: '/dashboard/settings/store',
-        icon: 'building',
-        isActive: false,
-        items: []
-      },
-      {
-        title: 'nav.account',
-        url: '/dashboard/settings/account',
-        icon: 'account',
+        title: 'nav.settings',
+        url: '/dashboard/settings',
+        icon: 'settings',
         isActive: false,
         items: []
       },

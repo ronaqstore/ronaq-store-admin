@@ -151,6 +151,7 @@
     "cashLedger": "Cash Ledger",
     "suppliers": "Suppliers",
     "appearance": "Appearance",
+    "settings": "Settings",
     "storeSettings": "Online Store",
     "account": "Account",
     "shops": "Shops",
@@ -812,13 +813,17 @@
       "title": "Notifications",
       "description": "View and manage all your notifications."
     },
+    "settings": {
+      "title": "Settings",
+      "description": "Account security and your public storefront"
+    },
     "storeSettings": {
       "title": "Online Store",
-      "description": "Public storefront profile, logo, and visibility"
+      "description": "Manage your public storefront branding, profile, and visibility"
     },
     "account": {
       "title": "Account",
-      "description": "Change your login password"
+      "description": "Review your profile and keep your login secure"
     }
   },
   "dashboard": {
@@ -880,12 +885,20 @@
     "shopLogoHint": "JPEG, PNG or WebP. You can change this later in Online Store settings."
   },
   "storeSettings": {
+    "title": "Online Store",
+    "subtitle": "Manage your public storefront branding, profile, and visibility.",
     "logoTitle": "Shop logo",
     "logoHint": "Shown on your public storefront. Optional — a placeholder is used until you upload one.",
     "uploadLogo": "Upload logo",
     "changeLogo": "Change logo",
     "removeLogo": "Remove logo",
     "profileTitle": "Store profile",
+    "profileCardDescription": "What customers see on your public shop page.",
+    "editProfile": "Edit profile",
+    "editProfileTitle": "Edit store profile",
+    "editProfileDescription": "Update the details shown on your public storefront.",
+    "visibilityTitle": "Visibility",
+    "visibilityDescription": "Control whether your store is online and how stock is shown.",
     "slugLabel": "Store URL slug",
     "displayName": "Display name",
     "about": "About",
@@ -910,6 +923,13 @@
     "googleMapsPlaceholder": "Paste a Google Maps link"
   },
   "account": {
+    "title": "Account",
+    "subtitle": "Review your profile and keep your login secure.",
+    "profileTitle": "Profile",
+    "profileDescription": "Your shop owner identity in this workspace.",
+    "securityTitle": "Security",
+    "securityDescription": "Protect access to your shop dashboard.",
+    "changePasswordHint": "Choose a strong password that you do not use elsewhere.",
     "changePasswordTitle": "Change password",
     "changePasswordDescription": "Update the password you use to sign in to your shop.",
     "currentPassword": "Current password",
@@ -1367,6 +1387,7 @@
     "subscriptions": "Subscriptions",
     "users": "Users",
     "appearance": "Appearance",
+    "settings": "Settings",
     "storeSettings": "Online Store",
     "account": "Account",
     "mobileShopManagement": "Mobile shop management",

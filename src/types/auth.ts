@@ -6,6 +6,15 @@ export interface ChangePasswordInput {
   newPassword: string;
 }
 
+export interface ChangePasswordDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export interface ChangePasswordDialogBodyProps {
+  onOpenChange: (open: boolean) => void;
+}
+
 export interface LoginValues {
   phone: string;
   password: string;

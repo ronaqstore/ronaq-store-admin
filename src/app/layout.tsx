@@ -31,19 +31,30 @@ import '../styles/globals.css';
 export async function generateMetadata(): Promise<Metadata> {
   const metadataBase = new URL(env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000');
 
-  const defaultMetadata = {
+  const defaultMetadata: Metadata = {
     metadataBase,
     applicationName: APP_NAME,
     title: {
-      default: APP_NAME,
+      default: `Admin | ${APP_NAME}`,
       template: `%s | ${APP_NAME}`
     },
     description: APP_DESCRIPTION,
+    robots: {
+      index: false,
+      follow: false,
+      nocache: true,
+      googleBot: {
+        index: false,
+        follow: false,
+        noimageindex: true,
+        nosnippet: true
+      }
+    },
     appleWebApp: {
       capable: true,
       statusBarStyle: 'black-translucent',
       title: APP_NAME
-    } as Metadata['appleWebApp'],
+    },
     formatDetection: {
       telephone: false
     },
@@ -62,14 +73,14 @@ export async function generateMetadata(): Promise<Metadata> {
       ]
     },
     openGraph: {
-      title: APP_NAME,
+      title: `Admin | ${APP_NAME}`,
       description: APP_DESCRIPTION,
       siteName: APP_NAME,
       type: 'website'
     },
     twitter: {
       card: 'summary',
-      title: APP_NAME,
+      title: `Admin | ${APP_NAME}`,
       description: APP_DESCRIPTION
     }
   };
@@ -101,8 +112,19 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
       ...defaultMetadata,
       title: {
-        default: defaultTitle,
+        default: `Admin | ${defaultTitle}`,
         template: `%s | ${APP_NAME}`
+      },
+      robots: {
+        index: false,
+        follow: false,
+        nocache: true,
+        googleBot: {
+          index: false,
+          follow: false,
+          noimageindex: true,
+          nosnippet: true
+        }
       },
       alternates
     };

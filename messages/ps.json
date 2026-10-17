@@ -151,6 +151,7 @@
     "cashLedger": "نغدي کتاب",
     "suppliers": "عرضه کوونکي",
     "appearance": "بڼه",
+    "settings": "ترتیبات",
     "storeSettings": "آنلاین دوکان",
     "account": "حساب",
     "shops": "دوکانونه",
@@ -812,13 +813,17 @@
       "title": "خبرتیاکنې",
       "description": "خپل ټولې خبرتیاکنې وګورئ او اداره کړئ."
     },
+    "settings": {
+      "title": "ترتیبات",
+      "description": "د حساب امنیت او ستاسو عامه دوکان"
+    },
     "storeSettings": {
       "title": "آنلاین دوکان",
-      "description": "عامه پلورنځي پروفایل، لوګو، او لید"
+      "description": "د خپل عامه دوکان برانډینګ، پروفایل او لید اداره کړئ"
     },
     "account": {
       "title": "حساب",
-      "description": "خپل د ننوتلو پاسورډ بدل کړئ"
+      "description": "خپل پروفایل وګورئ او ننوتل خوندي وساتئ"
     }
   },
   "dashboard": {
@@ -880,12 +885,20 @@
     "shopLogoHint": "JPEG، PNG یا WebP. وروسته یې په آنلاین دوکان ترتیباتو کې بدلولی شئ."
   },
   "storeSettings": {
+    "title": "آنلاین دوکان",
+    "subtitle": "د خپل عامه دوکان برانډینګ، پروفایل او لید اداره کړئ.",
     "logoTitle": "د دوکان لوگو",
     "logoHint": "ستاسو په عامه دوکان کې ښکاري. اختیاري — تر اپلوډ پورې پلیس هولډر کارېږي.",
     "uploadLogo": "لوگو اپلوډ کړئ",
     "changeLogo": "لوگو بدل کړئ",
     "removeLogo": "لوگو لرې کړئ",
     "profileTitle": "د دوکان پروفایل",
+    "profileCardDescription": "پیرودونکي ستاسو په عامه دوکان پاڼه کې دا توضیحات ویني.",
+    "editProfile": "پروفایل سمول",
+    "editProfileTitle": "د دوکان پروفایل سمول",
+    "editProfileDescription": "په خپل عامه دوکان کې ښودل شوي توضیحات تازه کړئ.",
+    "visibilityTitle": "لید",
+    "visibilityDescription": "کنټرول کړئ چې دوکان آنلاین دی که نه او سټاک څنګه ښکاري.",
     "slugLabel": "د دوکان URL",
     "displayName": "ښودل شوی نوم",
     "about": "په اړه",
@@ -910,6 +923,13 @@
     "googleMapsPlaceholder": "د ګوګل میپس لینک پیسټ کړئ"
   },
   "account": {
+    "title": "حساب",
+    "subtitle": "خپل پروفایل وګورئ او ننوتل خوندي وساتئ.",
+    "profileTitle": "پروفایل",
+    "profileDescription": "په دې کاري ځای کې ستاسو د دوکان خاوند پېژندنه.",
+    "securityTitle": "امنیت",
+    "securityDescription": "د خپل دوکان ډشبورډ ته لاسرسی خوندي وساتئ.",
+    "changePasswordHint": "یو قوي پاسورډ وټاکئ چې بل ځای یې نه کاروئ.",
     "changePasswordTitle": "پاسورډ بدل کړئ",
     "changePasswordDescription": "هغه پاسورډ تازه کړئ چې تاسو یې د دوکان ننوتلو لپاره کاروئ.",
     "currentPassword": "اوسنی پاسورډ",
@@ -1366,6 +1386,7 @@
     "subscriptions": "ګډونونه",
     "users": "کاروونکي",
     "appearance": "بڼه",
+    "settings": "ترتیبات",
     "storeSettings": "آنلاین دوکان",
     "account": "حساب",
     "mobileShopManagement": "د موبایل دوکان اداره",
