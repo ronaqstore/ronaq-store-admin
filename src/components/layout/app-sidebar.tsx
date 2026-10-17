@@ -22,12 +22,12 @@ import { useFilteredNavGroups } from '@/hooks/use-nav';
 import type { NavGroup, NavItem, AppSidebarProps } from '@/types';
 export type { AppSidebarProps };
 import { Link, usePathname } from '@/i18n/navigation';
-import { useSelectedLayoutSegment } from 'next/navigation';
 import * as React from 'react';
 import { Icons } from '@/components/icons';
 import { useLocale, useTranslations } from 'next-intl';
 import { isRtlLocale, type AppLocale } from '@/i18n/request';
 import { translateMaybe } from '@/i18n/translate-maybe';
+import { isNavUrlActive } from '@/lib/nav-active';
 
 function filterNavGroups(
   groups: NavGroup[],
@@ -62,7 +62,6 @@ export default function AppSidebar({ role }: AppSidebarProps) {
   const isRtl = isRtlLocale(locale);
   const labelOf = React.useCallback((key: string) => translateMaybe(key, t), [t]);
   const pathname = usePathname();
-  const segment = useSelectedLayoutSegment();
   const { isMobile, setOpenMobile } = useSidebar();
   const initialGroups = React.useMemo(() => getNavGroupsForRole(role), [role]);
   const filteredGroups = useFilteredNavGroups(initialGroups, role);
@@ -70,6 +69,16 @@ export default function AppSidebar({ role }: AppSidebarProps) {
   const visibleGroups = React.useMemo(
     () => filterNavGroups(filteredGroups, search, labelOf),
     [filteredGroups, search, labelOf]
+  );
+  const navUrls = React.useMemo(
+    () =>
+      visibleGroups.flatMap((group) =>
+        group.items.flatMap((item) => [
+          item.url,
+          ...(item.items?.map((sub) => sub.url) ?? [])
+        ])
+      ),
+    [visibleGroups]
   );
   const isSearching = search.trim().length > 0;
 
@@ -114,12 +123,7 @@ export default function AppSidebar({ role }: AppSidebarProps) {
               {group.items.map((item) => {
                 const Icon = item.icon ? Icons[item.icon] : Icons.logo;
                 const title = labelOf(item.title);
-                const isActive =
-                  pathname === item.url ||
-                  (segment !== null && item.url === `/dashboard/${segment}`) ||
-                  (item.url !== '/dashboard/platform' &&
-                    item.url !== '/dashboard/overview' &&
-                    pathname.startsWith(`${item.url}/`));
+                const isActive = isNavUrlActive(pathname, item.url, navUrls);
 
                 return item?.items && item?.items?.length > 0 ? (
                   <Collapsible

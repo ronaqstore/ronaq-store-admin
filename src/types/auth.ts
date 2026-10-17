@@ -1,6 +1,20 @@
 import type { ReactNode } from 'react';
 import type { AuthAccountRole } from '@/lib/auth/accounts';
 
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export interface ChangePasswordDialogBodyProps {
+  onOpenChange: (open: boolean) => void;
+}
+
 export interface LoginValues {
   phone: string;
   password: string;

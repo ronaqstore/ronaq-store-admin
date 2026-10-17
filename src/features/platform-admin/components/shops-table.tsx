@@ -1,25 +1,42 @@
 'use client';
 
+import { useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { useRouter } from '@/i18n/navigation';
-import { parseAsArrayOf, parseAsInteger, parseAsString, useQueryState, useQueryStates } from 'nuqs';
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   ResponsiveDataTable,
   type DetailConfig,
   type MobileItemConfig,
   type QuickFilterChip
 } from '@/components/data-table';
+import {
+  DUKAAN_DEFAULT_PAGE_SIZE,
+  useDukaanListParams
+} from '@/components/data-table/list-params';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { t as staticT } from '@/i18n/static-t';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
-import type { PlatformShop } from '../api/types';
-import { platformShopsQueryOptions } from '../api/queries';
-import { PLATFORM_CITY_OPTIONS, PLATFORM_STATUS_OPTIONS } from '../constants/filters';
+import { formatIsoDate } from '@/lib/dates';
+import type {
+  PlatformShop,
+  PlatformShopAccessStatus,
+  ShopRowActionsProps
+} from '../api/types';
+import { platformKeys, platformShopsQueryOptions } from '../api/queries';
+import { updateShopSubscription } from '../api/service';
+import {
+  PLATFORM_ACCESS_STATUS_LABEL_KEY,
+  PLATFORM_ACCESS_STATUS_VALUES,
+  platformAccessStatusOptions
+} from '../constants/filters';
 import { ShopStatusBadge } from './shop-status-badge';
+import { RenewSubscriptionDialog } from './renew-subscription-dialog';
+
+const SORTABLE_COLUMN_IDS = ['name', 'createdAt', 'subscriptionEndsAt'] as const;
 
 const columns: ColumnDef<PlatformShop>[] = [
   {
@@ -31,11 +48,13 @@ const columns: ColumnDef<PlatformShop>[] = [
     cell: ({ row }) => (
       <div className='min-w-40'>
         <p className='font-medium'>{row.original.name}</p>
-        <p className='text-muted-foreground text-xs'>{row.original.address}</p>
+        <p className='text-muted-foreground text-xs'>
+          {row.original.address || row.original.storeSlug || '—'}
+        </p>
       </div>
     ),
     meta: {
-      label: 'platform.shop',
+      label: 'table.shopName',
       placeholderKey: 'nav.searchShops',
       variant: 'text',
       icon: Icons.search,
@@ -43,190 +62,263 @@ const columns: ColumnDef<PlatformShop>[] = [
       primary: true,
       priority: 1
     },
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    enableSorting: true
   },
   {
-    id: 'owner_name',
-    accessorKey: 'owner_name',
+    id: 'ownerName',
+    accessorKey: 'ownerName',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title={staticT('table.ownerName')} />
     ),
     cell: ({ row }) => (
       <div>
-        <p className='font-medium'>{row.original.owner_name}</p>
-        <p className='text-muted-foreground text-xs'>{row.original.owner_phone}</p>
+        <p className='font-medium'>{row.original.ownerName ?? '—'}</p>
+        <p className='text-muted-foreground text-xs'>{row.original.ownerPhone ?? '—'}</p>
       </div>
     ),
-    meta: { label: 'platform.owner', type: 'text', priority: 2 }
+    meta: { label: 'table.ownerName', type: 'text', priority: 2 },
+    enableSorting: false
   },
   {
-    id: 'city',
-    accessorKey: 'city',
-    header: ({ column }) => <DataTableColumnHeader column={column} title={staticT('table.city')} />,
-    cell: ({ row }) => <span className='font-medium'>{row.original.city}</span>,
-    meta: {
-      label: 'platform.allCities',
-      variant: 'multiSelect',
-      options: [...PLATFORM_CITY_OPTIONS],
-      type: 'text',
-      priority: 3
-    },
-    enableColumnFilter: true
-  },
-  {
-    id: 'status',
-    accessorKey: 'status',
+    id: 'accessStatus',
+    accessorKey: 'accessStatus',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title={staticT('table.col.status')} />
     ),
-    cell: ({ row }) => <ShopStatusBadge status={row.original.status} />,
+    cell: ({ row }) => <ShopStatusBadge status={row.original.accessStatus} />,
     meta: {
       label: 'platform.allStatuses',
       variant: 'multiSelect',
-      options: [...PLATFORM_STATUS_OPTIONS],
+      options: platformAccessStatusOptions,
       type: 'status',
       priority: 1
     },
-    enableColumnFilter: true
+    enableColumnFilter: true,
+    enableSorting: false
   },
   {
-    id: 'trial_ends_at',
-    accessorKey: 'trial_ends_at',
+    id: 'subscriptionEndsAt',
+    accessorKey: 'subscriptionEndsAt',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={staticT('table.trialEnds')} />
+      <DataTableColumnHeader column={column} title={staticT('platform.subscriptionEnds')} />
     ),
-    cell: ({ row }) => row.original.trial_ends_at ?? '—',
-    meta: { label: 'platform.trialEnds', type: 'date', priority: 3 }
-  },
-  {
-    id: 'next_due_at',
-    accessorKey: 'next_due_at',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={staticT('table.nextDueDate')} />
-    ),
-    cell: ({ row }) => row.original.next_due_at ?? '—',
+    cell: ({ row }) => formatIsoDate(row.original.subscriptionEndsAt),
     meta: {
-      label: 'platform.nextDueDate',
+      label: 'platform.subscriptionEnds',
       type: 'date',
       highlight: true,
       priority: 1
-    }
+    },
+    enableSorting: true
+  },
+  {
+    id: 'createdAt',
+    accessorKey: 'createdAt',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title={staticT('platform.createdAt')} />
+    ),
+    cell: ({ row }) => formatIsoDate(row.original.createdAt),
+    meta: {
+      label: 'platform.createdAt',
+      type: 'date',
+      priority: 3
+    },
+    enableSorting: true
   },
   {
     id: 'actions',
     meta: { mobile: 'hidden' },
-    cell: ({ row }) => (
-      <RowActionsMenu
-        actions={[
-          {
-            label: staticT('table.viewShop'),
-            href: `/dashboard/platform/shops?shop=${row.original.id}`
-          },
-          { label: staticT('nav.subscriptions'), href: '/dashboard/platform/subscriptions' }
-        ]}
-      />
-    ),
+    cell: ({ row }) => <ShopRowActions shop={row.original} />,
     enableSorting: false
   }
 ];
 
+function statusLabel(status: PlatformShopAccessStatus): string {
+  return staticT(PLATFORM_ACCESS_STATUS_LABEL_KEY[status]);
+}
+
+function ShopRowActions({ shop }: ShopRowActionsProps) {
+  const t = useT();
+  const qc = useQueryClient();
+  const [renewOpen, setRenewOpen] = useState(false);
+
+  const suspend = useMutation({
+    mutationFn: () => updateShopSubscription(shop.id, { isActive: false }),
+    onSuccess: async () => {
+      toast.success(t('platform.suspendSuccess', { name: shop.name }));
+      await qc.invalidateQueries({ queryKey: platformKeys.all });
+    },
+    onError: (err: Error) => toast.error(err.message || t('platform.suspendFailed'))
+  });
+
+  const reactivate = useMutation({
+    mutationFn: () => updateShopSubscription(shop.id, { isActive: true }),
+    onSuccess: async () => {
+      toast.success(t('platform.reactivateSuccess', { name: shop.name }));
+      await qc.invalidateQueries({ queryKey: platformKeys.all });
+    },
+    onError: (err: Error) => toast.error(err.message || t('platform.reactivateFailed'))
+  });
+
+  const busy = suspend.isPending || reactivate.isPending;
+
+  return (
+    <>
+      <RowActionsMenu
+        actions={[
+          {
+            label: t('platform.renewAction'),
+            onClick: () => setRenewOpen(true),
+            disabled: busy
+          },
+          shop.status === 'SUSPENDED'
+            ? {
+                label: t('platform.reactivateAction'),
+                onClick: () => reactivate.mutate(),
+                disabled: busy
+              }
+            : {
+                label: t('platform.suspendAction'),
+                onClick: () => suspend.mutate(),
+                disabled: busy
+              }
+        ]}
+      />
+      <RenewSubscriptionDialog
+        open={renewOpen}
+        onOpenChange={setRenewOpen}
+        shopId={shop.id}
+        shopName={shop.name}
+        currentEndsAt={shop.subscriptionEndsAt}
+      />
+    </>
+  );
+}
+
 const shopMobileItem: MobileItemConfig<PlatformShop> = {
   leading: 'avatar',
   title: (row) => row.name,
-  subtitle: (row) => `${row.owner_name} · ${row.city}`,
-  badge: (row) => ({ label: row.status, status: row.status }),
-  value: (row) => row.next_due_at ?? '—',
-  valueLabel: () => staticT('table.due'),
-  meta: [(row) => row.owner_phone],
-  ariaLabel: (row) => `${row.name}, ${row.owner_name}, ${row.city}, ${row.status}`
+  subtitle: (row) => `${row.ownerName ?? '—'} · ${row.ownerPhone ?? '—'}`,
+  badge: (row) => ({
+    label: statusLabel(row.accessStatus),
+    status: row.accessStatus
+  }),
+  value: (row) => formatIsoDate(row.subscriptionEndsAt),
+  valueLabel: () => staticT('platform.subscriptionEnds'),
+  meta: [
+    (row) => (row.hasPassword ? staticT('platform.passwordSet') : staticT('platform.passwordPending'))
+  ],
+  ariaLabel: (row) =>
+    `${row.name}, ${row.ownerName ?? ''}, ${statusLabel(row.accessStatus)}`
 };
 
 const shopDetail: DetailConfig<PlatformShop> = {
   mode: 'sheet',
   title: (row) => row.name,
-  badge: (row) => ({ label: row.status, status: row.status }),
-  value: (row) => row.next_due_at ?? '—',
+  badge: (row) => ({
+    label: statusLabel(row.accessStatus),
+    status: row.accessStatus
+  }),
+  value: (row) => formatIsoDate(row.subscriptionEndsAt),
   sections: (row) => [
     {
       title: staticT('platform.shop'),
       fields: [
         { label: staticT('table.col.name'), value: row.name },
-        { label: staticT('table.address'), value: row.address },
-        { label: staticT('table.city'), value: row.city },
-        { label: staticT('table.col.status'), value: <ShopStatusBadge status={row.status} /> }
+        { label: staticT('table.address'), value: row.address ?? '—' },
+        { label: staticT('platform.storeSlug'), value: row.storeSlug ?? '—' },
+        { label: staticT('table.col.status'), value: <ShopStatusBadge status={row.accessStatus} /> }
       ]
     },
     {
       title: staticT('platform.owner'),
       fields: [
-        { label: staticT('table.col.name'), value: row.owner_name },
+        { label: staticT('table.col.name'), value: row.ownerName ?? '—' },
         {
           label: staticT('table.col.phone'),
-          value: (
+          value: row.ownerPhone ? (
             <a
               className='text-primary underline-offset-2 hover:underline'
-              href={`tel:${row.owner_phone}`}
+              href={`tel:${row.ownerPhone}`}
             >
-              {row.owner_phone}
+              {row.ownerPhone}
             </a>
+          ) : (
+            '—'
           )
+        },
+        {
+          label: staticT('platform.password'),
+          value: row.hasPassword
+            ? staticT('platform.passwordSet')
+            : staticT('platform.passwordPending')
         }
       ]
     },
     {
-      title: staticT('table.billing'),
+      title: staticT('platform.subscription'),
       fields: [
-        { label: staticT('table.trialEndsLabel'), value: row.trial_ends_at ?? '—' },
-        { label: staticT('table.due'), value: row.next_due_at ?? '—' }
+        {
+          label: staticT('platform.subscriptionEnds'),
+          value: formatIsoDate(row.subscriptionEndsAt)
+        },
+        {
+          label: staticT('platform.createdAt'),
+          value: formatIsoDate(row.createdAt)
+        }
       ]
     }
   ]
 };
 
 export function PlatformShopsTable() {
-  const router = useRouter();
   const t = useT();
-  const [page] = useQueryState('page', parseAsInteger.withDefault(1));
-  const [perPage] = useQueryState('perPage', parseAsInteger.withDefault(10));
-  const [name] = useQueryState('name', parseAsString);
-  const [facetValues] = useQueryStates({
-    city: parseAsArrayOf(parseAsString, ','),
-    status: parseAsArrayOf(parseAsString, ',')
-  });
 
-  const filters = {
-    page,
-    limit: perPage,
-    ...(name && { search: name }),
-    ...(facetValues.city?.length && { city: facetValues.city.join(',') }),
-    ...(facetValues.status?.length && {
-      status: facetValues.status.join(',') as PlatformShop['status']
+  const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
+    (typeof SORTABLE_COLUMN_IDS)[number]
+  >([...SORTABLE_COLUMN_IDS], 'name', ['accessStatus'], 'createdAt', 'desc');
+
+  const accessStatusRaw = (filters as Record<string, string | undefined>).accessStatus;
+  const accessStatusFilter =
+    typeof accessStatusRaw === 'string' && accessStatusRaw.length > 0
+      ? accessStatusRaw
+      : undefined;
+
+  const { data } = useSuspenseQuery(
+    platformShopsQueryOptions({
+      page: params.page,
+      pageSize: params.perPage,
+      search: filters.search,
+      accessStatus: accessStatusFilter,
+      sortBy,
+      sortOrder
     })
-  };
+  );
 
-  const { data } = useSuspenseQuery(platformShopsQueryOptions(filters));
-  const pageCount = Math.max(1, Math.ceil(data.total_items / perPage));
+  const pageCount = getPageCount(data.total);
 
   const { table } = useDataTable({
     data: data.items,
     columns,
     pageCount,
-    rowCount: data.total_items,
+    rowCount: data.total,
     shallow: true,
     debounceMs: 400,
     initialState: {
-      pagination: { pageIndex: page - 1, pageSize: perPage },
-      columnPinning: { right: ['actions'] }
+      pagination: { pageIndex: 0, pageSize: DUKAAN_DEFAULT_PAGE_SIZE },
+      columnPinning: { right: ['actions'] },
+      sorting: [{ id: 'createdAt', desc: true }]
     }
   });
 
   const shopQuickFilters: QuickFilterChip[] = [
     { id: 'all', label: t('table.all') },
-    ...PLATFORM_STATUS_OPTIONS.map((opt) => ({
-      id: opt.value,
-      label: opt.label,
-      columnId: 'status',
-      value: [opt.value]
+    ...PLATFORM_ACCESS_STATUS_VALUES.map((value) => ({
+      id: value,
+      label: t(PLATFORM_ACCESS_STATUS_LABEL_KEY[value]),
+      columnId: 'accessStatus',
+      value: [value]
     }))
   ];
 
@@ -234,15 +326,7 @@ export function PlatformShopsTable() {
     <ResponsiveDataTable
       table={table}
       mobileItem={shopMobileItem}
-      detail={{
-        ...shopDetail,
-        actions: (row) => [
-          {
-            label: t('table.openRecord'),
-            onClick: () => router.push(`/dashboard/platform/shops?shop=${row.id}`)
-          }
-        ]
-      }}
+      detail={shopDetail}
       quickFilters={shopQuickFilters}
     />
   );

@@ -52,6 +52,7 @@ export interface ProfileAvatarProps {
 export interface AccountMenuItemsProps {
   userName: string;
   shopName: string;
+  showShopSettings: boolean;
 }
 
 export interface ShellProps {

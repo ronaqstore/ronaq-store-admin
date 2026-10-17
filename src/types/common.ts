@@ -288,3 +288,10 @@ export interface DateFieldShellProps {
   displayText: ReactNode;
   children: ReactNode;
 }
+
+export interface SettingsSectionProps {
+  title: string;
+  description: string;
+  icon: Icon;
+  children: ReactNode;
+}

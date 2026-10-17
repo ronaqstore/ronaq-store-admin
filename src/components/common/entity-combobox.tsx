@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Icons } from '@/components/icons';
-import { Spinner } from '@/components/ui/spinner';
+import { ComboboxListSkeleton } from '@/components/common/combobox-list-skeleton';
 import { cn } from '@/lib/utils';
 import type { EntityComboboxItem, EntityComboboxProps } from '@/types';
 
@@ -19,7 +19,6 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
   search,
   onSearchChange,
   isLoading,
-  loadingText = '',
   emptyText = '',
   clearSelectionTitle = '',
   disabled,
@@ -117,13 +116,13 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
         className='z-50 w-[var(--radix-popover-trigger-width)] min-w-[320px] p-0 shadow-lg'
       >
         <div className='p-2 pb-1.5'>
-          <div className='relative flex items-center'>
+          <div className='relative flex items-center overflow-hidden rounded-md border border-border bg-muted/40'>
             <Icons.search className='pointer-events-none absolute start-2.5 size-4 text-muted-foreground' />
             <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={searchPlaceholder}
-              className='h-9 ps-8 pe-8 text-sm font-normal text-foreground'
+              className='h-9 border-0 bg-transparent ps-8 pe-8 text-sm font-normal text-foreground shadow-none outline-none ring-0 ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0'
               autoFocus
             />
             {search ? (
@@ -140,10 +139,7 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
 
         <div className='max-h-60 overflow-y-auto p-1 text-sm'>
           {isLoading && items.length === 0 ? (
-            <div className='flex items-center justify-center gap-2 py-6 text-sm font-normal text-muted-foreground'>
-              <Spinner className='text-primary' />
-              <span>{loadingText}</span>
-            </div>
+            <ComboboxListSkeleton />
           ) : items.length === 0 ? (
             <div className='py-6 text-center text-sm font-normal text-muted-foreground'>
               {emptyText}

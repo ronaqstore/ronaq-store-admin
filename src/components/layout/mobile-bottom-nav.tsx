@@ -11,6 +11,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import type { NavItem, MobileBottomNavProps } from '@/types';
 import { useT, translateMaybe } from '@/i18n/use-t';
 import { cn } from '@/lib/utils';
+import { isNavUrlActive } from '@/lib/nav-active';
 
 const SHOP_PRIMARY = [
   '/dashboard/overview',
@@ -35,12 +36,6 @@ function flattenNav(groups: ReturnType<typeof getNavGroupsForRole>): NavItem[] {
   );
 }
 
-function isActivePath(pathname: string, url: string): boolean {
-  if (pathname === url) return true;
-  if (url !== '/dashboard' && pathname.startsWith(`${url}/`)) return true;
-  return false;
-}
-
 export function MobileBottomNav({ role }: MobileBottomNavProps) {
   const t = useT();
   const isMobile = useIsMobile();
@@ -48,6 +43,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
   const [moreOpen, setMoreOpen] = React.useState(false);
   const groups = useFilteredNavGroups(getNavGroupsForRole(role), role);
   const allItems = React.useMemo(() => flattenNav(groups), [groups]);
+  const allUrls = React.useMemo(() => allItems.map((item) => item.url), [allItems]);
 
   const primaryUrls = role === 'SUPER_ADMIN' ? PLATFORM_PRIMARY : SHOP_PRIMARY;
   const primary = primaryUrls
@@ -72,7 +68,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
         <ul className='mx-auto flex h-14 max-w-lg items-stretch justify-around px-1'>
           {primary.map((item) => {
             const Icon = item.icon ? Icons[item.icon] : Icons.circle;
-            const active = isActivePath(pathname, item.url);
+            const active = isNavUrlActive(pathname, item.url, allUrls);
             return (
               <li key={item.url} className='flex flex-1'>
                 <Link
@@ -117,7 +113,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
           <ul className='no-scrollbar grid gap-1 overflow-y-auto px-2 pb-4'>
             {moreItems.map((item) => {
               const Icon = item.icon ? Icons[item.icon] : Icons.circle;
-              const active = isActivePath(pathname, item.url);
+              const active = isNavUrlActive(pathname, item.url, allUrls);
               return (
                 <li key={item.url}>
                   <Link
