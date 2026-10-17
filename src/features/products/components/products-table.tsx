@@ -3,8 +3,8 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
+import { PreviewableImage } from '@/components/media/previewable-image';
 import {
   ResponsiveDataTable,
   StatusBadge,
@@ -24,7 +24,7 @@ import { listBrands } from '@/features/brands/api/service';
 import type { ProductDTO } from '@/lib/api/types';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { formatEmpty } from '@/lib/format-empty';
-import { productImageSrc } from '@/constants/placeholders';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/constants/placeholders';
 import { DUKAAN_DEFAULT_PAGE_SIZE, useDukaanListParams } from '@/components/data-table/list-params';
 import type {
   ProductCellActionProps,
@@ -92,6 +92,8 @@ function ProductCellAction({ data }: ProductCellActionProps) {
       deactivateTitle={t('dukaan.product.deactivateTitle')}
       deactivateDescription={t('dukaan.product.deactivateDescription')}
       deactivateSuccess={t('dukaan.product.productDeactivated')}
+      activateTitle={t('dukaan.product.activateTitle')}
+      activateDescription={t('dukaan.product.activateDescription')}
       activateSuccess={t('dukaan.product.productActivated')}
       onDeactivate={deactivateProduct}
       onActivate={reactivateProduct}
@@ -115,16 +117,14 @@ const productColumns: ColumnDef<ProductDTO>[] = [
       cell: ({ row }) => {
         const cover = row.original.imageUrl || row.original.imageUrls?.[0] || null;
         return (
-          <div className='relative h-10 w-10 overflow-hidden rounded-md border bg-muted'>
-            <Image
-              src={productImageSrc(cover)}
-              alt={formatEmpty(row.original.name)}
-              fill
-              unoptimized
-              className='object-cover'
-              sizes='40px'
-            />
-          </div>
+          <PreviewableImage
+            src={cover}
+            alt={formatEmpty(row.original.name)}
+            className='relative h-10 w-10 overflow-hidden rounded-md border bg-muted'
+            imageClassName='object-cover'
+            sizes='40px'
+            fallbackSrc={PLACEHOLDER_PRODUCT_IMAGE}
+          />
         );
       }
     },
@@ -274,19 +274,15 @@ function ProductImagesField({ row }: ProductImagesFieldProps) {
   return (
     <div className='grid grid-cols-3 gap-2'>
       {urls.map((url, index) => (
-        <div
+        <PreviewableImage
           key={`${url}-${index}`}
+          src={url}
+          alt={`${formatEmpty(row.name)} ${index + 1}`}
           className='relative aspect-square overflow-hidden rounded-lg border bg-muted'
-        >
-          <Image
-            src={productImageSrc(url)}
-            alt={`${formatEmpty(row.name)} ${index + 1}`}
-            fill
-            unoptimized
-            className='object-cover'
-            sizes='120px'
-          />
-        </div>
+          imageClassName='object-cover'
+          sizes='120px'
+          fallbackSrc={PLACEHOLDER_PRODUCT_IMAGE}
+        />
       ))}
     </div>
   );

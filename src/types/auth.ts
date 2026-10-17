@@ -23,6 +23,7 @@ export interface LoginValues {
 export interface BaseLoginFormProps {
   title: string;
   description: string;
+  banner?: string | null;
   minPasswordLength?: number;
   onSubmit: (values: LoginValues) => Promise<string | null>;
   footer?: ReactNode;

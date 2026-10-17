@@ -9,6 +9,8 @@ export function SimpleEntityCellAction({
   deactivateTitle,
   deactivateDescription,
   deactivateSuccess,
+  activateTitle,
+  activateDescription,
   activateSuccess,
   onDeactivate,
   onActivate,
@@ -22,6 +24,8 @@ export function SimpleEntityCellAction({
       deactivateTitle={deactivateTitle}
       deactivateDescription={deactivateDescription}
       deactivateSuccess={deactivateSuccess}
+      activateTitle={activateTitle}
+      activateDescription={activateDescription}
       activateSuccess={activateSuccess}
       onDeactivate={onDeactivate}
       onActivate={onActivate}

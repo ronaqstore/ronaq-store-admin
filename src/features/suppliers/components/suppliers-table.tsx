@@ -49,6 +49,9 @@ function SupplierCellAction({ data }: SupplierCellActionProps) {
       deactivateDescription={t('dukaan.party.supplierDeactivateDescription')}
       deactivateConfirmLabel={t('common.deactivate')}
       deactivateSuccess={t('dukaan.party.supplierDeactivated')}
+      activateTitle={t('dukaan.party.supplierActivateTitle')}
+      activateDescription={t('dukaan.party.supplierActivateDescription')}
+      activateConfirmLabel={t('common.activate')}
       activateSuccess={t('dukaan.party.supplierActivated')}
       onDeactivate={deactivateSupplier}
       onActivate={reactivateSupplier}

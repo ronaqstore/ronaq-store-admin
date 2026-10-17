@@ -113,6 +113,7 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
   const [createOpen, setCreateOpen] = useState(false);
   const [editCategory, setEditCategory] = useState<ExpenseCategoryDTO | null>(null);
   const [deactivateTarget, setDeactivateTarget] = useState<ExpenseCategoryDTO | null>(null);
+  const [activateTarget, setActivateTarget] = useState<ExpenseCategoryDTO | null>(null);
 
   const sortableColumnIds = ['name', 'createdAt', 'updatedAt'];
   const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<ExpenseCategorySortField>(
@@ -248,12 +249,7 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
             category={row.original}
             onEdit={(cat) => setEditCategory(cat)}
             onDeactivate={(cat) => setDeactivateTarget(cat)}
-            onActivate={(cat) =>
-              activateMutation.mutate({
-                id: cat.id,
-                input: { isActive: true }
-              })
-            }
+            onActivate={(cat) => setActivateTarget(cat)}
             isActivating={activateMutation.isPending}
           />
         </div>
@@ -307,6 +303,24 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
           title={t('common.deactivate')}
           description={t('expenses.deactivateDesc', { name: deactivateTarget.name })}
           confirmLabel={t('common.deactivate')}
+        />
+      )}
+
+      {activateTarget && (
+        <AlertModal
+          isOpen={!!activateTarget}
+          onClose={() => setActivateTarget(null)}
+          onConfirm={() =>
+            activateMutation.mutate(
+              { id: activateTarget.id, input: { isActive: true } },
+              { onSuccess: () => setActivateTarget(null) }
+            )
+          }
+          loading={activateMutation.isPending}
+          title={t('common.activate')}
+          description={t('expenses.activateDesc', { name: activateTarget.name })}
+          confirmLabel={t('common.activate')}
+          confirmVariant='default'
         />
       )}
 

@@ -36,6 +36,8 @@ function BrandCellAction({ data }: BrandCellActionProps) {
       deactivateTitle={t('dukaan.brand.deactivateTitle')}
       deactivateDescription={t('dukaan.brand.deactivateDescription')}
       deactivateSuccess={t('dukaan.brand.deactivated')}
+      activateTitle={t('dukaan.brand.activateTitle')}
+      activateDescription={t('dukaan.brand.activateDescription')}
       activateSuccess={t('dukaan.brand.activated')}
       onDeactivate={deactivateBrand}
       onActivate={reactivateBrand}

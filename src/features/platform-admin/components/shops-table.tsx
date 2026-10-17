@@ -20,6 +20,7 @@ import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { t as staticT } from '@/i18n/static-t';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
+import { AlertModal } from '@/components/modal/alert-modal';
 import { formatIsoDate } from '@/lib/dates';
 import type {
   PlatformShop,
@@ -143,11 +144,14 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
   const t = useT();
   const qc = useQueryClient();
   const [renewOpen, setRenewOpen] = useState(false);
+  const [suspendOpen, setSuspendOpen] = useState(false);
+  const [reactivateOpen, setReactivateOpen] = useState(false);
 
   const suspend = useMutation({
     mutationFn: () => updateShopSubscription(shop.id, { isActive: false }),
     onSuccess: async () => {
       toast.success(t('platform.suspendSuccess', { name: shop.name }));
+      setSuspendOpen(false);
       await qc.invalidateQueries({ queryKey: platformKeys.all });
     },
     onError: (err: Error) => toast.error(err.message || t('platform.suspendFailed'))
@@ -157,6 +161,7 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
     mutationFn: () => updateShopSubscription(shop.id, { isActive: true }),
     onSuccess: async () => {
       toast.success(t('platform.reactivateSuccess', { name: shop.name }));
+      setReactivateOpen(false);
       await qc.invalidateQueries({ queryKey: platformKeys.all });
     },
     onError: (err: Error) => toast.error(err.message || t('platform.reactivateFailed'))
@@ -166,6 +171,25 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
 
   return (
     <>
+      <AlertModal
+        isOpen={suspendOpen}
+        onClose={() => setSuspendOpen(false)}
+        onConfirm={() => suspend.mutate()}
+        loading={suspend.isPending}
+        title={t('platform.suspendTitle')}
+        description={t('platform.suspendDescription', { name: shop.name })}
+        confirmLabel={t('platform.suspendAction')}
+      />
+      <AlertModal
+        isOpen={reactivateOpen}
+        onClose={() => setReactivateOpen(false)}
+        onConfirm={() => reactivate.mutate()}
+        loading={reactivate.isPending}
+        title={t('platform.reactivateTitle')}
+        description={t('platform.reactivateDescription', { name: shop.name })}
+        confirmLabel={t('platform.reactivateAction')}
+        confirmVariant='default'
+      />
       <RowActionsMenu
         actions={[
           {
@@ -176,12 +200,12 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
           shop.status === 'SUSPENDED'
             ? {
                 label: t('platform.reactivateAction'),
-                onClick: () => reactivate.mutate(),
+                onClick: () => setReactivateOpen(true),
                 disabled: busy
               }
             : {
                 label: t('platform.suspendAction'),
-                onClick: () => suspend.mutate(),
+                onClick: () => setSuspendOpen(true),
                 disabled: busy
               }
         ]}

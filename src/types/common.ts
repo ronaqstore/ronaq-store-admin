@@ -63,6 +63,7 @@ export interface AlertModalProps {
   description?: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  confirmVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   closeOnOutsideClick?: boolean;
 }
 
@@ -269,6 +270,8 @@ export interface SimpleEntityCellActionProps {
   deactivateTitle: string;
   deactivateDescription: string;
   deactivateSuccess: string;
+  activateTitle: string;
+  activateDescription: string;
   activateSuccess: string;
   onDeactivate: (id: string) => Promise<unknown>;
   onActivate: (id: string) => Promise<unknown>;

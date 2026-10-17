@@ -1,10 +1,10 @@
 'use client';
 
-import { signIn, getSession } from 'next-auth/react';
+import { signIn, getSession, signOut } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
-import { SHOP_HOME, PLATFORM_HOME, canAccessPath, delocalize } from '@/lib/auth/routes';
+import { SHOP_HOME, canAccessPath, delocalize } from '@/lib/auth/routes';
 import { normalizePhone } from '@/lib/auth/phone';
 import type { LoginValues } from '@/types/auth';
 import { BaseLoginForm } from './base-login-form';
@@ -14,11 +14,14 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard';
+  const suspendedBanner =
+    searchParams.get('reason') === 'suspended' ? t('auth.shopSuspendedLogout') : null;
 
   const handleLogin = async (values: LoginValues): Promise<string | null> => {
     const result = await signIn('credentials', {
       phone: normalizePhone(values.phone),
       password: values.password,
+      isPlatformAdmin: 'false',
       redirect: false
     });
 
@@ -28,11 +31,15 @@ export function LoginForm() {
 
     const session = await getSession();
     const role = session?.user?.role;
-    const home = role === 'SUPER_ADMIN' ? PLATFORM_HOME : SHOP_HOME;
+    if (role !== 'OWNER') {
+      await signOut({ redirect: false });
+      return t('auth.invalidCredentials');
+    }
+
     const target =
       callbackUrl && callbackUrl.startsWith('/') && canAccessPath(callbackUrl, role)
         ? delocalize(callbackUrl)
-        : home;
+        : SHOP_HOME;
 
     router.replace(target);
     router.refresh();
@@ -43,6 +50,7 @@ export function LoginForm() {
     <BaseLoginForm
       title={t('auth.signIn')}
       description={t('auth.signInHint')}
+      banner={suspendedBanner}
       minPasswordLength={1}
       onSubmit={handleLogin}
       footer={

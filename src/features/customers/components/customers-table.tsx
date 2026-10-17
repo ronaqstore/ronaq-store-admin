@@ -49,6 +49,9 @@ function CustomerCellAction({ data }: CustomerCellActionProps) {
       deactivateDescription={t('dukaan.party.customerArchiveDescription')}
       deactivateConfirmLabel={t('common.archive')}
       deactivateSuccess={t('dukaan.party.customerArchived')}
+      activateTitle={t('dukaan.party.customerActivateTitle')}
+      activateDescription={t('dukaan.party.customerActivateDescription')}
+      activateConfirmLabel={t('common.activate')}
       activateSuccess={t('dukaan.party.customerActivated')}
       onDeactivate={deactivateCustomer}
       onActivate={reactivateCustomer}

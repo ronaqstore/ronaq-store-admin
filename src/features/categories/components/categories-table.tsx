@@ -36,6 +36,8 @@ function CategoryCellAction({ data }: CategoryCellActionProps) {
       deactivateTitle={t('dukaan.category.deactivateTitle')}
       deactivateDescription={t('dukaan.category.deactivateDescription')}
       deactivateSuccess={t('dukaan.category.deactivated')}
+      activateTitle={t('dukaan.category.activateTitle')}
+      activateDescription={t('dukaan.category.activateDescription')}
       activateSuccess={t('dukaan.category.activated')}
       onDeactivate={deactivateCategory}
       onActivate={reactivateCategory}

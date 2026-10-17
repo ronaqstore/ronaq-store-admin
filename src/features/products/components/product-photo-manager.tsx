@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { PreviewableImage } from '@/components/media/previewable-image';
 import { AppError } from '@/lib/errors';
 
 import {
@@ -106,21 +107,19 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
         <div className='grid grid-cols-2 gap-3 sm:grid-cols-4'>
           {images.map((image, index) => (
             <div key={image.id} className='group relative overflow-hidden rounded-lg border'>
-              <Image
+              <PreviewableImage
                 src={image.url}
                 alt={`${t('images')} ${index + 1}`}
-                width={200}
-                height={128}
-                className='h-32 w-full object-cover'
-                loading='lazy'
-                unoptimized
+                className='relative h-32 w-full'
+                imageClassName='object-cover'
+                sizes='200px'
               />
-              <div className='absolute inset-0 flex items-center justify-center gap-1 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100'>
+              <div className='pointer-events-none absolute inset-0 flex items-center justify-center gap-1 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100'>
                 <Button
                   type='button'
                   variant='secondary'
                   size='icon'
-                  className='h-8 w-8'
+                  className='pointer-events-auto h-8 w-8'
                   aria-label={t('common.moveUp')}
                   onClick={() => handleMove(index, index - 1)}
                   disabled={index === 0 || reorderMutation.isPending}
@@ -131,7 +130,7 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
                   type='button'
                   variant='destructive'
                   size='icon'
-                  className='h-8 w-8'
+                  className='pointer-events-auto h-8 w-8'
                   aria-label={t('common.delete')}
                   onClick={() => handleDelete(image.id)}
                   disabled={deleteMutation.isPending}
@@ -142,7 +141,7 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
                   type='button'
                   variant='secondary'
                   size='icon'
-                  className='h-8 w-8'
+                  className='pointer-events-auto h-8 w-8'
                   aria-label={t('common.moveDown')}
                   onClick={() => handleMove(index, index + 1)}
                   disabled={index === images.length - 1 || reorderMutation.isPending}

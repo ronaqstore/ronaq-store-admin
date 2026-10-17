@@ -1,14 +1,15 @@
 'use client';
 
 import { useRef, useState, type ChangeEvent } from 'react';
-import Image from 'next/image';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Icons } from '@/components/icons';
-import { shopLogoSrc } from '@/constants/placeholders';
+import { PreviewableImage } from '@/components/media/previewable-image';
+import { AlertModal } from '@/components/modal/alert-modal';
+import { PLACEHOLDER_SHOP_LOGO } from '@/constants/placeholders';
 import { formatEmpty } from '@/lib/format-empty';
 import { useT } from '@/i18n/use-t';
 import type { StoreProfileDetailRow } from '@/types/store-settings';
@@ -28,8 +29,7 @@ export function StoreSettingsForm() {
   const uploadMutation = useUploadShopLogo();
   const removeMutation = useRemoveShopLogo();
   const [profileOpen, setProfileOpen] = useState(false);
-
-  const logoSrc = shopLogoSrc(data.logoUrl);
+  const [enabledConfirm, setEnabledConfirm] = useState<boolean | null>(null);
 
   const profileRows: StoreProfileDetailRow[] = [
     { label: t('storeSettings.displayName'), value: formatEmpty(data.displayName) },
@@ -61,7 +61,15 @@ export function StoreSettingsForm() {
   };
 
   const handleEnabledChange = (checked: boolean) => {
-    updateMutation.mutate({ isEnabled: checked });
+    setEnabledConfirm(checked);
+  };
+
+  const confirmEnabledChange = () => {
+    if (enabledConfirm == null) return;
+    updateMutation.mutate(
+      { isEnabled: enabledConfirm },
+      { onSettled: () => setEnabledConfirm(null) }
+    );
   };
 
   const handleExactStockChange = (checked: boolean) => {
@@ -74,18 +82,37 @@ export function StoreSettingsForm() {
 
   return (
     <>
+      <AlertModal
+        isOpen={enabledConfirm != null}
+        onClose={() => setEnabledConfirm(null)}
+        onConfirm={confirmEnabledChange}
+        loading={updateMutation.isPending}
+        title={
+          enabledConfirm
+            ? t('storeSettings.enableConfirmTitle')
+            : t('storeSettings.disableConfirmTitle')
+        }
+        description={
+          enabledConfirm
+            ? t('storeSettings.enableConfirmDescription')
+            : t('storeSettings.disableConfirmDescription')
+        }
+        confirmLabel={
+          enabledConfirm ? t('storeSettings.enableConfirmLabel') : t('storeSettings.disableConfirmLabel')
+        }
+        confirmVariant={enabledConfirm ? 'default' : 'destructive'}
+      />
       <div className='grid gap-4 lg:grid-cols-2'>
         <Card className='min-w-0'>
           <CardHeader className='flex flex-row items-start gap-4 space-y-0'>
-            <div className='relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border bg-muted shadow-sm'>
-              <Image
-                src={logoSrc}
-                alt={formatEmpty(data.displayName)}
-                fill
-                unoptimized
-                className='object-cover'
-              />
-            </div>
+            <PreviewableImage
+              src={data.logoUrl}
+              alt={formatEmpty(data.displayName)}
+              className='relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border bg-muted shadow-sm'
+              imageClassName='object-cover'
+              sizes='80px'
+              fallbackSrc={PLACEHOLDER_SHOP_LOGO}
+            />
             <div className='min-w-0 flex-1 space-y-1'>
               <div className='flex flex-wrap items-center gap-2'>
                 <CardTitle className='text-base'>{t('storeSettings.logoTitle')}</CardTitle>

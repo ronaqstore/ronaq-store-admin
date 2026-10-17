@@ -14,6 +14,7 @@ import type { BaseLoginFormProps, LoginValues } from '@/types/auth';
 export function BaseLoginForm({
   title,
   description,
+  banner,
   minPasswordLength = 1,
   onSubmit,
   footer
@@ -59,6 +60,12 @@ export function BaseLoginForm({
       </CardHeader>
       <CardContent>
         <form className='space-y-6' onSubmit={handleSubmit}>
+          {banner ? (
+            <Alert variant='destructive'>
+              <Icons.warning className='h-4 w-4' />
+              <AlertDescription>{banner}</AlertDescription>
+            </Alert>
+          ) : null}
           {error ? (
             <Alert variant='destructive'>
               <Icons.warning className='h-4 w-4' />

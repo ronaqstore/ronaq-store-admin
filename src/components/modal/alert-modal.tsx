@@ -23,6 +23,7 @@ export function AlertModal({
   description,
   confirmLabel,
   cancelLabel,
+  confirmVariant = 'destructive',
   closeOnOutsideClick = true
 }: AlertModalProps) {
   const t = useT();
@@ -54,7 +55,7 @@ export function AlertModal({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={loading}>{resolvedCancel}</AlertDialogCancel>
-          <AlertDialogAction variant='destructive' isLoading={loading} onClick={handleConfirm}>
+          <AlertDialogAction variant={confirmVariant} isLoading={loading} onClick={handleConfirm}>
             {resolvedConfirm}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -18,6 +18,9 @@ export function PartyCellAction({
   deactivateDescription,
   deactivateConfirmLabel,
   deactivateSuccess,
+  activateTitle,
+  activateDescription,
+  activateConfirmLabel,
   activateSuccess,
   onDeactivate,
   onActivate,
@@ -28,6 +31,7 @@ export function PartyCellAction({
   const qc = useQueryClient();
   const [editOpen, setEditOpen] = useState(false);
   const [deactivateOpen, setDeactivateOpen] = useState(false);
+  const [activateOpen, setActivateOpen] = useState(false);
 
   const deactivate = useMutation({
     mutationFn: () => onDeactivate(id),
@@ -43,6 +47,7 @@ export function PartyCellAction({
     mutationFn: () => onActivate(id),
     onSuccess: () => {
       toast.success(activateSuccess);
+      setActivateOpen(false);
       void qc.invalidateQueries({ queryKey: invalidateQueryKey });
     },
     onError: (e: Error) => toast.error(e.message)
@@ -63,6 +68,16 @@ export function PartyCellAction({
         title={deactivateTitle}
         description={deactivateDescription}
         confirmLabel={deactivateConfirmLabel ?? t('common.deactivate')}
+      />
+      <AlertModal
+        isOpen={activateOpen}
+        onClose={() => setActivateOpen(false)}
+        onConfirm={() => activate.mutate()}
+        loading={activate.isPending}
+        title={activateTitle}
+        description={activateDescription}
+        confirmLabel={activateConfirmLabel ?? t('common.activate')}
+        confirmVariant='default'
       />
       {renderEditDialog(editOpen, setEditOpen)}
       <RowActionsMenu
@@ -94,11 +109,10 @@ export function PartyCellAction({
           ...(!isSystem && !isActive
             ? [
                 {
-                  label: t('common.activate'),
+                  label: activateConfirmLabel ?? t('common.activate'),
                   icon: Icons.check,
                   className: 'text-emerald-600 focus:text-emerald-700 dark:text-emerald-400',
-                  disabled: activate.isPending,
-                  onClick: () => activate.mutate()
+                  onClick: () => setActivateOpen(true)
                 }
               ]
             : [])
