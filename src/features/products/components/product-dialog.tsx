@@ -9,7 +9,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
@@ -203,13 +202,13 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
   };
 
   return (
-    <DialogContent className='flex max-h-[90vh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl'>
-      <DialogHeader className='shrink-0 px-4 pt-4 pe-12'>
+    <DialogContent className='left-1/2 top-4 flex max-h-[calc(100dvh-2rem)] w-full -translate-x-1/2 translate-y-0 flex-col gap-0 overflow-y-auto overscroll-contain p-0 sm:max-w-3xl'>
+      <DialogHeader className='sticky top-0 z-10 shrink-0 border-b bg-popover px-4 py-4 pe-12'>
         <DialogTitle>{isEdit ? t('editTitle') : t('addTitle')}</DialogTitle>
         <DialogDescription>{isEdit ? t('editDescription') : t('addDescription')}</DialogDescription>
       </DialogHeader>
-      <form className='flex min-h-0 flex-1 flex-col' onSubmit={handleSubmit}>
-        <div className='no-scrollbar min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-4'>
+      <form className='flex flex-col' onSubmit={handleSubmit}>
+        <div className='px-4 py-4'>
           <FieldGroup className='gap-4'>
             <form.AppField
               name='name'
@@ -417,12 +416,12 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
             {isEdit && (
               <>
                 <div className='border-t pt-4'>
-                  <h4 className='text-sm font-semibold mb-3'>{t('onlineStoreSettings')}</h4>
+                  <h4 className='mb-3 text-sm font-semibold'>{t('onlineStoreSettings')}</h4>
                   <form.AppField
                     name='publicDescription'
                     children={(field) => <field.TextareaField label={t('publicDescription')} />}
                   />
-                  <div className='grid min-w-0 gap-4 sm:grid-cols-2 mt-3'>
+                  <div className='mt-3 grid min-w-0 gap-4 sm:grid-cols-2'>
                     <form.AppField
                       name='isPublished'
                       children={(field) => <field.CheckboxField label={t('isPublished')} />}
@@ -439,12 +438,12 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
 
           {isEdit && product?.id ? (
             <div className='mt-6 border-t pt-4'>
-              <h4 className='text-sm font-semibold mb-3'>{t('images')}</h4>
+              <h4 className='mb-3 text-sm font-semibold'>{t('images')}</h4>
               <ProductPhotoManager productId={product.id} images={images} onChange={setImages} />
             </div>
           ) : null}
         </div>
-        <DialogFooter className='mx-0 mb-0 shrink-0'>
+        <div className='sticky bottom-0 flex flex-col-reverse gap-3 border-t bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-end'>
           <DialogCancelButton
             onClick={() => onOpenChange(false)}
             disabled={createProduct.isPending || updateProduct.isPending}
@@ -453,7 +452,7 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
             mode={isEdit ? 'edit' : 'add'}
             loading={createProduct.isPending || updateProduct.isPending}
           />
-        </DialogFooter>
+        </div>
       </form>
     </DialogContent>
   );
