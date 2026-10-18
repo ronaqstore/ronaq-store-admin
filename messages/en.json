@@ -901,7 +901,7 @@
     "cityPlaceholder": "Enter city",
     "addressPlaceholder": "Enter shop address",
     "shopLogoOptional": "Shop logo (optional)",
-    "shopLogoHint": "JPEG, PNG or WebP. You can change this later in Online Store settings.",
+    "shopLogoHint": "JPEG, PNG or WebP",
     "shopSuspendedLogout": "Your shop has been suspended or your subscription ended. Contact Ronaq Store support to renew."
   },
   "storeSettings": {
