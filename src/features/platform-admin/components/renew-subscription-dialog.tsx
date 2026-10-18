@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent } from 'react';
+import { type FormEvent, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -15,6 +15,7 @@ import { FieldGroup } from '@/components/ui/field';
 import { useAppForm } from '@/lib/form';
 import { useT } from '@/i18n/use-t';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { platformKeys } from '../api/queries';
 import { updateShopSubscription } from '../api/service';
 import type { RenewSubscriptionDialogProps } from '@/types';
@@ -62,6 +63,7 @@ function RenewSubscriptionDialogBody({
 }: Omit<RenewSubscriptionDialogProps, 'open'>) {
   const t = useT();
   const qc = useQueryClient();
+  const [subscriptionDateError, setSubscriptionDateError] = useState('');
 
   const renew = useMutation({
     mutationFn: (subscriptionEndsAt: string) =>
@@ -82,9 +84,10 @@ function RenewSubscriptionDialogBody({
     },
     onSubmit: async ({ value }) => {
       if (!(value.subscriptionEndsAt instanceof Date)) {
-        toast.error(t('platform.validation.subscriptionRequired'));
+        setSubscriptionDateError(t('platform.validation.subscriptionRequired'));
         return;
       }
+      setSubscriptionDateError('');
       await renew.mutateAsync(toIsoDate(value.subscriptionEndsAt));
     }
   });
@@ -105,7 +108,10 @@ function RenewSubscriptionDialogBody({
 
       <form className='space-y-4 pt-2' onSubmit={handleSubmit}>
         <FieldGroup>
-          <form.AppField name='subscriptionEndsAt'>
+          <form.AppField
+            name='subscriptionEndsAt'
+            listeners={{ onChange: () => setSubscriptionDateError('') }}
+          >
             {(field) => (
               <field.DatePickerField
                 label={t('platform.fields.subscriptionEndsAt')}
@@ -114,6 +120,7 @@ function RenewSubscriptionDialogBody({
               />
             )}
           </form.AppField>
+          <DialogFieldError message={subscriptionDateError} />
         </FieldGroup>
 
         <DialogFooter>

@@ -1,0 +1,23 @@
+import * as z from 'zod';
+import type { useTranslations } from 'next-intl';
+
+type Translator = ReturnType<typeof useTranslations>;
+
+export const createSaleFormSchema = (t: Translator) =>
+  z.object({
+    customer_id: z.string(),
+    discount: z.number().min(0, t('validation.valueNonNegative')),
+    paid_now: z.number().min(0, t('validation.valueNonNegative')),
+    notes: z.string(),
+    lines: z
+      .array(
+        z.object({
+          product_id: z.string().min(1, t('validation.productRequired')),
+          quantity: z.number().int().positive(t('validation.quantityPositive')),
+          unit_price: z.number().min(0, t('validation.valueNonNegative')),
+          inventory_unit_id: z.string().optional(),
+          tracking_type: z.enum(['QUANTITY', 'SERIALIZED']).optional()
+        })
+      )
+      .min(1, t('validation.lineItemsMinOne'))
+  });

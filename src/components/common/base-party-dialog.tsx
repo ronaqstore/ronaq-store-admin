@@ -14,6 +14,7 @@ import { FieldGroup } from '@/components/ui/field';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { useAppForm } from '@/lib/form';
+import { INPUT_LIMITS } from '@/lib/input-limits';
 import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import type { BasePartyDialogProps, BasePartyDialogBodyProps, BasePartyFormState } from '@/types';
@@ -150,6 +151,7 @@ function BasePartyDialogBody({
                   label={t('dukaan.party.phone')}
                   type='tel'
                   inputMode='numeric'
+                  maxLength={INPUT_LIMITS.phone}
                   placeholder={t('users.phonePlaceholder')}
                   startIcon={Icons.phone}
                 />
@@ -157,11 +159,23 @@ function BasePartyDialogBody({
             />
             <form.AppField
               name='address'
-              children={(field) => <field.TextField label={t('dukaan.party.address')} />}
+              children={(field) => (
+                <field.TextField
+                  label={t('dukaan.party.address')}
+                  maxLength={INPUT_LIMITS.addressCustomer}
+                />
+              )}
             />
             <form.AppField
               name='opening_balance'
-              children={(field) => <field.TextField label={openingBalanceLabel} type='number' />}
+              children={(field) => (
+                <field.TextField
+                  label={openingBalanceLabel}
+                  type='number'
+                  min={0}
+                  max={INPUT_LIMITS.amountRupeesMax}
+                />
+              )}
             />
             <form.AppField
               name='notes'

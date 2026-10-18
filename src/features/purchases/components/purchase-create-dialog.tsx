@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/dialog';
 import { useT } from '@/i18n/use-t';
 import { useAppForm } from '@/lib/form';
+import { INPUT_LIMITS } from '@/lib/input-limits';
+import { isFieldMetaInvalid } from '@/lib/form-context';
 import { todayIsoDate } from '@/lib/dates';
 import { createClientRequestId, formatPkr, fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import type {
@@ -100,11 +102,6 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
         };
       });
 
-    if (items.length === 0) {
-      toast.error(t('purchases.addAtLeastOneItem'));
-      return;
-    }
-
     const payload: CreatePurchaseInput = {
       clientRequestId,
       supplierId: values.supplier_id,
@@ -182,7 +179,7 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
         <form.Field
           name='supplier_id'
           children={(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            const isInvalid = isFieldMetaInvalid(field.state.meta);
             return (
               <FormEntitySelect
                 name={field.name}
@@ -203,7 +200,12 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
         />
         <form.AppField
           name='supplier_invoice_ref'
-          children={(field) => <field.TextField label={t('dukaan.purchase.invoiceRef')} />}
+          children={(field) => (
+            <field.TextField
+              label={t('dukaan.purchase.invoiceRef')}
+              maxLength={INPUT_LIMITS.invoiceRef}
+            />
+          )}
         />
         <div className='sm:col-span-2'>
           <form.AppField
@@ -245,8 +247,7 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
                   <form.Field
                     name={`lines[${idx}].product_id`}
                     children={(subField) => {
-                      const isInvalid =
-                        subField.state.meta.isTouched && !subField.state.meta.isValid;
+                      const isInvalid = isFieldMetaInvalid(subField.state.meta);
                       return (
                         <FormEntitySelect<ProductPickerItem>
                           name={subField.name}
@@ -274,6 +275,8 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
                       <subField.TextField
                         label={t('dukaan.purchase.quantity')}
                         type='number'
+                        min={1}
+                        max={INPUT_LIMITS.quantityMax}
                         required
                       />
                     )}
@@ -284,6 +287,8 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
                       <subField.TextField
                         label={t('dukaan.purchase.unitCost')}
                         type='number'
+                        min={0}
+                        max={INPUT_LIMITS.amountRupeesMax}
                         required
                       />
                     )}
@@ -300,6 +305,7 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
                                 label={t('dukaan.purchase.imei1List')}
                                 placeholder={t('dukaan.purchase.imeiHelp')}
                                 rows={2}
+                                maxLength={INPUT_LIMITS.description}
                                 required
                               />
                             )}
@@ -361,6 +367,8 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
                     <subField.TextField
                       label={t('dukaan.purchase.paidNow')}
                       type='number'
+                      min={0}
+                      max={INPUT_LIMITS.amountRupeesMax}
                       required
                     />
                   )}

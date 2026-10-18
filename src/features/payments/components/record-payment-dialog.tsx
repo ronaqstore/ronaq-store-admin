@@ -20,7 +20,11 @@ import { todayIsoDate } from '@/lib/dates';
 import { useT } from '@/i18n/use-t';
 import { Icons } from '@/components/icons';
 import type { CustomerDTO } from '@/lib/api/types';
-import type { PaymentMethodOption, RecordPaymentDialogProps } from '@/types/payment';
+import type {
+  PaymentMethodOption,
+  RecordPaymentDialogProps,
+  RecordPaymentFormErrors
+} from '@/types/payment';
 import {
   Select,
   SelectContent,
@@ -33,6 +37,10 @@ import { createPaymentMutation } from '../api/mutations';
 import { paymentKeys } from '../api/queries';
 import { CustomerSelectCombobox } from './customer-select';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
+import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
+import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
+import { cn } from '@/lib/utils';
 
 const PAYMENT_METHOD_OPTIONS = [
   { value: 'CASH', label: 'Cash' },
@@ -55,6 +63,7 @@ export function RecordPaymentDialog({
   const [paymentDate, setPaymentDate] = useState(todayIsoDate);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodOption>('CASH');
   const [notes, setNotes] = useState('');
+  const [errors, setErrors] = useState<RecordPaymentFormErrors>({});
 
   const recordMutation = useMutation({
     ...createPaymentMutation,
@@ -78,15 +87,19 @@ export function RecordPaymentDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const nextErrors: RecordPaymentFormErrors = {};
     if (!customerId) {
-      toast.error(t('payments.selectCustomer'));
-      return;
+      nextErrors.customerId = t('payments.selectCustomer');
     }
     const num = parseFloat(amountStr);
     if (!num || num <= 0) {
-      toast.error(t('payments.validAmount'));
+      nextErrors.amount = t('payments.validAmount');
+    }
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
+    setErrors({});
 
     const paisaAmount = toPaisa(num);
 
@@ -103,6 +116,18 @@ export function RecordPaymentDialog({
   const handleSelectCustomer = (cust: CustomerDTO | null) => {
     setCustomerId(cust ? cust.id : '');
     setSelectedCustomer(cust);
+    if (cust) setErrors((prev) => ({ ...prev, customerId: undefined }));
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAmountStr(
+      sanitizeNumberInput(e.target.value, { min: 1, max: INPUT_LIMITS.amountRupeesMax })
+    );
+    setErrors((prev) => ({ ...prev, amount: undefined }));
+  };
+
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNotes(clampText(e.target.value, INPUT_LIMITS.notes));
   };
 
   return (
@@ -123,6 +148,7 @@ export function RecordPaymentDialog({
               selectedCustomer={selectedCustomer}
               onSelectCustomer={handleSelectCustomer}
             />
+            <DialogFieldError message={errors.customerId} />
           </div>
 
           {selectedCustomer && (
@@ -155,15 +181,22 @@ export function RecordPaymentDialog({
               <Input
                 id='payment-amount'
                 type='number'
-                min='1'
+                min={1}
+                max={INPUT_LIMITS.amountRupeesMax}
                 step='any'
                 placeholder='0'
-                className='ps-9 text-sm font-normal text-foreground'
+                className={cn(
+                  'ps-9 text-sm font-normal text-foreground',
+                  errors.amount && 'border-destructive'
+                )}
                 value={amountStr}
-                onChange={(e) => setAmountStr(e.target.value)}
+                onChange={handleAmountChange}
+                onKeyDown={(e) => blockInvalidNumberKeys(e)}
+                aria-invalid={!!errors.amount}
                 required
               />
             </div>
+            <DialogFieldError id='payment-amount-error' message={errors.amount} />
           </div>
 
           <div className='space-y-1.5'>
@@ -241,7 +274,8 @@ export function RecordPaymentDialog({
               id='payment-notes'
               placeholder={t('payments.notesPlaceholder')}
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={handleNotesChange}
+              maxLength={INPUT_LIMITS.notes}
               rows={2}
               className='text-sm font-normal text-foreground'
             />
@@ -254,7 +288,7 @@ export function RecordPaymentDialog({
             />
             <DialogPrimaryButton
               mode='add'
-              disabled={recordMutation.isPending || !customerId || !amountStr}
+              disabled={recordMutation.isPending}
               loading={recordMutation.isPending}
             />
           </DialogFooter>

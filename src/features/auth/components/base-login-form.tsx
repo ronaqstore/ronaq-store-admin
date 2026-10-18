@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Icons } from '@/components/icons';
 import { isValidPkMobile } from '@/lib/auth/phone';
+import { INPUT_LIMITS } from '@/lib/input-limits';
 import type { BaseLoginFormProps, LoginValues } from '@/types/auth';
 
 export function BaseLoginForm({
@@ -81,6 +82,7 @@ export function BaseLoginForm({
                   label={t('auth.phone')}
                   type='tel'
                   inputMode='numeric'
+                  maxLength={INPUT_LIMITS.phone}
                   autoComplete='tel'
                   placeholder='03XXXXXXXXX'
                   startIcon={Icons.phone}

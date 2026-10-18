@@ -29,6 +29,8 @@ import {
 } from '@/components/ui/table';
 import { useT } from '@/i18n/use-t';
 import { useAppForm } from '@/lib/form';
+import { INPUT_LIMITS } from '@/lib/input-limits';
+import { isFieldMetaInvalid } from '@/lib/form-context';
 import { formatIsoDate, todayIsoDate } from '@/lib/dates';
 import {
   createClientRequestId,
@@ -57,6 +59,7 @@ const ReturnSaleDialog = dynamic(
   { ssr: false }
 );
 import { createSaleMutation } from '../api/mutations';
+import { createSaleFormSchema } from '../schemas/sale-schema';
 import type { CreateSaleInput, CreateSaleItemInput, SaleDTO } from '@/lib/api/types';
 import type {
   SaleCreateDialogProps,
@@ -154,6 +157,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
       notes: '',
       lines: [{ ...emptySaleLine }]
     },
+    validators: { onSubmit: createSaleFormSchema(t) as never },
     onSubmit: ({ value }: SaleFormSubmitContext) => {
       const items: CreateSaleItemInput[] = value.lines
         .filter((l) => l.product_id)
@@ -163,11 +167,6 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
           unitPrice: toPaisa(Number(l.unit_price) || 0),
           inventoryUnitId: l.inventory_unit_id || undefined
         }));
-
-      if (items.length === 0) {
-        toast.error(t('dukaan.sale.atLeastOneLine'));
-        return;
-      }
 
       const payload: CreateSaleInput = {
         clientRequestId,
@@ -227,7 +226,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
               <form.Field
                 name='customer_id'
                 children={(field) => {
-                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                  const isInvalid = isFieldMetaInvalid(field.state.meta);
                   return (
                     <FormEntitySelect
                       name={field.name}
@@ -297,8 +296,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
                     <form.Field
                       name={`lines[${idx}].product_id`}
                       children={(subField) => {
-                        const isInvalid =
-                          subField.state.meta.isTouched && !subField.state.meta.isValid;
+                        const isInvalid = isFieldMetaInvalid(subField.state.meta);
                         return (
                           <FormEntitySelect<ProductPickerItem>
                             name={subField.name}
@@ -327,6 +325,8 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
                       <subField.TextField
                         label={t('dukaan.sale.quantity')}
                         type='number'
+                        min={1}
+                        max={INPUT_LIMITS.quantityMax}
                         required
                       />
                     )}
@@ -337,6 +337,8 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
                       <subField.TextField
                         label={t('dukaan.sale.unitPrice')}
                         type='number'
+                        min={0}
+                        max={INPUT_LIMITS.amountRupeesMax}
                         required
                       />
                     )}
@@ -362,13 +364,25 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
         <form.AppField
           name='discount'
           children={(field) => (
-            <field.TextField label={t('dukaan.sale.discount')} type='number' required />
+            <field.TextField
+              label={t('dukaan.sale.discount')}
+              type='number'
+              min={0}
+              max={INPUT_LIMITS.amountRupeesMax}
+              required
+            />
           )}
         />
         <form.AppField
           name='paid_now'
           children={(field) => (
-            <field.TextField label={t('dukaan.sale.paidNow')} type='number' required />
+            <field.TextField
+              label={t('dukaan.sale.paidNow')}
+              type='number'
+              min={0}
+              max={INPUT_LIMITS.amountRupeesMax}
+              required
+            />
           )}
         />
         <div className='sm:col-span-2'>
@@ -377,6 +391,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
             children={(field) => (
               <field.TextField
                 label={t('dukaan.sale.notes')}
+                maxLength={INPUT_LIMITS.notes}
                 placeholder={t('dukaan.sale.notesPlaceholder')}
               />
             )}

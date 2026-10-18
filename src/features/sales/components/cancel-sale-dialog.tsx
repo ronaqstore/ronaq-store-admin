@@ -16,6 +16,7 @@ export function CancelSaleDialog({ sale, open, onOpenChange, onSuccess }: Cancel
   const qc = useQueryClient();
   const t = useT();
   const [reason, setReason] = useState('');
+  const [reasonError, setReasonError] = useState('');
   const [confirmOverdraft, setConfirmOverdraft] = useState(false);
   const [overdraftPrompt, setOverdraftPrompt] = useState<OverdraftPrompt | null>(null);
 
@@ -50,9 +51,10 @@ export function CancelSaleDialog({ sale, open, onOpenChange, onSuccess }: Cancel
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
-      toast.error(t('sales.cancelDialog.reasonRequired'));
+      setReasonError(t('sales.cancelDialog.reasonRequired'));
       return;
     }
+    setReasonError('');
 
     cancel.mutate({
       id: sale.id,
@@ -61,6 +63,11 @@ export function CancelSaleDialog({ sale, open, onOpenChange, onSuccess }: Cancel
         confirmOverdraft: confirmOverdraft || !!overdraftPrompt
       }
     });
+  };
+
+  const handleReasonChange = (v: string) => {
+    setReason(v);
+    setReasonError('');
   };
 
   const impactItems: CancelImpactItem[] = [];
@@ -127,7 +134,8 @@ export function CancelSaleDialog({ sale, open, onOpenChange, onSuccess }: Cancel
       impactItems={impactItems}
       overdraftAlert={overdraftSection}
       reason={reason}
-      onReasonChange={setReason}
+      onReasonChange={handleReasonChange}
+      reasonError={reasonError}
       reasonLabel={t('sales.cancelDialog.reasonLabel')}
       reasonPlaceholder={t('sales.cancelDialog.reasonPlaceholder')}
       reasonId='saleCancelReason'

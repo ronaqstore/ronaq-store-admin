@@ -13,6 +13,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
+import { cn } from '@/lib/utils';
+import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { useT } from '@/i18n/use-t';
 import type {
   EditStoreProfileDialogBodyProps,
@@ -49,6 +52,7 @@ function EditStoreProfileDialogBody({
   const [city, setCity] = useState(settings.city ?? '');
   const [openingHours, setOpeningHours] = useState(settings.openingHours ?? '');
   const [googleMapsUrl, setGoogleMapsUrl] = useState(settings.googleMapsUrl ?? '');
+  const [displayNameError, setDisplayNameError] = useState('');
 
   useEffect(() => {
     setDisplayName(settings.displayName ?? '');
@@ -63,7 +67,11 @@ function EditStoreProfileDialogBody({
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!displayName.trim()) return;
+    if (!displayName.trim()) {
+      setDisplayNameError(t('validation.nameRequired'));
+      return;
+    }
+    setDisplayNameError('');
 
     updateMutation.mutate(
       {
@@ -82,6 +90,39 @@ function EditStoreProfileDialogBody({
     );
   };
 
+  const handleDisplayNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDisplayName(clampText(e.target.value, INPUT_LIMITS.name));
+    setDisplayNameError('');
+  };
+
+  const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCity(clampText(e.target.value, INPUT_LIMITS.city));
+  };
+
+  const handleOpeningHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOpeningHours(clampText(e.target.value, INPUT_LIMITS.openingHours));
+  };
+
+  const handleAboutChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setAbout(clampText(e.target.value, INPUT_LIMITS.about));
+  };
+
+  const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setWhatsappNumber(clampText(e.target.value, INPUT_LIMITS.phone));
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhoneNumber(clampText(e.target.value, INPUT_LIMITS.phoneLoose));
+  };
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAddress(clampText(e.target.value, INPUT_LIMITS.address));
+  };
+
+  const handleGoogleMapsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setGoogleMapsUrl(clampText(e.target.value, INPUT_LIMITS.imageUrl));
+  };
+
   const busy = updateMutation.isPending;
 
   return (
@@ -98,20 +139,30 @@ function EditStoreProfileDialogBody({
             <Input
               id='edit-displayName'
               value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
+              onChange={handleDisplayNameChange}
+              maxLength={INPUT_LIMITS.name}
+              className={cn(displayNameError && 'border-destructive')}
+              aria-invalid={!!displayNameError}
               required
             />
+            <DialogFieldError id='edit-displayName-error' message={displayNameError} />
           </div>
           <div className='space-y-2'>
             <Label htmlFor='edit-city'>{t('storeSettings.city')}</Label>
-            <Input id='edit-city' value={city} onChange={(e) => setCity(e.target.value)} />
+            <Input
+              id='edit-city'
+              value={city}
+              onChange={handleCityChange}
+              maxLength={INPUT_LIMITS.city}
+            />
           </div>
           <div className='space-y-2'>
             <Label htmlFor='edit-hours'>{t('storeSettings.openingHours')}</Label>
             <Input
               id='edit-hours'
               value={openingHours}
-              onChange={(e) => setOpeningHours(e.target.value)}
+              onChange={handleOpeningHoursChange}
+              maxLength={INPUT_LIMITS.openingHours}
             />
           </div>
         </div>
@@ -121,7 +172,8 @@ function EditStoreProfileDialogBody({
           <Textarea
             id='edit-about'
             value={about}
-            onChange={(e) => setAbout(e.target.value)}
+            onChange={handleAboutChange}
+            maxLength={INPUT_LIMITS.about}
             rows={3}
           />
         </div>
@@ -132,7 +184,8 @@ function EditStoreProfileDialogBody({
             <Input
               id='edit-whatsapp'
               value={whatsappNumber}
-              onChange={(e) => setWhatsappNumber(e.target.value)}
+              onChange={handleWhatsappChange}
+              maxLength={INPUT_LIMITS.phone}
               placeholder='923001234567'
             />
           </div>
@@ -141,7 +194,8 @@ function EditStoreProfileDialogBody({
             <Input
               id='edit-phone'
               value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              onChange={handlePhoneChange}
+              maxLength={INPUT_LIMITS.phoneLoose}
               placeholder='0300-1234567'
             />
           </div>
@@ -152,7 +206,8 @@ function EditStoreProfileDialogBody({
           <Input
             id='edit-address'
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            onChange={handleAddressChange}
+            maxLength={INPUT_LIMITS.address}
           />
         </div>
 
@@ -161,7 +216,8 @@ function EditStoreProfileDialogBody({
           <Input
             id='edit-maps'
             value={googleMapsUrl}
-            onChange={(e) => setGoogleMapsUrl(e.target.value)}
+            onChange={handleGoogleMapsChange}
+            maxLength={INPUT_LIMITS.imageUrl}
             placeholder={t('storeSettings.googleMapsPlaceholder')}
           />
         </div>
@@ -171,7 +227,7 @@ function EditStoreProfileDialogBody({
           <DialogPrimaryButton
             mode='save'
             loading={busy}
-            disabled={busy || !displayName.trim()}
+            disabled={busy}
           />
         </DialogFooter>
       </form>

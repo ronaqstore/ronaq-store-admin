@@ -19,6 +19,7 @@ export function CancelPurchaseDialog({
   const t = useT();
   const qc = useQueryClient();
   const [reason, setReason] = useState('');
+  const [reasonError, setReasonError] = useState('');
 
   const { data: impact, isLoading: impactLoading } = useQuery({
     ...purchaseCancelImpactQueryOptions(purchase.id),
@@ -41,9 +42,10 @@ export function CancelPurchaseDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
-      toast.error(t('purchases.cancelDialog.reasonRequired'));
+      setReasonError(t('purchases.cancelDialog.reasonRequired'));
       return;
     }
+    setReasonError('');
 
     cancel.mutate({
       id: purchase.id,
@@ -51,6 +53,11 @@ export function CancelPurchaseDialog({
         cancelReason: reason.trim()
       }
     });
+  };
+
+  const handleReasonChange = (v: string) => {
+    setReason(v);
+    setReasonError('');
   };
 
   const impactItems: CancelImpactItem[] = [
@@ -86,7 +93,8 @@ export function CancelPurchaseDialog({
       loadingImpactText={t('purchases.cancelDialog.calculatingImpact')}
       impactItems={impactItems}
       reason={reason}
-      onReasonChange={setReason}
+      onReasonChange={handleReasonChange}
+      reasonError={reasonError}
       reasonLabel={t('purchases.cancelDialog.reasonLabel')}
       reasonPlaceholder={t('purchases.cancelDialog.reasonPlaceholder')}
       reasonId='purchaseCancelReason'

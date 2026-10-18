@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
 import { useAppForm } from '@/lib/form';
+import { INPUT_LIMITS } from '@/lib/input-limits';
 import { useT } from '@/i18n/use-t';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { platformKeys } from '../api/queries';
@@ -123,6 +124,7 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
               {(field) => (
                 <field.TextField
                   label={t('platform.fields.shopName')}
+                  maxLength={INPUT_LIMITS.nameLong}
                   placeholder={t('platform.fields.shopNamePlaceholder')}
                   required
                 />
@@ -132,6 +134,7 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
               {(field) => (
                 <field.TextField
                   label={t('platform.fields.shopPhone')}
+                  maxLength={INPUT_LIMITS.phone}
                   placeholder={t('platform.fields.phonePlaceholder')}
                 />
               )}
@@ -140,6 +143,7 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
               {(field) => (
                 <field.TextareaField
                   label={t('platform.fields.shopAddress')}
+                  maxLength={INPUT_LIMITS.shopAddress}
                   placeholder={t('platform.fields.shopAddressPlaceholder')}
                 />
               )}
@@ -148,6 +152,7 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
               {(field) => (
                 <field.TextField
                   label={t('platform.fields.ownerName')}
+                  maxLength={INPUT_LIMITS.name}
                   placeholder={t('platform.fields.ownerNamePlaceholder')}
                   required
                 />
@@ -157,6 +162,7 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
               {(field) => (
                 <field.TextField
                   label={t('platform.fields.ownerPhone')}
+                  maxLength={INPUT_LIMITS.phone}
                   placeholder={t('platform.fields.phonePlaceholder')}
                   required
                 />

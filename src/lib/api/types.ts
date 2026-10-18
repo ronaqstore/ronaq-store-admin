@@ -461,6 +461,10 @@ export interface ProductAttributes {
   defaultSellingPrice?: number;
   lowStockThreshold?: number;
   isActive?: boolean;
+  isPublished?: boolean;
+  publicDescription?: string | null;
+  contactForPrice?: boolean;
+  ptaStatus?: PtaStatus | null;
 }
 
 export interface CreateProductInput extends ProductAttributes {
@@ -475,10 +479,6 @@ export interface UpdateProductInput extends Partial<ProductAttributes> {
   categoryId?: string;
   brandId?: string;
   trackingType?: TrackingType;
-  isPublished?: boolean;
-  publicDescription?: string | null;
-  contactForPrice?: boolean;
-  ptaStatus?: PtaStatus | null;
 }
 
 export interface ProductListFilters {

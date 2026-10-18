@@ -21,7 +21,8 @@ import { useT } from '@/i18n/use-t';
 import type {
   SupplierDTO,
   UnpaidPurchaseDTO,
-  RecordSupplierPaymentDialogProps
+  RecordSupplierPaymentDialogProps,
+  SupplierPaymentFormErrors
 } from '@/types/supplier-payment';
 import type { OverdraftPrompt } from '@/types';
 import { createSupplierPaymentMutation } from '../api/mutations';
@@ -29,7 +30,11 @@ import { supplierPaymentKeys, supplierPayableQueryOptions } from '../api/queries
 import { SupplierSelectCombobox } from './supplier-select';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
+import { SupplierPaymentTargetSection } from './supplier-payment-target-section';
+import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
+import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
+import { cn } from '@/lib/utils';
 
 export function RecordSupplierPaymentDialog({
   open,
@@ -48,6 +53,7 @@ export function RecordSupplierPaymentDialog({
   const [notes, setNotes] = useState('');
   const [confirmOverdraft, setConfirmOverdraft] = useState(false);
   const [overdraftPrompt, setOverdraftPrompt] = useState<OverdraftPrompt | null>(null);
+  const [errors, setErrors] = useState<SupplierPaymentFormErrors>({});
 
   const { data: payableData, isLoading: payableLoading } = useQuery({
     ...supplierPayableQueryOptions(supplierId),
@@ -76,6 +82,7 @@ export function RecordSupplierPaymentDialog({
     setNotes('');
     setConfirmOverdraft(false);
     setOverdraftPrompt(null);
+    setErrors({});
   };
 
   const recordMutation = useMutation({
@@ -127,33 +134,32 @@ export function RecordSupplierPaymentDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const nextErrors: SupplierPaymentFormErrors = {};
     if (!supplierId) {
-      toast.error(t('supplierPayments.supplierRequired'));
-      return;
+      nextErrors.supplierId = t('supplierPayments.supplierRequired');
     }
 
     const num = parseFloat(amountStr);
-    if (!num || num <= 0) {
-      toast.error(t('common.invalidAmount'));
-      return;
-    }
-
     const paisaAmount = toPaisa(num);
-
-    if (maxRemainingPaisa > 0 && paisaAmount > maxRemainingPaisa) {
-      toast.error(t('supplierPayments.amountExceedsDebt'));
-      return;
+    if (!num || num <= 0) {
+      nextErrors.amount = t('common.invalidAmount');
+    } else if (maxRemainingPaisa > 0 && paisaAmount > maxRemainingPaisa) {
+      nextErrors.amount = t('supplierPayments.amountExceedsDebt');
     }
 
     if (targetType === 'purchase' && !selectedPurchaseId) {
-      toast.error(t('supplierPayments.selectPurchaseBill'));
-      return;
+      nextErrors.purchaseId = t('supplierPayments.selectPurchaseBill');
     }
 
     if (overdraftPrompt && !confirmOverdraft) {
-      toast.error(t('supplierPayments.confirmOverdraftBeforeSaving'));
+      nextErrors.confirmOverdraft = t('supplierPayments.confirmOverdraftBeforeSaving');
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
+    setErrors({});
 
     recordMutation.mutate({
       supplierId,
@@ -169,15 +175,35 @@ export function RecordSupplierPaymentDialog({
     if (!next) resetForm();
     onOpenChange(next);
   };
-
   const handleTargetTypeChange = (val: string) => {
     setTargetType(val as 'opening' | 'purchase');
     setAmountStr('');
   };
-
   const handleSelectPurchase = (purchaseId: string) => {
     setSelectedPurchaseId(purchaseId);
     setAmountStr('');
+    setErrors((e) => ({ ...e, purchaseId: undefined }));
+  };
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAmountStr(sanitizeNumberInput(e.target.value, { min: 1, max: INPUT_LIMITS.amountRupeesMax }));
+    setErrors((p) => ({ ...p, amount: undefined }));
+  };
+
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNotes(clampText(e.target.value, INPUT_LIMITS.notes));
+  };
+  const handleConfirmOverdraftChange = (checked: boolean) => {
+    setConfirmOverdraft(checked);
+    if (checked) setErrors((p) => ({ ...p, confirmOverdraft: undefined }));
+  };
+
+  const handleChoosePurchaseTarget = () => {
+    if (unpaidPurchases.length > 0) {
+      setTargetType('purchase');
+      if (!selectedPurchaseId && unpaidPurchases[0]) {
+        setSelectedPurchaseId(unpaidPurchases[0].id);
+      }
+    }
   };
 
   return (
@@ -200,6 +226,7 @@ export function RecordSupplierPaymentDialog({
               placeholder={t('supplierPayments.searchSupplierPlaceholder')}
               disabled={recordMutation.isPending}
             />
+            <DialogFieldError message={errors.supplierId} />
           </div>
 
           {supplierId && (
@@ -239,120 +266,28 @@ export function RecordSupplierPaymentDialog({
           )}
 
           {supplierId && payableData && (
-            <div className='space-y-2'>
-              <Label className='text-sm font-normal text-foreground'>
-                {t('supplierPayments.paymentTarget')}
-              </Label>
-              <RadioGroup
-                value={targetType}
-                onValueChange={handleTargetTypeChange}
-                className='grid grid-cols-2 gap-2'
-              >
-                <div
-                  onClick={() => setTargetType('opening')}
-                  className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 text-sm transition-all ${
-                    targetType === 'opening'
-                      ? 'border-primary bg-primary/5 text-primary shadow-xs'
-                      : 'border-border/70 bg-card hover:bg-muted/30 text-foreground'
-                  }`}
-                >
-                  <div className='flex items-center gap-2'>
-                    <RadioGroupItem value='opening' id='target-opening' />
-                    <Label htmlFor='target-opening' className='cursor-pointer text-xs font-medium'>
-                      {t('supplierPayments.openingBalance')}
-                    </Label>
-                  </div>
-                  <span className='text-xs font-semibold text-muted-foreground'>
-                    {formatPkr(openingRemaining)}
-                  </span>
-                </div>
-
-                <div
-                  onClick={() => {
-                    if (unpaidPurchases.length > 0) {
-                      setTargetType('purchase');
-                      if (!selectedPurchaseId && unpaidPurchases[0]) {
-                        setSelectedPurchaseId(unpaidPurchases[0].id);
-                      }
-                    }
-                  }}
-                  className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 text-sm transition-all ${
-                    targetType === 'purchase'
-                      ? 'border-primary bg-primary/5 text-primary shadow-xs'
-                      : 'border-border/70 bg-card hover:bg-muted/30 text-foreground'
-                  } ${unpaidPurchases.length === 0 ? 'opacity-50 pointer-events-none' : ''}`}
-                >
-                  <div className='flex items-center gap-2'>
-                    <RadioGroupItem
-                      value='purchase'
-                      id='target-purchase'
-                      disabled={unpaidPurchases.length === 0}
-                    />
-                    <Label htmlFor='target-purchase' className='cursor-pointer text-xs font-medium'>
-                      {t('supplierPayments.specificBill')}
-                    </Label>
-                  </div>
-                  <span className='text-xs text-muted-foreground'>
-                    {unpaidPurchases.length} {t('supplierPayments.billsCount')}
-                  </span>
-                </div>
-              </RadioGroup>
-
-              {targetType === 'purchase' && (
-                <div className='mt-2 space-y-1.5'>
-                  <Label className='text-xs font-normal text-muted-foreground'>
-                    {t('supplierPayments.selectBillInvoice')}
-                  </Label>
-                  {unpaidPurchases.length === 0 ? (
-                    <p className='text-xs text-muted-foreground'>
-                      {t('supplierPayments.noUnpaidBills')}
-                    </p>
-                  ) : (
-                    <div className='max-h-36 space-y-1.5 overflow-y-auto rounded-lg border border-border/70 p-1.5'>
-                      {unpaidPurchases.map((purchase) => {
-                        const isChosen = selectedPurchaseId === purchase.id;
-                        return (
-                          <div
-                            key={purchase.id}
-                            onClick={() => handleSelectPurchase(purchase.id)}
-                            className={`flex cursor-pointer items-center justify-between rounded-md p-2 text-xs transition-colors ${
-                              isChosen
-                                ? 'bg-primary/10 font-semibold text-primary'
-                                : 'hover:bg-muted/50 text-foreground'
-                            }`}
-                          >
-                            <div className='flex flex-col'>
-                              <span className='font-medium text-foreground'>
-                                {purchase.purchaseNo}
-                                {purchase.supplierInvoiceRef && (
-                                  <span className='text-muted-foreground ms-1'>
-                                    {t('supplierPayments.inv', {
-                                      inv: purchase.supplierInvoiceRef
-                                    })}
-                                  </span>
-                                )}
-                              </span>
-                              <span className='text-[10px] text-muted-foreground'>
-                                {t('supplierPayments.date')} {purchase.purchaseDate}{' '}
-                                {t('supplierPayments.total')} {formatPkr(purchase.totalAmount)}
-                              </span>
-                            </div>
-                            <div className='text-end'>
-                              <span className='font-semibold text-foreground'>
-                                {formatPkr(purchase.remaining)}
-                              </span>
-                              <div className='text-[10px] text-muted-foreground'>
-                                {t('supplierPayments.remaining')}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            <SupplierPaymentTargetSection
+              targetType={targetType}
+              openingRemaining={openingRemaining}
+              unpaidPurchases={unpaidPurchases}
+              selectedPurchaseId={selectedPurchaseId}
+              purchaseIdError={errors.purchaseId}
+              onTargetTypeChange={handleTargetTypeChange}
+              onSelectPurchase={handleSelectPurchase}
+              onChoosePurchaseTarget={handleChoosePurchaseTarget}
+              labels={{
+                paymentTarget: t('supplierPayments.paymentTarget'),
+                openingBalance: t('supplierPayments.openingBalance'),
+                specificBill: t('supplierPayments.specificBill'),
+                billsCount: t('supplierPayments.billsCount'),
+                selectBillInvoice: t('supplierPayments.selectBillInvoice'),
+                noUnpaidBills: t('supplierPayments.noUnpaidBills'),
+                inv: (inv) => t('supplierPayments.inv', { inv }),
+                date: t('supplierPayments.date'),
+                total: t('supplierPayments.total'),
+                remaining: t('supplierPayments.remaining')
+              }}
+            />
           )}
 
           <div className='space-y-1.5'>
@@ -380,16 +315,23 @@ export function RecordSupplierPaymentDialog({
               <Input
                 id='supplier-payment-amount'
                 type='number'
-                min='1'
+                min={1}
+                max={INPUT_LIMITS.amountRupeesMax}
                 step='any'
                 placeholder='0.00'
                 value={amountStr}
-                onChange={(e) => setAmountStr(e.target.value)}
+                onChange={handleAmountChange}
+                onKeyDown={(e) => blockInvalidNumberKeys(e)}
                 disabled={recordMutation.isPending}
-                className='h-10 ps-9 text-sm font-normal text-foreground'
+                className={cn(
+                  'h-10 ps-9 text-sm font-normal text-foreground',
+                  errors.amount && 'border-destructive'
+                )}
+                aria-invalid={!!errors.amount}
                 required
               />
             </div>
+            <DialogFieldError id='supplier-payment-amount-error' message={errors.amount} />
           </div>
 
           <div className='space-y-1.5'>
@@ -417,7 +359,8 @@ export function RecordSupplierPaymentDialog({
               rows={2}
               placeholder={t('supplierPayments.notesPlaceholder')}
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={handleNotesChange}
+              maxLength={INPUT_LIMITS.notes}
               disabled={recordMutation.isPending}
               className='resize-none text-sm font-normal text-foreground'
             />
@@ -427,7 +370,7 @@ export function RecordSupplierPaymentDialog({
             <OverdraftAlert
               variant='banner'
               checked={confirmOverdraft}
-              onCheckedChange={setConfirmOverdraft}
+              onCheckedChange={handleConfirmOverdraftChange}
               title={t('supplierPayments.shortfallWarningTitle')}
               description={
                 overdraftPrompt.message ||
@@ -438,7 +381,7 @@ export function RecordSupplierPaymentDialog({
               confirmLabel={t('supplierPayments.confirmOverdraft')}
             />
           )}
-
+          {errors.confirmOverdraft && <DialogFieldError message={errors.confirmOverdraft} />}
           <DialogFooter className='gap-2 sm:gap-2.5 pt-2'>
             <DialogCancelButton
               onClick={() => onOpenChange(false)}
@@ -447,7 +390,7 @@ export function RecordSupplierPaymentDialog({
             <DialogPrimaryButton
               mode='add'
               loading={recordMutation.isPending}
-              disabled={recordMutation.isPending || (!!overdraftPrompt && !confirmOverdraft)}
+              disabled={recordMutation.isPending}
             />
           </DialogFooter>
         </form>

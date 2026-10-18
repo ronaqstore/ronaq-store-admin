@@ -113,6 +113,35 @@ export interface RecordSupplierPaymentDialogProps {
   onSuccess?: () => void;
 }
 
+export type SupplierPaymentFormErrors = Partial<
+  Record<'supplierId' | 'amount' | 'purchaseId' | 'confirmOverdraft', string>
+>;
+
+export interface SupplierPaymentTargetLabels {
+  paymentTarget: string;
+  openingBalance: string;
+  specificBill: string;
+  billsCount: string;
+  selectBillInvoice: string;
+  noUnpaidBills: string;
+  inv: (inv: string) => string;
+  date: string;
+  total: string;
+  remaining: string;
+}
+
+export interface SupplierPaymentTargetSectionProps {
+  targetType: 'opening' | 'purchase';
+  openingRemaining: number;
+  unpaidPurchases: UnpaidPurchaseDTO[];
+  selectedPurchaseId: string;
+  purchaseIdError?: string;
+  onTargetTypeChange: (val: string) => void;
+  onSelectPurchase: (purchaseId: string) => void;
+  onChoosePurchaseTarget: () => void;
+  labels: SupplierPaymentTargetLabels;
+}
+
 export interface SupplierPaymentDetailSheetProps {
   payment: SupplierPaymentDTO | null;
   open: boolean;

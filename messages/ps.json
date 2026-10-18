@@ -646,6 +646,8 @@
     "maxFileSize5Mb": "د فایل اعظمي اندازه ۵MB ده",
     "acceptedFileTypes": "د فایل منل شوي ډولونه: {types}",
     "productNameMin2Chars": "د محصول نوم باید لږ تر لږه دوه توری ولري",
+    "productNameMax100": "د محصول نوم باید له ۱۰۰ توریو څخه زیات نه وي",
+    "lowStockMax": "د کم ذخیره حد باید له ۱،۰۰۰،۰۰۰ څخه زیات نه وي",
     "descriptionMin10Chars": "توضیح باید لږ تر لږه لس توری ولري",
     "firstNameMin2Chars": "لومړی نوم باید لږ تر لږه دوه توری ولري",
     "lastNameMin2Chars": "وروستی نوم باید لږ تر لږه دوه توری ولري",

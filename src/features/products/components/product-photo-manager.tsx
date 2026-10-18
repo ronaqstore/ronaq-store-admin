@@ -15,16 +15,23 @@ import {
   useReorderProductImages,
   useUploadProductImage
 } from '../api/mutations';
+import type { ProductImageDTO } from '@/lib/api/types';
 import type { ProductPhotoManagerProps } from '@/types/products';
 
-export function ProductPhotoManager({ productId, images, onChange }: ProductPhotoManagerProps) {
+export function ProductPhotoManager({
+  productId,
+  images,
+  onChange,
+  onAddPendingFile,
+  onRemovePendingFile
+}: ProductPhotoManagerProps) {
   const t = useTranslations('dukaan.product');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isIconUploading, setIsIconUploading] = useState(false);
 
-  const uploadMutation = useUploadProductImage(productId);
-  const deleteMutation = useDeleteProductImage(productId);
-  const reorderMutation = useReorderProductImages(productId);
+  const uploadMutation = useUploadProductImage(productId ?? '');
+  const deleteMutation = useDeleteProductImage(productId ?? '');
+  const reorderMutation = useReorderProductImages(productId ?? '');
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -38,14 +45,30 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
         lastModified: Date.now()
       });
 
-      uploadMutation.mutate(resizedFile, {
-        onSettled: () => {
-          setIsIconUploading(false);
-          if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+      if (productId) {
+        uploadMutation.mutate(resizedFile, {
+          onSettled: () => {
+            setIsIconUploading(false);
+            if (fileInputRef.current) {
+              fileInputRef.current.value = '';
+            }
           }
+        });
+      } else {
+        const localId = `local-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        const localUrl = URL.createObjectURL(resizedFile);
+        const newImage: ProductImageDTO = {
+          id: localId,
+          url: localUrl,
+          sortOrder: images.length
+        };
+        onChange([...images, newImage]);
+        onAddPendingFile?.(resizedFile, localId);
+        setIsIconUploading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
         }
-      });
+      }
     } catch (error) {
       setIsIconUploading(false);
       toast.error((error as Error).message || t('imageTypeError'));
@@ -56,7 +79,12 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
   };
 
   const handleDelete = (imageId: string) => {
-    deleteMutation.mutate(imageId);
+    if (productId) {
+      deleteMutation.mutate(imageId);
+    } else {
+      onChange(images.filter((img) => img.id !== imageId));
+      onRemovePendingFile?.(imageId);
+    }
   };
 
   const handleMove = (fromIndex: number, toIndex: number) => {
@@ -65,7 +93,9 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
     const [moved] = newImages.splice(fromIndex, 1);
     newImages.splice(toIndex, 0, moved);
     onChange(newImages);
-    reorderMutation.mutate(newImages.map((img, idx) => ({ id: img.id, sortOrder: idx })));
+    if (productId) {
+      reorderMutation.mutate(newImages.map((img, idx) => ({ id: img.id, sortOrder: idx })));
+    }
   };
 
   return (

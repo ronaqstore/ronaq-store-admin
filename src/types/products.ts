@@ -14,6 +14,22 @@ export interface ProductImageQueryExtraOptions {
   enabled?: boolean;
 }
 
+export interface CreateProductResult {
+  id?: string;
+  message?: string;
+}
+
+export interface CreateProductApiResponse {
+  data?: { id?: string };
+  id?: string;
+  message?: string;
+}
+
+export interface PendingProductImageFile {
+  id: string;
+  file: File;
+}
+
 export interface ProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -26,9 +42,11 @@ export interface ProductDialogBodyProps {
 }
 
 export interface ProductPhotoManagerProps {
-  productId: string;
+  productId?: string;
   images: ProductImageDTO[];
   onChange: (images: ProductImageDTO[]) => void;
+  onAddPendingFile?: (file: File, id: string) => void;
+  onRemovePendingFile?: (imageId: string) => void;
 }
 
 export interface ProductsHeaderActionProps {

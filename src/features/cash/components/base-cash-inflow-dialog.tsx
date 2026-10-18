@@ -15,6 +15,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
+import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
+import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
+import { cn } from '@/lib/utils';
 import { toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import type { BaseCashInflowDialogProps } from '@/types/cash';
@@ -39,6 +43,7 @@ export function BaseCashInflowDialog({
   const [amountStr, setAmountStr] = useState('');
   const [date, setDate] = useState(todayIsoDate);
   const [notes, setNotes] = useState('');
+  const [amountError, setAmountError] = useState('');
 
   const createMutation = useMutation({
     mutationFn: mutateFn,
@@ -59,9 +64,10 @@ export function BaseCashInflowDialog({
     e.preventDefault();
     const parsedAmount = parseFloat(amountStr);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      toast.error(t('common.invalidAmount'));
+      setAmountError(t('common.invalidAmount'));
       return;
     }
+    setAmountError('');
 
     createMutation.mutate({
       amount: toPaisa(parsedAmount),
@@ -76,6 +82,17 @@ export function BaseCashInflowDialog({
       setNotes('');
     }
     onOpenChange(next);
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAmountStr(
+      sanitizeNumberInput(e.target.value, { min: 1, max: INPUT_LIMITS.amountRupeesMax })
+    );
+    setAmountError('');
+  };
+
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNotes(clampText(e.target.value, INPUT_LIMITS.notes));
   };
 
   const amountId = `${idPrefix}-amount`;
@@ -102,17 +119,24 @@ export function BaseCashInflowDialog({
               <Input
                 id={amountId}
                 type='number'
-                min='1'
+                min={1}
+                max={INPUT_LIMITS.amountRupeesMax}
                 step='any'
                 placeholder='0.00'
                 value={amountStr}
-                onChange={(e) => setAmountStr(e.target.value)}
+                onChange={handleAmountChange}
+                onKeyDown={(e) => blockInvalidNumberKeys(e)}
                 disabled={createMutation.isPending}
-                className='h-10 ps-9 text-sm font-normal text-foreground w-full'
+                className={cn(
+                  'h-10 ps-9 text-sm font-normal text-foreground w-full',
+                  amountError && 'border-destructive'
+                )}
+                aria-invalid={!!amountError}
                 autoFocus
                 required
               />
             </div>
+            <DialogFieldError id={`${amountId}-error`} message={amountError} />
           </div>
 
           <div className='space-y-1.5 w-full'>
@@ -140,7 +164,8 @@ export function BaseCashInflowDialog({
               rows={2}
               placeholder={notesPlaceholder}
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={handleNotesChange}
+              maxLength={INPUT_LIMITS.notes}
               disabled={createMutation.isPending}
               className='resize-none text-sm font-normal text-foreground w-full'
             />
@@ -154,7 +179,7 @@ export function BaseCashInflowDialog({
             <DialogPrimaryButton
               mode='save'
               loading={createMutation.isPending}
-              disabled={createMutation.isPending || !amountStr || Number(amountStr) <= 0}
+              disabled={createMutation.isPending}
             />
           </DialogFooter>
         </form>

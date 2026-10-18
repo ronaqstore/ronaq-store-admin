@@ -646,6 +646,8 @@
     "maxFileSize5Mb": "زیادہ سے زیادہ فائل سائز 5MB ہے",
     "acceptedFileTypes": "قبول شدہ فائل کی قسمیں: {types}",
     "productNameMin2Chars": "پروڈکٹ کا نام کم از کم 2 حروف کا ہونا چاہیے",
+    "productNameMax100": "پروڈکٹ کا نام 100 حروف سے زیادہ نہیں ہو سکتا",
+    "lowStockMax": "لو اسٹاک حد 1,000,000 سے زیادہ نہیں ہو سکتی",
     "descriptionMin10Chars": "تفصیل کم از کم 10 حروف کی ہونی چاہیے",
     "firstNameMin2Chars": "پہلا نام کم از کم 2 حروف کا ہونا چاہیے",
     "lastNameMin2Chars": "آخری نام کم از کم 2 حروف کا ہونا چاہیے",

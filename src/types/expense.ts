@@ -171,6 +171,13 @@ export interface RecordExpenseDialogProps {
   onSuccess?: () => void;
 }
 
+export interface RecordExpenseFormErrors {
+  categoryId?: string;
+  amount?: string;
+  expenseDate?: string;
+  confirmOverdraft?: string;
+}
+
 export interface CancelExpenseMutationVariables {
   id: string;
   input: CancelExpenseInput;

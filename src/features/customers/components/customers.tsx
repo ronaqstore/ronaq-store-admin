@@ -114,6 +114,7 @@ export function CustomerLedgerClient({ id }: CustomerLedgerClientProps) {
               <field.TextField
                 label={t('dukaan.party.receivePayment')}
                 type='number'
+                min={1}
                 required
                 description={t('dukaan.party.paymentAllocationHint')}
               />

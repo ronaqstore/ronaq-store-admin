@@ -15,6 +15,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
+import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
+import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
+import { cn } from '@/lib/utils';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
 import { formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
@@ -36,6 +40,7 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
   const [notes, setNotes] = useState('');
   const [overdraftPrompt, setOverdraftPrompt] = useState<CashOverdraftPrompt | null>(null);
   const [confirmOverdraft, setConfirmOverdraft] = useState(false);
+  const [amountError, setAmountError] = useState('');
 
   const withdrawalMutation = useMutation({
     ...createOwnerWithdrawalMutation,
@@ -61,18 +66,26 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
   });
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAmountStr(e.target.value);
+    setAmountStr(
+      sanitizeNumberInput(e.target.value, { min: 1, max: INPUT_LIMITS.amountRupeesMax })
+    );
+    setAmountError('');
     setOverdraftPrompt(null);
     setConfirmOverdraft(false);
+  };
+
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNotes(clampText(e.target.value, INPUT_LIMITS.notes));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const parsedAmount = parseFloat(amountStr);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      toast.error(t('common.invalidAmount'));
+      setAmountError(t('common.invalidAmount'));
       return;
     }
+    setAmountError('');
 
     withdrawalMutation.mutate({
       amount: toPaisa(parsedAmount),
@@ -112,17 +125,24 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
               <Input
                 id='withdrawal-amount'
                 type='number'
-                min='1'
+                min={1}
+                max={INPUT_LIMITS.amountRupeesMax}
                 step='any'
                 placeholder='0.00'
                 value={amountStr}
                 onChange={handleAmountChange}
+                onKeyDown={(e) => blockInvalidNumberKeys(e)}
                 disabled={withdrawalMutation.isPending}
-                className='h-10 ps-9 text-sm font-normal text-foreground w-full'
+                className={cn(
+                  'h-10 ps-9 text-sm font-normal text-foreground w-full',
+                  amountError && 'border-destructive'
+                )}
+                aria-invalid={!!amountError}
                 autoFocus
                 required
               />
             </div>
+            <DialogFieldError id='withdrawal-amount-error' message={amountError} />
           </div>
 
           <div className='space-y-1.5 w-full'>
@@ -150,7 +170,8 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
               rows={2}
               placeholder={t('dukaan.cash.withdrawalPlaceholder')}
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={handleNotesChange}
+              maxLength={INPUT_LIMITS.notes}
               disabled={withdrawalMutation.isPending}
               className='resize-none text-sm font-normal text-foreground w-full'
             />
@@ -180,12 +201,7 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
             <DialogPrimaryButton
               mode='save'
               loading={withdrawalMutation.isPending}
-              disabled={
-                withdrawalMutation.isPending ||
-                !amountStr ||
-                Number(amountStr) <= 0 ||
-                (Boolean(overdraftPrompt) && !confirmOverdraft)
-              }
+              disabled={withdrawalMutation.isPending}
             />
           </DialogFooter>
         </form>

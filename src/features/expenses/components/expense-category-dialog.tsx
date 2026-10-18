@@ -15,6 +15,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
+import { cn } from '@/lib/utils';
+import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { useT } from '@/i18n/use-t';
 import { createExpenseCategoryMutation, updateExpenseCategoryMutation } from '../api/mutations';
 import { expenseKeys } from '../api/queries';
@@ -36,6 +39,7 @@ function ExpenseCategoryDialogBody({
 
   const [name, setName] = useState(category?.name ?? '');
   const [isActive, setIsActive] = useState(category ? category.isActive : true);
+  const [nameError, setNameError] = useState('');
 
   const createMutation = useMutation({
     ...createExpenseCategoryMutation,
@@ -84,17 +88,14 @@ function ExpenseCategoryDialogBody({
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) {
-      toast.error(t('expenses.nameRequired'));
+      setNameError(t('expenses.nameRequired'));
       return;
     }
     if (trimmed.length < 2) {
-      toast.error(t('expenses.nameMinLength'));
+      setNameError(t('expenses.nameMinLength'));
       return;
     }
-    if (trimmed.length > 100) {
-      toast.error(t('expenses.nameMaxLength'));
-      return;
-    }
+    setNameError('');
 
     if (isEdit && category) {
       updateMutation.mutate({
@@ -110,6 +111,11 @@ function ExpenseCategoryDialogBody({
         isActive
       });
     }
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(clampText(e.target.value, INPUT_LIMITS.name));
+    setNameError('');
   };
 
   return (
@@ -129,13 +135,19 @@ function ExpenseCategoryDialogBody({
           <Input
             id='category-name'
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={handleNameChange}
             placeholder={t('expenses.categoryPlaceholder')}
             disabled={isPending}
-            className='h-10 text-sm font-normal text-foreground w-full'
+            className={cn(
+              'h-10 text-sm font-normal text-foreground w-full',
+              nameError && 'border-destructive'
+            )}
+            aria-invalid={!!nameError}
+            maxLength={INPUT_LIMITS.name}
             autoFocus
             required
           />
+          <DialogFieldError id='category-name-error' message={nameError} />
         </div>
 
         {isEdit && (
@@ -167,7 +179,7 @@ function ExpenseCategoryDialogBody({
           <DialogPrimaryButton
             mode={isEdit ? 'edit' : 'add'}
             loading={isPending}
-            disabled={isPending || !name.trim()}
+            disabled={isPending}
           />
         </DialogFooter>
       </form>

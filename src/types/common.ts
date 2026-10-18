@@ -190,6 +190,7 @@ export interface BaseCancelDialogProps {
   reasonId?: string;
   reasonCharactersCountText?: string;
   quickSelectReasonText?: string;
+  reasonError?: string;
   onSubmit: (e: React.FormEvent) => void;
   isSubmitting: boolean;
   cancelButtonText?: string;

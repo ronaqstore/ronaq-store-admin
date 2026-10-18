@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { isValidPkMobile, normalizePhone } from '@/lib/auth/phone';
+import { INPUT_LIMITS } from '@/lib/input-limits';
 import { SHOP_HOME } from '@/lib/auth/routes';
 import { registerOwnerAccountWithOptionalLogo } from '@/features/auth/api/service';
 import { shopLogoSrc } from '@/constants/placeholders';
@@ -166,6 +167,7 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
                     label={t('auth.phone')}
                     type='tel'
                     inputMode='numeric'
+                    maxLength={INPUT_LIMITS.phone}
                     autoComplete='tel'
                     placeholder='03XXXXXXXXX'
                     startIcon={Icons.phone}
@@ -210,6 +212,7 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
                 children={(field) => (
                   <field.TextField
                     label={t('auth.shopName')}
+                    maxLength={INPUT_LIMITS.nameLong}
                     placeholder={t('auth.shopNamePlaceholder')}
                     startIcon={Icons.building}
                     required
@@ -221,6 +224,7 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
                 children={(field) => (
                   <field.TextField
                     label={t('auth.city')}
+                    maxLength={INPUT_LIMITS.city}
                     placeholder={t('auth.cityPlaceholder')}
                     startIcon={Icons.building}
                     required
@@ -234,6 +238,7 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
               children={(field) => (
                 <field.TextField
                   label={t('auth.address')}
+                  maxLength={INPUT_LIMITS.shopAddress}
                   placeholder={t('auth.addressPlaceholder')}
                   startIcon={Icons.building}
                 />

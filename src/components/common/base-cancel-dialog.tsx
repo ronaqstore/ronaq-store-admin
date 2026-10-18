@@ -14,7 +14,9 @@ import { Label } from '@/components/ui/label';
 import { Icons } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PresetReasonPills } from '@/components/common/preset-reason-pills';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { useT } from '@/i18n/use-t';
+import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { cn } from '@/lib/utils';
 import type { BaseCancelDialogProps } from '@/types';
 
@@ -38,6 +40,7 @@ export function BaseCancelDialog({
   reasonId = 'cancel-reason',
   reasonCharactersCountText,
   quickSelectReasonText,
+  reasonError,
   onSubmit,
   isSubmitting,
   cancelButtonText,
@@ -124,13 +127,20 @@ export function BaseCancelDialog({
               <Textarea
                 id={reasonId}
                 value={reason}
-                onChange={(e) => onReasonChange(e.target.value)}
+                onChange={(e) =>
+                  onReasonChange(clampText(e.target.value, INPUT_LIMITS.cancelReason))
+                }
                 placeholder={reasonPlaceholder || ''}
                 rows={3}
-                className='resize-none text-xs'
-                maxLength={500}
+                className={cn(
+                  'resize-none text-xs',
+                  reasonError && 'border-destructive'
+                )}
+                maxLength={INPUT_LIMITS.cancelReason}
+                aria-invalid={!!reasonError}
                 required
               />
+              <DialogFieldError id={`${reasonId}-error`} message={reasonError} />
               {presetReasons && presetReasons.length > 0 && (
                 <div className='space-y-1.5 pt-1'>
                   {quickSelectReasonText ? (
@@ -157,7 +167,7 @@ export function BaseCancelDialog({
               <Button
                 type='submit'
                 variant='destructive'
-                disabled={isSubmitting || !reason.trim()}
+                disabled={isSubmitting}
                 isLoading={isSubmitting}
                 className='w-full sm:w-auto'
               >

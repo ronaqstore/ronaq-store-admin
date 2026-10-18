@@ -646,6 +646,8 @@
     "maxFileSize5Mb": "Max file size is 5MB",
     "acceptedFileTypes": "Accepted file types: {types}",
     "productNameMin2Chars": "Product name must be at least 2 characters",
+    "productNameMax100": "Product name must be 100 characters or fewer",
+    "lowStockMax": "Low-stock threshold cannot exceed 1,000,000",
     "descriptionMin10Chars": "Description must be at least 10 characters",
     "firstNameMin2Chars": "First name must be at least 2 characters",
     "lastNameMin2Chars": "Last name must be at least 2 characters",
