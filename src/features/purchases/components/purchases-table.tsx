@@ -141,7 +141,7 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
       ? sortBy
       : 'purchaseDate';
 
-  const { data } = useQuery(
+  const { data, isFetching } = useQuery(
     purchasesQueryOptions({
       page: params.page,
       pageSize: params.perPage,
@@ -326,6 +326,7 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
       mobileItem={purchaseMobileItem}
       detail={purchaseDetail}
       quickFilters={purchaseQuickFilters}
+      isLoading={isFetching}
     />
   );
 }

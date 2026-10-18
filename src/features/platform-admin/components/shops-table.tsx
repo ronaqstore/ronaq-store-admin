@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   ResponsiveDataTable,
@@ -310,7 +310,7 @@ export function PlatformShopsTable() {
       ? accessStatusRaw
       : undefined;
 
-  const { data } = useSuspenseQuery(
+  const { data, isFetching } = useQuery(
     platformShopsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
@@ -321,13 +321,15 @@ export function PlatformShopsTable() {
     })
   );
 
-  const pageCount = getPageCount(data.total);
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const pageCount = getPageCount(total);
 
   const { table } = useDataTable({
-    data: data.items,
+    data: items,
     columns,
     pageCount,
-    rowCount: data.total,
+    rowCount: total,
     shallow: true,
     debounceMs: 400,
     initialState: {
@@ -353,6 +355,7 @@ export function PlatformShopsTable() {
       mobileItem={shopMobileItem}
       detail={shopDetail}
       quickFilters={shopQuickFilters}
+      isLoading={isFetching}
     />
   );
 }

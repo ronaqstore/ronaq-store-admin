@@ -69,9 +69,12 @@ export function ResponsiveDataTable<TData>({
   quickFilters,
   ledger,
   className,
-  isLoading = false,
+  isLoading: isLoadingProp,
   rowCount
 }: ResponsiveDataTableProps<TData>) {
+  const isLoading =
+    isLoadingProp ??
+    Boolean((table.options.meta as { isLoading?: boolean } | undefined)?.isLoading);
   const t = useTranslations();
   const router = useRouter();
   const pathname = usePathname();
@@ -115,11 +118,17 @@ export function ResponsiveDataTable<TData>({
     }
   }, [pathname]);
 
+  const totalRowsCount =
+    typeof table.options.rowCount === 'number' && table.options.rowCount > 0
+      ? Math.min(table.options.rowCount, table.getState().pagination?.pageSize || 10)
+      : null;
+
   const skeletonRowCount =
-    (currentRowsCount && currentRowsCount > 0 ? currentRowsCount : null) ??
     (rowCount && rowCount > 0 ? rowCount : null) ??
+    (currentRowsCount && currentRowsCount > 0 ? currentRowsCount : null) ??
+    totalRowsCount ??
     (cachedRowsCount && cachedRowsCount > 0 ? cachedRowsCount : null) ??
-    3;
+    5;
 
   return (
     <div

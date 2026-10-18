@@ -100,6 +100,7 @@ export interface UseDataTableProps<TData>
   scroll?: boolean;
   shallow?: boolean;
   startTransition?: React.TransitionStartFunction;
+  isLoading?: boolean;
 }
 
 export * from '@/components/data-table/types';

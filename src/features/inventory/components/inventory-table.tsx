@@ -90,7 +90,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
   const rawLowStock = (filters as Record<string, unknown>).lowStock ?? lowStockParam;
   const lowStockFilter = parseBooleanFacet(rawLowStock);
 
-  const { data, isLoading } = useQuery(
+  const { data, isFetching } = useQuery(
     inventoryStockQueryOptions({
       page: params.page,
       pageSize: params.perPage,
@@ -360,7 +360,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
         mobileItem={inventoryMobileItem}
         detail={inventoryDetail}
         quickFilters={inventoryQuickFilters}
-        isLoading={isLoading}
+        isLoading={isFetching}
       />
 
       {adjustOpen && (

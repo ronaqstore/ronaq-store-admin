@@ -52,6 +52,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     scroll = false,
     shallow = true,
     startTransition,
+    isLoading,
     ...tableProps
   } = props;
 
@@ -222,6 +223,10 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     columns,
     initialState,
     pageCount,
+    meta: {
+      ...tableProps.meta,
+      ...(isLoading !== undefined ? { isLoading } : {})
+    },
     state: {
       pagination,
       sorting,

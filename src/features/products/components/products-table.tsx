@@ -1,7 +1,7 @@
 'use client';
 
 import type { ColumnDef } from '@tanstack/react-table';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { Badge } from '@/components/ui/badge';
 import { PreviewableImage } from '@/components/media/previewable-image';
@@ -339,7 +339,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
   const categoryId = firstFilterValue((filters as Record<string, unknown>).categoryId);
   const brandId = firstFilterValue((filters as Record<string, unknown>).brandId);
 
-  const { data } = useSuspenseQuery(
+  const { data, isFetching } = useQuery(
     productsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
@@ -350,12 +350,14 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       sortOrder
     })
   );
-  const pageCount = Math.max(1, Math.ceil(data.total / params.perPage));
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / params.perPage));
   const { table } = useDataTable({
-    data: data.items,
+    data: items,
     columns: productColumns,
     pageCount,
-    rowCount: data.total,
+    rowCount: total,
     shallow: true,
     debounceMs: 400,
     initialState: {
@@ -369,6 +371,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       toolbarAction={toolbarAction}
       mobileItem={productMobileItem}
       detail={productDetail}
+      isLoading={isFetching}
     />
   );
 }

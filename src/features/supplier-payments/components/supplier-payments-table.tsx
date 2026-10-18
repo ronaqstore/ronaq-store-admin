@@ -123,7 +123,7 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
   const statusFilter = parseActiveCancelledStatus(statusParam);
   const search = searchParam || supplierNameParam || undefined;
 
-  const { data, isLoading, isFetching } = useQuery(
+  const { data, isFetching } = useQuery(
     supplierPaymentsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
@@ -294,8 +294,7 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
         toolbarAction={recordActionButton}
         mobileItem={supplierPaymentMobileItem}
         detail={supplierPaymentDetail}
-        isLoading={isLoading || isFetching}
-        rowCount={items.length > 0 ? items.length : total > 0 ? total : undefined}
+        isLoading={isFetching}
       />
     </>
   );
