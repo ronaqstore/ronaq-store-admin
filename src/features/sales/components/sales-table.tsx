@@ -180,7 +180,7 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
   const search = searchParam || saleNoParam || undefined;
   const statusFilter = parseActiveCancelledStatus(statusParam);
 
-  const { data, isLoading, isFetching } = useQuery(
+  const { data, isFetching } = useQuery(
     salesQueryOptions({
       page: params.page,
       pageSize: params.perPage,
@@ -325,6 +325,7 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
       meta: {
         label: 'table.col.status',
         variant: 'select',
+        icon: Icons.circle,
         options: [
           { label: 'Active', value: 'ACTIVE' },
           { label: 'Cancelled', value: 'CANCELLED' }
@@ -380,8 +381,7 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
       mobileItem={saleMobileItem}
       detail={saleDetail}
       quickFilters={salesQuickFilters}
-      isLoading={isLoading || isFetching}
-      rowCount={items.length > 0 ? items.length : total > 0 ? total : undefined}
+      isLoading={isFetching}
     />
   );
 }

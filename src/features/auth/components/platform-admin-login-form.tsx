@@ -1,8 +1,8 @@
 'use client';
 
-import { signIn, getSession } from 'next-auth/react';
+import { signIn, getSession, signOut } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { PLATFORM_HOME } from '@/lib/auth/routes';
 import { normalizePhone } from '@/lib/auth/phone';
 import type { LoginValues } from '@/types/auth';
@@ -24,7 +24,12 @@ export function PlatformAdminLoginForm() {
       return t('auth.platformAdminError');
     }
 
-    await getSession();
+    const session = await getSession();
+    if (session?.user?.role !== 'SUPER_ADMIN') {
+      await signOut({ redirect: false });
+      return t('auth.platformAdminError');
+    }
+
     router.replace(PLATFORM_HOME);
     router.refresh();
     return null;
@@ -37,7 +42,18 @@ export function PlatformAdminLoginForm() {
       minPasswordLength={8}
       onSubmit={handleLogin}
       footer={
-        <p className='text-muted-foreground text-center text-xs'>{t('auth.platformAdminNotice')}</p>
+        <div className='space-y-2 text-center text-xs leading-relaxed'>
+          <p className='text-muted-foreground'>{t('auth.platformAdminNotice')}</p>
+          <p className='text-muted-foreground'>
+            {t('auth.shopOwnerPrompt')}{' '}
+            <Link
+              href='/login'
+              className='text-foreground underline-offset-4 hover:underline'
+            >
+              {t('auth.shopOwnerSignInLink')}
+            </Link>
+          </p>
+        </div>
       }
     />
   );

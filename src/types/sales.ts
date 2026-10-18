@@ -96,6 +96,17 @@ export interface SaleLineItem {
   tracking_type?: TrackingType;
 }
 
+export interface SaleLineImeiFieldProps {
+  productId: string;
+  name: string;
+  value: string;
+  onBlur: () => void;
+  onValueChange: (unitId: string) => void;
+  isInvalid: boolean;
+  errors: Array<{ message?: string } | undefined>;
+  excludedUnitIds: string[];
+}
+
 export interface SaleFormValues {
   customer_id: string;
   discount: number;

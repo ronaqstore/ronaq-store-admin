@@ -7,7 +7,12 @@ import type {
   UpdateProductInput,
   ProductImageDTO
 } from '@/lib/api/types';
-import type { ProductImageListResponse, ProductImageReorderItem } from '@/types';
+import type {
+  ProductImageListResponse,
+  ProductImageReorderItem,
+  CreateProductResult,
+  CreateProductApiResponse
+} from '@/types';
 import { appFetch } from '@/lib/api/app-fetch';
 
 import { buildQueryString } from '@/lib/api/query-params';
@@ -25,12 +30,16 @@ export async function listProducts(
   return appFetch<PaginatedResponse<ProductDTO>>(`/api/products${qs}`);
 }
 
-export async function createProduct(input: CreateProductInput): Promise<ProductDTO> {
-  return appFetch<ProductDTO>('/api/products', {
+export async function createProduct(input: CreateProductInput): Promise<CreateProductResult> {
+  const res = await appFetch<CreateProductApiResponse>('/api/products', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input)
   });
+  return {
+    id: res.data?.id || res.id,
+    message: res.message
+  };
 }
 
 export async function updateProduct(id: string, input: UpdateProductInput): Promise<ProductDTO> {
@@ -41,8 +50,12 @@ export async function updateProduct(id: string, input: UpdateProductInput): Prom
   });
 }
 
-export async function deleteProduct(id: string): Promise<unknown> {
-  return appFetch<unknown>(`/api/products/${id}`, { method: 'DELETE' });
+export async function deactivateProduct(id: string): Promise<ProductDTO> {
+  return updateProduct(id, { isActive: false });
+}
+
+export async function reactivateProduct(id: string): Promise<ProductDTO> {
+  return updateProduct(id, { isActive: true });
 }
 
 export async function listProductImages(
@@ -71,7 +84,7 @@ export async function reorderProductImages(
   return appFetch<unknown>(`/api/products/${productId}/images/order`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ items })
+    body: JSON.stringify({ imageIds: items.map((item) => item.id) })
   });
 }
 

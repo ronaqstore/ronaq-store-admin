@@ -1,73 +1,48 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
+import { useRef, useState, type ChangeEvent } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { useTranslations } from 'next-intl';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { Icons } from '@/components/icons';
-import { shopLogoSrc } from '@/constants/placeholders';
+import { PreviewableImage } from '@/components/media/previewable-image';
+import { AlertModal } from '@/components/modal/alert-modal';
+import { PLACEHOLDER_SHOP_LOGO } from '@/constants/placeholders';
 import { formatEmpty } from '@/lib/format-empty';
+import { useT } from '@/i18n/use-t';
+import type { StoreProfileDetailRow } from '@/types/store-settings';
 import { storeSettingsQueryOptions } from '../api/queries';
 import {
   useRemoveShopLogo,
   useUpdateStoreSettings,
   useUploadShopLogo
 } from '../api/mutations';
+import { EditStoreProfileDialog } from './edit-store-profile-dialog';
 
 export function StoreSettingsForm() {
-  const t = useTranslations();
+  const t = useT();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data } = useSuspenseQuery(storeSettingsQueryOptions());
   const updateMutation = useUpdateStoreSettings();
   const uploadMutation = useUploadShopLogo();
   const removeMutation = useRemoveShopLogo();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [enabledConfirm, setEnabledConfirm] = useState<boolean | null>(null);
 
-  const [displayName, setDisplayName] = useState('');
-  const [about, setAbout] = useState('');
-  const [whatsappNumber, setWhatsappNumber] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
-  const [openingHours, setOpeningHours] = useState('');
-  const [googleMapsUrl, setGoogleMapsUrl] = useState('');
-  const [isEnabled, setIsEnabled] = useState(false);
-  const [showExactStock, setShowExactStock] = useState(false);
+  const profileRows: StoreProfileDetailRow[] = [
+    { label: t('storeSettings.displayName'), value: formatEmpty(data.displayName) },
+    { label: t('storeSettings.city'), value: formatEmpty(data.city) },
+    { label: t('storeSettings.phone'), value: formatEmpty(data.phoneNumber) },
+    { label: t('storeSettings.whatsapp'), value: formatEmpty(data.whatsappNumber) },
+    { label: t('storeSettings.address'), value: formatEmpty(data.address) },
+    { label: t('storeSettings.openingHours'), value: formatEmpty(data.openingHours) },
+    { label: t('storeSettings.about'), value: formatEmpty(data.about) },
+    { label: t('storeSettings.googleMaps'), value: formatEmpty(data.googleMapsUrl) }
+  ];
 
-  useEffect(() => {
-    setDisplayName(data.displayName ?? '');
-    setAbout(data.about ?? '');
-    setWhatsappNumber(data.whatsappNumber ?? '');
-    setPhoneNumber(data.phoneNumber ?? '');
-    setAddress(data.address ?? '');
-    setCity(data.city ?? '');
-    setOpeningHours(data.openingHours ?? '');
-    setGoogleMapsUrl(data.googleMapsUrl ?? '');
-    setIsEnabled(Boolean(data.isEnabled));
-    setShowExactStock(Boolean(data.showExactStock));
-  }, [data]);
-
-  const handleSave = () => {
-    updateMutation.mutate({
-      displayName: displayName.trim(),
-      about: about.trim() || null,
-      whatsappNumber: whatsappNumber.trim() || null,
-      phoneNumber: phoneNumber.trim() || null,
-      address: address.trim() || null,
-      city: city.trim() || null,
-      openingHours: openingHours.trim() || null,
-      googleMapsUrl: googleMapsUrl.trim() || null,
-      isEnabled,
-      showExactStock
-    });
-  };
-
-  const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     uploadMutation.mutate(file, {
@@ -85,58 +60,74 @@ export function StoreSettingsForm() {
     removeMutation.mutate();
   };
 
-  const handleDisplayNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDisplayName(e.target.value);
+  const handleEnabledChange = (checked: boolean) => {
+    setEnabledConfirm(checked);
   };
 
-  const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCity(e.target.value);
+  const confirmEnabledChange = () => {
+    if (enabledConfirm == null) return;
+    updateMutation.mutate(
+      { isEnabled: enabledConfirm },
+      { onSettled: () => setEnabledConfirm(null) }
+    );
   };
 
-  const handleAboutChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setAbout(e.target.value);
+  const handleExactStockChange = (checked: boolean) => {
+    updateMutation.mutate({ showExactStock: checked });
   };
 
-  const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setWhatsappNumber(e.target.value);
+  const openProfileDialog = () => {
+    setProfileOpen(true);
   };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPhoneNumber(e.target.value);
-  };
-
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAddress(e.target.value);
-  };
-
-  const handleHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOpeningHours(e.target.value);
-  };
-
-  const handleMapsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGoogleMapsUrl(e.target.value);
-  };
-
-  const logoSrc = shopLogoSrc(data.logoUrl);
 
   return (
-    <div className='mx-auto grid max-w-4xl gap-6'>
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('storeSettings.logoTitle')}</CardTitle>
-          <CardDescription>{t('storeSettings.logoHint')}</CardDescription>
-        </CardHeader>
-        <CardContent className='flex flex-col gap-4 sm:flex-row sm:items-center'>
-          <div className='relative h-24 w-24 overflow-hidden rounded-2xl border bg-muted'>
-            <Image
-              src={logoSrc}
+    <>
+      <AlertModal
+        isOpen={enabledConfirm != null}
+        onClose={() => setEnabledConfirm(null)}
+        onConfirm={confirmEnabledChange}
+        loading={updateMutation.isPending}
+        title={
+          enabledConfirm
+            ? t('storeSettings.enableConfirmTitle')
+            : t('storeSettings.disableConfirmTitle')
+        }
+        description={
+          enabledConfirm
+            ? t('storeSettings.enableConfirmDescription')
+            : t('storeSettings.disableConfirmDescription')
+        }
+        confirmLabel={
+          enabledConfirm ? t('storeSettings.enableConfirmLabel') : t('storeSettings.disableConfirmLabel')
+        }
+        confirmVariant={enabledConfirm ? 'default' : 'destructive'}
+      />
+      <div className='grid gap-4 lg:grid-cols-2'>
+        <Card className='min-w-0'>
+          <CardHeader className='flex flex-row items-start gap-4 space-y-0'>
+            <PreviewableImage
+              src={data.logoUrl}
               alt={formatEmpty(data.displayName)}
-              fill
-              unoptimized
-              className='object-cover'
+              className='relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border bg-muted shadow-sm'
+              imageClassName='object-cover'
+              sizes='80px'
+              fallbackSrc={PLACEHOLDER_SHOP_LOGO}
             />
-          </div>
-          <div className='flex flex-wrap gap-2'>
+            <div className='min-w-0 flex-1 space-y-1'>
+              <div className='flex flex-wrap items-center gap-2'>
+                <CardTitle className='text-base'>{t('storeSettings.logoTitle')}</CardTitle>
+                <Badge variant={data.isEnabled ? 'default' : 'secondary'}>
+                  {data.isEnabled ? t('status.active') : t('status.inactive')}
+                </Badge>
+              </div>
+              <CardDescription>{t('storeSettings.logoHint')}</CardDescription>
+              <p className='text-muted-foreground pt-1 text-xs'>
+                {t('storeSettings.slugLabel')}:{' '}
+                <span className='text-foreground font-medium'>{formatEmpty(data.slug)}</span>
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent className='flex flex-wrap gap-2'>
             <Button
               type='button'
               variant='outline'
@@ -163,105 +154,79 @@ export function StoreSettingsForm() {
               className='hidden'
               onChange={handleLogoSelect}
             />
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('storeSettings.profileTitle')}</CardTitle>
-          <CardDescription>
-            {t('storeSettings.slugLabel')}: {formatEmpty(data.slug)}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className='space-y-4'>
-          <div className='grid gap-4 sm:grid-cols-2'>
-            <div className='space-y-2'>
-              <Label htmlFor='displayName'>{t('storeSettings.displayName')}</Label>
-              <Input id='displayName' value={displayName} onChange={handleDisplayNameChange} />
-            </div>
-            <div className='space-y-2'>
-              <Label htmlFor='city'>{t('storeSettings.city')}</Label>
-              <Input id='city' value={city} onChange={handleCityChange} />
-            </div>
-          </div>
-
-          <div className='space-y-2'>
-            <Label htmlFor='about'>{t('storeSettings.about')}</Label>
-            <Textarea id='about' value={about} onChange={handleAboutChange} rows={3} />
-          </div>
-
-          <div className='grid gap-4 sm:grid-cols-2'>
-            <div className='space-y-2'>
-              <Label htmlFor='whatsapp'>{t('storeSettings.whatsapp')}</Label>
-              <Input
-                id='whatsapp'
-                value={whatsappNumber}
-                onChange={handleWhatsappChange}
-                placeholder='923001234567'
-              />
-            </div>
-            <div className='space-y-2'>
-              <Label htmlFor='phone'>{t('storeSettings.phone')}</Label>
-              <Input
-                id='phone'
-                value={phoneNumber}
-                onChange={handlePhoneChange}
-                placeholder='0300-1234567'
-              />
-            </div>
-          </div>
-
-          <div className='space-y-2'>
-            <Label htmlFor='address'>{t('storeSettings.address')}</Label>
-            <Input id='address' value={address} onChange={handleAddressChange} />
-          </div>
-
-          <div className='grid gap-4 sm:grid-cols-2'>
-            <div className='space-y-2'>
-              <Label htmlFor='hours'>{t('storeSettings.openingHours')}</Label>
-              <Input id='hours' value={openingHours} onChange={handleHoursChange} />
-            </div>
-            <div className='space-y-2'>
-              <Label htmlFor='maps'>{t('storeSettings.googleMaps')}</Label>
-              <Input
-                id='maps'
-                value={googleMapsUrl}
-                onChange={handleMapsChange}
-                placeholder={t('storeSettings.googleMapsPlaceholder')}
-              />
-            </div>
-          </div>
-
-          <div className='flex flex-col gap-4 rounded-lg border p-4'>
-            <div className='flex items-center justify-between gap-4'>
-              <div>
+        <Card className='min-w-0'>
+          <CardHeader className='pb-3'>
+            <CardTitle className='text-base'>{t('storeSettings.visibilityTitle')}</CardTitle>
+            <CardDescription>{t('storeSettings.visibilityDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent className='space-y-3'>
+            <div className='flex items-center justify-between gap-4 rounded-lg border p-3.5'>
+              <div className='min-w-0'>
                 <p className='text-sm font-medium'>{t('storeSettings.enableStore')}</p>
-                <p className='text-xs text-muted-foreground'>{t('storeSettings.enableHint')}</p>
+                <p className='text-muted-foreground text-xs'>{t('storeSettings.enableHint')}</p>
               </div>
-              <Switch checked={isEnabled} onCheckedChange={setIsEnabled} />
+              <Switch
+                checked={Boolean(data.isEnabled)}
+                onCheckedChange={handleEnabledChange}
+                disabled={updateMutation.isPending}
+              />
             </div>
-            <div className='flex items-center justify-between gap-4'>
-              <div>
+            <div className='flex items-center justify-between gap-4 rounded-lg border p-3.5'>
+              <div className='min-w-0'>
                 <p className='text-sm font-medium'>{t('storeSettings.showExactStock')}</p>
-                <p className='text-xs text-muted-foreground'>
+                <p className='text-muted-foreground text-xs'>
                   {t('storeSettings.showExactStockHint')}
                 </p>
               </div>
-              <Switch checked={showExactStock} onCheckedChange={setShowExactStock} />
+              <Switch
+                checked={Boolean(data.showExactStock)}
+                onCheckedChange={handleExactStockChange}
+                disabled={updateMutation.isPending}
+              />
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          <Button
-            type='button'
-            onClick={handleSave}
-            isLoading={updateMutation.isPending}
-            disabled={!displayName.trim()}
-          >
-            {t('storeSettings.save')}
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+        <Card className='min-w-0 lg:col-span-2'>
+          <CardHeader className='flex flex-row items-start justify-between gap-4 space-y-0'>
+            <div className='space-y-1'>
+              <CardTitle className='flex items-center gap-2 text-base'>
+                <Icons.building className='h-4 w-4' />
+                {t('storeSettings.profileTitle')}
+              </CardTitle>
+              <CardDescription>{t('storeSettings.profileCardDescription')}</CardDescription>
+            </div>
+            <Button type='button' variant='outline' size='sm' onClick={openProfileDialog}>
+              <Icons.edit className='me-2 h-4 w-4' />
+              {t('storeSettings.editProfile')}
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <dl className='grid gap-3 sm:grid-cols-2 xl:grid-cols-4'>
+              {profileRows.map((row) => (
+                <div
+                  key={row.label}
+                  className='bg-muted/40 rounded-lg border px-3 py-3 xl:[&:nth-last-child(-n+2)]:col-span-2'
+                >
+                  <dt className='text-muted-foreground text-xs font-medium tracking-wide uppercase'>
+                    {row.label}
+                  </dt>
+                  <dd className='mt-1 break-words text-sm font-medium'>{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </CardContent>
+        </Card>
+      </div>
+
+      <EditStoreProfileDialog
+        open={profileOpen}
+        onOpenChange={setProfileOpen}
+        settings={data}
+      />
+    </>
   );
 }

@@ -27,6 +27,7 @@ export function CancelSupplierPaymentDialog({
   const t = useT();
   const qc = useQueryClient();
   const [reason, setReason] = useState('');
+  const [reasonError, setReasonError] = useState('');
 
   const { data: impact, isLoading: impactLoading } = useQuery({
     ...supplierPaymentCancelImpactQueryOptions(payment.id),
@@ -49,9 +50,10 @@ export function CancelSupplierPaymentDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
-      toast.error(t('supplierPayments.reasonRequired'));
+      setReasonError(t('supplierPayments.reasonRequired'));
       return;
     }
+    setReasonError('');
 
     cancel.mutate({
       id: payment.id,
@@ -59,6 +61,11 @@ export function CancelSupplierPaymentDialog({
         cancelReason: reason.trim()
       }
     });
+  };
+
+  const handleReasonChange = (v: string) => {
+    setReason(v);
+    setReasonError('');
   };
 
   const impactItems: CancelImpactItem[] = [
@@ -118,7 +125,8 @@ export function CancelSupplierPaymentDialog({
       impactItems={impactItems}
       presetReasons={PRESET_REASONS}
       reason={reason}
-      onReasonChange={setReason}
+      onReasonChange={handleReasonChange}
+      reasonError={reasonError}
       reasonLabel={t('supplierPayments.reasonLabel')}
       reasonPlaceholder={t('supplierPayments.reasonPlaceholder')}
       reasonId='supplier-cancel-reason'

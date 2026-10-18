@@ -19,6 +19,7 @@ import { Icons } from '@/components/icons';
 import { InstallPrompt } from '@/components/pwa/install-prompt';
 import { clearPwaCaches } from '@/lib/pwa';
 import { useT } from '@/i18n/use-t';
+import { Link } from '@/i18n/navigation';
 import type { ProfileAvatarProps, AccountMenuItemsProps } from '@/types';
 
 function ProfileAvatar({ className }: ProfileAvatarProps) {
@@ -31,7 +32,7 @@ function ProfileAvatar({ className }: ProfileAvatarProps) {
   );
 }
 
-function AccountMenuItems({ userName, shopName }: AccountMenuItemsProps) {
+function AccountMenuItems({ userName, shopName, showShopSettings }: AccountMenuItemsProps) {
   const t = useT();
   const [signingOut, setSigningOut] = React.useState(false);
 
@@ -58,6 +59,17 @@ function AccountMenuItems({ userName, shopName }: AccountMenuItemsProps) {
           </div>
         </DropdownMenuLabel>
       </DropdownMenuGroup>
+      {showShopSettings ? (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem render={<Link href='/dashboard/settings' />}>
+              <Icons.settings className='me-2 h-4 w-4' />
+              {t('nav.settings')}
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </>
+      ) : null}
       <DropdownMenuSeparator />
       <div className='px-1 py-0.5'>
         <InstallPrompt variant='menu' />
@@ -85,6 +97,8 @@ export function UserNav() {
 
   if (!data?.user) return null;
 
+  const showShopSettings = data.user.role !== 'SUPER_ADMIN';
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -104,6 +118,7 @@ export function UserNav() {
         <AccountMenuItems
           userName={data.user.name ?? t('user.user')}
           shopName={data.user.shopName ?? ''}
+          showShopSettings={showShopSettings}
         />
       </DropdownMenuContent>
     </DropdownMenu>

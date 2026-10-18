@@ -79,3 +79,8 @@ export interface PaymentCreateBody {
   method?: string;
   [key: string]: unknown;
 }
+
+export interface RecordPaymentFormErrors {
+  customerId?: string;
+  amount?: string;
+}

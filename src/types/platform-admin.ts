@@ -1,8 +1,6 @@
 import type { Icons } from '@/components/icons';
 
-export type PlatformShopStatus = 'ACTIVE' | 'TRIAL' | 'EXPIRED';
-
-export type SubscriptionPlan = 'TRIAL' | 'MONTHLY' | 'YEARLY';
+export type PlatformShopAccessStatus = 'ACTIVE' | 'EXPIRED' | 'SUSPENDED';
 
 export interface ShopStatusConfig {
   labelKey: string;
@@ -11,15 +9,22 @@ export interface ShopStatusConfig {
 }
 
 export interface ShopStatusBadgeProps {
-  status: PlatformShopStatus;
+  status: PlatformShopAccessStatus;
 }
 
-export interface PlatformStatusOption {
-  label: string;
-  value: PlatformShopStatus;
+export interface CreateShopDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export interface PlatformPlanOption {
-  label: string;
-  value: SubscriptionPlan;
+export interface CreateShopDialogBodyProps {
+  onOpenChange: (open: boolean) => void;
+}
+
+export interface RenewSubscriptionDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  shopId: string;
+  shopName: string;
+  currentEndsAt: string;
 }

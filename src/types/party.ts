@@ -73,6 +73,9 @@ export interface PartyCellActionProps {
   deactivateDescription: string;
   deactivateConfirmLabel?: string;
   deactivateSuccess: string;
+  activateTitle: string;
+  activateDescription: string;
+  activateConfirmLabel?: string;
   activateSuccess: string;
   onDeactivate: (id: string) => Promise<unknown>;
   onActivate: (id: string) => Promise<unknown>;

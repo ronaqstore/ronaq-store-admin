@@ -113,6 +113,7 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
   const [createOpen, setCreateOpen] = useState(false);
   const [editCategory, setEditCategory] = useState<ExpenseCategoryDTO | null>(null);
   const [deactivateTarget, setDeactivateTarget] = useState<ExpenseCategoryDTO | null>(null);
+  const [activateTarget, setActivateTarget] = useState<ExpenseCategoryDTO | null>(null);
 
   const sortableColumnIds = ['name', 'createdAt', 'updatedAt'];
   const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<ExpenseCategorySortField>(
@@ -130,7 +131,7 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
   const search = searchParam || nameParam || undefined;
   const isActiveFilter = parseBooleanFacet(isActiveParam);
 
-  const { data, isLoading, isFetching } = useQuery(
+  const { data, isFetching } = useQuery(
     expenseCategoriesQueryOptions({
       page: params.page,
       pageSize: params.perPage,
@@ -204,6 +205,7 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
       meta: {
         label: 'table.col.status',
         variant: 'select',
+        icon: Icons.circle,
         options: [
           { label: 'Active', value: 'true' },
           { label: 'Inactive', value: 'false' }
@@ -247,12 +249,7 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
             category={row.original}
             onEdit={(cat) => setEditCategory(cat)}
             onDeactivate={(cat) => setDeactivateTarget(cat)}
-            onActivate={(cat) =>
-              activateMutation.mutate({
-                id: cat.id,
-                input: { isActive: true }
-              })
-            }
+            onActivate={(cat) => setActivateTarget(cat)}
             isActivating={activateMutation.isPending}
           />
         </div>
@@ -309,13 +306,30 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
         />
       )}
 
+      {activateTarget && (
+        <AlertModal
+          isOpen={!!activateTarget}
+          onClose={() => setActivateTarget(null)}
+          onConfirm={() =>
+            activateMutation.mutate(
+              { id: activateTarget.id, input: { isActive: true } },
+              { onSuccess: () => setActivateTarget(null) }
+            )
+          }
+          loading={activateMutation.isPending}
+          title={t('common.activate')}
+          description={t('expenses.activateDesc', { name: activateTarget.name })}
+          confirmLabel={t('common.activate')}
+          confirmVariant='default'
+        />
+      )}
+
       <ResponsiveDataTable
         table={table}
         toolbarAction={toolbarActionButton}
         mobileItem={categoryMobileItem}
         detail={categoryDetail}
-        isLoading={isLoading || isFetching}
-        rowCount={items.length > 0 ? items.length : total > 0 ? total : undefined}
+        isLoading={isFetching}
       />
     </>
   );

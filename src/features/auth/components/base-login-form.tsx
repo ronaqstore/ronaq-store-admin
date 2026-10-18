@@ -9,11 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Icons } from '@/components/icons';
 import { isValidPkMobile } from '@/lib/auth/phone';
+import { INPUT_LIMITS } from '@/lib/input-limits';
 import type { BaseLoginFormProps, LoginValues } from '@/types/auth';
 
 export function BaseLoginForm({
   title,
   description,
+  banner,
   minPasswordLength = 1,
   onSubmit,
   footer
@@ -59,6 +61,12 @@ export function BaseLoginForm({
       </CardHeader>
       <CardContent>
         <form className='space-y-6' onSubmit={handleSubmit}>
+          {banner ? (
+            <Alert variant='destructive'>
+              <Icons.warning className='h-4 w-4' />
+              <AlertDescription>{banner}</AlertDescription>
+            </Alert>
+          ) : null}
           {error ? (
             <Alert variant='destructive'>
               <Icons.warning className='h-4 w-4' />
@@ -74,6 +82,7 @@ export function BaseLoginForm({
                   label={t('auth.phone')}
                   type='tel'
                   inputMode='numeric'
+                  maxLength={INPUT_LIMITS.phone}
                   autoComplete='tel'
                   placeholder='03XXXXXXXXX'
                   startIcon={Icons.phone}

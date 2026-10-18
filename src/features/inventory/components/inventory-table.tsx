@@ -90,7 +90,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
   const rawLowStock = (filters as Record<string, unknown>).lowStock ?? lowStockParam;
   const lowStockFilter = parseBooleanFacet(rawLowStock);
 
-  const { data, isLoading } = useQuery(
+  const { data, isFetching } = useQuery(
     inventoryStockQueryOptions({
       page: params.page,
       pageSize: params.perPage,
@@ -167,6 +167,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       meta: {
         label: 'table.col.tracking',
         variant: 'select',
+        icon: Icons.box,
         options: TRACKING_OPTIONS,
         priority: 2,
         mobile: 'subtitle'
@@ -221,6 +222,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       meta: {
         label: 'status.lowStock',
         variant: 'select',
+        icon: Icons.warning,
         options: LOW_STOCK_OPTIONS,
         priority: 1,
         mobile: 'badge'
@@ -358,7 +360,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
         mobileItem={inventoryMobileItem}
         detail={inventoryDetail}
         quickFilters={inventoryQuickFilters}
-        isLoading={isLoading}
+        isLoading={isFetching}
       />
 
       {adjustOpen && (

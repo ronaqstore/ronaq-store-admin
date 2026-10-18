@@ -4,13 +4,13 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { ResponsiveDataTable } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { t } from '@/i18n';
 import { SimpleEntityCellAction } from '@/components/common/simple-entity-cell-action';
 import { brandsQueryOptions, brandKeys } from '../api/queries';
-import { deleteBrand } from '../api/service';
+import { deactivateBrand, reactivateBrand } from '../api/service';
 import type { BrandDTO } from '@/lib/api/types';
 import type { BrandCellActionProps, BrandsTableProps } from '@/types';
 import {
@@ -32,10 +32,15 @@ function BrandCellAction({ data }: BrandCellActionProps) {
   return (
     <SimpleEntityCellAction
       id={data.id}
-      deleteTitle={t('dukaan.brand.deleteTitle')}
-      deleteDescription={t('dukaan.brand.deleteDescription')}
-      deleteSuccess={t('dukaan.brand.deleted')}
-      onDelete={deleteBrand}
+      isActive={data.isActive}
+      deactivateTitle={t('dukaan.brand.deactivateTitle')}
+      deactivateDescription={t('dukaan.brand.deactivateDescription')}
+      deactivateSuccess={t('dukaan.brand.deactivated')}
+      activateTitle={t('dukaan.brand.activateTitle')}
+      activateDescription={t('dukaan.brand.activateDescription')}
+      activateSuccess={t('dukaan.brand.activated')}
+      onDeactivate={deactivateBrand}
+      onActivate={reactivateBrand}
       invalidateQueryKey={brandKeys.all}
       renderDialog={(open, onOpenChange) => (
         <BrandDialog open={open} onOpenChange={onOpenChange} brand={data} />
@@ -91,7 +96,7 @@ export function BrandsTable({ toolbarAction }: BrandsTableProps) {
   const isActiveFilter = parseBooleanFacet(
     (filters as Record<string, unknown>).isActive ?? isActiveParam
   );
-  const { data } = useSuspenseQuery(
+  const { data, isFetching } = useQuery(
     brandsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
@@ -101,12 +106,14 @@ export function BrandsTable({ toolbarAction }: BrandsTableProps) {
       sortOrder
     })
   );
-  const pageCount = Math.max(1, Math.ceil(data.total / params.perPage));
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / params.perPage));
   const { table } = useDataTable({
-    data: data.items,
+    data: items,
     columns: brandColumns,
     pageCount,
-    rowCount: data.total,
+    rowCount: total,
     shallow: true,
     debounceMs: 400,
     initialState: {
@@ -120,6 +127,7 @@ export function BrandsTable({ toolbarAction }: BrandsTableProps) {
       toolbarAction={toolbarAction}
       mobileItem={brandMobileItem}
       detail={brandDetail}
+      isLoading={isFetching}
     />
   );
 }

@@ -4,10 +4,3 @@ export class AppError extends Error {
     this.name = 'AppError';
   }
 }
-
-export class ValidationError extends AppError {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ValidationError';
-  }
-}

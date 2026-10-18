@@ -24,8 +24,13 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Icons } from '@/components/icons';
+import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
+import { cn } from '@/lib/utils';
 import { useT } from '@/i18n/use-t';
 import { formatPkr, toPaisa } from '@/lib/dukaan/numbers';
+import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
+import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import type { ReturnPreviewDTO, ReturnItemInput } from '@/lib/api/types';
 import { todayIsoDate } from '@/lib/dates';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
@@ -42,6 +47,9 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
   const [refundPkr, setRefundPkr] = useState<number>(0);
   const [confirmOverdraft, setConfirmOverdraft] = useState(false);
   const [previewData, setPreviewData] = useState<ReturnPreviewDTO | null>(null);
+  const [itemsError, setItemsError] = useState('');
+  const [reasonError, setReasonError] = useState('');
+  const [refundError, setRefundError] = useState('');
 
   const [itemStates, setItemStates] = useState<Record<string, ItemReturnState>>(() => {
     const initial: Record<string, ItemReturnState> = {};
@@ -89,14 +97,35 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
       ...prev,
       [itemId]: { ...prev[itemId], selected }
     }));
+    setItemsError('');
   };
 
   const handleItemQuantityChange = (itemId: string, maxQty: number, valStr: string) => {
-    const val = Math.max(1, Math.min(maxQty, Number(valStr) || 1));
+    const cappedMax = Math.min(maxQty, INPUT_LIMITS.quantityMax);
+    const sanitized = sanitizeNumberInput(valStr, { min: 1, max: cappedMax });
+    const val = sanitized === '' ? 1 : Number(sanitized);
     setItemStates((prev) => ({
       ...prev,
       [itemId]: { ...prev[itemId], quantity: val }
     }));
+  };
+
+  const handleRefundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitized = sanitizeNumberInput(e.target.value, {
+      min: 0,
+      max: INPUT_LIMITS.amountRupeesMax
+    });
+    setRefundPkr(sanitized === '' ? 0 : Number(sanitized));
+    setRefundError('');
+  };
+
+  const handleReasonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setReason(clampText(e.target.value, INPUT_LIMITS.cancelReason));
+    setReasonError('');
+  };
+
+  const handleNotesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNotes(clampText(e.target.value, INPUT_LIMITS.notes));
   };
 
   const handleItemConditionChange = (itemId: string, condition: 'GOOD' | 'DAMAGED' | null) => {
@@ -117,14 +146,23 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
       }));
 
     if (selectedItems.length === 0) {
-      toast.error(t('sales.returnDialog.selectAtLeastOne'));
       return null;
     }
     return selectedItems;
   };
 
-  const handleRunPreview = () => {
+  const validateSelectedItems = (): ReturnItemInput[] | null => {
     const selectedItems = getSelectedReturnItems();
+    if (!selectedItems) {
+      setItemsError(t('sales.returnDialog.selectAtLeastOne'));
+      return null;
+    }
+    setItemsError('');
+    return selectedItems;
+  };
+
+  const handleRunPreview = () => {
+    const selectedItems = validateSelectedItems();
     if (!selectedItems) return;
 
     preview.mutate({
@@ -139,12 +177,19 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
-      toast.error(t('sales.returnDialog.reasonRequired'));
+      setReasonError(t('sales.returnDialog.reasonRequired'));
       return;
     }
+    setReasonError('');
 
-    const selectedItems = getSelectedReturnItems();
+    const selectedItems = validateSelectedItems();
     if (!selectedItems) return;
+
+    if (previewData && toPaisa(refundPkr) > previewData.refundable) {
+      setRefundError(t('validation.refundExceedsMax'));
+      return;
+    }
+    setRefundError('');
 
     recordReturn.mutate({
       id: sale.id,
@@ -172,7 +217,12 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
             <Label className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
               {t('sales.returnDialog.selectItems')}
             </Label>
-            <div className='space-y-2 rounded-lg border p-3'>
+            <div
+              className={cn(
+                'space-y-2 rounded-lg border p-3',
+                itemsError && 'border-destructive'
+              )}
+            >
               {sale.items.map((item) => {
                 const state = itemStates[item.id] || {
                   selected: false,
@@ -243,6 +293,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
                 );
               })}
             </div>
+            <DialogFieldError message={itemsError} />
           </div>
 
           <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
@@ -265,10 +316,15 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
                 id='refundAmount'
                 type='number'
                 min={0}
+                max={INPUT_LIMITS.amountRupeesMax}
                 value={refundPkr}
-                onChange={(e) => setRefundPkr(Math.max(0, Number(e.target.value) || 0))}
+                onChange={handleRefundChange}
+                onKeyDown={(e) => blockInvalidNumberKeys(e)}
                 placeholder='0'
+                aria-invalid={!!refundError}
+                className={cn(refundError && 'border-destructive')}
               />
+              <DialogFieldError message={refundError} />
             </div>
           </div>
 
@@ -347,11 +403,15 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
             <Textarea
               id='returnReason'
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              onChange={handleReasonChange}
+              maxLength={INPUT_LIMITS.cancelReason}
               placeholder={t('sales.returnDialog.reasonPlaceholder')}
               rows={2}
+              className={cn(reasonError && 'border-destructive')}
+              aria-invalid={!!reasonError}
               required
             />
+            <DialogFieldError id='returnReason-error' message={reasonError} />
           </div>
 
           <div className='space-y-1.5'>
@@ -359,27 +419,23 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
             <Input
               id='returnNotes'
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={handleNotesChange}
+              maxLength={INPUT_LIMITS.notes}
               placeholder={t('sales.returnDialog.notesPlaceholder')}
             />
           </div>
 
           <DialogFooter className='gap-2 sm:gap-0'>
-            <Button
-              type='button'
-              variant='outline'
-              disabled={recordReturn.isPending}
+            <DialogCancelButton
               onClick={() => onOpenChange(false)}
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button
-              type='submit'
               disabled={recordReturn.isPending}
-              isLoading={recordReturn.isPending}
-            >
-              {t('sales.returnDialog.submit')}
-            </Button>
+            />
+            <DialogPrimaryButton
+              mode='add'
+              label={t('sales.returnDialog.submit')}
+              disabled={recordReturn.isPending}
+              loading={recordReturn.isPending}
+            />
           </DialogFooter>
         </form>
       </DialogContent>

@@ -3,7 +3,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -22,13 +21,16 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { DialogCancelButton } from '@/components/common/dialog-actions';
+import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
+import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
+import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
+import { cn } from '@/lib/utils';
 import { useT } from '@/i18n/use-t';
-import type { StockAdjustDialogProps } from '@/types/inventory';
+import type { StockAdjustDialogProps, StockAdjustFormErrors } from '@/types/inventory';
 import { createInventoryAdjustment } from '../api/service';
 import { inventoryKeys, inventoryStockQueryOptions } from '../api/queries';
 import type { CreateInventoryAdjustmentInput } from '@/lib/api/types';
-import { ValidationError } from '@/lib/errors';
 
 export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockAdjustDialogProps) {
   const qc = useQueryClient();
@@ -45,6 +47,7 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedImei, setSelectedImei] = useState<string>('');
   const [reason, setReason] = useState<string>('');
+  const [errors, setErrors] = useState<StockAdjustFormErrors>({});
 
   const selectedProduct =
     products.find((p) => p.id === productId) ??
@@ -76,35 +79,27 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
     }
   }, [productId]);
 
+  const buildPayload = (): CreateInventoryAdjustmentInput | null => {
+    const payload: CreateInventoryAdjustmentInput = {
+      productId,
+      type,
+      reason: reason.trim()
+    };
+
+    if (type === 'ADJUSTMENT') {
+      payload.countedQuantity = Number(countedQuantity);
+    } else if (isSerialized) {
+      payload.inventoryUnitId = selectedImei;
+    } else {
+      payload.quantity = Math.max(1, Number(quantity));
+    }
+
+    return payload;
+  };
+
   const mutation = useMutation({
-    mutationFn: async () => {
-      if (!productId) throw new ValidationError('Please select a product');
-      if (!reason.trim()) throw new ValidationError('Reason is required for all stock changes');
-
-      const payload: CreateInventoryAdjustmentInput = {
-        productId,
-        type,
-        reason: reason.trim()
-      };
-
-      if (type === 'ADJUSTMENT') {
-        if (isSerialized) {
-          throw new ValidationError(
-            'Count adjustments are only allowed for non-serialized products'
-          );
-        }
-        payload.countedQuantity = Number(countedQuantity);
-      } else {
-        if (isSerialized) {
-          if (!selectedImei) throw new ValidationError('Please select the unit IMEI to write off');
-          payload.inventoryUnitId = selectedImei;
-        } else {
-          payload.quantity = Math.max(1, Number(quantity));
-        }
-      }
-
-      return createInventoryAdjustment(payload);
-    },
+    mutationFn: async (payload: CreateInventoryAdjustmentInput) =>
+      createInventoryAdjustment(payload),
     onSuccess: (res) => {
       toast.success(res.message || t('inventory.adjustSuccess'));
       void qc.invalidateQueries({ queryKey: inventoryKeys.all });
@@ -118,7 +113,67 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate();
+
+    const nextErrors: StockAdjustFormErrors = {};
+    if (!productId) {
+      nextErrors.productId = t('validation.productRequired');
+    }
+    if (!reason.trim()) {
+      nextErrors.reason = t('validation.reasonRequired');
+    }
+    if (type !== 'ADJUSTMENT' && isSerialized && !selectedImei) {
+      nextErrors.imei = t('validation.imeiRequired');
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      return;
+    }
+    setErrors({});
+
+    const payload = buildPayload();
+    if (!payload) return;
+    mutation.mutate(payload);
+  };
+
+  const handleProductChange = (val: string | null) => {
+    setProductId(val ?? '');
+    setErrors((prev) => ({ ...prev, productId: undefined }));
+  };
+
+  const handleImeiSelectChange = (val: string | null) => {
+    setSelectedImei(val ?? '');
+    setErrors((prev) => ({ ...prev, imei: undefined }));
+  };
+
+  const writeOffQtyMax = selectedProduct
+    ? Math.min(selectedProduct.inStock, INPUT_LIMITS.quantityMax)
+    : INPUT_LIMITS.quantityMax;
+
+  const handleImeiInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedImei(clampText(e.target.value, INPUT_LIMITS.imei));
+    setErrors((prev) => ({ ...prev, imei: undefined }));
+  };
+
+  const handleCountedQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCountedQuantity(
+      Number(
+        sanitizeNumberInput(e.target.value, { min: 0, max: INPUT_LIMITS.quantityMax })
+      ) || 0
+    );
+  };
+
+  const handleWriteOffQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuantity(
+      Number(
+        sanitizeNumberInput(e.target.value, { min: 1, max: writeOffQtyMax })
+      ) || 1
+    );
+  };
+
+  const handleReasonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setReason(clampText(e.target.value, INPUT_LIMITS.cancelReason));
+    setErrors((prev) => ({ ...prev, reason: undefined }));
   };
 
   return (
@@ -133,7 +188,10 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
           <div className='grid gap-4 py-2'>
             <div className='space-y-1.5'>
               <Label htmlFor='adj-product'>{t('table.col.product')}</Label>
-              <Select value={productId} onValueChange={(val) => setProductId(val ?? '')}>
+              <Select
+                value={productId}
+                onValueChange={handleProductChange}
+              >
                 <SelectTrigger id='adj-product' className='w-full'>
                   <SelectValue placeholder={t('inventory.selectProduct')}>
                     {selectedProduct
@@ -149,6 +207,7 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
                   ))}
                 </SelectContent>
               </Select>
+              <DialogFieldError message={errors.productId} />
             </div>
 
             <div className='space-y-1.5'>
@@ -186,8 +245,10 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
                   id='adj-count'
                   type='number'
                   min={0}
+                  max={INPUT_LIMITS.quantityMax}
                   value={countedQuantity}
-                  onChange={(e) => setCountedQuantity(Math.max(0, parseInt(e.target.value) || 0))}
+                  onChange={handleCountedQuantityChange}
+                  onKeyDown={(e) => blockInvalidNumberKeys(e)}
                   required
                 />
                 {selectedProduct && (
@@ -213,7 +274,10 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
               <div className='space-y-1.5'>
                 <Label htmlFor='adj-imei'>{t('inventory.unitImeiToWriteOff')}</Label>
                 {selectedProduct?.imeis && selectedProduct.imeis.length > 0 ? (
-                  <Select value={selectedImei} onValueChange={(val) => setSelectedImei(val ?? '')}>
+                  <Select
+                    value={selectedImei}
+                    onValueChange={handleImeiSelectChange}
+                  >
                     <SelectTrigger id='adj-imei'>
                       <SelectValue placeholder={t('inventory.selectImei')}>
                         {selectedImei ? `${t('inventory.imeiLabel')} ${selectedImei}` : undefined}
@@ -232,10 +296,14 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
                     id='adj-imei'
                     placeholder={t('inventory.enterImeiOrId')}
                     value={selectedImei}
-                    onChange={(e) => setSelectedImei(e.target.value)}
+                    onChange={handleImeiInputChange}
+                    maxLength={INPUT_LIMITS.imei}
+                    className={cn(errors.imei && 'border-destructive')}
+                    aria-invalid={!!errors.imei}
                     required
                   />
                 )}
+                <DialogFieldError id='adj-imei-error' message={errors.imei} />
               </div>
             ) : (
               <div className='space-y-1.5'>
@@ -251,9 +319,10 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
                   id='adj-qty'
                   type='number'
                   min={1}
-                  max={selectedProduct?.inStock ?? 9999}
+                  max={writeOffQtyMax}
                   value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={handleWriteOffQuantityChange}
+                  onKeyDown={(e) => blockInvalidNumberKeys(e)}
                   required
                 />
               </div>
@@ -266,21 +335,23 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
                 placeholder={t('inventory.reasonPlaceholder')}
                 rows={3}
                 value={reason}
-                onChange={(e) => setReason(e.target.value)}
+                onChange={handleReasonChange}
+                maxLength={INPUT_LIMITS.cancelReason}
+                className={cn(errors.reason && 'border-destructive')}
+                aria-invalid={!!errors.reason}
                 required
               />
+              <DialogFieldError id='adj-reason-error' message={errors.reason} />
             </div>
           </div>
 
           <DialogFooter className='gap-2 sm:gap-0'>
             <DialogCancelButton onClick={() => onOpenChange(false)} disabled={mutation.isPending} />
-            <Button
-              type='submit'
-              disabled={!reason.trim()}
-              isLoading={mutation.isPending}
-            >
-              {t('inventory.recordChange')}
-            </Button>
+            <DialogPrimaryButton
+              mode='save'
+              label={t('inventory.recordChange')}
+              loading={mutation.isPending}
+            />
           </DialogFooter>
         </form>
       </DialogContent>

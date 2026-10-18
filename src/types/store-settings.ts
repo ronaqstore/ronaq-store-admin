@@ -31,3 +31,19 @@ export interface UpdateStoreSettingsInput {
   instagramUrl?: string | null;
   showExactStock?: boolean;
 }
+
+export interface EditStoreProfileDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  settings: StoreSettingsDTO;
+}
+
+export interface EditStoreProfileDialogBodyProps {
+  onOpenChange: (open: boolean) => void;
+  settings: StoreSettingsDTO;
+}
+
+export interface StoreProfileDetailRow {
+  label: string;
+  value: string;
+}

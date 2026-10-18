@@ -5,5 +5,9 @@ import type { LocaleDashboardErrorProps } from '@/types';
 export type { LocaleDashboardErrorProps };
 
 export default function DashboardError({ error, reset }: LocaleDashboardErrorProps) {
-  return <ErrorView error={error} reset={reset} />;
+  return (
+    <div className='flex min-h-0 w-full flex-1 flex-col'>
+      <ErrorView error={error} reset={reset} />
+    </div>
+  );
 }

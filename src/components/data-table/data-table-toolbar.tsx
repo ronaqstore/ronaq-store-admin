@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { DataTableDateFilter } from '@/components/ui/table/data-table-date-filter';
+import { DataTableAsyncFacetedFilter } from '@/components/ui/table/data-table-async-faceted-filter';
 import { DataTableFacetedFilter } from '@/components/ui/table/data-table-faceted-filter';
 import { DataTableSliderFilter } from '@/components/ui/table/data-table-slider-filter';
 import { DataTableViewOptions } from '@/components/ui/table/data-table-view-options';
@@ -11,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { translateMaybe } from '@/i18n/translate-maybe';
 import { DataTableFiltersSheet } from './data-table-filters-sheet';
 import type { DataTableToolbarProps, DataTableToolbarFilterProps } from './types';
 
@@ -63,11 +65,17 @@ export function DataTableToolbar<TData>({
                 }
                 return (
                   textColumn.columnDef.meta?.placeholder ??
-                  textColumn.columnDef.meta?.label ??
+                  (textColumn.columnDef.meta?.label
+                    ? translateMaybe(textColumn.columnDef.meta.label, t)
+                    : undefined) ??
                   t('table.search')
                 );
               })()}
-              aria-label={textColumn.columnDef.meta?.label ?? t('table.search')}
+              aria-label={
+                textColumn.columnDef.meta?.label
+                  ? translateMaybe(textColumn.columnDef.meta.label, t)
+                  : t('table.search')
+              }
               value={(textColumn.getFilterValue() as string) ?? ''}
               onChange={(event) => textColumn.setFilterValue(event.target.value)}
               className='h-11 min-h-11 flex-1'
@@ -203,6 +211,16 @@ function DataTableToolbarFilter<TData>({ column }: DataTableToolbarFilterProps<T
       );
     case 'select':
     case 'multiSelect':
+      if (columnMeta.asyncOptions) {
+        return (
+          <DataTableAsyncFacetedFilter
+            column={column}
+            title={label}
+            config={columnMeta.asyncOptions}
+            multiple={columnMeta.variant === 'multiSelect'}
+          />
+        );
+      }
       return (
         <DataTableFacetedFilter
           column={column}

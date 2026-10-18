@@ -10,6 +10,13 @@ export interface BrandListFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface UpdateBrandInput {
+  name?: string;
+  isActive?: boolean;
+}
+
+export type UpdateBrandArg = string | UpdateBrandInput;
+
 export interface BrandDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;

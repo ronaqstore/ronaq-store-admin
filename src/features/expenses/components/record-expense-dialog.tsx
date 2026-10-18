@@ -19,12 +19,20 @@ import { formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import { useT } from '@/i18n/use-t';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
+import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
+import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
+import { cn } from '@/lib/utils';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
 import { createExpenseMutation } from '../api/mutations';
 import { expenseKeys } from '../api/queries';
 import { CategorySelectCombobox } from './category-select';
 import { AddCategoryDialog } from './add-category-dialog';
-import type { ExpenseCategoryDTO, RecordExpenseDialogProps } from '@/types/expense';
+import type {
+  ExpenseCategoryDTO,
+  RecordExpenseDialogProps,
+  RecordExpenseFormErrors
+} from '@/types/expense';
 import type { OverdraftPrompt } from '@/types';
 
 export function RecordExpenseDialog({
@@ -44,6 +52,16 @@ export function RecordExpenseDialog({
   const [overdraftPrompt, setOverdraftPrompt] = useState<OverdraftPrompt | null>(null);
 
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
+  const [errors, setErrors] = useState<RecordExpenseFormErrors>({});
+
+  const clearError = (key: keyof RecordExpenseFormErrors) => {
+    setErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
 
   const recordMutation = useMutation({
     ...createExpenseMutation,
@@ -76,6 +94,7 @@ export function RecordExpenseDialog({
     setDescription('');
     setConfirmOverdraft(false);
     setOverdraftPrompt(null);
+    setErrors({});
   };
 
   const handleCategoryCreated = (newCat: ExpenseCategoryDTO) => {
@@ -86,21 +105,29 @@ export function RecordExpenseDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const nextErrors: RecordExpenseFormErrors = {};
     if (!categoryId) {
-      toast.error(t('expenses.categoryRequired'));
-      return;
+      nextErrors.categoryId = t('expenses.categoryRequired');
     }
 
     const num = parseFloat(amountStr);
     if (!num || num <= 0) {
-      toast.error(t('common.invalidAmount'));
-      return;
+      nextErrors.amount = t('common.invalidAmount');
+    }
+
+    if (!expenseDate.trim()) {
+      nextErrors.expenseDate = t('validation.dateRequired');
     }
 
     if (overdraftPrompt && !confirmOverdraft) {
-      toast.error(t('expenses.confirmOverdraftRequired'));
+      nextErrors.confirmOverdraft = t('expenses.confirmOverdraftRequired');
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
+    setErrors({});
 
     recordMutation.mutate({
       categoryId,
@@ -119,6 +146,28 @@ export function RecordExpenseDialog({
   const handleCategorySelect = (cat: ExpenseCategoryDTO | null) => {
     setSelectedCategory(cat);
     setCategoryId(cat?.id ?? '');
+    clearError('categoryId');
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAmountStr(
+      sanitizeNumberInput(e.target.value, { min: 1, max: INPUT_LIMITS.amountRupeesMax })
+    );
+    clearError('amount');
+  };
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDescription(clampText(e.target.value, INPUT_LIMITS.notes));
+  };
+
+  const handleExpenseDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setExpenseDate(e.target.value);
+    clearError('expenseDate');
+  };
+
+  const handleConfirmOverdraftChange = (checked: boolean) => {
+    setConfirmOverdraft(checked);
+    if (checked) clearError('confirmOverdraft');
   };
 
   return (
@@ -154,6 +203,7 @@ export function RecordExpenseDialog({
                 disabled={recordMutation.isPending}
                 onAddNewCategoryClick={() => setAddCategoryOpen(true)}
               />
+              <DialogFieldError message={errors.categoryId} />
             </div>
 
             <div className='space-y-1.5 w-full'>
@@ -167,16 +217,23 @@ export function RecordExpenseDialog({
                 <Input
                   id='expense-amount'
                   type='number'
-                  min='1'
+                  min={1}
+                  max={INPUT_LIMITS.amountRupeesMax}
                   step='any'
                   placeholder='0.00'
                   value={amountStr}
-                  onChange={(e) => setAmountStr(e.target.value)}
+                  onChange={handleAmountChange}
+                  onKeyDown={(e) => blockInvalidNumberKeys(e)}
                   disabled={recordMutation.isPending}
-                  className='h-10 ps-9 text-sm font-normal text-foreground w-full'
+                  className={cn(
+                    'h-10 ps-9 text-sm font-normal text-foreground w-full',
+                    errors.amount && 'border-destructive'
+                  )}
+                  aria-invalid={!!errors.amount}
                   required
                 />
               </div>
+              <DialogFieldError id='expense-amount-error' message={errors.amount} />
             </div>
 
             <div className='space-y-1.5 w-full'>
@@ -187,11 +244,16 @@ export function RecordExpenseDialog({
                 id='expense-date'
                 type='date'
                 value={expenseDate}
-                onChange={(e) => setExpenseDate(e.target.value)}
+                onChange={handleExpenseDateChange}
                 disabled={recordMutation.isPending}
-                className='h-10 text-sm font-normal text-foreground w-full cursor-pointer'
+                className={cn(
+                  'h-10 text-sm font-normal text-foreground w-full cursor-pointer',
+                  errors.expenseDate && 'border-destructive'
+                )}
+                aria-invalid={!!errors.expenseDate}
                 required
               />
+              <DialogFieldError id='expense-date-error' message={errors.expenseDate} />
             </div>
 
             <div className='space-y-1.5 w-full'>
@@ -204,7 +266,8 @@ export function RecordExpenseDialog({
                 rows={3}
                 placeholder={t('expenses.descriptionPlaceholder')}
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={handleDescriptionChange}
+                maxLength={INPUT_LIMITS.notes}
                 disabled={recordMutation.isPending}
                 className='resize-none text-sm font-normal text-foreground w-full'
               />
@@ -214,7 +277,7 @@ export function RecordExpenseDialog({
               <OverdraftAlert
                 variant='banner'
                 checked={confirmOverdraft}
-                onCheckedChange={setConfirmOverdraft}
+                onCheckedChange={handleConfirmOverdraftChange}
                 title={t('expenses.shortfallWarningTitle')}
                 description={
                   overdraftPrompt.message ||
@@ -225,6 +288,9 @@ export function RecordExpenseDialog({
                 confirmLabel={t('expenses.confirmExpenseOverdraft')}
               />
             )}
+            {errors.confirmOverdraft ? (
+              <DialogFieldError message={errors.confirmOverdraft} />
+            ) : null}
 
             <DialogFooter className='gap-2 sm:gap-2.5 pt-2'>
               <DialogCancelButton
@@ -232,9 +298,9 @@ export function RecordExpenseDialog({
                 disabled={recordMutation.isPending}
               />
               <DialogPrimaryButton
-                mode='save'
+                mode='add'
                 loading={recordMutation.isPending}
-                disabled={recordMutation.isPending || (!!overdraftPrompt && !confirmOverdraft)}
+                disabled={recordMutation.isPending}
               />
             </DialogFooter>
           </form>

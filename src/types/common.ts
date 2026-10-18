@@ -22,6 +22,7 @@ export type DialogPrimaryMode = 'add' | 'edit' | 'save';
 
 export interface DialogPrimaryButtonProps {
   mode: DialogPrimaryMode;
+  label?: string;
   disabled?: boolean;
   loading?: boolean;
   type?: 'submit' | 'button';
@@ -62,6 +63,7 @@ export interface AlertModalProps {
   description?: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  confirmVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   closeOnOutsideClick?: boolean;
 }
 
@@ -188,6 +190,7 @@ export interface BaseCancelDialogProps {
   reasonId?: string;
   reasonCharactersCountText?: string;
   quickSelectReasonText?: string;
+  reasonError?: string;
   onSubmit: (e: React.FormEvent) => void;
   isSubmitting: boolean;
   cancelButtonText?: string;
@@ -264,10 +267,15 @@ export interface SimpleEntityDialogBodyProps extends SimpleEntityDialogProps {}
 
 export interface SimpleEntityCellActionProps {
   id: string;
-  deleteTitle: string;
-  deleteDescription: string;
-  deleteSuccess: string;
-  onDelete: (id: string) => Promise<unknown>;
+  isActive: boolean;
+  deactivateTitle: string;
+  deactivateDescription: string;
+  deactivateSuccess: string;
+  activateTitle: string;
+  activateDescription: string;
+  activateSuccess: string;
+  onDeactivate: (id: string) => Promise<unknown>;
+  onActivate: (id: string) => Promise<unknown>;
   invalidateQueryKey: readonly unknown[];
   renderDialog: (open: boolean, onOpenChange: (open: boolean) => void) => ReactNode;
 }
@@ -286,5 +294,12 @@ export interface DateFieldShellProps {
   errors?: unknown[];
   hasValue: boolean;
   displayText: ReactNode;
+  children: ReactNode;
+}
+
+export interface SettingsSectionProps {
+  title: string;
+  description: string;
+  icon: Icon;
   children: ReactNode;
 }

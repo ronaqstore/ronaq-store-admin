@@ -100,6 +100,7 @@ export type TextFieldProps = BaseFieldProps &
 export interface NamedEntity {
   id: string;
   name: string;
+  isActive?: boolean;
   is_active?: boolean;
 }
 
@@ -129,4 +130,26 @@ export interface FormEntitySelectProps<T extends NamedEntity> extends InfiniteEn
 
 export interface SubFieldApi<T = string> {
   handleChange: (val: T) => void;
+}
+
+export interface DialogFieldErrorProps {
+  id?: string;
+  message?: string | null;
+}
+
+export interface FieldMetaInvalidInput {
+  isTouched: boolean;
+  isValid: boolean;
+  errors: unknown[];
+  errorMap: Record<string, unknown>;
+}
+
+export interface SanitizeNumberInputOptions {
+  min?: number;
+  max?: number;
+}
+
+export interface BlockInvalidNumberKeysEvent {
+  key: string;
+  preventDefault: () => void;
 }

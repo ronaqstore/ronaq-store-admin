@@ -14,6 +14,7 @@ import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { useFieldContext, useFieldInvalid } from '@/lib/form-context';
+import { clampText, INPUT_LIMITS } from '@/lib/input-limits';
 import type { TextFieldProps } from '@/types';
 export type { TextFieldProps };
 
@@ -24,6 +25,10 @@ export function TextField({
   startIcon: StartIcon,
   className,
   type,
+  min,
+  max,
+  maxLength,
+  onKeyDown,
   ...inputProps
 }: TextFieldProps) {
   const field = useFieldContext<string | number | undefined>();
@@ -33,23 +38,54 @@ export function TextField({
   const [showPassword, setShowPassword] = React.useState(false);
 
   const isPassword = type === 'password';
+  const isNumber = type === 'number';
   const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
   const useGroup = Boolean(StartIcon) || isPassword;
+  const resolvedMin = min ?? (isNumber ? 0 : undefined);
+  const resolvedMax = max ?? (isNumber ? INPUT_LIMITS.amountRupeesMax : undefined);
+  const resolvedMaxLength =
+    maxLength ??
+    (isPassword ? INPUT_LIMITS.password : isNumber ? undefined : INPUT_LIMITS.name);
 
   const sharedInputProps = {
     ...inputProps,
     id: field.name,
     name: field.name,
     value: field.state.value ?? '',
+    min: resolvedMin,
+    max: resolvedMax,
+    maxLength: isNumber ? undefined : resolvedMaxLength,
     onBlur: field.handleBlur,
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-      field.handleChange(
-        type === 'number'
-          ? e.target.value === ''
-            ? undefined
-            : Number(e.target.value)
-          : e.target.value
-      ),
+    onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (isNumber) {
+        if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') {
+          e.preventDefault();
+        }
+      }
+      onKeyDown?.(e);
+    },
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!isNumber) {
+        const next =
+          resolvedMaxLength !== undefined
+            ? clampText(e.target.value, resolvedMaxLength)
+            : e.target.value;
+        field.handleChange(next);
+        return;
+      }
+      if (e.target.value === '') {
+        field.handleChange(undefined);
+        return;
+      }
+      const n = Number(e.target.value);
+      if (Number.isNaN(n)) return;
+      const minBound = resolvedMin !== undefined ? Number(resolvedMin) : 0;
+      const maxBound =
+        resolvedMax !== undefined ? Number(resolvedMax) : INPUT_LIMITS.amountRupeesMax;
+      let next = n < minBound ? minBound : n;
+      if (next > maxBound) next = maxBound;
+      field.handleChange(next);
+    },
     'aria-invalid': isInvalid,
     'aria-describedby': isInvalid ? `${field.name}-error` : undefined,
     type: inputType

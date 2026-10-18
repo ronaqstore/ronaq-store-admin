@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { BaseCancelDialog } from '@/components/common/base-cancel-dialog';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { useT } from '@/i18n/use-t';
 import type { CancelImpactItem, OverdraftPrompt } from '@/types';
 import type { CancelPaymentDialogProps } from '@/types/payment';
@@ -27,6 +28,8 @@ export function CancelPaymentDialog({
   const t = useT();
   const qc = useQueryClient();
   const [reason, setReason] = useState('');
+  const [reasonError, setReasonError] = useState('');
+  const [overdraftError, setOverdraftError] = useState('');
   const [confirmOverdraft, setConfirmOverdraft] = useState(false);
   const [overdraftPrompt, setOverdraftPrompt] = useState<OverdraftPrompt | null>(null);
 
@@ -61,14 +64,16 @@ export function CancelPaymentDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
-      toast.error(t('payments.reasonRequired'));
+      setReasonError(t('payments.reasonRequired'));
       return;
     }
+    setReasonError('');
 
     if ((impact?.willCauseOverdraft || !!overdraftPrompt) && !confirmOverdraft) {
-      toast.error(t('payments.confirmOverdraftRequired'));
+      setOverdraftError(t('payments.confirmOverdraftRequired'));
       return;
     }
+    setOverdraftError('');
 
     cancel.mutate({
       id: payment.id,
@@ -77,6 +82,16 @@ export function CancelPaymentDialog({
         confirmOverdraft: confirmOverdraft || !!overdraftPrompt
       }
     });
+  };
+
+  const handleConfirmOverdraftChange = (checked: boolean) => {
+    setConfirmOverdraft(checked);
+    if (checked) setOverdraftError('');
+  };
+
+  const handleReasonChange = (v: string) => {
+    setReason(v);
+    setReasonError('');
   };
 
   const impactItems: CancelImpactItem[] = [];
@@ -113,7 +128,7 @@ export function CancelPaymentDialog({
       {impact?.willCauseOverdraft && (
         <OverdraftAlert
           checked={confirmOverdraft}
-          onCheckedChange={setConfirmOverdraft}
+          onCheckedChange={handleConfirmOverdraftChange}
           title={t('payments.drawerOverdraftWarning')}
           description={t('payments.drawerOverdraftDesc', { amount: formatPkr(impact.cashAfter) })}
           confirmLabel={t('payments.confirmNegativeCash')}
@@ -123,13 +138,14 @@ export function CancelPaymentDialog({
       {overdraftPrompt && !impact?.willCauseOverdraft && (
         <OverdraftAlert
           checked={confirmOverdraft}
-          onCheckedChange={setConfirmOverdraft}
+          onCheckedChange={handleConfirmOverdraftChange}
           title={t('payments.drawerOverdraftWarning')}
           description={overdraftPrompt.message}
           confirmLabel={t('payments.confirmNegativeCash')}
           id='confirm-overdraft-prompt'
         />
       )}
+      <DialogFieldError message={overdraftError} />
     </>
   );
 
@@ -152,7 +168,8 @@ export function CancelPaymentDialog({
       overdraftAlert={overdraftSection}
       presetReasons={PRESET_REASONS}
       reason={reason}
-      onReasonChange={setReason}
+      onReasonChange={handleReasonChange}
+      reasonError={reasonError}
       reasonLabel={t('payments.reasonLabel')}
       reasonPlaceholder={t('payments.reasonPlaceholder')}
       reasonId='cancel-reason'

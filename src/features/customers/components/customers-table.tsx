@@ -49,6 +49,9 @@ function CustomerCellAction({ data }: CustomerCellActionProps) {
       deactivateDescription={t('dukaan.party.customerArchiveDescription')}
       deactivateConfirmLabel={t('common.archive')}
       deactivateSuccess={t('dukaan.party.customerArchived')}
+      activateTitle={t('dukaan.party.customerActivateTitle')}
+      activateDescription={t('dukaan.party.customerActivateDescription')}
+      activateConfirmLabel={t('common.activate')}
       activateSuccess={t('dukaan.party.customerActivated')}
       onDeactivate={deactivateCustomer}
       onActivate={reactivateCustomer}
@@ -137,7 +140,7 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
   const search = searchParam || nameParam || undefined;
   const isActiveFilter = parseBooleanFacet(isActiveParam);
 
-  const { data, isLoading, isFetching } = useQuery(
+  const { data, isFetching } = useQuery(
     customersQueryOptions({
       page: params.page,
       pageSize: params.perPage,
@@ -176,8 +179,7 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
       mobileItem={customerMobileItem}
       detail={customerDetail}
       quickFilters={customerQuickFilters}
-      isLoading={isLoading || isFetching}
-      rowCount={items.length > 0 ? items.length : total > 0 ? total : undefined}
+      isLoading={isFetching}
     />
   );
 }

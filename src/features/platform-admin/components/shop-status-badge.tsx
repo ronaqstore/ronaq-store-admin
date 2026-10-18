@@ -1,26 +1,27 @@
 import { cn } from '@/lib/utils';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
-import type { PlatformShopStatus } from '../api/types';
 import type { ShopStatusBadgeProps, ShopStatusConfig } from '@/types';
+import { PLATFORM_ACCESS_STATUS_LABEL_KEY } from '../constants/filters';
+import type { PlatformShopAccessStatus } from '../api/types';
 
-const STATUS_CONFIG: Record<PlatformShopStatus, ShopStatusConfig> = {
+const STATUS_CONFIG: Record<PlatformShopAccessStatus, ShopStatusConfig> = {
   ACTIVE: {
-    labelKey: 'platform.active',
+    labelKey: PLATFORM_ACCESS_STATUS_LABEL_KEY.ACTIVE,
     className:
       'border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
-    icon: 'circle'
-  },
-  TRIAL: {
-    labelKey: 'platform.onTrial',
-    className:
-      'border-transparent bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
-    icon: 'exclusive'
+    icon: 'check'
   },
   EXPIRED: {
-    labelKey: 'platform.expired',
+    labelKey: PLATFORM_ACCESS_STATUS_LABEL_KEY.EXPIRED,
     className: 'border-transparent bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
     icon: 'circleX'
+  },
+  SUSPENDED: {
+    labelKey: PLATFORM_ACCESS_STATUS_LABEL_KEY.SUSPENDED,
+    className:
+      'border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+    icon: 'ban'
   }
 };
 

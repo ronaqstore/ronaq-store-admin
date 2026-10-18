@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Icons } from '@/components/icons';
+import { ComboboxListSkeleton } from '@/components/common/combobox-list-skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useT } from '@/i18n/use-t';
 import type { NamedEntity, InfiniteEntitySelectProps } from '@/types';
@@ -57,10 +59,14 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
       const result = await fetchPage({
         page: pageParam,
         limit: PAGE_SIZE,
+        pageSize: PAGE_SIZE,
+        ...(activeOnly ? { isActive: true, is_active: 'true' } : {}),
         ...(debouncedSearch ? { search: debouncedSearch } : {})
       });
       const items = activeOnly
-        ? result.items.filter((item) => item.is_active !== false)
+        ? result.items.filter(
+            (item) => item.isActive !== false && item.is_active !== false
+          )
         : result.items;
       return { ...result, items };
     },
@@ -143,28 +149,39 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
             onValueChange={setSearch}
           />
           <CommandList id={LIST_ID} className='pt-1' onScroll={onListScroll}>
-            <CommandEmpty>{query.isLoading ? t('common.loading') : effEmptyMessage}</CommandEmpty>
-            <CommandGroup>
-              {items.map((item) => (
-                <CommandItem
-                  key={item.id}
-                  value={item.id}
-                  keywords={[item.name]}
-                  data-checked={value === item.id || undefined}
-                  onSelect={() => handleSelectItem(item)}
-                >
-                  <Icons.check
-                    className={cn('me-2 size-4', value === item.id ? 'opacity-100' : 'opacity-0')}
-                  />
-                  <span className='truncate'>{item.name}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-            {query.isFetchingNextPage ? (
-              <div className='text-muted-foreground py-2 text-center text-xs'>
-                {t('table.loadMore')}
-              </div>
-            ) : null}
+            {query.isLoading && items.length === 0 ? (
+              <ComboboxListSkeleton />
+            ) : (
+              <>
+                <CommandEmpty>{effEmptyMessage}</CommandEmpty>
+                <CommandGroup className='[&_[cmdk-group-items]]:space-y-1.5'>
+                  {items.map((item) => (
+                    <CommandItem
+                      key={item.id}
+                      value={item.id}
+                      keywords={[item.name]}
+                      data-checked={value === item.id || undefined}
+                      onSelect={() => handleSelectItem(item)}
+                      className='py-2'
+                    >
+                      <Icons.check
+                        className={cn(
+                          'me-2 size-4',
+                          value === item.id ? 'opacity-100' : 'opacity-0'
+                        )}
+                      />
+                      <span className='truncate'>{item.name}</span>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+                {query.isFetchingNextPage ? (
+                  <div className='space-y-1.5 px-2 py-2' aria-busy='true'>
+                    <Skeleton className='h-9 w-full' />
+                    <Skeleton className='h-9 w-[85%]' />
+                  </div>
+                ) : null}
+              </>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

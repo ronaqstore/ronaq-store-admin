@@ -1,12 +1,10 @@
 'use client';
 
 import type { ColumnDef } from '@tanstack/react-table';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
-import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
+import { PreviewableImage } from '@/components/media/previewable-image';
 import {
   ResponsiveDataTable,
   StatusBadge,
@@ -15,20 +13,69 @@ import {
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
-import { useSuspenseQuery } from '@tanstack/react-query';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { t as staticT } from '@/i18n/static-t';
-import { AlertModal } from '@/components/modal/alert-modal';
-import { RowActionsMenu } from '@/components/common/row-actions-menu';
+import { SimpleEntityCellAction } from '@/components/common/simple-entity-cell-action';
 import { productsQueryOptions, productsQueryKeys } from '../api/queries';
-import { deleteProduct } from '../api/service';
+import { deactivateProduct, reactivateProduct } from '../api/service';
+import { listCategories } from '@/features/categories/api/service';
+import { listBrands } from '@/features/brands/api/service';
 import type { ProductDTO } from '@/lib/api/types';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { formatEmpty } from '@/lib/format-empty';
-import { productImageSrc } from '@/constants/placeholders';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/constants/placeholders';
 import { DUKAAN_DEFAULT_PAGE_SIZE, useDukaanListParams } from '@/components/data-table/list-params';
-import type { ProductCellActionProps, ProductsTableProps } from '@/types/products';
+import type {
+  ProductCellActionProps,
+  ProductImagesFieldProps,
+  ProductsTableProps
+} from '@/types/products';
+import type { AsyncFacetedFilterConfig } from '@/types/data-table';
+
+const categoryAsyncFilter: AsyncFacetedFilterConfig = {
+  queryKey: ['categories', 'product-filter'],
+  searchPlaceholderKey: 'dukaan.product.searchCategories',
+  activeOnly: true,
+  fetchPage: async ({ page, pageSize, search }) => {
+    const res = await listCategories({
+      page,
+      pageSize,
+      search,
+      isActive: true,
+      sortBy: 'name',
+      sortOrder: 'asc'
+    });
+    return {
+      items: res.items,
+      total: res.total,
+      page: res.page,
+      pageSize: res.pageSize
+    };
+  }
+};
+
+const brandAsyncFilter: AsyncFacetedFilterConfig = {
+  queryKey: ['brands', 'product-filter'],
+  searchPlaceholderKey: 'dukaan.product.searchBrands',
+  activeOnly: true,
+  fetchPage: async ({ page, pageSize, search }) => {
+    const res = await listBrands({
+      page,
+      pageSize,
+      search,
+      isActive: true,
+      sortBy: 'name',
+      sortOrder: 'asc'
+    });
+    return {
+      items: res.items,
+      total: res.total,
+      page: res.page,
+      pageSize: res.pageSize
+    };
+  }
+};
 
 const ProductDialog = dynamic(
   () => import('./product-dialog').then((mod) => mod.ProductDialog),
@@ -37,171 +84,167 @@ const ProductDialog = dynamic(
 
 function ProductCellAction({ data }: ProductCellActionProps) {
   const t = useT();
-  const qc = useQueryClient();
-  const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-
-  const remove = useMutation({
-    mutationFn: () => deleteProduct(data.id),
-    onSuccess: () => {
-      toast.success(t('dukaan.product.deleted'));
-      setDeleteOpen(false);
-      void qc.invalidateQueries({ queryKey: productsQueryKeys.all });
-    },
-    onError: (e: Error) => toast.error(e.message)
-  });
 
   return (
-    <>
-      <AlertModal
-        isOpen={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        onConfirm={() => remove.mutate()}
-        loading={remove.isPending}
-        title={t('dukaan.product.deleteTitle')}
-        description={t('dukaan.product.deleteDescription')}
-        confirmLabel={t('common.delete')}
-      />
-      <ProductDialog open={editOpen} onOpenChange={setEditOpen} product={data} />
-      <RowActionsMenu
-        actions={[
-          {
-            label: t('common.edit'),
-            icon: Icons.edit,
-            onClick: () => setEditOpen(true)
-          },
-          {
-            label: t('common.delete'),
-            icon: Icons.trash,
-            variant: 'destructive',
-            onClick: () => setDeleteOpen(true)
-          }
-        ]}
-      />
-    </>
+    <SimpleEntityCellAction
+      id={data.id}
+      isActive={data.isActive}
+      deactivateTitle={t('dukaan.product.deactivateTitle')}
+      deactivateDescription={t('dukaan.product.deactivateDescription')}
+      deactivateSuccess={t('dukaan.product.productDeactivated')}
+      activateTitle={t('dukaan.product.activateTitle')}
+      activateDescription={t('dukaan.product.activateDescription')}
+      activateSuccess={t('dukaan.product.productActivated')}
+      onDeactivate={deactivateProduct}
+      onActivate={reactivateProduct}
+      invalidateQueryKey={productsQueryKeys.all}
+      renderDialog={(open, onOpenChange) => (
+        <ProductDialog open={open} onOpenChange={onOpenChange} product={data} />
+      )}
+    />
   );
 }
 
 const productColumns: ColumnDef<ProductDTO>[] = [
-  {
-    id: 'image',
-    accessorKey: 'imageUrl',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={staticT('tableColumns.image')} />
-    ),
-    meta: { label: 'tableColumns.image', type: 'text', priority: 1 },
-    cell: ({ row }) => (
-      <div className='relative h-10 w-10 overflow-hidden rounded-md border bg-muted'>
-        <Image
-          src={productImageSrc(row.original.imageUrl)}
-          alt={formatEmpty(row.original.name)}
-          fill
-          unoptimized
-          className='object-cover'
-          sizes='40px'
-        />
-      </div>
-    )
-  },
-  {
-    id: 'name',
-    accessorKey: 'name',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={staticT('table.col.name')} />
-    ),
-    meta: {
-      label: 'table.col.name',
-      placeholderKey: 'table.search' as const,
-      variant: 'text',
-      icon: Icons.search,
-      type: 'text',
-      primary: true,
-      priority: 1
+    {
+      id: 'image',
+      accessorKey: 'imageUrl',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={staticT('tableColumns.image')} />
+      ),
+      meta: { label: 'tableColumns.image', type: 'image', priority: 1 },
+      enableSorting: false,
+      cell: ({ row }) => {
+        const cover = row.original.imageUrl || row.original.imageUrls?.[0] || null;
+        return (
+          <PreviewableImage
+            src={cover}
+            alt={formatEmpty(row.original.name)}
+            className='relative h-10 w-10 overflow-hidden rounded-md border bg-muted'
+            imageClassName='object-cover'
+            sizes='40px'
+            fallbackSrc={PLACEHOLDER_PRODUCT_IMAGE}
+          />
+        );
+      }
     },
-    enableColumnFilter: true,
-    cell: ({ row }) => (
-      <div className='flex flex-col'>
-        <span className='font-medium'>{formatEmpty(row.original.name)}</span>
-        <span className='text-xs text-muted-foreground'>
-          {row.original.sku
-            ? `SKU: ${row.original.sku}`
-            : formatEmpty(row.original.brandName)}
-        </span>
-      </div>
-    )
-  },
-  {
-    id: 'categoryName',
-    accessorKey: 'categoryName',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={staticT('dukaan.product.category')} />
-    ),
-    meta: { label: 'dukaan.product.category', type: 'text', priority: 2 },
-    cell: ({ row }) => <span>{formatEmpty(row.original.categoryName)}</span>
-  },
-  {
-    id: 'brandName',
-    accessorKey: 'brandName',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={staticT('dukaan.product.brand')} />
-    ),
-    meta: { label: 'dukaan.product.brand', type: 'text', priority: 3 },
-    cell: ({ row }) => <span>{formatEmpty(row.original.brandName)}</span>
-  },
-  {
-    id: 'defaultSellingPrice',
-    accessorKey: 'defaultSellingPrice',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={staticT('dukaan.product.sellingPrice')} />
-    ),
-    meta: { label: 'dukaan.product.sellingPrice', type: 'money', priority: 2 },
-    cell: ({ row }) => formatPkr(row.original.defaultSellingPrice)
-  },
-  {
-    id: 'quantityOnHand',
-    accessorKey: 'quantityOnHand',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={staticT('dukaan.product.stock')} />
-    ),
-    meta: { label: 'dukaan.product.stock', type: 'number', priority: 2 },
-    cell: ({ row }) => <span>{row.original.quantityOnHand ?? 0}</span>
-  },
-  {
-    id: 'isActive',
-    accessorKey: 'isActive',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={staticT('table.col.status')} />
-    ),
-    meta: { label: 'table.col.status', type: 'boolean', priority: 2 },
-    cell: ({ row }) => (
-      <div className='flex flex-col gap-1'>
-        <Badge variant={row.original.isActive ? 'default' : 'secondary'}>
-          {row.original.isActive ? staticT('status.active') : staticT('status.inactive')}
-        </Badge>
-        <span className='text-[10px] text-muted-foreground'>
-          {row.original.isPublished
-            ? staticT('dukaan.product.published')
-            : staticT('dukaan.product.unpublished')}
-        </span>
-      </div>
-    )
-  },
-  {
-    id: 'actions',
-    size: 48,
-    enableSorting: false,
-    enableHiding: false,
-    meta: { mobile: 'hidden' },
-    cell: ({ row }) => (
-      <div className='flex justify-end'>
-        <ProductCellAction data={row.original} />
-      </div>
-    )
-  }
-];
+    {
+      id: 'name',
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={staticT('table.col.name')} />
+      ),
+      meta: {
+        label: 'table.col.name',
+        placeholderKey: 'table.search' as const,
+        variant: 'text',
+        icon: Icons.search,
+        type: 'text',
+        primary: true,
+        priority: 1
+      },
+      enableColumnFilter: true,
+      cell: ({ row }) => (
+        <div className='flex flex-col'>
+          <span className='font-medium'>{formatEmpty(row.original.name)}</span>
+          <span className='text-xs text-muted-foreground'>
+            {row.original.sku
+              ? `SKU: ${row.original.sku}`
+              : formatEmpty(row.original.brandName)}
+          </span>
+        </div>
+      )
+    },
+    {
+      id: 'categoryId',
+      accessorKey: 'categoryId',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={staticT('dukaan.product.category')} />
+      ),
+      meta: {
+        label: 'dukaan.product.category',
+        variant: 'select',
+        icon: Icons.folder,
+        asyncOptions: categoryAsyncFilter,
+        type: 'text',
+        priority: 2
+      },
+      enableColumnFilter: true,
+      enableSorting: false,
+      cell: ({ row }) => <span>{formatEmpty(row.original.categoryName)}</span>
+    },
+    {
+      id: 'brandId',
+      accessorKey: 'brandId',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={staticT('dukaan.product.brand')} />
+      ),
+      meta: {
+        label: 'dukaan.product.brand',
+        variant: 'select',
+        icon: Icons.tag,
+        asyncOptions: brandAsyncFilter,
+        type: 'text',
+        priority: 3
+      },
+      enableColumnFilter: true,
+      enableSorting: false,
+      cell: ({ row }) => <span>{formatEmpty(row.original.brandName)}</span>
+    },
+    {
+      id: 'defaultSellingPrice',
+      accessorKey: 'defaultSellingPrice',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={staticT('dukaan.product.sellingPrice')} />
+      ),
+      meta: { label: 'dukaan.product.sellingPrice', type: 'money', priority: 2 },
+      cell: ({ row }) => formatPkr(row.original.defaultSellingPrice)
+    },
+    {
+      id: 'quantityOnHand',
+      accessorKey: 'quantityOnHand',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={staticT('dukaan.product.stock')} />
+      ),
+      meta: { label: 'dukaan.product.stock', type: 'number', priority: 2 },
+      cell: ({ row }) => <span>{row.original.quantityOnHand ?? 0}</span>
+    },
+    {
+      id: 'isActive',
+      accessorKey: 'isActive',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={staticT('table.col.status')} />
+      ),
+      meta: { label: 'table.col.status', type: 'boolean', priority: 2 },
+      cell: ({ row }) => (
+        <div className='flex flex-col gap-1'>
+          <Badge variant={row.original.isActive ? 'default' : 'secondary'}>
+            {row.original.isActive ? staticT('status.active') : staticT('status.inactive')}
+          </Badge>
+          <span className='text-[10px] text-muted-foreground'>
+            {row.original.isPublished
+              ? staticT('dukaan.product.published')
+              : staticT('dukaan.product.unpublished')}
+          </span>
+        </div>
+      )
+    },
+    {
+      id: 'actions',
+      size: 48,
+      enableSorting: false,
+      enableHiding: false,
+      meta: { mobile: 'hidden' },
+      cell: ({ row }) => (
+        <div className='flex justify-end'>
+          <ProductCellAction data={row.original} />
+        </div>
+      )
+    }
+  ];
 
 const productMobileItem: MobileItemConfig<ProductDTO> = {
-  leading: 'icon',
+  leading: 'thumbnail',
   leadingIcon: Icons.product,
   title: (row) => row.name,
   subtitle: (row) => row.categoryName || (row.isActive ? 'Active' : 'Inactive'),
@@ -213,6 +256,38 @@ const productMobileItem: MobileItemConfig<ProductDTO> = {
   ariaLabel: (row) => `${row.name}, ${row.isActive ? 'Active' : 'Inactive'}`
 };
 
+function ProductImagesField({ row }: ProductImagesFieldProps) {
+  const t = useT();
+  const urls =
+    row.imageUrls?.length ?
+      row.imageUrls
+    : row.imageUrl ?
+      [row.imageUrl]
+    : [];
+
+  if (urls.length === 0) {
+    return (
+      <span className='text-muted-foreground'>{t('dukaan.product.noImages')}</span>
+    );
+  }
+
+  return (
+    <div className='grid grid-cols-3 gap-2'>
+      {urls.map((url, index) => (
+        <PreviewableImage
+          key={`${url}-${index}`}
+          src={url}
+          alt={`${formatEmpty(row.name)} ${index + 1}`}
+          className='relative aspect-square overflow-hidden rounded-lg border bg-muted'
+          imageClassName='object-cover'
+          sizes='120px'
+          fallbackSrc={PLACEHOLDER_PRODUCT_IMAGE}
+        />
+      ))}
+    </div>
+  );
+}
+
 const productDetail: DetailConfig<ProductDTO> = {
   mode: 'sheet',
   title: (row) => row.name,
@@ -222,6 +297,10 @@ const productDetail: DetailConfig<ProductDTO> = {
   }),
   value: (row) => formatPkr(row.defaultSellingPrice),
   sections: (row) => [
+    {
+      title: staticT('dukaan.product.images'),
+      fields: [{ label: staticT('dukaan.product.images'), value: <ProductImagesField row={row} /> }]
+    },
     {
       title: 'Product Details',
       fields: [
@@ -244,24 +323,41 @@ const productDetail: DetailConfig<ProductDTO> = {
   ]
 };
 
+function firstFilterValue(value: unknown): string | undefined {
+  if (Array.isArray(value)) return typeof value[0] === 'string' ? value[0] : undefined;
+  if (typeof value === 'string' && value.trim()) return value.split(',')[0]?.trim() || undefined;
+  return undefined;
+}
+
 export function ProductsTable({ toolbarAction }: ProductsTableProps) {
   const sortableColumnIds = ['name', 'createdAt', 'updatedAt', 'defaultSellingPrice'];
-  const { params, filters, sortBy, sortOrder } = useDukaanListParams(sortableColumnIds, 'name');
-  const { data } = useSuspenseQuery(
+  const { params, filters, sortBy, sortOrder } = useDukaanListParams(sortableColumnIds, 'name', [
+    'categoryId',
+    'brandId'
+  ]);
+
+  const categoryId = firstFilterValue((filters as Record<string, unknown>).categoryId);
+  const brandId = firstFilterValue((filters as Record<string, unknown>).brandId);
+
+  const { data, isFetching } = useQuery(
     productsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
       search: filters.search,
+      categoryId,
+      brandId,
       sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | 'defaultSellingPrice' | undefined,
       sortOrder
     })
   );
-  const pageCount = Math.max(1, Math.ceil(data.total / params.perPage));
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / params.perPage));
   const { table } = useDataTable({
-    data: data.items,
+    data: items,
     columns: productColumns,
     pageCount,
-    rowCount: data.total,
+    rowCount: total,
     shallow: true,
     debounceMs: 400,
     initialState: {
@@ -275,6 +371,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       toolbarAction={toolbarAction}
       mobileItem={productMobileItem}
       detail={productDetail}
+      isLoading={isFetching}
     />
   );
 }

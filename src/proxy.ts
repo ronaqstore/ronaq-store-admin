@@ -7,7 +7,9 @@ import {
   loginPath,
   redirectForRole,
   shortcutPathForRole,
-  extractLocale
+  extractLocale,
+  isPlatformRoute,
+  localize
 } from '@/lib/auth/routes';
 import { routing } from '@/i18n/routing';
 
@@ -55,7 +57,9 @@ function handleAuthRedirects(req: NextRequest, session: AuthRedirectSession | nu
 
   if (startsWithDashboard && !isLoggedIn) {
     const url = req.nextUrl.clone();
-    url.pathname = loginPath(locale);
+    url.pathname = isPlatformRoute(pathname)
+      ? localize('/platform-admin/login', locale)
+      : loginPath(locale);
     url.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(url);
   }

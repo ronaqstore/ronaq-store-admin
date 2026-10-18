@@ -1,55 +1,74 @@
-import type { PlatformShopStatus, SubscriptionPlan } from '@/types';
-export type { PlatformShopStatus, SubscriptionPlan };
+import type { PlatformShopAccessStatus } from '@/types';
+
+export type { PlatformShopAccessStatus };
 
 export interface PlatformShop {
   id: string;
   name: string;
-  address: string;
-  city: string;
-  owner_name: string;
-  owner_phone: string;
-  status: PlatformShopStatus;
-  trial_ends_at: string | null;
-  next_due_at: string | null;
-  created_at: string;
-}
-
-export interface PlatformSubscription {
-  id: string;
-  shop_id: string;
-  shop_name: string;
-  plan: SubscriptionPlan;
-  status: PlatformShopStatus;
-  next_due_at: string | null;
-  amount_paisa: number;
+  phone: string | null;
+  address: string | null;
+  status: 'ACTIVE' | 'SUSPENDED';
+  accessStatus: PlatformShopAccessStatus;
+  isAccessible: boolean;
+  subscriptionEndsAt: string;
+  ownerId: string | null;
+  ownerName: string | null;
+  ownerPhone: string | null;
+  hasPassword: boolean;
+  storeSlug: string | null;
+  createdAt: string;
 }
 
 export interface PlatformOverview {
-  total_shops: number;
-  active_shops: number;
-  trial_shops: number;
-  expired_shops: number;
-  mrr_paisa: number;
+  totalShops: number;
+  activeShops: number;
+  expiredShops: number;
+  suspendedShops: number;
+}
+
+export interface ShopRowActionsProps {
+  shop: PlatformShop;
 }
 
 export interface PlatformShopFilters {
   page?: number;
+  pageSize?: number;
   limit?: number;
   search?: string;
-  city?: string;
-  status?: PlatformShopStatus | string;
+  accessStatus?: PlatformShopAccessStatus | string;
+  sortBy?: 'name' | 'createdAt' | 'subscriptionEndsAt';
+  sortOrder?: 'asc' | 'desc';
 }
 
-export interface PlatformSubscriptionFilters {
-  page?: number;
-  limit?: number;
-  search?: string;
-  status?: PlatformShopStatus | string;
+export interface CreatePlatformShopInput {
+  shopName: string;
+  shopPhone?: string;
+  shopAddress?: string;
+  subscriptionEndsAt: string;
+  ownerName: string;
+  ownerPhone: string;
 }
 
-export interface Paginated<T> {
-  items: T[];
-  total_items: number;
-  page: number;
-  limit: number;
+export interface CreatePlatformShopResult {
+  shopId: string;
+  shopName: string;
+  ownerId: string;
+  ownerName: string;
+  ownerPhone: string;
+  setupUrl: string;
+  setupLinkExpiresAt: string;
+  status: 'ACTIVE' | 'SUSPENDED';
+}
+
+export interface UpdateSubscriptionInput {
+  subscriptionEndsAt?: string;
+  isActive?: boolean;
+}
+
+export interface UpdateSubscriptionResult {
+  shopId: string;
+  shopName: string;
+  status: 'ACTIVE' | 'SUSPENDED';
+  subscriptionEndsAt: string;
+  isAccessible: boolean;
 }

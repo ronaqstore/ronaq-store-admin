@@ -88,10 +88,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return await tryPlatformAdminLogin(phone, password);
         }
 
-        const ownerResult = await tryOwnerLogin(phone, password);
-        if (ownerResult) return ownerResult;
-
-        return await tryPlatformAdminLogin(phone, password);
+        return await tryOwnerLogin(phone, password);
       }
     })
   ]

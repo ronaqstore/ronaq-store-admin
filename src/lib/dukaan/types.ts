@@ -3,6 +3,7 @@ export type SessionRole = 'OWNER' | 'ADMIN' | 'SUPER_ADMIN';
 export interface ListFilters {
   page?: number;
   limit?: number;
+  pageSize?: number;
   search?: string;
   sort?: string;
   status?: string;
@@ -14,6 +15,7 @@ export interface ListFilters {
   method?: string;
   low_stock?: string;
   is_active?: string;
+  isActive?: boolean;
   udhar_state?: string;
 }
 

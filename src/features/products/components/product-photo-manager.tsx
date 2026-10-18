@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { PreviewableImage } from '@/components/media/previewable-image';
 import { AppError } from '@/lib/errors';
 
 import {
@@ -14,16 +15,23 @@ import {
   useReorderProductImages,
   useUploadProductImage
 } from '../api/mutations';
+import type { ProductImageDTO } from '@/lib/api/types';
 import type { ProductPhotoManagerProps } from '@/types/products';
 
-export function ProductPhotoManager({ productId, images, onChange }: ProductPhotoManagerProps) {
+export function ProductPhotoManager({
+  productId,
+  images,
+  onChange,
+  onAddPendingFile,
+  onRemovePendingFile
+}: ProductPhotoManagerProps) {
   const t = useTranslations('dukaan.product');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isIconUploading, setIsIconUploading] = useState(false);
 
-  const uploadMutation = useUploadProductImage(productId);
-  const deleteMutation = useDeleteProductImage(productId);
-  const reorderMutation = useReorderProductImages(productId);
+  const uploadMutation = useUploadProductImage(productId ?? '');
+  const deleteMutation = useDeleteProductImage(productId ?? '');
+  const reorderMutation = useReorderProductImages(productId ?? '');
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -37,14 +45,30 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
         lastModified: Date.now()
       });
 
-      uploadMutation.mutate(resizedFile, {
-        onSettled: () => {
-          setIsIconUploading(false);
-          if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+      if (productId) {
+        uploadMutation.mutate(resizedFile, {
+          onSettled: () => {
+            setIsIconUploading(false);
+            if (fileInputRef.current) {
+              fileInputRef.current.value = '';
+            }
           }
+        });
+      } else {
+        const localId = `local-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        const localUrl = URL.createObjectURL(resizedFile);
+        const newImage: ProductImageDTO = {
+          id: localId,
+          url: localUrl,
+          sortOrder: images.length
+        };
+        onChange([...images, newImage]);
+        onAddPendingFile?.(resizedFile, localId);
+        setIsIconUploading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
         }
-      });
+      }
     } catch (error) {
       setIsIconUploading(false);
       toast.error((error as Error).message || t('imageTypeError'));
@@ -55,7 +79,12 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
   };
 
   const handleDelete = (imageId: string) => {
-    deleteMutation.mutate(imageId);
+    if (productId) {
+      deleteMutation.mutate(imageId);
+    } else {
+      onChange(images.filter((img) => img.id !== imageId));
+      onRemovePendingFile?.(imageId);
+    }
   };
 
   const handleMove = (fromIndex: number, toIndex: number) => {
@@ -64,7 +93,9 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
     const [moved] = newImages.splice(fromIndex, 1);
     newImages.splice(toIndex, 0, moved);
     onChange(newImages);
-    reorderMutation.mutate(newImages.map((img, idx) => ({ id: img.id, sortOrder: idx })));
+    if (productId) {
+      reorderMutation.mutate(newImages.map((img, idx) => ({ id: img.id, sortOrder: idx })));
+    }
   };
 
   return (
@@ -106,21 +137,19 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
         <div className='grid grid-cols-2 gap-3 sm:grid-cols-4'>
           {images.map((image, index) => (
             <div key={image.id} className='group relative overflow-hidden rounded-lg border'>
-              <Image
+              <PreviewableImage
                 src={image.url}
                 alt={`${t('images')} ${index + 1}`}
-                width={200}
-                height={128}
-                className='h-32 w-full object-cover'
-                loading='lazy'
-                unoptimized
+                className='relative h-32 w-full'
+                imageClassName='object-cover'
+                sizes='200px'
               />
-              <div className='absolute inset-0 flex items-center justify-center gap-1 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100'>
+              <div className='pointer-events-none absolute inset-0 flex items-center justify-center gap-1 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100'>
                 <Button
                   type='button'
                   variant='secondary'
                   size='icon'
-                  className='h-8 w-8'
+                  className='pointer-events-auto h-8 w-8'
                   aria-label={t('common.moveUp')}
                   onClick={() => handleMove(index, index - 1)}
                   disabled={index === 0 || reorderMutation.isPending}
@@ -131,7 +160,7 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
                   type='button'
                   variant='destructive'
                   size='icon'
-                  className='h-8 w-8'
+                  className='pointer-events-auto h-8 w-8'
                   aria-label={t('common.delete')}
                   onClick={() => handleDelete(image.id)}
                   disabled={deleteMutation.isPending}
@@ -142,7 +171,7 @@ export function ProductPhotoManager({ productId, images, onChange }: ProductPhot
                   type='button'
                   variant='secondary'
                   size='icon'
-                  className='h-8 w-8'
+                  className='pointer-events-auto h-8 w-8'
                   aria-label={t('common.moveDown')}
                   onClick={() => handleMove(index, index + 1)}
                   disabled={index === images.length - 1 || reorderMutation.isPending}

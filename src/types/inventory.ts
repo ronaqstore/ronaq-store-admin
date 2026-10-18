@@ -43,3 +43,9 @@ export interface StockAdjustDialogProps {
   onOpenChange: (open: boolean) => void;
   initialProduct?: InventoryItemDTO | null;
 }
+
+export interface StockAdjustFormErrors {
+  productId?: string;
+  reason?: string;
+  imei?: string;
+}

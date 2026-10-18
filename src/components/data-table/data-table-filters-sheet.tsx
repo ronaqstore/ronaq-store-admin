@@ -12,9 +12,11 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { DataTableAsyncFacetedFilter } from '@/components/ui/table/data-table-async-faceted-filter';
 import { DataTableFacetedFilter } from '@/components/ui/table/data-table-faceted-filter';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
+import { translateMaybe } from '@/i18n/translate-maybe';
 import type { DataTableFiltersSheetProps, FilterBlockProps } from './types';
 
 export function DataTableFiltersSheet<TData>({
@@ -163,19 +165,34 @@ function FilterBlock<TData>({ column }: FilterBlockProps<TData>) {
   if (!meta?.variant) return null;
 
   if (meta.variant === 'select' || meta.variant === 'multiSelect') {
+    const translate = (key: string) => {
+      try {
+        return (t as (k: string) => string)(key);
+      } catch {
+        return key;
+      }
+    };
     const options =
-      typeof meta.options === 'function'
-        ? meta.options((key: string) => t(key))
-        : (meta.options ?? []);
+      typeof meta.options === 'function' ? meta.options(translate) : (meta.options ?? []);
+    const label = meta.label ? translateMaybe(meta.label, t) : column.id;
     return (
       <div className='grid gap-2'>
-        <Label>{meta.label ?? column.id}</Label>
-        <DataTableFacetedFilter
-          column={column}
-          title={meta.label ?? column.id}
-          options={options}
-          multiple={meta.variant === 'multiSelect'}
-        />
+        <Label>{label}</Label>
+        {meta.asyncOptions ? (
+          <DataTableAsyncFacetedFilter
+            column={column}
+            title={label}
+            config={meta.asyncOptions}
+            multiple={meta.variant === 'multiSelect'}
+          />
+        ) : (
+          <DataTableFacetedFilter
+            column={column}
+            title={label}
+            options={options}
+            multiple={meta.variant === 'multiSelect'}
+          />
+        )}
       </div>
     );
   }

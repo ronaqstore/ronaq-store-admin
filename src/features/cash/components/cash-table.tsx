@@ -132,7 +132,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
     sortOrder
   };
 
-  const { data, isLoading, isFetching } = useQuery(cashMovementsQueryOptions(queryFilter));
+  const { data, isFetching } = useQuery(cashMovementsQueryOptions(queryFilter));
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -177,6 +177,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
       meta: {
         label: 'table.col.type',
         variant: 'select',
+        icon: Icons.cash,
         options: CASH_TYPE_OPTIONS,
         priority: 1,
         mobile: 'title'
@@ -206,6 +207,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
       meta: {
         label: 'table.col.dir',
         variant: 'select',
+        icon: Icons.trendingUp,
         options: [
           { label: 'In (IN)', value: 'IN' },
           { label: 'Out (OUT)', value: 'OUT' }
@@ -348,8 +350,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
         toolbarAction={toolbarActionButton}
         mobileItem={cashMobileItem}
         detail={cashDetail}
-        isLoading={isLoading || isFetching}
-        rowCount={items.length > 0 ? items.length : total > 0 ? total : undefined}
+        isLoading={isFetching}
       />
     </>
   );

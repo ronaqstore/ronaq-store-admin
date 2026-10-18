@@ -49,6 +49,9 @@ function SupplierCellAction({ data }: SupplierCellActionProps) {
       deactivateDescription={t('dukaan.party.supplierDeactivateDescription')}
       deactivateConfirmLabel={t('common.deactivate')}
       deactivateSuccess={t('dukaan.party.supplierDeactivated')}
+      activateTitle={t('dukaan.party.supplierActivateTitle')}
+      activateDescription={t('dukaan.party.supplierActivateDescription')}
+      activateConfirmLabel={t('common.activate')}
       activateSuccess={t('dukaan.party.supplierActivated')}
       onDeactivate={deactivateSupplier}
       onActivate={reactivateSupplier}
@@ -147,7 +150,7 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
   const search = searchParam || nameParam || undefined;
   const isActiveFilter = parseBooleanFacet(isActiveParam);
 
-  const { data, isLoading, isFetching } = useQuery(
+  const { data, isFetching } = useQuery(
     suppliersQueryOptions({
       page: params.page,
       pageSize: params.perPage,
@@ -186,8 +189,7 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
       mobileItem={supplierMobileItem}
       detail={supplierDetail}
       quickFilters={supplierQuickFilters}
-      isLoading={isLoading || isFetching}
-      rowCount={items.length > 0 ? items.length : total > 0 ? total : undefined}
+      isLoading={isFetching}
     />
   );
 }

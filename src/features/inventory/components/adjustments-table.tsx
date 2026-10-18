@@ -60,7 +60,7 @@ export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
     }
   }
 
-  const { data, isLoading } = useQuery(
+  const { data, isFetching } = useQuery(
     inventoryAdjustmentsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
@@ -142,6 +142,7 @@ export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
       meta: {
         label: 'table.col.type',
         variant: 'select',
+        icon: Icons.adjustments,
         options: TYPE_OPTIONS,
         priority: 2,
         mobile: 'badge'
@@ -291,7 +292,7 @@ export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
         mobileItem={mobileItem}
         detail={detail}
         quickFilters={quickFilters}
-        isLoading={isLoading}
+        isLoading={isFetching}
       />
 
       {adjustOpen && <StockAdjustDialog open={adjustOpen} onOpenChange={setAdjustOpen} />}

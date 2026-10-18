@@ -55,7 +55,6 @@ export function useUploadProductImage(productId: string) {
     mutationFn: (file: File) => uploadProductImage(productId, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productsQueryKeys.imageList(productId) });
-      queryClient.invalidateQueries({ queryKey: productsQueryKeys.lists() });
       toast.success(t('imageAdded'));
     },
     onError: (error: Error) => {
@@ -88,7 +87,6 @@ export function useDeleteProductImage(productId: string) {
     mutationFn: (imageId: string) => deleteProductImage(productId, imageId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productsQueryKeys.imageList(productId) });
-      queryClient.invalidateQueries({ queryKey: productsQueryKeys.lists() });
       toast.success(t('imageRemoved'));
     },
     onError: (error: Error) => {

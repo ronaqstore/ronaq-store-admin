@@ -5,11 +5,18 @@ import type {
   CreateInventoryAdjustmentResult,
   InventoryAdjustmentDTO,
   InventoryItemDTO,
+  InventoryUnitDTO,
   PaginatedResponse
 } from '@/lib/api/types';
 import type { InventoryStockFilters, InventoryAdjustmentsFilters } from '@/types';
 
 import { buildQueryString } from '@/lib/api/query-params';
+
+export async function listInventoryUnits(productId: string): Promise<InventoryUnitDTO[]> {
+  const qs = buildQueryString({ productId });
+  return appFetch<InventoryUnitDTO[]>(`/api/inventory/units${qs}`);
+}
+
 
 export async function listInventoryStock(
   filters: InventoryStockFilters = {},

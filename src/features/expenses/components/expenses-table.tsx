@@ -115,7 +115,7 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
   const statusFilter = parseActiveCancelledStatus(statusParam);
   const search = searchParam || categoryNameParam || undefined;
 
-  const { data, isLoading, isFetching } = useQuery(
+  const { data, isFetching } = useQuery(
     expensesQueryOptions({
       page: params.page,
       pageSize: params.perPage,
@@ -277,8 +277,7 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
         toolbarAction={recordActionButton}
         mobileItem={expenseMobileItem}
         detail={expenseDetail}
-        isLoading={isLoading || isFetching}
-        rowCount={items.length > 0 ? items.length : total > 0 ? total : undefined}
+        isLoading={isFetching}
       />
     </>
   );

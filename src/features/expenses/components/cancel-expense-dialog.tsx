@@ -19,6 +19,9 @@ import { useT } from '@/i18n/use-t';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { formatIsoDate } from '@/lib/dates';
 import { PresetReasonPills } from '@/components/common/preset-reason-pills';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
+import { cn } from '@/lib/utils';
+import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import type { CancelExpenseDialogProps } from '@/types/expense';
 import { cancelExpenseMutation } from '../api/mutations';
 import { expenseKeys } from '../api/queries';
@@ -39,6 +42,7 @@ export function CancelExpenseDialog({
   const t = useT();
   const qc = useQueryClient();
   const [reason, setReason] = useState('');
+  const [reasonError, setReasonError] = useState('');
 
   const cancel = useMutation({
     ...cancelExpenseMutation,
@@ -56,9 +60,10 @@ export function CancelExpenseDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
-      toast.error(t('expenses.cancelReasonRequired'));
+      setReasonError(t('expenses.cancelReasonRequired'));
       return;
     }
+    setReasonError('');
 
     cancel.mutate({
       id: expense.id,
@@ -66,6 +71,16 @@ export function CancelExpenseDialog({
         cancelReason: reason.trim()
       }
     });
+  };
+
+  const handlePresetReasonSelect = (v: string) => {
+    setReason(v);
+    setReasonError('');
+  };
+
+  const handleReasonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setReason(clampText(e.target.value, INPUT_LIMITS.cancelReason));
+    setReasonError('');
   };
 
   return (
@@ -116,18 +131,24 @@ export function CancelExpenseDialog({
               {t('expenses.cancelReason')} <span className='text-destructive'>*</span>
             </Label>
 
-            <PresetReasonPills reasons={PRESET_REASONS} onSelect={setReason} />
+            <PresetReasonPills reasons={PRESET_REASONS} onSelect={handlePresetReasonSelect} />
 
             <Textarea
               id='expense-cancel-reason'
               rows={3}
               placeholder={t('expenses.cancelReasonPlaceholder')}
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              onChange={handleReasonChange}
               disabled={cancel.isPending}
-              className='text-sm font-normal text-foreground'
+              className={cn(
+                'text-sm font-normal text-foreground',
+                reasonError && 'border-destructive'
+              )}
+              aria-invalid={!!reasonError}
+              maxLength={INPUT_LIMITS.cancelReason}
               required
             />
+            <DialogFieldError id='expense-cancel-reason-error' message={reasonError} />
           </div>
 
           <DialogFooter className='gap-2 sm:gap-2.5 pt-2'>

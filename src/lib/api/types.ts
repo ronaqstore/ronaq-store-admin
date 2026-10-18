@@ -345,6 +345,15 @@ export interface InventoryItemDTO {
   imeis?: string[];
 }
 
+export interface InventoryUnitDTO {
+  id: string;
+  productId: string;
+  imei1: string;
+  imei2?: string | null;
+  condition: 'NEW' | 'USED' | string;
+  status: string;
+}
+
 export interface InventoryAdjustmentDTO {
   id: string;
   shopId: string;
@@ -434,6 +443,7 @@ export interface ProductDTO {
   barcode?: string | null;
   description?: string | null;
   imageUrl?: string | null;
+  imageUrls?: string[];
   defaultPurchasePrice: number;
   defaultSellingPrice: number;
   lowStockThreshold: number;
@@ -460,6 +470,10 @@ export interface ProductAttributes {
   defaultSellingPrice?: number;
   lowStockThreshold?: number;
   isActive?: boolean;
+  isPublished?: boolean;
+  publicDescription?: string | null;
+  contactForPrice?: boolean;
+  ptaStatus?: PtaStatus | null;
 }
 
 export interface CreateProductInput extends ProductAttributes {
@@ -474,10 +488,6 @@ export interface UpdateProductInput extends Partial<ProductAttributes> {
   categoryId?: string;
   brandId?: string;
   trackingType?: TrackingType;
-  isPublished?: boolean;
-  publicDescription?: string | null;
-  contactForPrice?: boolean;
-  ptaStatus?: PtaStatus | null;
 }
 
 export interface ProductListFilters {

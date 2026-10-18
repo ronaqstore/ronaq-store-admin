@@ -9,9 +9,9 @@ export default function Providers({ activeThemeValue, children }: ProvidersProps
   return (
     <ActiveThemeProvider initialTheme={activeThemeValue}>
       <AppearanceProvider>
-        <AuthProvider>
-          <QueryProvider>{children}</QueryProvider>
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </QueryProvider>
       </AppearanceProvider>
     </ActiveThemeProvider>
   );

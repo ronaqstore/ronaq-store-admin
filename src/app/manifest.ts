@@ -72,7 +72,7 @@ export default function manifest(): MetadataRoute.Manifest {
 
     shortcuts: [
       {
-        name: 'New sale',
+        name: 'Add Sale',
         short_name: 'Sale',
         description: 'Start a new sale',
         url: '/?source=pwa&to=sales',

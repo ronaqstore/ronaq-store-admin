@@ -1,4 +1,5 @@
 import { apiRequest } from '@/lib/api/client';
+import { appFetch } from '@/lib/api/app-fetch';
 import { uploadShopLogo } from '@/features/store-settings/api/service';
 import type { RegisterValues, AuthResponseData } from '@/types/auth';
 
@@ -18,4 +19,8 @@ export async function registerOwnerAccountWithOptionalLogo(
     await uploadShopLogo(logoFile, auth.accessToken);
   }
   return auth;
+}
+
+export async function fetchAuthMe(): Promise<unknown> {
+  return appFetch('/api/auth/me');
 }

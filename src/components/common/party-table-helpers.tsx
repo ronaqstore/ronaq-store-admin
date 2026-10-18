@@ -13,6 +13,7 @@ import { formatPkr } from '@/lib/dukaan/numbers';
 import { formatDate } from '@/lib/format';
 import { t } from '@/i18n';
 import type { BasePartyRecord, PartyDetailLabels } from '@/types/party';
+import { Icons } from '@/components/icons';
 import type {
   HasStatusRecord,
   HasAmountRecord,
@@ -64,6 +65,7 @@ export function createPartyIsActiveColumn<T extends HasIsActiveRecord>(): Column
     meta: {
       label: 'table.col.status',
       variant: 'select',
+      icon: Icons.circle,
       options: [
         {
           get label() {
@@ -221,6 +223,7 @@ export function createActiveCancelledStatusColumn<T extends HasStatusRecord>(
     meta: {
       label: 'table.col.status',
       variant: 'select',
+      icon: Icons.circle,
       options: [
         { label: 'Active', value: 'ACTIVE' },
         { label: 'Cancelled', value: 'CANCELLED' }

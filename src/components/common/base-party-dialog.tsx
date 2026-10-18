@@ -14,6 +14,7 @@ import { FieldGroup } from '@/components/ui/field';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { useAppForm } from '@/lib/form';
+import { INPUT_LIMITS } from '@/lib/input-limits';
 import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import type { BasePartyDialogProps, BasePartyDialogBodyProps, BasePartyFormState } from '@/types';
@@ -30,7 +31,7 @@ export function BasePartyDialog({
   namePlaceholder,
   successCreated,
   successUpdated,
-  primaryButtonMode = 'save',
+  primaryButtonMode,
   onSave,
   invalidateQueryKey,
   schema
@@ -72,7 +73,7 @@ function BasePartyDialogBody({
   namePlaceholder,
   successCreated,
   successUpdated,
-  primaryButtonMode = 'save',
+  primaryButtonMode,
   onSave,
   invalidateQueryKey,
   schema
@@ -80,6 +81,7 @@ function BasePartyDialogBody({
   const qc = useQueryClient();
   const t = useT();
   const isEdit = Boolean(party);
+  const resolvedPrimaryMode = primaryButtonMode ?? (isEdit ? 'edit' : 'add');
 
   const save = useMutation({
     mutationFn: async (value: BasePartyFormState) => {
@@ -149,6 +151,7 @@ function BasePartyDialogBody({
                   label={t('dukaan.party.phone')}
                   type='tel'
                   inputMode='numeric'
+                  maxLength={INPUT_LIMITS.phone}
                   placeholder={t('users.phonePlaceholder')}
                   startIcon={Icons.phone}
                 />
@@ -156,11 +159,23 @@ function BasePartyDialogBody({
             />
             <form.AppField
               name='address'
-              children={(field) => <field.TextField label={t('dukaan.party.address')} />}
+              children={(field) => (
+                <field.TextField
+                  label={t('dukaan.party.address')}
+                  maxLength={INPUT_LIMITS.addressCustomer}
+                />
+              )}
             />
             <form.AppField
               name='opening_balance'
-              children={(field) => <field.TextField label={openingBalanceLabel} type='number' />}
+              children={(field) => (
+                <field.TextField
+                  label={openingBalanceLabel}
+                  type='number'
+                  min={0}
+                  max={INPUT_LIMITS.amountRupeesMax}
+                />
+              )}
             />
             <form.AppField
               name='notes'
@@ -170,7 +185,7 @@ function BasePartyDialogBody({
         </div>
         <DialogFooter className='mx-0 mb-0 shrink-0 gap-2 sm:gap-2.5'>
           <DialogCancelButton onClick={() => onOpenChange(false)} disabled={save.isPending} />
-          <DialogPrimaryButton mode={primaryButtonMode} loading={save.isPending} />
+          <DialogPrimaryButton mode={resolvedPrimaryMode} loading={save.isPending} />
         </DialogFooter>
       </form>
     </DialogContent>
