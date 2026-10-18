@@ -137,7 +137,7 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
           </div>
         </div>
 
-        <div className='max-h-60 overflow-y-auto p-1 text-sm'>
+        <div className='max-h-60 space-y-1.5 overflow-y-auto p-1 text-sm'>
           {isLoading && items.length === 0 ? (
             <ComboboxListSkeleton />
           ) : items.length === 0 ? (

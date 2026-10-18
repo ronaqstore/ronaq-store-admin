@@ -23,6 +23,8 @@ export const INPUT_LIMITS = {
   password: 72,
   passwordMin: 8,
   imei: 20,
+  imeiCountMax: 50_000,
+  imeiList: 50_000 * 21,
   shopAddress: 250,
   amountRupeesMax: 999_999_999_999,
   quantityMax: 9_999_999,

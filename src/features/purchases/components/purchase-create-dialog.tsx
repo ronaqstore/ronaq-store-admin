@@ -19,7 +19,7 @@ import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
 import { isFieldMetaInvalid } from '@/lib/form-context';
 import { todayIsoDate } from '@/lib/dates';
-import { createClientRequestId, formatPkr, fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
+import { createClientRequestId, formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import type {
   CreatePurchaseInput,
   CreatePurchaseItemInput,
@@ -31,25 +31,17 @@ import type {
   PurchaseCreateFormProps,
   PurchaseCreateDialogProps
 } from '@/types/purchases';
-import type { OverdraftPrompt, PickerFetchFilters, ProductPickerItem } from '@/types';
+import type { OverdraftPrompt, PickerFetchFilters } from '@/types';
 
 import { purchaseKeys } from '../api/queries';
 import { createPurchaseMutation } from '../api/mutations';
-import { createPurchaseFormSchema } from '../schemas/purchase-schema';
+import { createPurchaseFormSchema, parseImeiList } from '../schemas/purchase-schema';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
+import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { FormEntitySelect } from '@/components/forms/form-entity-select';
-import type { SubFieldApi } from '@/types/forms';
-import { listProducts } from '@/features/products/api/service';
 import { listSuppliers } from '@/features/suppliers/api/service';
-import { mapProductToPicker, mapSupplierToPicker, toPickerPage } from '@/lib/api/picker';
-
-
-function parseImeiList(text: string): string[] {
-  return text
-    .split(/[\n,]+/)
-    .map((x) => x.trim())
-    .filter(Boolean);
-}
+import { mapSupplierToPicker, toPickerPage } from '@/lib/api/picker';
+import { PurchaseLineCard } from './purchase-line-card';
 
 const emptyLine = (): PurchaseLineDraft => ({
   product_id: '',
@@ -88,7 +80,6 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
   });
 
   const submitPurchase = (values: PurchaseFormValues, confirmOverdraft = false) => {
-    const today = todayIsoDate();
     const items: CreatePurchaseItemInput[] = values.lines
       .filter((l) => l.product_id)
       .map((l) => {
@@ -106,7 +97,7 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
       clientRequestId,
       supplierId: values.supplier_id,
       supplierInvoiceRef: values.supplier_invoice_ref?.trim() || undefined,
-      purchaseDate: today,
+      purchaseDate: todayIsoDate(),
       isOpeningStock: values.is_opening_stock,
       paidNow: values.is_opening_stock ? 0 : toPaisa(Number(values.paid_now) || 0),
       confirmOverdraft,
@@ -136,20 +127,6 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
     void form.handleSubmit();
   };
 
-  const handleProductSelect = (
-    idx: number,
-    subField: SubFieldApi,
-    id: string,
-    product: ProductPickerItem | null
-  ) => {
-    subField.handleChange(id);
-    form.setFieldValue(
-      `lines[${idx}].unit_cost`,
-      product ? fromPaisa(product.default_purchase_price) : 0
-    );
-    form.setFieldValue(`lines[${idx}].tracking_type`, product?.tracking_type);
-  };
-
   const fetchSupplierPage = async (filters: PickerFetchFilters) =>
     toPickerPage(
       await listSuppliers({
@@ -161,243 +138,187 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
       mapSupplierToPicker
     );
 
-  const fetchProductPage = async (filters: PickerFetchFilters) =>
-    toPickerPage(
-      await listProducts({
-        page: filters.page ?? 1,
-        pageSize: filters.limit ?? 20,
-        search: filters.search,
-        isActive: true
-      }),
-      mapProductToPicker
-    );
-
-
   return (
-    <form className='space-y-4' onSubmit={handleSubmit}>
-      <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
-        <form.Field
-          name='supplier_id'
-          children={(field) => {
-            const isInvalid = isFieldMetaInvalid(field.state.meta);
+    <form className='flex min-h-0 flex-1 flex-col' onSubmit={handleSubmit}>
+      <div className='no-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4'>
+        <section className='space-y-3'>
+          <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
+            <form.Field
+              name='supplier_id'
+              children={(field) => {
+                const isInvalid = isFieldMetaInvalid(field.state.meta);
+                return (
+                  <FormEntitySelect
+                    name={field.name}
+                    label={t('dukaan.purchase.supplier')}
+                    required
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onValueChange={(id) => field.handleChange(id)}
+                    isInvalid={isInvalid}
+                    errors={field.state.meta.errors}
+                    queryKey={['suppliers', 'picker']}
+                    fetchPage={fetchSupplierPage}
+                    placeholder={t('dukaan.purchase.pickSupplier')}
+                    searchPlaceholder={t('dukaan.purchase.searchSuppliers')}
+                  />
+                );
+              }}
+            />
+            <form.AppField
+              name='supplier_invoice_ref'
+              children={(field) => (
+                <field.TextField
+                  label={t('dukaan.purchase.invoiceRef')}
+                  maxLength={INPUT_LIMITS.invoiceRef}
+                />
+              )}
+            />
+          </div>
+          <div className='rounded-xl border border-border/70 bg-muted/30 px-3 py-2.5'>
+            <form.AppField
+              name='is_opening_stock'
+              listeners={{
+                onChange: ({ value }) => {
+                  if (value) form.setFieldValue('paid_now', 0);
+                }
+              }}
+              children={(field) => (
+                <field.CheckboxField label={t('dukaan.purchase.openingStock')} />
+              )}
+            />
+          </div>
+        </section>
+
+        <section className='space-y-3'>
+          <div className='flex items-center justify-between gap-2'>
+            <h3 className='text-sm font-semibold'>{t('dukaan.purchase.items')}</h3>
+          </div>
+          <form.AppField
+            name='lines'
+            mode='array'
+            children={(field) => {
+              const linesInvalid = isFieldMetaInvalid(field.state.meta);
+              return (
+                <div className='space-y-3'>
+                  {field.state.value.map((_, idx) => (
+                    <PurchaseLineCard
+                      key={idx}
+                      form={form}
+                      index={idx}
+                      canRemove={field.state.value.length > 1}
+                      onRemove={() => {
+                        field.removeValue(idx);
+                      }}
+                    />
+                  ))}
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='sm'
+                    className='w-full border-dashed sm:w-auto'
+                    onClick={() => field.pushValue(emptyLine())}
+                  >
+                    <Icons.add className='me-1.5 size-4' />
+                    {t('dukaan.purchase.addLine')}
+                  </Button>
+                  {linesInvalid ? (
+                    <DialogFieldError
+                      message={
+                        field.state.meta.errors
+                          .map((err) =>
+                            typeof err === 'string' ? err : (err?.message ?? String(err))
+                          )
+                          .filter(Boolean)
+                          .join(' ') || undefined
+                      }
+                    />
+                  ) : null}
+                </div>
+              );
+            }}
+          />
+        </section>
+
+        <form.Subscribe
+          selector={(s) => ({
+            isOpeningStock: s.values.is_opening_stock,
+            lines: s.values.lines,
+            paidNow: s.values.paid_now
+          })}
+          children={({ isOpeningStock, lines, paidNow }) => {
+            const totalRs = lines.reduce(
+              (sum, l) => sum + (Number(l.quantity) || 0) * (Number(l.unit_cost) || 0),
+              0
+            );
+            const dueRs = Math.max(0, totalRs - (Number(paidNow) || 0));
             return (
-              <FormEntitySelect
-                name={field.name}
-                label={t('dukaan.purchase.supplier')}
-                required
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onValueChange={(id) => field.handleChange(id)}
-                isInvalid={isInvalid}
-                errors={field.state.meta.errors}
-                queryKey={['suppliers', 'picker']}
-                fetchPage={fetchSupplierPage}
-                placeholder={t('dukaan.purchase.pickSupplier')}
-                searchPlaceholder={t('dukaan.purchase.searchSuppliers')}
-              />
+              <section className='rounded-xl border border-border/80 bg-muted/25 p-3'>
+                {isOpeningStock ? (
+                  <p className='text-sm font-medium tabular-nums'>
+                    {t('dukaan.purchase.openingStockTotal', {
+                      total: formatPkr(toPaisa(totalRs))
+                    })}
+                    <span className='ms-1 font-normal text-muted-foreground'>
+                      {t('dukaan.purchase.noCashMovement')}
+                    </span>
+                  </p>
+                ) : (
+                  <div className='grid gap-3 sm:grid-cols-[minmax(0,14rem)_1fr] sm:items-end'>
+                    <form.AppField
+                      name='paid_now'
+                      children={(subField) => (
+                        <subField.TextField
+                          label={t('dukaan.purchase.paidNow')}
+                          type='number'
+                          min={0}
+                          max={INPUT_LIMITS.amountRupeesMax}
+                          required
+                        />
+                      )}
+                    />
+                    <div className='flex flex-col gap-1 text-end sm:pb-0.5'>
+                      <div className='flex items-baseline justify-end gap-2'>
+                        <span className='text-xs text-muted-foreground'>
+                          {t('dukaan.purchase.totalLabel')}
+                        </span>
+                        <span className='text-base font-semibold tabular-nums'>
+                          {formatPkr(toPaisa(totalRs))}
+                        </span>
+                      </div>
+                      <div className='flex items-baseline justify-end gap-2'>
+                        <span className='text-xs text-muted-foreground'>
+                          {t('dukaan.purchase.balanceDue')}
+                        </span>
+                        <span className='text-sm font-medium tabular-nums text-amber-700 dark:text-amber-400'>
+                          {formatPkr(toPaisa(dueRs))}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </section>
             );
           }}
         />
-        <form.AppField
-          name='supplier_invoice_ref'
-          children={(field) => (
-            <field.TextField
-              label={t('dukaan.purchase.invoiceRef')}
-              maxLength={INPUT_LIMITS.invoiceRef}
-            />
-          )}
-        />
-        <div className='sm:col-span-2'>
-          <form.AppField
-            name='is_opening_stock'
-            listeners={{
-              onChange: ({ value }) => {
-                if (value) form.setFieldValue('paid_now', 0);
-              }
-            }}
-            children={(field) => <field.CheckboxField label={t('dukaan.purchase.openingStock')} />}
-          />
-        </div>
-      </div>
 
-      <div className='space-y-3'>
-        <h3 className='font-medium'>{t('dukaan.purchase.items')}</h3>
-        <form.AppField
-          name='lines'
-          mode='array'
-          children={(field) => (
-            <>
-              {field.state.value.map((_, idx) => (
-                <div
-                  key={idx}
-                  className='relative grid gap-3 rounded-lg border p-3 pe-24 md:grid-cols-[minmax(0,1fr)_5.5rem_8.5rem]'
-                >
-                  {field.state.value.length > 1 && (
-                    <Button
-                      type='button'
-                      variant='ghost'
-                      size='sm'
-                      className='absolute end-2 top-2 h-7 text-muted-foreground hover:text-destructive'
-                      onClick={() => field.removeValue(idx)}
-                    >
-                      <Icons.trash className='me-1 h-4 w-4' />
-                      {t('common.remove')}
-                    </Button>
-                  )}
-                  <form.Field
-                    name={`lines[${idx}].product_id`}
-                    children={(subField) => {
-                      const isInvalid = isFieldMetaInvalid(subField.state.meta);
-                      return (
-                        <FormEntitySelect<ProductPickerItem>
-                          name={subField.name}
-                          label={t('dukaan.purchase.product')}
-                          required
-                          value={subField.state.value}
-                          onBlur={subField.handleBlur}
-                          onValueChange={(id, product) =>
-                            handleProductSelect(idx, subField, id, product)
-                          }
-                          isInvalid={isInvalid}
-                          errors={subField.state.meta.errors}
-                          queryKey={['products', 'picker']}
-                          fetchPage={fetchProductPage}
-                          placeholder={t('dukaan.purchase.product')}
-                          searchPlaceholder={t('dukaan.purchase.searchProducts')}
-                        />
-
-                      );
-                    }}
-                  />
-                  <form.AppField
-                    name={`lines[${idx}].quantity`}
-                    children={(subField) => (
-                      <subField.TextField
-                        label={t('dukaan.purchase.quantity')}
-                        type='number'
-                        min={1}
-                        max={INPUT_LIMITS.quantityMax}
-                        required
-                      />
-                    )}
-                  />
-                  <form.AppField
-                    name={`lines[${idx}].unit_cost`}
-                    children={(subField) => (
-                      <subField.TextField
-                        label={t('dukaan.purchase.unitCost')}
-                        type='number'
-                        min={0}
-                        max={INPUT_LIMITS.amountRupeesMax}
-                        required
-                      />
-                    )}
-                  />
-                  <form.Subscribe
-                    selector={(s) => s.values.lines[idx]?.tracking_type}
-                    children={(trackingType) =>
-                      trackingType === 'SERIALIZED' ? (
-                        <div className='col-span-full grid gap-2 md:grid-cols-2'>
-                          <form.AppField
-                            name={`lines[${idx}].imeis_text`}
-                            children={(subField) => (
-                              <subField.TextareaField
-                                label={t('dukaan.purchase.imei1List')}
-                                placeholder={t('dukaan.purchase.imeiHelp')}
-                                rows={2}
-                                maxLength={INPUT_LIMITS.description}
-                                required
-                              />
-                            )}
-                          />
-                          <form.AppField
-                            name={`lines[${idx}].condition`}
-                            children={(subField) => (
-                              <subField.SelectField
-                                label={t('dukaan.purchase.condition')}
-                                options={[
-                                  {
-                                    label: t('dukaan.purchase.conditionNew'),
-                                    value: 'NEW'
-                                  },
-                                  {
-                                    label: t('dukaan.purchase.conditionUsed'),
-                                    value: 'USED'
-                                  }
-                                ]}
-                              />
-                            )}
-                          />
-                        </div>
-                      ) : null
-                    }
-                  />
-                </div>
-              ))}
-              <Button
-                type='button'
-                variant='outline'
-                size='sm'
-                onClick={() => field.pushValue(emptyLine())}
-              >
-                <Icons.add className='me-1 h-4 w-4' />
-                {t('dukaan.purchase.addLine')}
-              </Button>
-            </>
-          )}
-        />
-      </div>
-
-      <form.Subscribe
-        selector={(s) => ({
-          isOpeningStock: s.values.is_opening_stock,
-          lines: s.values.lines
-        })}
-        children={({ isOpeningStock, lines }) => {
-          const totalRs = lines.reduce(
-            (sum, l) => sum + (Number(l.quantity) || 0) * (Number(l.unit_cost) || 0),
-            0
-          );
-          return !isOpeningStock ? (
-            <div className='flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between'>
-              <div className='w-full sm:max-w-xs'>
-                <form.AppField
-                  name='paid_now'
-                  children={(subField) => (
-                    <subField.TextField
-                      label={t('dukaan.purchase.paidNow')}
-                      type='number'
-                      min={0}
-                      max={INPUT_LIMITS.amountRupeesMax}
-                      required
-                    />
-                  )}
-                />
-              </div>
-              <p className='pb-2 text-end text-sm font-medium tabular-nums'>
-                {t('dukaan.purchase.total', { total: formatPkr(toPaisa(totalRs)) })}
+        {warning ? (
+          <div className='rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm'>
+            <p className='font-medium text-amber-900 dark:text-amber-200'>
+              {warning.message || t('purchases.overdraftWarning')}
+            </p>
+            {warning.shortfall ? (
+              <p className='mt-1 text-xs text-muted-foreground'>
+                {t('purchases.shortfall')} {formatPkr(warning.shortfall)}
               </p>
-            </div>
-          ) : (
-            <p className='text-end text-sm font-medium tabular-nums text-muted-foreground'>
-              {t('dukaan.purchase.openingStockTotal', { total: formatPkr(toPaisa(totalRs)) })}
-              <span className='font-normal'> {t('dukaan.purchase.noCashMovement')}</span>
-            </p>
-          );
-        }}
-      />
+            ) : null}
+          </div>
+        ) : null}
+      </div>
 
-      {warning ? (
-        <div className='rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm'>
-          <p className='font-medium text-amber-900 dark:text-amber-200'>
-            {warning.message || t('purchases.overdraftWarning')}
-          </p>
-          {warning.shortfall ? (
-            <p className='text-xs text-muted-foreground mt-1'>
-              {t('purchases.shortfall')} {formatPkr(warning.shortfall)}
-            </p>
-          ) : null}
-          <div className='mt-2 flex justify-end gap-3'>
+      <div className='shrink-0 border-t bg-popover px-4 py-3'>
+        {warning ? (
+          <div className='flex flex-col-reverse gap-2 sm:flex-row sm:justify-end'>
             <DialogCancelButton onClick={() => setWarning(null)} disabled={save.isPending} />
             <DialogPrimaryButton
               mode='add'
@@ -406,13 +327,13 @@ export function PurchaseCreateForm({ onDone }: PurchaseCreateFormProps) {
               onClick={() => submitPurchase(form.state.values, true)}
             />
           </div>
-        </div>
-      ) : (
-        <DialogFooter className='mx-0 mb-0 px-0'>
-          {onDone ? <DialogCancelButton onClick={onDone} disabled={save.isPending} /> : null}
-          <DialogPrimaryButton mode='add' loading={save.isPending} />
-        </DialogFooter>
-      )}
+        ) : (
+          <DialogFooter className='mx-0 mb-0 gap-2 px-0 sm:gap-2'>
+            {onDone ? <DialogCancelButton onClick={onDone} disabled={save.isPending} /> : null}
+            <DialogPrimaryButton mode='add' loading={save.isPending} />
+          </DialogFooter>
+        )}
+      </div>
     </form>
   );
 }
@@ -433,13 +354,13 @@ export function PurchaseCreateDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className='flex max-h-[90dvh] w-full flex-col gap-0 overflow-hidden p-0 data-[size]:max-w-none sm:max-w-3xl max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:max-h-[90dvh] max-sm:translate-y-0 max-sm:rounded-t-[var(--radius)] max-sm:rounded-b-none'>
-        <DialogHeader className='shrink-0 px-4 pt-4 pe-12'>
+        <DialogHeader className='shrink-0 border-b px-4 pt-4 pb-3 pe-12'>
           <DialogTitle>{t('dukaan.purchase.newTitle')}</DialogTitle>
           <DialogDescription>{t('dukaan.purchase.newDescription')}</DialogDescription>
         </DialogHeader>
-        <div className='no-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]'>
-          <PurchaseCreateForm onDone={() => onOpenChange(false)} />
-        </div>
+        {open ? (
+          <PurchaseCreateForm key='purchase-create' onDone={() => onOpenChange(false)} />
+        ) : null}
       </DialogContent>
     </Dialog>
   );

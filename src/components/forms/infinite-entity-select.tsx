@@ -154,7 +154,7 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
             ) : (
               <>
                 <CommandEmpty>{effEmptyMessage}</CommandEmpty>
-                <CommandGroup>
+                <CommandGroup className='[&_[cmdk-group-items]]:space-y-1.5'>
                   {items.map((item) => (
                     <CommandItem
                       key={item.id}
@@ -162,6 +162,7 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
                       keywords={[item.name]}
                       data-checked={value === item.id || undefined}
                       onSelect={() => handleSelectItem(item)}
+                      className='py-2'
                     >
                       <Icons.check
                         className={cn(
@@ -174,9 +175,9 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
                   ))}
                 </CommandGroup>
                 {query.isFetchingNextPage ? (
-                  <div className='space-y-1 px-2 py-2' aria-busy='true'>
-                    <Skeleton className='h-8 w-full' />
-                    <Skeleton className='h-8 w-[85%]' />
+                  <div className='space-y-1.5 px-2 py-2' aria-busy='true'>
+                    <Skeleton className='h-9 w-full' />
+                    <Skeleton className='h-9 w-[85%]' />
                   </div>
                 ) : null}
               </>

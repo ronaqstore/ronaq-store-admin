@@ -49,6 +49,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
   const [previewData, setPreviewData] = useState<ReturnPreviewDTO | null>(null);
   const [itemsError, setItemsError] = useState('');
   const [reasonError, setReasonError] = useState('');
+  const [refundError, setRefundError] = useState('');
 
   const [itemStates, setItemStates] = useState<Record<string, ItemReturnState>>(() => {
     const initial: Record<string, ItemReturnState> = {};
@@ -115,6 +116,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
       max: INPUT_LIMITS.amountRupeesMax
     });
     setRefundPkr(sanitized === '' ? 0 : Number(sanitized));
+    setRefundError('');
   };
 
   const handleReasonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -182,6 +184,12 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
 
     const selectedItems = validateSelectedItems();
     if (!selectedItems) return;
+
+    if (previewData && toPaisa(refundPkr) > previewData.refundable) {
+      setRefundError(t('validation.refundExceedsMax'));
+      return;
+    }
+    setRefundError('');
 
     recordReturn.mutate({
       id: sale.id,
@@ -313,7 +321,10 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
                 onChange={handleRefundChange}
                 onKeyDown={(e) => blockInvalidNumberKeys(e)}
                 placeholder='0'
+                aria-invalid={!!refundError}
+                className={cn(refundError && 'border-destructive')}
               />
+              <DialogFieldError message={refundError} />
             </div>
           </div>
 

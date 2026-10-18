@@ -4,7 +4,7 @@ const ROW_COUNT = 5;
 
 export function ComboboxListSkeleton() {
   return (
-    <div className='space-y-1 p-1' aria-busy='true' aria-live='polite'>
+    <div className='space-y-1.5 p-1' aria-busy='true' aria-live='polite'>
       {Array.from({ length: ROW_COUNT }, (_, index) => (
         <div key={index} className='flex items-center gap-2.5 rounded-md px-2.5 py-2'>
           <Skeleton className='size-4 shrink-0 rounded' />

@@ -345,6 +345,15 @@ export interface InventoryItemDTO {
   imeis?: string[];
 }
 
+export interface InventoryUnitDTO {
+  id: string;
+  productId: string;
+  imei1: string;
+  imei2?: string | null;
+  condition: 'NEW' | 'USED' | string;
+  status: string;
+}
+
 export interface InventoryAdjustmentDTO {
   id: string;
   shopId: string;

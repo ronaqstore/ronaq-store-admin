@@ -6,5 +6,5 @@ export function formatLabel(value: string): string {
 }
 
 export function createClientRequestId(): string {
-  return `req_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  return crypto.randomUUID();
 }
