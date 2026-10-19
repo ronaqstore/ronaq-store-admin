@@ -1,17 +1,27 @@
 import * as z from 'zod';
 import type { useTranslations } from 'next-intl';
 import { INPUT_LIMITS } from '@/lib/input-limits';
+import type { PurchasePhoneUnitDraft } from '@/types';
 
 type Translator = ReturnType<typeof useTranslations>;
 
 const IMEI_PATTERN = /^[0-9A-Za-z]{4,20}$/;
 
-export function parseImeiList(text: string): string[] {
-  return text
-    .split(/[\n,]+/)
-    .map((x) => x.trim())
-    .filter(Boolean);
-}
+const phoneUnitSchema = (t: Translator) =>
+  z.object({
+    imei1: z
+      .string()
+      .min(1, t('validation.imeiRequired'))
+      .regex(IMEI_PATTERN, t('validation.imeiInvalidFormat')),
+    imei2: z
+      .string()
+      .min(1, t('validation.imei2Required'))
+      .regex(IMEI_PATTERN, t('validation.imeiInvalidFormat')),
+    condition: z.enum(['NEW', 'USED']),
+    battery_health: z.union([z.number(), z.literal('')]).optional(),
+    asking_price: z.union([z.number(), z.literal('')]).optional(),
+    defect_notes: z.string().optional()
+  });
 
 export const createPurchaseFormSchema = (t: Translator) =>
   z
@@ -27,18 +37,15 @@ export const createPurchaseFormSchema = (t: Translator) =>
               product_id: z.string().min(1, t('validation.productRequired')),
               quantity: z.number().int().positive(t('validation.quantityPositive')),
               unit_cost: z.number().min(0, t('validation.valueNonNegative')),
-              imeis_text: z.string(),
-              imei2_text: z.string(),
+              phone_units: z.array(phoneUnitSchema(t)),
               condition: z.enum(['NEW', 'USED']),
               tracking_type: z.enum(['QUANTITY', 'SERIALIZED']).optional()
             })
             .superRefine((line, ctx) => {
-              const imeis = parseImeiList(line.imeis_text);
-
-              if (line.tracking_type === 'QUANTITY' && imeis.length > 0) {
+              if (line.tracking_type === 'QUANTITY' && line.phone_units.length > 0) {
                 ctx.addIssue({
                   code: 'custom',
-                  path: ['imeis_text'],
+                  path: ['phone_units'],
                   message: t('validation.imeisNotAllowed')
                 });
                 return;
@@ -46,19 +53,10 @@ export const createPurchaseFormSchema = (t: Translator) =>
 
               if (line.tracking_type !== 'SERIALIZED') return;
 
-              if (imeis.length === 0) {
+              if (line.quantity > INPUT_LIMITS.imeiCountMax) {
                 ctx.addIssue({
                   code: 'custom',
-                  path: ['imeis_text'],
-                  message: t('validation.imeiRequired')
-                });
-                return;
-              }
-
-              if (imeis.length > INPUT_LIMITS.imeiCountMax) {
-                ctx.addIssue({
-                  code: 'custom',
-                  path: ['imeis_text'],
+                  path: ['quantity'],
                   message: t('validation.imeiCountMax', {
                     max: INPUT_LIMITS.imeiCountMax
                   })
@@ -66,36 +64,40 @@ export const createPurchaseFormSchema = (t: Translator) =>
                 return;
               }
 
-              if (imeis.length !== line.quantity) {
+              if (line.phone_units.length !== line.quantity) {
                 ctx.addIssue({
                   code: 'custom',
-                  path: ['imeis_text'],
-                  message: t('validation.imei1CountMismatch', {
+                  path: ['phone_units'],
+                  message: t('validation.phoneUnitsCountMismatch', {
                     quantity: line.quantity
                   })
                 });
               }
 
               const seen = new Set<string>();
-              for (const imei of imeis) {
-                if (!IMEI_PATTERN.test(imei)) {
+              line.phone_units.forEach((unit, unitIdx) => {
+                if (unit.imei1 && unit.imei2 && unit.imei1 === unit.imei2) {
                   ctx.addIssue({
                     code: 'custom',
-                    path: ['imeis_text'],
-                    message: t('validation.imeiInvalidFormat')
+                    path: ['phone_units', unitIdx, 'imei2'],
+                    message: t('validation.imeiPairMustDiffer')
                   });
-                  break;
                 }
-                if (seen.has(imei)) {
-                  ctx.addIssue({
-                    code: 'custom',
-                    path: ['imeis_text'],
-                    message: t('validation.imeiDuplicate', { imei })
-                  });
-                  break;
+                for (const [field, imei] of [
+                  ['imei1', unit.imei1],
+                  ['imei2', unit.imei2]
+                ] as const) {
+                  if (!imei) continue;
+                  if (seen.has(imei)) {
+                    ctx.addIssue({
+                      code: 'custom',
+                      path: ['phone_units', unitIdx, field],
+                      message: t('validation.imeiDuplicate', { imei })
+                    });
+                  }
+                  seen.add(imei);
                 }
-                seen.add(imei);
-              }
+              });
             })
         )
         .min(1, t('validation.lineItemsMinOne'))
@@ -126,16 +128,45 @@ export const createPurchaseFormSchema = (t: Translator) =>
       const seenAcross = new Set<string>();
       value.lines.forEach((line, lineIdx) => {
         if (line.tracking_type !== 'SERIALIZED') return;
-        for (const imei of parseImeiList(line.imeis_text)) {
-          if (seenAcross.has(imei)) {
-            ctx.addIssue({
-              code: 'custom',
-              path: ['lines', lineIdx, 'imeis_text'],
-              message: t('validation.imeiDuplicate', { imei })
-            });
-            return;
+        line.phone_units.forEach((unit, unitIdx) => {
+          for (const [field, imei] of [
+            ['imei1', unit.imei1],
+            ['imei2', unit.imei2]
+          ] as const) {
+            if (!imei) continue;
+            if (seenAcross.has(imei)) {
+              ctx.addIssue({
+                code: 'custom',
+                path: ['lines', lineIdx, 'phone_units', unitIdx, field],
+                message: t('validation.imeiDuplicate', { imei })
+              });
+              return;
+            }
+            seenAcross.add(imei);
           }
-          seenAcross.add(imei);
-        }
+        });
       });
     });
+
+export function emptyPhoneUnit(condition: 'NEW' | 'USED' = 'NEW') {
+  return {
+    imei1: '',
+    imei2: '',
+    condition,
+    battery_health: '' as const,
+    asking_price: '' as const,
+    defect_notes: ''
+  };
+}
+
+export function resizePhoneUnits(
+  units: PurchasePhoneUnitDraft[],
+  quantity: number,
+  defaultCondition: 'NEW' | 'USED'
+) {
+  const next = units.slice(0, quantity);
+  while (next.length < quantity) {
+    next.push(emptyPhoneUnit(defaultCondition));
+  }
+  return next;
+}

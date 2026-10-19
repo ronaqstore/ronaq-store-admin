@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -10,12 +11,14 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FieldGroup } from '@/components/ui/field';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
 import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
+import { isValidationApiError } from '@/lib/api/is-validation-error';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import type { BasePartyDialogProps, BasePartyDialogBodyProps, BasePartyFormState } from '@/types';
 
@@ -32,6 +35,7 @@ export function BasePartyDialog({
   successCreated,
   successUpdated,
   primaryButtonMode,
+  showCnic,
   onSave,
   invalidateQueryKey,
   schema
@@ -53,6 +57,7 @@ export function BasePartyDialog({
           successCreated={successCreated}
           successUpdated={successUpdated}
           primaryButtonMode={primaryButtonMode}
+          showCnic={showCnic}
           onSave={onSave}
           invalidateQueryKey={invalidateQueryKey}
           schema={schema}
@@ -74,6 +79,7 @@ function BasePartyDialogBody({
   successCreated,
   successUpdated,
   primaryButtonMode,
+  showCnic,
   onSave,
   invalidateQueryKey,
   schema
@@ -82,12 +88,14 @@ function BasePartyDialogBody({
   const t = useT();
   const isEdit = Boolean(party);
   const resolvedPrimaryMode = primaryButtonMode ?? (isEdit ? 'edit' : 'add');
+  const [formApiError, setFormApiError] = useState<string | null>(null);
 
   const save = useMutation({
     mutationFn: async (value: BasePartyFormState) => {
       const payload = {
         name: value.name.trim(),
         phone: value.phone?.trim() || undefined,
+        ...(showCnic ? { cnic: value.cnic?.trim() || '' } : {}),
         address: value.address?.trim() || undefined,
         notes: value.notes?.trim() || undefined,
         openingBalance: toPaisa(Number(value.opening_balance || 0)),
@@ -101,19 +109,27 @@ function BasePartyDialogBody({
       void qc.invalidateQueries({ queryKey: invalidateQueryKey });
       onOpenChange(false);
     },
-    onError: (e: Error) => toast.error(e.message)
+    onError: (e: Error) => {
+      if (isValidationApiError(e)) {
+        setFormApiError(e.message);
+        return;
+      }
+      toast.error(e.message);
+    }
   });
 
   const form = useAppForm({
     defaultValues: {
       name: party?.name ?? '',
       phone: party?.phone ?? '',
+      cnic: party?.cnic ?? '',
       address: party?.address ?? '',
       notes: party?.notes ?? '',
       opening_balance: party ? fromPaisa(party.openingBalance) : 0
     },
     validators: schema ? { onSubmit: schema as never } : undefined,
     onSubmit: ({ value }) => {
+      setFormApiError(null);
       save.mutate(value as BasePartyFormState);
     }
   });
@@ -131,6 +147,12 @@ function BasePartyDialogBody({
       </DialogHeader>
       <form className='flex min-h-0 flex-1 flex-col' onSubmit={handleSubmit}>
         <div className='no-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-4'>
+          {formApiError ? (
+            <Alert variant='destructive' className='mb-4'>
+              <Icons.warning />
+              <AlertDescription>{formApiError}</AlertDescription>
+            </Alert>
+          ) : null}
           <FieldGroup className='gap-4'>
             <form.AppField
               name='name'
@@ -154,15 +176,31 @@ function BasePartyDialogBody({
                   maxLength={INPUT_LIMITS.phone}
                   placeholder={t('users.phonePlaceholder')}
                   startIcon={Icons.phone}
+                  description={t('dukaan.party.phoneHelp')}
                 />
               )}
             />
+            {showCnic ? (
+              <form.AppField
+                name='cnic'
+                children={(field) => (
+                  <field.TextField
+                    label={t('dukaan.party.cnic')}
+                    inputMode='numeric'
+                    maxLength={INPUT_LIMITS.cnic}
+                    placeholder={t('dukaan.party.cnicPlaceholder')}
+                    description={t('dukaan.party.cnicHelp')}
+                  />
+                )}
+              />
+            ) : null}
             <form.AppField
               name='address'
               children={(field) => (
                 <field.TextField
                   label={t('dukaan.party.address')}
                   maxLength={INPUT_LIMITS.addressCustomer}
+                  placeholder={t('dukaan.party.addressPlaceholder')}
                 />
               )}
             />
@@ -174,12 +212,18 @@ function BasePartyDialogBody({
                   type='number'
                   min={0}
                   max={INPUT_LIMITS.amountRupeesMax}
+                  placeholder={t('dukaan.party.openingBalancePlaceholder')}
                 />
               )}
             />
             <form.AppField
               name='notes'
-              children={(field) => <field.TextareaField label={t('dukaan.party.notes')} />}
+              children={(field) => (
+                <field.TextareaField
+                  label={t('dukaan.party.notes')}
+                  placeholder={t('dukaan.party.notesPlaceholder')}
+                />
+              )}
             />
           </FieldGroup>
         </div>

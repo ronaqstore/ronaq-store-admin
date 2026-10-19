@@ -14,7 +14,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Icons } from '@/components/icons';
 import { formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import { useT } from '@/i18n/use-t';
@@ -181,19 +180,9 @@ export function RecordExpenseDialog({
 
           <form onSubmit={handleSubmit} className='space-y-4 pt-2'>
             <div className='space-y-1.5 w-full'>
-              <div className='flex items-center justify-between'>
-                <Label className='text-sm font-normal text-foreground'>
-                  {t('expenses.category')} <span className='text-destructive'>*</span>
-                </Label>
-                <button
-                  type='button'
-                  onClick={() => setAddCategoryOpen(true)}
-                  className='text-xs font-medium text-primary hover:underline flex items-center gap-1'
-                >
-                  <Icons.add className='size-3' />
-                  <span>{t('expenses.newCategory')}</span>
-                </button>
-              </div>
+              <Label className='text-sm font-normal text-foreground'>
+                {t('expenses.category')} <span className='text-destructive'>*</span>
+              </Label>
 
               <CategorySelectCombobox
                 value={categoryId}

@@ -36,12 +36,12 @@
     @apply bg-background text-foreground;
   }
 
-  /* Standalone PWA: reduce accidental pull-to-refresh / rubber-band on POS & tables */
-  html {
-    overscroll-behavior: none;
-  }
+  html,
   body {
-    overscroll-behavior-y: none;
+    height: 100%;
+    max-height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
   }
   @media (display-mode: standalone) {
     html,

@@ -4,6 +4,7 @@ export interface BasePartyRecord {
   id: string;
   name: string;
   phone?: string | null;
+  cnic?: string | null;
   address?: string | null;
   notes?: string | null;
   openingBalance: number;
@@ -21,6 +22,7 @@ export interface BasePartyEntity {
   id: string;
   name: string;
   phone?: string | null;
+  cnic?: string | null;
   address?: string | null;
   notes?: string | null;
   openingBalance: number;
@@ -30,6 +32,7 @@ export interface BasePartyEntity {
 export interface BasePartyPayload {
   name: string;
   phone?: string;
+  cnic?: string;
   address?: string;
   notes?: string;
   openingBalance: number;
@@ -39,6 +42,7 @@ export interface BasePartyPayload {
 export interface BasePartyFormState {
   name: string;
   phone?: string;
+  cnic?: string;
   address?: string;
   notes?: string;
   opening_balance: number;
@@ -57,6 +61,7 @@ export interface BasePartyDialogProps {
   successCreated: string;
   successUpdated: string;
   primaryButtonMode?: 'add' | 'edit' | 'save';
+  showCnic?: boolean;
   onSave: (payload: BasePartyPayload, id?: string) => Promise<unknown>;
   invalidateQueryKey: readonly unknown[];
   schema?: unknown;

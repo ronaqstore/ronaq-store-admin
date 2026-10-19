@@ -19,6 +19,9 @@ import {
 import { useT } from '@/i18n/use-t';
 import { formatIsoDate } from '@/lib/dates';
 import { formatLabel, formatPkr } from '@/lib/dukaan/numbers';
+import { shopLogoSrc } from '@/constants/placeholders';
+import Image from 'next/image';
+import { storeSettingsQueryOptions } from '@/features/store-settings';
 import dynamic from 'next/dynamic';
 import { SalesTable } from './sales-table';
 import { SaleCreateDialog } from './sale-create-dialog';
@@ -171,6 +174,7 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
               <TableHead>{t('dukaan.sale.item')}</TableHead>
               <TableHead>IMEI</TableHead>
               <TableHead>{t('table.col.qty')}</TableHead>
+              <TableHead>{t('dukaan.sale.warranty')}</TableHead>
               <TableHead>{t('dukaan.sale.price')}</TableHead>
               <TableHead className='text-end'>{t('common.total')}</TableHead>
             </TableRow>
@@ -181,6 +185,13 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
                 <TableCell className='font-medium'>{item.productName}</TableCell>
                 <TableCell>{item.imei ?? '—'}</TableCell>
                 <TableCell>{item.quantity}</TableCell>
+                <TableCell>
+                  {item.imei
+                    ? item.warrantyDays
+                      ? t('dukaan.sale.warrantyDays', { days: item.warrantyDays })
+                      : t('dukaan.sale.companyWarranty')
+                    : '—'}
+                </TableCell>
                 <TableCell>{formatPkr(item.unitPrice)}</TableCell>
                 <TableCell className='text-end font-semibold'>{formatPkr(item.total)}</TableCell>
               </TableRow>
@@ -289,14 +300,24 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
 export function SaleReceiptClient({ id }: SaleReceiptClientProps) {
   const t = useT();
   const { data } = useSuspenseQuery(saleQueryOptions(id));
+  const { data: storeSettings } = useSuspenseQuery(storeSettingsQueryOptions());
   const activePayments = (data.payments ?? []).filter((p) => p.status === 'ACTIVE');
   const paid = activePayments.reduce((acc, p) => acc + p.amount, 0);
   const outstanding = Math.max(0, data.totalAmount - paid);
+  const shopName = storeSettings.displayName?.trim() || t('common.appName');
 
   return (
     <div className='mx-auto max-w-lg space-y-4 rounded-lg border bg-white p-6 text-black print:border-0'>
       <div className='text-center'>
-        <h1 className='text-xl font-bold'>{t('common.appName')}</h1>
+        <Image
+          src={shopLogoSrc(storeSettings.logoUrl)}
+          alt={shopName}
+          width={64}
+          height={64}
+          unoptimized
+          className='mx-auto mb-3 h-16 w-16 rounded-full object-cover print:h-14 print:w-14'
+        />
+        <h1 className='text-xl font-bold'>{shopName}</h1>
         <p className='mt-2 font-medium'>
           {t('dukaan.sale.receipt')} {data.saleNo}
         </p>
@@ -311,6 +332,7 @@ export function SaleReceiptClient({ id }: SaleReceiptClientProps) {
             <th className='py-1'>{t('dukaan.sale.item')}</th>
             <th>IMEI</th>
             <th>{t('table.col.qty')}</th>
+            <th>{t('dukaan.sale.warranty')}</th>
             <th className='text-end'>{t('table.col.amount')}</th>
           </tr>
         </thead>
@@ -320,6 +342,13 @@ export function SaleReceiptClient({ id }: SaleReceiptClientProps) {
               <td className='py-1'>{item.productName}</td>
               <td>{item.imei ?? '—'}</td>
               <td>{item.quantity}</td>
+              <td>
+                {item.imei
+                  ? item.warrantyDays
+                    ? t('dukaan.sale.warrantyDays', { days: item.warrantyDays })
+                    : t('dukaan.sale.companyWarranty')
+                  : '—'}
+              </td>
               <td className='text-end'>{formatPkr(item.total)}</td>
             </tr>
           ))}

@@ -20,6 +20,7 @@ export function CustomerDialog({ open, onOpenChange, customer }: CustomerDialogP
       descriptionAdd={t('dukaan.party.customerAddDescription')}
       descriptionEdit={t('dukaan.party.customerEditDescription')}
       openingBalanceLabel={t('dukaan.party.customerOpeningBalance')}
+      namePlaceholder={t('dukaan.party.customerNamePlaceholder')}
       successCreated={t('dukaan.party.customerAdded')}
       successUpdated={t('dukaan.party.customerUpdated')}
       onSave={(payload, id) => (id ? updateCustomer(id, payload) : createCustomer(payload))}

@@ -1,9 +1,10 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef, Row } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { parseAsString, useQueryState } from 'nuqs';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
@@ -31,8 +32,21 @@ import type { InventoryRowActionsProps, InventoryTableProps } from '@/types/inve
 import { inventoryStockQueryOptions } from '../api/queries';
 import { StockAdjustDialog } from './stock-adjust-dialog';
 
-function InventoryRowActions({ item, onAdjust }: InventoryRowActionsProps) {
+function InventoryRowActions({ item, onAdjust, onViewUnits }: InventoryRowActionsProps) {
   const t = useT();
+  const actions = [];
+  if (item.trackingType === 'SERIALIZED' && onViewUnits) {
+    actions.push({
+      label: t('inventory.viewSerializedUnits'),
+      icon: Icons.box,
+      onClick: () => onViewUnits(item)
+    });
+  }
+  actions.push({
+    label: t('common.adjustStock'),
+    icon: Icons.adjustments,
+    onClick: () => onAdjust(item)
+  });
   return (
     <div
       onClick={(e) => e.stopPropagation()}
@@ -40,15 +54,7 @@ function InventoryRowActions({ item, onAdjust }: InventoryRowActionsProps) {
       role='presentation'
       data-slot='action-cell'
     >
-      <RowActionsMenu
-        actions={[
-          {
-            label: t('common.adjustStock'),
-            icon: Icons.adjustments,
-            onClick: () => onAdjust(item)
-          }
-        ]}
-      />
+      <RowActionsMenu actions={actions} />
     </div>
   );
 }
@@ -65,6 +71,7 @@ const LOW_STOCK_OPTIONS = [
 
 export function InventoryTable({ toolbarAction }: InventoryTableProps) {
   const t = useT();
+  const router = useRouter();
   const [adjustOpen, setAdjustOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<InventoryItemDTO | null>(null);
 
@@ -120,7 +127,17 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       ),
       cell: ({ row }) => (
         <div className='flex flex-col gap-0.5'>
-          <span className='font-normal text-foreground'>{row.original.name}</span>
+          {row.original.trackingType === 'SERIALIZED' ? (
+            <Link
+              href={`/dashboard/inventory/${row.original.id}`}
+              className='font-normal text-foreground hover:underline hover:text-primary transition-colors'
+              onClick={(e) => e.stopPropagation()}
+            >
+              {row.original.name}
+            </Link>
+          ) : (
+            <span className='font-normal text-foreground'>{row.original.name}</span>
+          )}
           <div className='flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground'>
             {row.original.brandName && <span>{row.original.brandName}</span>}
             {row.original.brandName && row.original.categoryName && <span>·</span>}
@@ -236,7 +253,13 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       enableSorting: false,
       enableHiding: false,
       meta: { mobile: 'hidden' },
-      cell: ({ row }) => <InventoryRowActions item={row.original} onAdjust={handleAdjust} />
+      cell: ({ row }) => (
+        <InventoryRowActions
+          item={row.original}
+          onAdjust={handleAdjust}
+          onViewUnits={(item) => router.push(`/dashboard/inventory/${item.id}`)}
+        />
+      )
     }
   ];
 
@@ -303,7 +326,16 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
             }
           ]
         : [])
-    ]
+    ],
+    actions: (row) =>
+      row.trackingType === 'SERIALIZED'
+        ? [
+            {
+              label: t('inventory.viewSerializedUnits'),
+              onClick: () => router.push(`/dashboard/inventory/${row.id}`)
+            }
+          ]
+        : []
   };
 
   const inventoryQuickFilters: QuickFilterChip[] = [
@@ -345,10 +377,19 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
     setAdjustOpen(true);
   };
 
+  const handleRowClick = (row: Row<InventoryItemDTO>) => {
+    if (row.original.trackingType === 'SERIALIZED') {
+      router.push(`/dashboard/inventory/${row.original.id}`);
+      return true;
+    }
+    return false;
+  };
+
   return (
     <>
       <ResponsiveDataTable
         table={table}
+        onRowClick={handleRowClick}
         toolbarAction={
           toolbarAction ?? (
             <Button type='button' size='sm' onClick={handleOpenAdjustStock}>

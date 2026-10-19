@@ -90,11 +90,18 @@ export function PurchaseDetailClient({ id }: PurchaseDetailClientProps) {
             <TableRow key={item.id}>
               <TableCell>
                 <div className='font-medium'>{item.productName || item.productId}</div>
-                {item.imeis && item.imeis.length > 0 && (
-                  <div className='text-muted-foreground text-xs font-mono mt-0.5'>
-                    {t('purchases.imeisLabel')} {item.imeis.join(', ')}
+                {item.phoneUnits && item.phoneUnits.length > 0 ? (
+                  <div className='text-muted-foreground mt-0.5 space-y-0.5 text-xs font-mono'>
+                    {item.phoneUnits.map((unit) => (
+                      <div key={`${unit.imei1}-${unit.imei2}`}>
+                        {t('purchases.imeiPair', {
+                          imei1: unit.imei1,
+                          imei2: unit.imei2 ?? '—'
+                        })}
+                      </div>
+                    ))}
                   </div>
-                )}
+                ) : null}
               </TableCell>
               <TableCell>{item.quantity}</TableCell>
               <TableCell>{formatPkr(item.unitCost)}</TableCell>

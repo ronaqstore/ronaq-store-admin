@@ -15,13 +15,18 @@ export function MobileList<TData>({
   preferNavigate = true,
   isLoading,
   skeletonRowCount,
-  onNavigate
+  onNavigate,
+  onRowClick
 }: MobileListProps<TData>) {
   const t = useTranslations();
   const [active, setActive] = React.useState<Row<TData> | null>(null);
   const rows = table.getRowModel().rows;
 
   const openRow = (row: Row<TData>) => {
+    if (onRowClick) {
+      onRowClick(row);
+      return;
+    }
     if (detail.mode === 'page' && preferNavigate && detail.href && onNavigate) {
       onNavigate(detail.href(row.original));
       return;

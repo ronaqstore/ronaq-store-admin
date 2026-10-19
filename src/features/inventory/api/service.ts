@@ -8,12 +8,31 @@ import type {
   InventoryUnitDTO,
   PaginatedResponse
 } from '@/lib/api/types';
-import type { InventoryStockFilters, InventoryAdjustmentsFilters } from '@/types';
+import type {
+  InventoryStockFilters,
+  InventoryAdjustmentsFilters,
+  ListInventoryUnitsExtraOptions
+} from '@/types';
 
 import { buildQueryString } from '@/lib/api/query-params';
 
-export async function listInventoryUnits(productId: string): Promise<InventoryUnitDTO[]> {
-  const qs = buildQueryString({ productId });
+export async function listInventoryUnits(
+  productId: string,
+  status?: string,
+  search?: string,
+  token?: string,
+  extra?: ListInventoryUnitsExtraOptions
+): Promise<InventoryUnitDTO[]> {
+  const qs = buildQueryString({
+    productId,
+    ...(status ? { status } : {}),
+    ...(search ? { search } : {}),
+    ...(extra?.condition ? { condition: extra.condition } : {}),
+    ...(extra?.batteryMin != null ? { batteryMin: extra.batteryMin } : {})
+  });
+  if (token) {
+    return apiRequest<InventoryUnitDTO[]>(`/inventory/units${qs}`, undefined, token);
+  }
   return appFetch<InventoryUnitDTO[]>(`/api/inventory/units${qs}`);
 }
 

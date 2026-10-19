@@ -9,27 +9,38 @@ import { useT } from '@/i18n/use-t';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FieldGroup } from '@/components/ui/field';
 import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
 import { isFieldMetaInvalid } from '@/lib/form-context';
-import { toPaisa } from '@/lib/dukaan/numbers';
+import { isValidationApiError } from '@/lib/api/is-validation-error';
 import type { ProductImageDTO } from '@/lib/api/types';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { FormEntitySelect } from '@/components/forms/form-entity-select';
+import { Icons } from '@/components/icons';
 
 import { useCreateProduct, useUpdateProduct } from '../api/mutations';
 import { productsQueryKeys, useProductImagesQuery } from '../api/queries';
-import { uploadProductImage } from '../api/service';
-import { createProductFormSchema } from '../schemas/product-schema';
+import { uploadPendingProductImages } from '../api/service';
+import { createProductFormSchema } from '@/lib/products/product-schema';
 import { ProductPhotoManager } from './product-photo-manager';
-import { emptyProductForm, productToForm } from './product-form-defaults';
-import { listCategories } from '@/features/categories/api/service';
-import { listBrands } from '@/features/brands/api/service';
+import {
+  emptyProductForm,
+  productToForm,
+  buildProductPayload,
+  getPtaOptions,
+  getAuthenticityOptions
+} from '@/lib/products/product-form-defaults';
+import {
+  fetchCategorySelectPage,
+  fetchBrandSelectPage
+} from '../api/entity-picker-fetchers';
+import { isAppleBrandName } from '@/lib/device-family';
+import type { NamedEntity } from '@/types';
 import type {
   ProductDialogProps,
   ProductDialogBodyProps,
@@ -73,6 +84,8 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
   });
   const [images, setImages] = useState<ProductImageDTO[]>([]);
   const [pendingFiles, setPendingFiles] = useState<PendingProductImageFile[]>([]);
+  const [formApiError, setFormApiError] = useState<string | null>(null);
+  const [brandLabel, setBrandLabel] = useState(product?.brandName ?? '');
 
   useEffect(() => {
     if (imagesData?.items) {
@@ -86,93 +99,45 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
       onSubmit: createProductFormSchema(tRoot) as never
     },
     onSubmit: ({ value }) => {
-      const cleanString = (val?: string | null) => {
-        const trimmed = val?.trim();
-        return trimmed ? trimmed : undefined;
-      };
+      setFormApiError(null);
+      const payload = buildProductPayload(value);
 
       if (product) {
-        updateProduct.mutate(
-          {
-            name: value.name.trim(),
-            categoryId: value.categoryId,
-            brandId: value.brandId,
-            trackingType: value.trackingType,
-            defaultPurchasePrice: toPaisa(Number(value.defaultPurchasePrice || 0)),
-            defaultSellingPrice: toPaisa(Number(value.defaultSellingPrice || 0)),
-            lowStockThreshold: Number(value.lowStockThreshold || 0),
-            model: cleanString(value.model),
-            color: cleanString(value.color),
-            ram: value.trackingType === 'SERIALIZED' ? cleanString(value.ram) : null,
-            storage: value.trackingType === 'SERIALIZED' ? cleanString(value.storage) : null,
-            sku: cleanString(value.sku),
-            barcode: cleanString(value.barcode),
-            description: cleanString(value.description),
-            imageUrl: cleanString(value.imageUrl),
-            isActive: value.isActive ?? true,
-            isPublished: value.isPublished ?? false,
-            publicDescription: cleanString(value.publicDescription),
-            contactForPrice: value.contactForPrice ?? false,
-            ptaStatus: value.trackingType === 'SERIALIZED' ? (value.ptaStatus || null) : null
+        updateProduct.mutate(payload, {
+          onSuccess: () => {
+            void qc.invalidateQueries({ queryKey: productsQueryKeys.all });
+            onOpenChange(false);
           },
-          {
-            onSuccess: () => {
-              void qc.invalidateQueries({ queryKey: productsQueryKeys.all });
-              onOpenChange(false);
-            },
-            onError: (err: Error) => {
-              toast.error(err.message || t('updateFailed'));
+          onError: (err: Error) => {
+            if (isValidationApiError(err)) {
+              setFormApiError(err.message);
+              return;
             }
+            toast.error(err.message || t('updateFailed'));
           }
-        );
+        });
       } else {
-        createProduct.mutate(
-          {
-            name: value.name.trim(),
-            categoryId: value.categoryId,
-            brandId: value.brandId,
-            trackingType: value.trackingType,
-            defaultPurchasePrice: toPaisa(Number(value.defaultPurchasePrice || 0)),
-            defaultSellingPrice: toPaisa(Number(value.defaultSellingPrice || 0)),
-            lowStockThreshold: Number(value.lowStockThreshold || 0),
-            model: cleanString(value.model),
-            color: cleanString(value.color),
-            ram: value.trackingType === 'SERIALIZED' ? cleanString(value.ram) : undefined,
-            storage: value.trackingType === 'SERIALIZED' ? cleanString(value.storage) : undefined,
-            sku: cleanString(value.sku),
-            barcode: cleanString(value.barcode),
-            description: cleanString(value.description),
-            imageUrl: cleanString(value.imageUrl),
-            isActive: value.isActive ?? true,
-            isPublished: value.isPublished ?? false,
-            publicDescription: cleanString(value.publicDescription),
-            contactForPrice: value.contactForPrice ?? false,
-            ptaStatus:
-              value.trackingType === 'SERIALIZED' ? (value.ptaStatus || undefined) : undefined
-          },
-          {
-            onSuccess: async (data) => {
-              const newId = (data as { id?: string })?.id;
-              if (newId && pendingFiles.length > 0) {
-                for (const img of images) {
-                  const pending = pendingFiles.find((p) => p.id === img.id);
-                  if (pending) {
-                    try {
-                      await uploadProductImage(newId, pending.file);
-                    } catch (uploadError) {
-                      toast.error((uploadError as Error).message);
-                    }
-                  }
-                }
+        createProduct.mutate(payload, {
+          onSuccess: async (data) => {
+            const newId = (data as { id?: string })?.id;
+            if (newId) {
+              try {
+                await uploadPendingProductImages(newId, images, pendingFiles);
+              } catch (uploadError) {
+                toast.error((uploadError as Error).message);
               }
-              void qc.invalidateQueries({ queryKey: productsQueryKeys.all });
-              onOpenChange(false);
-            },
-            onError: (err: Error) => {
-              toast.error(err.message || t('createFailed'));
             }
+            void qc.invalidateQueries({ queryKey: productsQueryKeys.all });
+            onOpenChange(false);
+          },
+          onError: (err: Error) => {
+            if (isValidationApiError(err)) {
+              setFormApiError(err.message);
+              return;
+            }
+            toast.error(err.message || t('createFailed'));
           }
-        );
+        });
       }
     }
   });
@@ -182,18 +147,35 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
     void form.handleSubmit();
   };
 
+  const handleBrandChange = (id: string, item: NamedEntity | null) => {
+    form.setFieldValue('brandId', id);
+    setBrandLabel(item?.name ?? '');
+    const apple = isAppleBrandName(item?.name);
+    const pta = form.getFieldValue('ptaStatus');
+    if (!apple && pta && !['PTA_APPROVED', 'NON_PTA'].includes(pta)) {
+      form.setFieldValue('ptaStatus', null);
+    }
+  };
+
   return (
     <DialogContent className='left-1/2 top-4 flex max-h-[calc(100dvh-2rem)] w-full -translate-x-1/2 translate-y-0 flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl'>
       <DialogHeader className='shrink-0 border-b bg-popover px-6 py-4 pe-12'>
         <DialogTitle>{isEdit ? t('editTitle') : t('addTitle')}</DialogTitle>
-        <DialogDescription>{isEdit ? t('editDescription') : t('addDescription')}</DialogDescription>
       </DialogHeader>
       <form className='flex min-h-0 flex-1 flex-col overflow-hidden' onSubmit={handleSubmit}>
         <div className='flex-1 overflow-y-auto overscroll-contain px-6 py-4'>
+          {formApiError ? (
+            <Alert variant='destructive' className='mb-4'>
+              <Icons.warning />
+              <AlertDescription>{formApiError}</AlertDescription>
+            </Alert>
+          ) : null}
           <FieldGroup className='gap-4'>
             <form.AppField
               name='name'
-              children={(field) => <field.TextField label={t('name')} required />}
+              children={(field) => (
+                <field.TextField label={t('name')} required placeholder={t('namePlaceholder')} />
+              )}
             />
             <div className='grid min-w-0 gap-4 sm:grid-cols-2'>
               <form.Field
@@ -211,22 +193,7 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                       isInvalid={isInvalid}
                       errors={field.state.meta.errors}
                       queryKey={['categories', 'infinite-select']}
-                      fetchPage={async (filters) => {
-                        const res = await listCategories({
-                          page: filters.page,
-                          pageSize: filters.pageSize ?? filters.limit ?? 20,
-                          search: filters.search,
-                          isActive: true,
-                          sortBy: 'name',
-                          sortOrder: 'asc'
-                        });
-                        return {
-                          items: res.items,
-                          total: res.total,
-                          page: res.page,
-                          limit: res.pageSize
-                        };
-                      }}
+                      fetchPage={fetchCategorySelectPage}
                       selectedLabel={product?.categoryName ?? undefined}
                       extraItems={
                         product?.categoryId && product.categoryName
@@ -250,28 +217,13 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                       required
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onValueChange={(id) => field.handleChange(id)}
+                      onValueChange={handleBrandChange}
                       isInvalid={isInvalid}
                       errors={field.state.meta.errors}
                       queryKey={['brands', 'infinite-select']}
-                      fetchPage={async (filters) => {
-                        const res = await listBrands({
-                          page: filters.page,
-                          pageSize: filters.pageSize ?? filters.limit ?? 20,
-                          search: filters.search,
-                          isActive: true,
-                          sortBy: 'name',
-                          sortOrder: 'asc'
-                        });
-                        return {
-                          items: res.items,
-                          total: res.total,
-                          page: res.page,
-                          limit: res.pageSize
-                        };
-                      }}
+                      fetchPage={fetchBrandSelectPage}
                       selectedLabel={product?.brandName ?? undefined}
-                      extraItems={ 
+                      extraItems={
                         product?.brandId && product.brandName
                           ? [{ id: product.brandId, name: product.brandName }]
                           : []
@@ -302,13 +254,23 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
               <form.AppField
                 name='defaultPurchasePrice'
                 children={(field) => (
-                  <field.TextField label={t('purchasePrice')} type='number' min={0} required />
+                  <field.TextField
+                    label={t('purchasePrice')}
+                    type='number'
+                    min={0}
+                    placeholder={t('purchasePricePlaceholder')}
+                  />
                 )}
               />
               <form.AppField
                 name='defaultSellingPrice'
                 children={(field) => (
-                  <field.TextField label={t('sellingPrice')} type='number' min={0} required />
+                  <field.TextField
+                    label={t('sellingPrice')}
+                    type='number'
+                    min={0}
+                    placeholder={t('sellingPricePlaceholder')}
+                  />
                 )}
               />
             </div>
@@ -324,16 +286,18 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                         <field.TextField
                           label={t('model')}
                           maxLength={INPUT_LIMITS.model}
-                          placeholder={
-                            trackingType === 'SERIALIZED' ? t('modelPlaceholder') : undefined
-                          }
+                          placeholder={t('modelPlaceholder')}
                         />
                       )}
                     />
                     <form.AppField
                       name='color'
                       children={(field) => (
-                        <field.TextField label={t('color')} maxLength={INPUT_LIMITS.color} />
+                        <field.TextField
+                          label={t('color')}
+                          maxLength={INPUT_LIMITS.color}
+                          placeholder={t('colorPlaceholder')}
+                        />
                       )}
                     />
                   </div>
@@ -366,15 +330,25 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                         children={(field) => (
                           <field.SelectField
                             label={t('ptaStatus')}
-                            options={[
-                              { value: 'PTA_APPROVED', label: t('ptaApproved') },
-                              { value: 'NON_PTA', label: t('nonPta') }
-                            ]}
+                            options={getPtaOptions(t, {
+                              apple: isAppleBrandName(brandLabel)
+                            })}
                           />
                         )}
                       />
                     </>
                   )}
+                  {trackingType === 'QUANTITY' ? (
+                    <form.AppField
+                      name='authenticity'
+                      children={(field) => (
+                        <field.RadioGroupField
+                          label={t('authenticity')}
+                          options={getAuthenticityOptions(t)}
+                        />
+                      )}
+                    />
+                  ) : null}
                 </>
               )}
             />
@@ -383,13 +357,21 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
               <form.AppField
                 name='sku'
                 children={(field) => (
-                  <field.TextField label={t('sku')} maxLength={INPUT_LIMITS.sku} />
+                  <field.TextField
+                    label={t('sku')}
+                    maxLength={INPUT_LIMITS.sku}
+                    placeholder={t('skuPlaceholder')}
+                  />
                 )}
               />
               <form.AppField
                 name='barcode'
                 children={(field) => (
-                  <field.TextField label={t('barcode')} maxLength={INPUT_LIMITS.barcode} />
+                  <field.TextField
+                    label={t('barcode')}
+                    maxLength={INPUT_LIMITS.barcode}
+                    placeholder={t('barcodePlaceholder')}
+                  />
                 )}
               />
             </div>
@@ -402,6 +384,7 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                   min={0}
                   max={INPUT_LIMITS.lowStockMax}
                   required
+                  placeholder={t('lowStockThresholdPlaceholder')}
                 />
               )}
             />
@@ -411,6 +394,7 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                 <field.TextareaField
                   label={t('description')}
                   maxLength={INPUT_LIMITS.description}
+                  placeholder={t('descriptionPlaceholder')}
                 />
               )}
             />
@@ -423,6 +407,7 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                   <field.TextareaField
                     label={t('publicDescription')}
                     maxLength={INPUT_LIMITS.publicDescription}
+                    placeholder={t('publicDescriptionPlaceholder')}
                   />
                 )}
               />

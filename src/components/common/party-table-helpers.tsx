@@ -148,6 +148,9 @@ export function buildPartyDetail<T extends BasePartyRecord>(
               '—'
             )
           },
+          ...(row.cnic != null
+            ? [{ label: t('dukaan.party.cnic'), value: row.cnic || '—' }]
+            : []),
           {
             label: t('table.col.status'),
             value: (

@@ -64,3 +64,7 @@ export interface ProductImagesFieldProps {
 export interface ProductsTableProps {
   toolbarAction?: ReactNode;
 }
+
+export interface PtaOptionsArgs {
+  apple?: boolean;
+}

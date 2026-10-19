@@ -122,6 +122,7 @@ export interface ResponsiveDataTableProps<TData> {
   className?: string;
   isLoading?: boolean;
   rowCount?: number;
+  onRowClick?: (row: Row<TData>) => boolean | void;
 }
 
 export interface CompactOrFullTableProps<TData> {
@@ -188,6 +189,7 @@ export interface MobileListProps<TData> {
   isLoading?: boolean;
   skeletonRowCount?: number;
   onNavigate?: (href: string) => void;
+  onRowClick?: (row: Row<TData>) => void;
 }
 
 export interface QuickFilterChipsProps<TData> {

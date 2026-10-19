@@ -3,7 +3,7 @@ import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import type { ProductListFilters } from '@/lib/api/types';
 import type { ProductImageQueryExtraOptions } from '@/types';
 
-import { listProductImages, listProducts } from './service';
+import { getProduct, listProductImages, listProducts } from './service';
 
 export const productsQueryKeys = {
   all: ['products'] as const,
@@ -20,6 +20,14 @@ export function productsQueryOptions(filters: ProductListFilters = {}, token?: s
     queryKey: productsQueryKeys.list(filters),
     queryFn: () => listProducts(filters, token),
     placeholderData: keepPreviousData
+  });
+}
+
+export function productQueryOptions(id: string, token?: string) {
+  return queryOptions({
+    queryKey: productsQueryKeys.detail(id),
+    queryFn: () => getProduct(id, token),
+    enabled: !!id
   });
 }
 

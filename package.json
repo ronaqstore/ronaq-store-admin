@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test src/components/data-table/resolve-mobile-item.test.ts",
     "check": "node scripts/run-checks.mjs",
-    "knip": "knip --reporter compact",
+    "knip": "node scripts/run-knip.mjs",
     "check:unused": "node scripts/code/check-unused.cjs",
     "fix:unused": "node scripts/code/check-unused.cjs --fix",
     "check:orphans": "node scripts/code/check-orphans.cjs",

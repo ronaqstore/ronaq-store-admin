@@ -20,7 +20,9 @@ export const createSaleFormSchema = (t: Translator) =>
               quantity: z.number().int().positive(t('validation.quantityPositive')),
               unit_price: z.number().min(0, t('validation.valueNonNegative')),
               inventory_unit_id: z.string().optional(),
-              tracking_type: z.enum(['QUANTITY', 'SERIALIZED']).optional()
+              tracking_type: z.enum(['QUANTITY', 'SERIALIZED']).optional(),
+              unit_condition: z.enum(['NEW', 'USED']).optional(),
+              warranty_days: z.string().optional()
             })
             .superRefine((line, ctx) => {
               if (line.tracking_type !== 'SERIALIZED') return;
@@ -38,6 +40,23 @@ export const createSaleFormSchema = (t: Translator) =>
                   code: 'custom',
                   path: ['inventory_unit_id'],
                   message: t('validation.inventoryUnitRequired')
+                });
+              }
+
+              const days = line.warranty_days?.trim();
+              if (line.unit_condition === 'USED') {
+                if (days !== '1' && days !== '2' && days !== '3') {
+                  ctx.addIssue({
+                    code: 'custom',
+                    path: ['warranty_days'],
+                    message: t('validation.warrantyDaysRequired')
+                  });
+                }
+              } else if (days) {
+                ctx.addIssue({
+                  code: 'custom',
+                  path: ['warranty_days'],
+                  message: t('validation.warrantyDaysNotAllowed')
                 });
               }
             })

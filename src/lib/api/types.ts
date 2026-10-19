@@ -42,6 +42,7 @@ export interface SaleItemDTO {
   unitPrice: number;
   unitCost: number;
   total: number;
+  warrantyDays?: number | null;
 }
 
 export interface SalePaymentDTO {
@@ -119,6 +120,7 @@ export interface CreateSaleItemInput {
   quantity: number;
   unitPrice: number;
   inventoryUnitId?: string;
+  warrantyDays?: number;
 }
 
 export interface CreateSaleInput {
@@ -272,6 +274,7 @@ export interface PurchaseItemDTO {
   quantity: number;
   unitCost: number;
   totalCost: number;
+  phoneUnits?: Array<{ imei1: string; imei2: string | null }>;
   imeis?: string[];
 }
 
@@ -297,11 +300,20 @@ export interface PurchaseDTO {
   items: PurchaseItemDTO[];
 }
 
+export interface CreatePurchasePhoneUnitInput {
+  imei1: string;
+  imei2: string;
+  condition?: 'NEW' | 'USED';
+  batteryHealth?: number;
+  askingPrice?: number;
+  defectNotes?: string;
+}
+
 export interface CreatePurchaseItemInput {
   productId: string;
   quantity: number;
   unitCost: number;
-  imeis?: string[];
+  phoneUnits?: CreatePurchasePhoneUnitInput[];
   condition?: 'NEW' | 'USED';
 }
 
@@ -352,6 +364,22 @@ export interface InventoryUnitDTO {
   imei2?: string | null;
   condition: 'NEW' | 'USED' | string;
   status: string;
+  unitCost?: number;
+  batteryHealth?: number | null;
+  askingPrice?: number | null;
+  defectNotes?: string | null;
+  effectivePrice?: number | null;
+  createdAt?: string;
+  purchaseNo?: string | null;
+  purchaseDate?: string | null;
+  supplierInvoiceRef?: string | null;
+  supplierName?: string | null;
+  supplierPhone?: string | null;
+  saleNo?: string | null;
+  saleDate?: string | null;
+  customerName?: string | null;
+  customerPhone?: string | null;
+  salePrice?: number | null;
 }
 
 export interface InventoryAdjustmentDTO {
@@ -389,6 +417,7 @@ export interface SupplierDTO {
   shopId: string;
   name: string;
   phone?: string | null;
+  cnic?: string | null;
   address?: string | null;
   notes?: string | null;
   openingBalance: number;
@@ -401,6 +430,7 @@ export interface SupplierDTO {
 export interface CreateSupplierInput {
   name: string;
   phone?: string;
+  cnic?: string;
   address?: string;
   notes?: string;
   openingBalance?: number;
@@ -410,6 +440,7 @@ export interface CreateSupplierInput {
 export interface UpdateSupplierInput {
   name?: string;
   phone?: string;
+  cnic?: string;
   address?: string;
   notes?: string;
   openingBalance?: number;
@@ -418,7 +449,14 @@ export interface UpdateSupplierInput {
 
 export type TrackingType = 'QUANTITY' | 'SERIALIZED';
 
-export type PtaStatus = 'PTA_APPROVED' | 'NON_PTA';
+export type PtaStatus =
+  | 'PTA_APPROVED'
+  | 'NON_PTA'
+  | 'JV'
+  | 'BYPASS'
+  | 'MDM_BYPASS';
+
+export type ProductAuthenticity = 'ORIGINAL' | 'COPY';
 
 export interface ProductImageDTO {
   id: string;
@@ -452,6 +490,7 @@ export interface ProductDTO {
   publicDescription?: string | null;
   contactForPrice: boolean;
   ptaStatus?: PtaStatus | null;
+  authenticity?: ProductAuthenticity | null;
   quantityOnHand: number;
   createdAt: string;
   updatedAt: string;
@@ -474,6 +513,7 @@ export interface ProductAttributes {
   publicDescription?: string | null;
   contactForPrice?: boolean;
   ptaStatus?: PtaStatus | null;
+  authenticity?: ProductAuthenticity | null;
 }
 
 export interface CreateProductInput extends ProductAttributes {

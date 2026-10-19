@@ -6,7 +6,7 @@ import type {
   ReturnPreviewInput,
   CreateReturnInput
 } from '@/lib/api/types';
-import type { TrackingType } from '@/lib/api/types';
+import type { ProductAuthenticity, TrackingType } from '@/lib/api/types';
 
 export interface SaleOverdraftPrompt {
   confirmOverdraft?: boolean;
@@ -94,6 +94,16 @@ export interface SaleLineItem {
   unit_price: number;
   inventory_unit_id?: string;
   tracking_type?: TrackingType;
+  unit_condition?: 'NEW' | 'USED';
+  warranty_days?: string;
+  authenticity?: ProductAuthenticity | null;
+}
+
+export interface SaleLineImeiUnitPick {
+  condition?: 'NEW' | 'USED';
+  effectivePrice?: number | null;
+  batteryHealth?: number | null;
+  defectNotes?: string | null;
 }
 
 export interface SaleLineImeiFieldProps {
@@ -101,7 +111,11 @@ export interface SaleLineImeiFieldProps {
   name: string;
   value: string;
   onBlur: () => void;
-  onValueChange: (unitId: string) => void;
+  onValueChange: (
+    unitId: string,
+    condition?: 'NEW' | 'USED',
+    unit?: SaleLineImeiUnitPick
+  ) => void;
   isInvalid: boolean;
   errors: Array<{ message?: string } | undefined>;
   excludedUnitIds: string[];
@@ -129,4 +143,15 @@ export interface SaleDetailClientProps {
 
 export interface SaleReceiptClientProps {
   id: string;
+}
+
+export interface SaleUnitPriceHint {
+  effectivePrice?: number | null;
+  defectNotes?: string | null;
+}
+
+export interface SaleTotalsSummaryProps {
+  subtotalRs: number;
+  totalRs: number;
+  udharRs: number;
 }

@@ -70,7 +70,8 @@ export function ResponsiveDataTable<TData>({
   ledger,
   className,
   isLoading: isLoadingProp,
-  rowCount
+  rowCount,
+  onRowClick
 }: ResponsiveDataTableProps<TData>) {
   const isLoading =
     isLoadingProp ??
@@ -81,6 +82,17 @@ export function ResponsiveDataTable<TData>({
   const { ref, mode, wideCompact } = useContainerMode();
   const [sideRow, setSideRow] = React.useState<Row<TData> | null>(null);
   const isList = mode === 'list' || mode === 'cards';
+
+  const handleRowClick = React.useCallback(
+    (row: Row<TData>) => {
+      if (onRowClick) {
+        const handled = onRowClick(row);
+        if (handled !== false) return;
+      }
+      setSideRow(row);
+    },
+    [onRowClick]
+  );
 
   const mobileItem = React.useMemo(
     () =>
@@ -165,6 +177,7 @@ export function ResponsiveDataTable<TData>({
                 isLoading={isLoading}
                 skeletonRowCount={skeletonRowCount}
                 onNavigate={(href) => router.push(href)}
+                onRowClick={handleRowClick}
               />
             )}
             <LoadMore table={table} />
@@ -178,7 +191,7 @@ export function ResponsiveDataTable<TData>({
             wideCompact={wideCompact}
             isLoading={isLoading}
             skeletonRowCount={skeletonRowCount}
-            onRowClick={(row) => setSideRow(row)}
+            onRowClick={handleRowClick}
           />
           <div className='shrink-0'>
             <DataTablePagination table={table} variant='full' />

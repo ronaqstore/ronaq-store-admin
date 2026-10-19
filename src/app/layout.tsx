@@ -174,11 +174,12 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       data-theme={themeToApply}
       data-appearance-density={densityToApply}
       data-appearance-digits={digitsToApply}
+      className='h-full overflow-hidden'
     >
       <body
         suppressHydrationWarning
         className={cn(
-          'bg-background overflow-x-hidden overscroll-none font-sans antialiased',
+          'bg-background h-full overflow-hidden overscroll-none font-sans antialiased',
           'standalone:overscroll-none',
           fontVariables
         )}

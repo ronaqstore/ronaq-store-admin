@@ -3,6 +3,7 @@ export const INPUT_LIMITS = {
   nameLong: 150,
   phone: 20,
   phoneLoose: 30,
+  cnic: 15,
   address: 300,
   addressCustomer: 255,
   city: 100,

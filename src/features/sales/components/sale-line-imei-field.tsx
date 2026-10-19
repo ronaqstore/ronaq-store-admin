@@ -33,20 +33,39 @@ export function SaleLineImeiField({
   });
 
   const excluded = new Set(excludedUnitIds);
-  const options = (unitsQuery.data ?? [])
-    .filter((unit) => unit.id === value || !excluded.has(unit.id))
-    .map((unit) => ({
-      value: unit.id,
-      label: `${t('inventory.imeiLabel')} ${unit.imei1}${
-        unit.condition ? ` · ${unit.condition}` : ''
-      }`
-    }));
+  const units = (unitsQuery.data ?? []).filter(
+    (unit) => unit.id === value || !excluded.has(unit.id)
+  );
+  const options = units.map((unit) => {
+    const parts = [
+      `${t('inventory.imeiLabel')} ${unit.imei1}`,
+      unit.condition || null,
+      unit.batteryHealth != null
+        ? t('dukaan.sale.batteryPct', { pct: unit.batteryHealth })
+        : null
+    ].filter(Boolean);
+    return { value: unit.id, label: parts.join(' · ') };
+  });
 
   const placeholder = unitsQuery.isLoading
     ? t('dukaan.sale.loadingImeis')
     : options.length === 0
       ? t('dukaan.sale.noImeisInStock')
       : t('dukaan.sale.selectImei');
+  const handleValueChange = (next: string | null) => {
+    const unitId = next ?? '';
+    const unit = units.find((u) => u.id === unitId);
+    const condition =
+      unit?.condition === 'USED' || unit?.condition === 'NEW'
+        ? unit.condition
+        : undefined;
+    onValueChange(unitId, condition, {
+      condition,
+      effectivePrice: unit?.effectivePrice ?? unit?.askingPrice ?? null,
+      batteryHealth: unit?.batteryHealth ?? null,
+      defectNotes: unit?.defectNotes ?? null
+    });
+  };
 
   return (
     <Field data-invalid={isInvalid}>
@@ -56,7 +75,7 @@ export function SaleLineImeiField({
       <Select
         name={name}
         value={value || ''}
-        onValueChange={(next) => onValueChange(next ?? '')}
+        onValueChange={handleValueChange}
         items={options.map((opt) => ({ value: opt.value, label: opt.label }))}
       >
         <SelectTrigger

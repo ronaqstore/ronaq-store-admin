@@ -1,14 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import { FloatingActionButton } from '@/components/common/floating-action-button';
 import { TablePageBody } from '@/components/layout/table-page-body';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { useT } from '@/i18n/use-t';
+import { useRouter } from '@/i18n/navigation';
 import type { PurchasesHeaderActionProps, PurchasesListClientProps } from '@/types/purchases';
 import { PurchasesTable } from './purchases-table';
-import { PurchaseCreateDialog } from './purchase-create-dialog';
 
 export { PurchaseDetailClient } from './purchase-detail-client';
 
@@ -22,17 +21,18 @@ export function PurchasesHeaderAction({ className, onAdd }: PurchasesHeaderActio
   );
 }
 
-export function PurchasesListClient({ defaultOpenAdd = false }: PurchasesListClientProps) {
+export function PurchasesListClient(_props: PurchasesListClientProps = {}) {
   const t = useT();
-  const [open, setOpen] = useState(defaultOpenAdd);
+  const router = useRouter();
+
+  const goNew = () => {
+    router.push('/dashboard/purchases/new');
+  };
 
   return (
     <TablePageBody>
-      <PurchasesTable
-        toolbarAction={<PurchasesHeaderAction className='h-8' onAdd={() => setOpen(true)} />}
-      />
-      <FloatingActionButton label={t('common.newPurchase')} onClick={() => setOpen(true)} />
-      <PurchaseCreateDialog open={open} onOpenChange={setOpen} clearDefaultQuery={defaultOpenAdd} />
+      <PurchasesTable toolbarAction={<PurchasesHeaderAction className='h-8' onAdd={goNew} />} />
+      <FloatingActionButton label={t('common.newPurchase')} onClick={goNew} />
     </TablePageBody>
   );
 }

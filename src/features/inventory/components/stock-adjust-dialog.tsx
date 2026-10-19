@@ -32,7 +32,12 @@ import { createInventoryAdjustment } from '../api/service';
 import { inventoryKeys, inventoryStockQueryOptions } from '../api/queries';
 import type { CreateInventoryAdjustmentInput } from '@/lib/api/types';
 
-export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockAdjustDialogProps) {
+export function StockAdjustDialog({
+  open,
+  onOpenChange,
+  initialProduct,
+  initialImei
+}: StockAdjustDialogProps) {
   const qc = useQueryClient();
   const t = useT();
   const { data: stockData } = useQuery({
@@ -45,7 +50,7 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
   const [type, setType] = useState<'ADJUSTMENT' | 'DAMAGED' | 'LOST'>('ADJUSTMENT');
   const [countedQuantity, setCountedQuantity] = useState<number>(initialProduct?.inStock ?? 0);
   const [quantity, setQuantity] = useState<number>(1);
-  const [selectedImei, setSelectedImei] = useState<string>('');
+  const [selectedImei, setSelectedImei] = useState<string>(initialImei ?? '');
   const [reason, setReason] = useState<string>('');
   const [errors, setErrors] = useState<StockAdjustFormErrors>({});
 
@@ -68,7 +73,9 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
   useEffect(() => {
     if (selectedProduct) {
       setCountedQuantity(selectedProduct.inStock);
-      if (selectedProduct.imeis && selectedProduct.imeis.length > 0) {
+      if (initialImei) {
+        setSelectedImei(initialImei);
+      } else if (selectedProduct.imeis && selectedProduct.imeis.length > 0) {
         setSelectedImei(selectedProduct.imeis[0]);
       } else {
         setSelectedImei('');
@@ -77,7 +84,7 @@ export function StockAdjustDialog({ open, onOpenChange, initialProduct }: StockA
         setType('DAMAGED');
       }
     }
-  }, [productId]);
+  }, [productId, initialImei]);
 
   const buildPayload = (): CreateInventoryAdjustmentInput | null => {
     const payload: CreateInventoryAdjustmentInput = {
