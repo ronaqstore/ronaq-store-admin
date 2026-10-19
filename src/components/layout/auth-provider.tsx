@@ -6,7 +6,7 @@ import type { AuthProviderProps } from '@/types';
 
 export function AuthProvider({ children }: AuthProviderProps) {
   return (
-    <SessionProvider>
+    <SessionProvider refetchOnWindowFocus={false} refetchInterval={0}>
       <SessionAccessGuard />
       {children}
     </SessionProvider>
