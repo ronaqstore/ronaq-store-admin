@@ -19,6 +19,15 @@ export interface PartyDetailLabels {
   openingBalance: string;
 }
 
+export type PartyApiField = 'phone' | 'cnic';
+
+export interface MappedPartyApiError {
+  field?: PartyApiField;
+  message: string;
+}
+
+export type PartyErrorTranslator = (key: string) => string;
+
 export interface BasePartyEntity {
   id: string;
   name: string;

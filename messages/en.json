@@ -82,6 +82,8 @@
     "col": {
       "name": "Name",
       "phone": "Phone",
+      "cnic": "CNIC",
+      "address": "Address",
       "status": "Status",
       "date": "Date",
       "amount": "Amount",
@@ -779,6 +781,8 @@
     "warrantyDaysNotAllowed": "Brand-new phones use company warranty — do not set shop warranty days.",
     "cnicInvalid": "Enter a valid 13-digit Pakistani CNIC (area code 1–7).",
     "phoneInvalidPk": "Enter a valid Pakistani mobile (03XXXXXXXXX).",
+    "phoneAlreadyTaken": "This mobile number is already used on the platform (shop login, platform admin, supplier, or customer). Pick a different one.",
+    "cnicAlreadyTaken": "Another supplier in your shop already uses this CNIC. Pick a different one.",
     "amountExceedsOutstanding": "Amount cannot exceed the outstanding balance.",
     "refundExceedsMax": "Refund cannot be more than the refundable amount.",
     "addItemRequired": "Add at least one item.",

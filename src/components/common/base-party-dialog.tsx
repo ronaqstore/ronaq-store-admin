@@ -19,6 +19,7 @@ import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
 import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import { isValidationApiError } from '@/lib/api/is-validation-error';
+import { mapPartyApiError } from '@/lib/api/map-party-api-error';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import type { BasePartyDialogProps, BasePartyDialogBodyProps, BasePartyFormState } from '@/types';
@@ -110,13 +111,6 @@ function BasePartyDialogBody({
       onOpenChange(false);
       void qc.invalidateQueries({ queryKey: invalidateQueryKey });
       toastSuccessAfterClose(isEdit ? successUpdated : successCreated);
-    },
-    onError: (e: Error) => {
-      if (isValidationApiError(e)) {
-        setFormApiError(e.message);
-        return;
-      }
-      toast.error(e.message);
     }
   });
 
@@ -132,9 +126,26 @@ function BasePartyDialogBody({
   const form = useAppForm({
     defaultValues,
     validators: schema ? { onSubmit: schema as never } : undefined,
-    onSubmit: ({ value }) => {
+    onSubmit: async ({ value }) => {
       setFormApiError(null);
-      save.mutate(value);
+      try {
+        await save.mutateAsync(value);
+      } catch (e) {
+        if (isValidationApiError(e)) {
+          const mapped = mapPartyApiError(e, t);
+          if (mapped.field) {
+            form.setFieldMeta(mapped.field, (meta) => ({
+              ...meta,
+              errorMap: { ...meta.errorMap, onSubmit: mapped.message },
+              errors: [mapped.message]
+            }));
+            return;
+          }
+          setFormApiError(mapped.message);
+          return;
+        }
+        toast.error(e instanceof Error ? e.message : String(e));
+      }
     }
   });
 

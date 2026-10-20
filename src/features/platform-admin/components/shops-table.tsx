@@ -47,14 +47,19 @@ const columns: ColumnDef<PlatformShop>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title={staticT('table.shopName')} />
     ),
-    cell: ({ row }) => (
-      <div className='min-w-40'>
-        <p className='font-medium'>{row.original.name}</p>
-        <p className='text-muted-foreground text-xs'>
-          {row.original.address || row.original.storeSlug || '—'}
-        </p>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const subtitle = row.original.address || row.original.storeSlug || '—';
+      return (
+        <div className='min-w-40 max-w-[220px]'>
+          <p className='font-medium truncate' title={row.original.name}>
+            {row.original.name}
+          </p>
+          <p className='text-muted-foreground truncate text-xs' title={subtitle}>
+            {subtitle}
+          </p>
+        </div>
+      );
+    },
     meta: {
       label: 'table.shopName',
       placeholderKey: 'nav.searchShops',

@@ -35,25 +35,40 @@ export function createPartyPhoneColumn<T extends BasePartyRecord>(): ColumnDef<T
   };
 }
 
-export function createPartyCreatedAtColumn<T extends BasePartyRecord>(): ColumnDef<T> {
+export function createPartyCnicColumn<T extends BasePartyRecord>(): ColumnDef<T> {
   return {
-    id: 'createdAt',
-    accessorKey: 'createdAt',
-    size: 140,
-    header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.date')} />,
-    meta: {
-      label: 'table.col.date',
-      type: 'date',
-      priority: 3,
-      mobile: 'hidden'
-    },
-    enableSorting: true,
-    cell: ({ row }) =>
-      formatDate((row.original as T).createdAt, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      })
+    id: 'cnic',
+    accessorKey: 'cnic',
+    size: 160,
+    header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.cnic')} />,
+    meta: { label: 'table.col.cnic', type: 'text', priority: 3, mobile: 'hidden' },
+    enableSorting: false,
+    cell: ({ row }) => {
+      const cnic = (row.original as T).cnic?.trim();
+      return cnic || '—';
+    }
+  };
+}
+
+export function createPartyAddressColumn<T extends BasePartyRecord>(): ColumnDef<T> {
+  return {
+    id: 'address',
+    accessorKey: 'address',
+    size: 200,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title={t('table.col.address')} />
+    ),
+    meta: { label: 'table.col.address', type: 'text', priority: 3, mobile: 'hidden' },
+    enableSorting: false,
+    cell: ({ row }) => {
+      const address = (row.original as T).address?.trim();
+      if (!address) return '—';
+      return (
+        <span className='block max-w-50 truncate' title={address}>
+          {address}
+        </span>
+      );
+    }
   };
 }
 

@@ -32,7 +32,8 @@ import { SupplierDialog } from './supplier-dialog';
 import type { SupplierCellActionProps, SuppliersTableProps } from '@/types/suppliers';
 import {
   createPartyPhoneColumn,
-  createPartyCreatedAtColumn,
+  createPartyCnicColumn,
+  createPartyAddressColumn,
   createPartyIsActiveColumn,
   PartyActionsHeader,
   buildPartyMobileItem,
@@ -96,6 +97,8 @@ const supplierColumns: ColumnDef<SupplierDTO>[] = [
     )
   },
   createPartyPhoneColumn<SupplierDTO>(),
+  createPartyCnicColumn<SupplierDTO>(),
+  createPartyAddressColumn<SupplierDTO>(),
   {
     id: 'openingBalance',
     accessorKey: 'openingBalance',
@@ -112,7 +115,6 @@ const supplierColumns: ColumnDef<SupplierDTO>[] = [
     enableSorting: true,
     cell: ({ row }) => formatPkr(row.original.openingBalance)
   },
-  createPartyCreatedAtColumn<SupplierDTO>(),
   createPartyIsActiveColumn<SupplierDTO>(),
   {
     id: 'actions',
@@ -141,10 +143,10 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
     null
   );
 
-  const sortableColumnIds = ['name', 'phone', 'openingBalance', 'createdAt', 'isActive'];
+  const sortableColumnIds = ['name', 'phone', 'openingBalance', 'isActive'];
   const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     SupplierListFilters['sortBy']
-  >(sortableColumnIds, 'name', ['isActive'], 'createdAt');
+  >(sortableColumnIds, 'name', ['isActive'], 'name', 'asc');
 
   const [nameParam] = useQueryState('name', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);

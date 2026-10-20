@@ -36,7 +36,7 @@ import type {
 import { CustomerDialog } from './customer-dialog';
 import {
   createPartyPhoneColumn,
-  createPartyCreatedAtColumn,
+  createPartyAddressColumn,
   createPartyIsActiveColumn,
   PartyActionsHeader,
   buildPartyMobileItem,
@@ -91,6 +91,7 @@ const customerColumns: ColumnDef<CustomerDTO>[] = [
     enableSorting: true
   },
   createPartyPhoneColumn<CustomerDTO>(),
+  createPartyAddressColumn<CustomerDTO>(),
   {
     id: 'openingBalance',
     accessorKey: 'openingBalance',
@@ -107,7 +108,6 @@ const customerColumns: ColumnDef<CustomerDTO>[] = [
     enableSorting: true,
     cell: ({ row }) => formatPkr(row.original.openingBalance)
   },
-  createPartyCreatedAtColumn<CustomerDTO>(),
   createPartyIsActiveColumn<CustomerDTO>(),
   {
     id: 'actions',
@@ -137,10 +137,10 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
     null
   );
 
-  const sortableColumnIds = ['name', 'phone', 'openingBalance', 'createdAt', 'isActive'];
+  const sortableColumnIds = ['name', 'phone', 'openingBalance', 'isActive'];
   const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     CustomerListFilters['sortBy']
-  >(sortableColumnIds, 'name', ['isActive'], 'createdAt');
+  >(sortableColumnIds, 'name', ['isActive'], 'name', 'asc');
 
   const [nameParam] = useQueryState('name', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
