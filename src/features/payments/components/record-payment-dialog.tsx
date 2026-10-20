@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { toPaisa } from '@/lib/money';
 import { todayIsoDate } from '@/lib/dates';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
 import { Icons } from '@/components/icons';
 import type { CustomerDTO } from '@/lib/api/types';
@@ -68,17 +69,16 @@ export function RecordPaymentDialog({
   const recordMutation = useMutation({
     ...createPaymentMutation,
     onSuccess: () => {
-      toast.success(
-        t('payments.recordSuccess', {
-          amount: amountStr,
-          customer: selectedCustomer?.name || t('payments.customer')
-        })
-      );
-      void qc.invalidateQueries({ queryKey: paymentKeys.all });
+      const message = t('payments.recordSuccess', {
+        amount: amountStr,
+        customer: selectedCustomer?.name || t('payments.customer')
+      });
       onOpenChange(false);
       setAmountStr('');
       setNotes('');
+      void qc.invalidateQueries({ queryKey: paymentKeys.all });
       onSuccess?.();
+      toastSuccessAfterClose(message);
     },
     onError: (err: Error) => {
       toast.error(err.message || t('payments.recordFailed'));
@@ -175,7 +175,7 @@ export function RecordPaymentDialog({
               {t('payments.amountReceivedPkr')} <span className='text-destructive'>*</span>
             </Label>
             <div className='relative'>
-              <span className='absolute start-3 top-1/2 -translate-y-1/2 text-sm font-normal text-foreground'>
+              <span className='absolute inset-s-3 top-1/2 -translate-y-1/2 text-sm font-normal text-foreground'>
                 {t('common.currency')}
               </span>
               <Input
@@ -184,7 +184,7 @@ export function RecordPaymentDialog({
                 min={1}
                 max={INPUT_LIMITS.amountRupeesMax}
                 step='any'
-                placeholder='0'
+                placeholder={t('common.amountPlaceholder')}
                 className={cn(
                   'ps-9 text-sm font-normal text-foreground',
                   errors.amount && 'border-destructive'

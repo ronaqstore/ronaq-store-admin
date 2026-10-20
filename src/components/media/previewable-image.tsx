@@ -24,9 +24,13 @@ export function PreviewableImage({
   const canPreview = isPreviewableImageSrc(src);
   const displaySrc = canPreview ? src.trim() : (fallbackSrc ?? src ?? '');
 
-  const handleOpenPreview = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const stopRowActivation = (event: React.SyntheticEvent) => {
     event.preventDefault();
     event.stopPropagation();
+  };
+
+  const handleOpenPreview = (event: React.MouseEvent<HTMLButtonElement>) => {
+    stopRowActivation(event);
     setOpen(true);
   };
 
@@ -64,11 +68,14 @@ export function PreviewableImage({
     <>
       <button
         type='button'
+        data-slot='previewable-image'
         className={cn(
           'relative block overflow-hidden border-0 bg-transparent p-0 cursor-zoom-in',
           className
         )}
         onClick={handleOpenPreview}
+        onPointerDown={stopRowActivation}
+        onMouseDown={stopRowActivation}
         aria-label={t('aria.previewImage')}
       >
         {image}

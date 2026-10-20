@@ -19,6 +19,12 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle
+} from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DataTableFilterClear } from '@/components/ui/table/data-table-filter-clear';
 import { useT, translateMaybe } from '@/i18n/use-t';
@@ -32,19 +38,23 @@ interface DataTableAsyncFacetedFilterProps<TData, TValue> {
   title?: string;
   config: AsyncFacetedFilterConfig;
   multiple?: boolean;
+  /** `sheet` = full-width bottom picker (filters sheet). Default popover for desktop toolbar. */
+  presentation?: 'popover' | 'sheet';
 }
 
 export function DataTableAsyncFacetedFilter<TData, TValue>({
   column,
   title,
   config,
-  multiple
+  multiple,
+  presentation = 'popover'
 }: DataTableAsyncFacetedFilterProps<TData, TValue>) {
   const t = useT();
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState('');
   const [debouncedSearch, setDebouncedSearch] = React.useState('');
   const [labelCache, setLabelCache] = React.useState<Record<string, string>>({});
+  const isSheet = presentation === 'sheet';
 
   const activeOnly = config.activeOnly ?? true;
   const searchPlaceholder =
@@ -148,6 +158,112 @@ export function DataTableAsyncFacetedFilter<TData, TValue>({
 
   const FilterIcon = column?.columnDef.meta?.icon ?? Icons.adjustments;
 
+  const triggerLabel =
+    selectedLabels.length === 0
+      ? title
+      : selectedLabels.length === 1
+        ? selectedLabels[0]?.label
+        : `${selectedLabels.length} ${t('common.selected')}`;
+
+  const list = (
+    <Command shouldFilter={false}>
+      <CommandInput placeholder={searchPlaceholder} value={search} onValueChange={setSearch} />
+      <CommandList
+        className={cn(isSheet ? 'max-h-[min(50dvh,22rem)]' : 'max-h-64')}
+        onScroll={onListScroll}
+      >
+        {query.isLoading && options.length === 0 ? (
+          <ComboboxListSkeleton />
+        ) : (
+          <>
+            <CommandEmpty>{t('table.noResults')}</CommandEmpty>
+            <CommandGroup className='p-0.5 [&_[cmdk-group-items]]:space-y-1'>
+              {options.map((option) => {
+                const isSelected = selectedValues.has(option.value);
+                return (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    keywords={[option.label]}
+                    onSelect={() => onItemSelect(option.value, option.label, isSelected)}
+                    className='my-0.5 flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2.5 text-sm'
+                  >
+                    <div
+                      className={cn(
+                        'border-primary flex size-4 items-center justify-center rounded-sm border',
+                        isSelected ? 'bg-primary' : 'opacity-50 [&_svg]:invisible'
+                      )}
+                    >
+                      <Icons.check />
+                    </div>
+                    <span className='truncate'>{option.label}</span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+            {query.isFetchingNextPage ? (
+              <div className='space-y-1 px-2 py-2' aria-busy='true'>
+                <Skeleton className='h-8 w-full' />
+                <Skeleton className='h-8 w-[85%]' />
+              </div>
+            ) : null}
+            {selectedValues.size > 0 ? (
+              <>
+                <CommandSeparator className='my-1' />
+                <CommandGroup className='p-0.5'>
+                  <CommandItem
+                    onSelect={() => onReset()}
+                    className='justify-center rounded-md py-1.5 text-center'
+                  >
+                    {t('table.resetFilters')}
+                  </CommandItem>
+                </CommandGroup>
+              </>
+            ) : null}
+          </>
+        )}
+      </CommandList>
+    </Command>
+  );
+
+  if (isSheet) {
+    return (
+      <>
+        <Button
+          type='button'
+          variant='outline'
+          className='h-11 w-full justify-start gap-2 px-3 font-normal'
+          onClick={() => setOpen(true)}
+        >
+          {selectedValues.size > 0 ? (
+            <DataTableFilterClear title={title} onReset={onReset} />
+          ) : (
+            <FilterIcon className='size-4 shrink-0 text-muted-foreground' />
+          )}
+          <span className='truncate'>{triggerLabel}</span>
+          {selectedValues.size > 1 ? (
+            <Badge variant='secondary' className='ms-auto rounded-sm px-1.5 font-normal'>
+              {selectedValues.size}
+            </Badge>
+          ) : null}
+        </Button>
+        <Sheet open={open} onOpenChange={handleOpenChange}>
+          <SheetContent
+            side='bottom'
+            overlayClassName='z-[60]'
+            className='z-[60] max-h-[85dvh] gap-0 rounded-t-[var(--radius)] pb-[max(1rem,env(safe-area-inset-bottom))]'
+          >
+            <div className='bg-muted mx-auto mt-1 mb-2 h-1 w-10 shrink-0 rounded-full' aria-hidden />
+            <SheetHeader className='border-b border-border'>
+              <SheetTitle>{title}</SheetTitle>
+            </SheetHeader>
+            <div className='min-h-0 flex-1 overflow-hidden px-2 py-2'>{list}</div>
+          </SheetContent>
+        </Sheet>
+      </>
+    );
+  }
+
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger
@@ -186,65 +302,7 @@ export function DataTableAsyncFacetedFilter<TData, TValue>({
         ) : null}
       </PopoverTrigger>
       <PopoverContent className='w-56 p-0' align='start' sideOffset={6}>
-        <Command shouldFilter={false}>
-          <CommandInput
-            placeholder={searchPlaceholder}
-            value={search}
-            onValueChange={setSearch}
-          />
-          <CommandList className='max-h-64' onScroll={onListScroll}>
-            {query.isLoading && options.length === 0 ? (
-              <ComboboxListSkeleton />
-            ) : (
-              <>
-                <CommandEmpty>{t('table.noResults')}</CommandEmpty>
-                <CommandGroup className='p-0.5 [&_[cmdk-group-items]]:space-y-1'>
-                  {options.map((option) => {
-                    const isSelected = selectedValues.has(option.value);
-                    return (
-                      <CommandItem
-                        key={option.value}
-                        value={option.value}
-                        keywords={[option.label]}
-                        onSelect={() => onItemSelect(option.value, option.label, isSelected)}
-                        className='my-0.5 flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm'
-                      >
-                        <div
-                          className={cn(
-                            'border-primary flex size-4 items-center justify-center rounded-sm border',
-                            isSelected ? 'bg-primary' : 'opacity-50 [&_svg]:invisible'
-                          )}
-                        >
-                          <Icons.check />
-                        </div>
-                        <span className='truncate'>{option.label}</span>
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-                {query.isFetchingNextPage ? (
-                  <div className='space-y-1 px-2 py-2' aria-busy='true'>
-                    <Skeleton className='h-8 w-full' />
-                    <Skeleton className='h-8 w-[85%]' />
-                  </div>
-                ) : null}
-                {selectedValues.size > 0 ? (
-                  <>
-                    <CommandSeparator className='my-1' />
-                    <CommandGroup className='p-0.5'>
-                      <CommandItem
-                        onSelect={() => onReset()}
-                        className='justify-center rounded-md py-1.5 text-center'
-                      >
-                        {t('table.resetFilters')}
-                      </CommandItem>
-                    </CommandGroup>
-                  </>
-                ) : null}
-              </>
-            )}
-          </CommandList>
-        </Command>
+        {list}
       </PopoverContent>
     </Popover>
   );

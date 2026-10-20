@@ -26,6 +26,7 @@ import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { cn } from '@/lib/utils';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
 import type { StockAdjustDialogProps, StockAdjustFormErrors } from '@/types/inventory';
 import { createInventoryAdjustment } from '../api/service';
@@ -108,10 +109,11 @@ export function StockAdjustDialog({
     mutationFn: async (payload: CreateInventoryAdjustmentInput) =>
       createInventoryAdjustment(payload),
     onSuccess: (res) => {
-      toast.success(res.message || t('inventory.adjustSuccess'));
-      void qc.invalidateQueries({ queryKey: inventoryKeys.all });
+      const message = res.message || t('inventory.adjustSuccess');
       onOpenChange(false);
       setReason('');
+      void qc.invalidateQueries({ queryKey: inventoryKeys.all });
+      toastSuccessAfterClose(message);
     },
     onError: (err: Error) => {
       toast.error(err.message || t('inventory.adjustFailed'));

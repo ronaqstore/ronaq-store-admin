@@ -1,33 +1,27 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { useT } from '@/i18n/use-t';
+import { useRouter } from '@/i18n/navigation';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FieldGroup } from '@/components/ui/field';
 import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
 import { isFieldMetaInvalid } from '@/lib/form-context';
 import { isValidationApiError } from '@/lib/api/is-validation-error';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import type { ProductImageDTO } from '@/lib/api/types';
-import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { FormEntitySelect } from '@/components/forms/form-entity-select';
 import { Icons } from '@/components/icons';
 
 import { useCreateProduct, useUpdateProduct } from '../api/mutations';
-import { productsQueryKeys, useProductImagesQuery } from '../api/queries';
+import { productQueryOptions, productsQueryKeys, useProductImagesQuery } from '../api/queries';
 import { uploadPendingProductImages } from '../api/service';
 import { createProductFormSchema } from '@/lib/products/product-schema';
-import { ProductPhotoManager } from './product-photo-manager';
 import {
   emptyProductForm,
   productToForm,
@@ -35,6 +29,7 @@ import {
   getPtaOptions,
   getAuthenticityOptions
 } from '@/lib/products/product-form-defaults';
+import { ProductFormSidebar } from './product-form-sidebar';
 import {
   fetchCategorySelectPage,
   fetchBrandSelectPage
@@ -42,45 +37,64 @@ import {
 import { isAppleBrandName } from '@/lib/device-family';
 import type { NamedEntity } from '@/types';
 import type {
-  ProductDialogProps,
-  ProductDialogBodyProps,
-  PendingProductImageFile
+  PendingProductImageFile,
+  ProductFormBodyProps,
+  ProductFormPageProps
 } from '@/types/products';
 
-export function ProductDialog({ open, onOpenChange, product }: ProductDialogProps) {
-  const qc = useQueryClient();
+export function ProductFormPageClient({ productId }: ProductFormPageProps) {
+  const isEdit = Boolean(productId);
+  const t = useTranslations('dukaan.product');
+  const tRoot = useT();
 
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) {
-      void qc.invalidateQueries({ queryKey: productsQueryKeys.lists() });
-    }
-    onOpenChange(nextOpen);
-  };
+  const productQuery = useQuery({
+    ...productQueryOptions(productId ?? ''),
+    enabled: isEdit
+  });
+
+  if (isEdit && productQuery.isLoading) {
+    return (
+      <div className='text-muted-foreground flex items-center gap-2 py-12 text-sm'>
+        <Icons.spinner className='size-4 animate-spin' />
+        {tRoot('common.loading')}
+      </div>
+    );
+  }
+
+  if (isEdit && (productQuery.isError || !productQuery.data)) {
+    return (
+      <Alert variant='destructive'>
+        <Icons.warning />
+        <AlertDescription>
+          {productQuery.error instanceof Error
+            ? productQuery.error.message
+            : t('updateFailed')}
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      {open ? (
-        <ProductDialogBody
-          key={product?.id ?? 'new'}
-          product={product}
-          onOpenChange={handleOpenChange}
-        />
-      ) : null}
-    </Dialog>
+    <ProductFormBody
+      key={productId ?? 'new'}
+      productId={productId}
+      product={productQuery.data ?? null}
+    />
   );
 }
 
-function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
+function ProductFormBody({ productId, product }: ProductFormBodyProps) {
+  const isEdit = Boolean(product);
   const qc = useQueryClient();
+  const router = useRouter();
   const t = useTranslations('dukaan.product');
   const tRoot = useT();
-  const isEdit = Boolean(product);
 
   const createProduct = useCreateProduct();
-  const updateProduct = useUpdateProduct(product?.id ?? '');
+  const updateProduct = useUpdateProduct(productId ?? '');
 
-  const { data: imagesData } = useProductImagesQuery(product?.id ?? '', undefined, {
-    enabled: isEdit && !!product?.id
+  const { data: imagesData } = useProductImagesQuery(productId ?? '', undefined, {
+    enabled: isEdit && !!productId
   });
   const [images, setImages] = useState<ProductImageDTO[]>([]);
   const [pendingFiles, setPendingFiles] = useState<PendingProductImageFile[]>([]);
@@ -88,25 +102,22 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
   const [brandLabel, setBrandLabel] = useState(product?.brandName ?? '');
 
   useEffect(() => {
-    if (imagesData?.items) {
-      setImages(imagesData.items);
-    }
+    if (imagesData?.items) setImages(imagesData.items);
   }, [imagesData]);
 
   const form = useAppForm({
     defaultValues: product ? productToForm(product) : emptyProductForm(),
-    validators: {
-      onSubmit: createProductFormSchema(tRoot) as never
-    },
+    validators: { onSubmit: createProductFormSchema(tRoot) as never },
     onSubmit: ({ value }) => {
       setFormApiError(null);
       const payload = buildProductPayload(value);
 
-      if (product) {
+      if (product && productId) {
         updateProduct.mutate(payload, {
           onSuccess: () => {
             void qc.invalidateQueries({ queryKey: productsQueryKeys.all });
-            onOpenChange(false);
+            router.push('/dashboard/products');
+            toastSuccessAfterClose(t('productUpdated'));
           },
           onError: (err: Error) => {
             if (isValidationApiError(err)) {
@@ -116,35 +127,49 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
             toast.error(err.message || t('updateFailed'));
           }
         });
-      } else {
-        createProduct.mutate(payload, {
-          onSuccess: async (data) => {
-            const newId = (data as { id?: string })?.id;
-            if (newId) {
-              try {
-                await uploadPendingProductImages(newId, images, pendingFiles);
-              } catch (uploadError) {
-                toast.error((uploadError as Error).message);
-              }
-            }
-            void qc.invalidateQueries({ queryKey: productsQueryKeys.all });
-            onOpenChange(false);
-          },
-          onError: (err: Error) => {
-            if (isValidationApiError(err)) {
-              setFormApiError(err.message);
-              return;
-            }
-            toast.error(err.message || t('createFailed'));
-          }
-        });
+        return;
       }
+
+      createProduct.mutate(payload, {
+        onSuccess: async (data) => {
+          const newId = (data as { id?: string })?.id;
+          if (newId) {
+            try {
+              await uploadPendingProductImages(newId, images, pendingFiles);
+            } catch (uploadError) {
+              toast.error((uploadError as Error).message);
+            }
+          }
+          void qc.invalidateQueries({ queryKey: productsQueryKeys.all });
+          router.push('/dashboard/products');
+          toastSuccessAfterClose(t('productCreated'));
+        },
+        onError: (err: Error) => {
+          if (isValidationApiError(err)) {
+            setFormApiError(err.message);
+            return;
+          }
+          toast.error(err.message || t('createFailed'));
+        }
+      });
     }
   });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     void form.handleSubmit();
+  };
+
+  const handleCancel = () => {
+    router.push('/dashboard/products');
+  };
+
+  const handleAddPendingFile = (file: File, id: string) => {
+    setPendingFiles((prev) => [...prev, { id, file }]);
+  };
+
+  const handleRemovePendingFile = (id: string) => {
+    setPendingFiles((prev) => prev.filter((p) => p.id !== id));
   };
 
   const handleBrandChange = (id: string, item: NamedEntity | null) => {
@@ -157,24 +182,28 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
     }
   };
 
+  const saving = createProduct.isPending || updateProduct.isPending;
+
   return (
-    <DialogContent className='left-1/2 top-4 flex max-h-[calc(100dvh-2rem)] w-full -translate-x-1/2 translate-y-0 flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl'>
-      <DialogHeader className='shrink-0 border-b bg-popover px-6 py-4 pe-12'>
-        <DialogTitle>{isEdit ? t('editTitle') : t('addTitle')}</DialogTitle>
-      </DialogHeader>
-      <form className='flex min-h-0 flex-1 flex-col overflow-hidden' onSubmit={handleSubmit}>
-        <div className='flex-1 overflow-y-auto overscroll-contain px-6 py-4'>
-          {formApiError ? (
-            <Alert variant='destructive' className='mb-4'>
-              <Icons.warning />
-              <AlertDescription>{formApiError}</AlertDescription>
-            </Alert>
-          ) : null}
+    <form className='w-full' onSubmit={handleSubmit}>
+      {formApiError ? (
+        <Alert variant='destructive' className='mb-6'>
+          <Icons.warning />
+          <AlertDescription>{formApiError}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      <div className='grid grid-cols-1 items-start gap-8 lg:grid-cols-3'>
+        <div className='space-y-8 lg:col-span-2'>
           <FieldGroup className='gap-4'>
             <form.AppField
               name='name'
               children={(field) => (
-                <field.TextField label={t('name')} required placeholder={t('namePlaceholder')} />
+                <field.TextField
+                  label={t('name')}
+                  required
+                  placeholder={t('namePlaceholder')}
+                />
               )}
             />
             <div className='grid min-w-0 gap-4 sm:grid-cols-2'>
@@ -250,7 +279,7 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
               )}
             />
 
-            <div className='grid min-w-0 gap-4 sm:grid-cols-2'>
+            <div className='grid min-w-0 gap-4 border-t border-border/60 pt-4 sm:grid-cols-2'>
               <form.AppField
                 name='defaultPurchasePrice'
                 children={(field) => (
@@ -274,34 +303,91 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                 )}
               />
             </div>
+            <p className='text-muted-foreground -mt-2 text-xs'>{t('pricesOptionalHint')}</p>
 
-            <form.Subscribe
-              selector={(state) => state.values.trackingType}
-              children={(trackingType) => (
-                <>
-                  <div className='grid min-w-0 gap-4 sm:grid-cols-2'>
-                    <form.AppField
-                      name='model'
-                      children={(field) => (
-                        <field.TextField
-                          label={t('model')}
-                          maxLength={INPUT_LIMITS.model}
-                          placeholder={t('modelPlaceholder')}
-                        />
-                      )}
+            <div className='grid min-w-0 gap-4 sm:grid-cols-3'>
+              <form.AppField
+                name='lowStockThreshold'
+                children={(field) => (
+                  <field.TextField
+                    label={t('lowStockThreshold')}
+                    type='number'
+                    min={0}
+                    max={INPUT_LIMITS.lowStockMax}
+                    required
+                    placeholder={t('lowStockThresholdPlaceholder')}
+                  />
+                )}
+              />
+              <form.AppField
+                name='sku'
+                children={(field) => (
+                  <field.TextField
+                    label={t('sku')}
+                    maxLength={INPUT_LIMITS.sku}
+                    placeholder={t('skuPlaceholder')}
+                  />
+                )}
+              />
+              <form.AppField
+                name='barcode'
+                children={(field) => (
+                  <field.TextField
+                    label={t('barcode')}
+                    maxLength={INPUT_LIMITS.barcode}
+                    placeholder={t('barcodePlaceholder')}
+                  />
+                )}
+              />
+            </div>
+
+            <form.AppField
+              name='description'
+              children={(field) => (
+                <field.TextareaField
+                  label={t('description')}
+                  maxLength={INPUT_LIMITS.description}
+                  placeholder={t('descriptionPlaceholder')}
+                />
+              )}
+            />
+
+            <div className='space-y-4 border-t border-border/60 pt-4'>
+              <form.AppField
+                name='authenticity'
+                children={(field) => (
+                  <field.RadioGroupField
+                    label={t('authenticity')}
+                    options={getAuthenticityOptions(t)}
+                  />
+                )}
+              />
+              <div className='grid min-w-0 gap-4 sm:grid-cols-2'>
+                <form.AppField
+                  name='model'
+                  children={(field) => (
+                    <field.TextField
+                      label={t('model')}
+                      maxLength={INPUT_LIMITS.model}
+                      placeholder={t('modelPlaceholder')}
                     />
-                    <form.AppField
-                      name='color'
-                      children={(field) => (
-                        <field.TextField
-                          label={t('color')}
-                          maxLength={INPUT_LIMITS.color}
-                          placeholder={t('colorPlaceholder')}
-                        />
-                      )}
+                  )}
+                />
+                <form.AppField
+                  name='color'
+                  children={(field) => (
+                    <field.TextField
+                      label={t('color')}
+                      maxLength={INPUT_LIMITS.color}
+                      placeholder={t('colorPlaceholder')}
                     />
-                  </div>
-                  {trackingType === 'SERIALIZED' && (
+                  )}
+                />
+              </div>
+              <form.Subscribe
+                selector={(state) => state.values.trackingType}
+                children={(trackingType) =>
+                  trackingType === 'SERIALIZED' ? (
                     <>
                       <div className='grid min-w-0 gap-4 sm:grid-cols-2'>
                         <form.AppField
@@ -337,70 +423,43 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                         )}
                       />
                     </>
-                  )}
-                  {trackingType === 'QUANTITY' ? (
-                    <form.AppField
-                      name='authenticity'
-                      children={(field) => (
-                        <field.RadioGroupField
-                          label={t('authenticity')}
-                          options={getAuthenticityOptions(t)}
-                        />
-                      )}
-                    />
-                  ) : null}
-                </>
-              )}
-            />
-
-            <div className='grid min-w-0 gap-4 sm:grid-cols-2'>
-              <form.AppField
-                name='sku'
-                children={(field) => (
-                  <field.TextField
-                    label={t('sku')}
-                    maxLength={INPUT_LIMITS.sku}
-                    placeholder={t('skuPlaceholder')}
-                  />
-                )}
-              />
-              <form.AppField
-                name='barcode'
-                children={(field) => (
-                  <field.TextField
-                    label={t('barcode')}
-                    maxLength={INPUT_LIMITS.barcode}
-                    placeholder={t('barcodePlaceholder')}
-                  />
-                )}
+                  ) : null
+                }
               />
             </div>
-            <form.AppField
-              name='lowStockThreshold'
-              children={(field) => (
-                <field.TextField
-                  label={t('lowStockThreshold')}
-                  type='number'
-                  min={0}
-                  max={INPUT_LIMITS.lowStockMax}
-                  required
-                  placeholder={t('lowStockThresholdPlaceholder')}
-                />
-              )}
-            />
-            <form.AppField
-              name='description'
-              children={(field) => (
-                <field.TextareaField
-                  label={t('description')}
-                  maxLength={INPUT_LIMITS.description}
-                  placeholder={t('descriptionPlaceholder')}
-                />
-              )}
-            />
+          </FieldGroup>
+        </div>
 
-            <div className='border-t pt-4'>
-              <h4 className='mb-3 text-sm font-semibold'>{t('onlineStoreSettings')}</h4>
+        <ProductFormSidebar
+          productId={productId}
+          images={images}
+          onImagesChange={setImages}
+          onAddPendingFile={handleAddPendingFile}
+          onRemovePendingFile={handleRemovePendingFile}
+          saving={saving}
+          isEdit={isEdit}
+          onCancel={handleCancel}
+          labels={{
+            images: t('images'),
+            onlineStoreSettings: t('onlineStoreSettings'),
+            add: t('add'),
+            save: tRoot('common.save'),
+            cancel: tRoot('common.cancel')
+          }}
+          fields={{
+            isPublished: (
+              <form.AppField
+                name='isPublished'
+                children={(field) => <field.CheckboxField label={t('isPublished')} />}
+              />
+            ),
+            contactForPrice: (
+              <form.AppField
+                name='contactForPrice'
+                children={(field) => <field.CheckboxField label={t('contactForPrice')} />}
+              />
+            ),
+            publicDescription: (
               <form.AppField
                 name='publicDescription'
                 children={(field) => (
@@ -411,45 +470,10 @@ function ProductDialogBody({ product, onOpenChange }: ProductDialogBodyProps) {
                   />
                 )}
               />
-              <div className='mt-3 grid min-w-0 gap-4 sm:grid-cols-2'>
-                <form.AppField
-                  name='isPublished'
-                  children={(field) => <field.CheckboxField label={t('isPublished')} />}
-                />
-                <form.AppField
-                  name='contactForPrice'
-                  children={(field) => <field.CheckboxField label={t('contactForPrice')} />}
-                />
-              </div>
-            </div>
-          </FieldGroup>
-
-          <div className='mt-6 border-t pt-4'>
-            <h4 className='mb-3 text-sm font-semibold'>{t('images')}</h4>
-            <ProductPhotoManager
-              productId={product?.id}
-              images={images}
-              onChange={setImages}
-              onAddPendingFile={(file, id) => {
-                setPendingFiles((prev) => [...prev, { id, file }]);
-              }}
-              onRemovePendingFile={(id) => {
-                setPendingFiles((prev) => prev.filter((p) => p.id !== id));
-              }}
-            />
-          </div>
-        </div>
-        <div className='z-10 flex shrink-0 flex-col-reverse gap-3 border-t bg-popover p-4 sm:flex-row sm:items-center sm:justify-end'>
-          <DialogCancelButton
-            onClick={() => onOpenChange(false)}
-            disabled={createProduct.isPending || updateProduct.isPending}
-          />
-          <DialogPrimaryButton
-            mode={isEdit ? 'edit' : 'add'}
-            loading={createProduct.isPending || updateProduct.isPending}
-          />
-        </div>
-      </form>
-    </DialogContent>
+            )
+          }}
+        />
+      </div>
+    </form>
   );
 }

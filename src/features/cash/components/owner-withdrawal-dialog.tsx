@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
 import { formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { createOwnerWithdrawalMutation } from '../api/mutations';
 import { cashKeys } from '../api/queries';
 import type {
@@ -51,14 +52,14 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
         return;
       }
 
-      toast.success(t('dukaan.cash.withdrawalSuccess'));
-      await qc.invalidateQueries({ queryKey: cashKeys.all });
-      await qc.invalidateQueries({ queryKey: ['dashboard'] });
       setAmountStr('');
       setNotes('');
       setOverdraftPrompt(null);
       setConfirmOverdraft(false);
       onOpenChange(false);
+      void qc.invalidateQueries({ queryKey: cashKeys.all });
+      void qc.invalidateQueries({ queryKey: ['dashboard'] });
+      toastSuccessAfterClose(t('dukaan.cash.withdrawalSuccess'));
     },
     onError: (err: Error) => {
       toast.error(err.message || t('dukaan.cash.withdrawalFailed'));
@@ -119,7 +120,7 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
               {t('dukaan.cash.withdrawalAmount')} <span className='text-destructive'>*</span>
             </Label>
             <div className='relative w-full'>
-              <span className='absolute start-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>
+              <span className='absolute inset-s-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>
                 {t('common.currency')}
               </span>
               <Input
@@ -128,7 +129,7 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
                 min={1}
                 max={INPUT_LIMITS.amountRupeesMax}
                 step='any'
-                placeholder='0.00'
+                placeholder={t('common.amountPlaceholder')}
                 value={amountStr}
                 onChange={handleAmountChange}
                 onKeyDown={(e) => blockInvalidNumberKeys(e)}

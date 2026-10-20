@@ -1,7 +1,8 @@
 import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import type { ProductDTO } from '@/lib/api/types';
 import type { PtaOptionsArgs } from '@/types';
-import type { ProductFormValues } from './product-schema';
+import type { ProductFormValues } from '@/types/products';
+import { EMPTY_FORM_NUMBER } from '@/types/common';
 
 export function emptyProductForm(): ProductFormValues {
   return {
@@ -9,9 +10,9 @@ export function emptyProductForm(): ProductFormValues {
     categoryId: '',
     brandId: '',
     trackingType: 'QUANTITY',
-    defaultPurchasePrice: 0,
-    defaultSellingPrice: 0,
-    lowStockThreshold: 5,
+    defaultPurchasePrice: EMPTY_FORM_NUMBER,
+    defaultSellingPrice: EMPTY_FORM_NUMBER,
+    lowStockThreshold: EMPTY_FORM_NUMBER,
     model: '',
     color: '',
     ram: '',
@@ -84,10 +85,7 @@ export function buildProductPayload(value: ProductFormValues) {
     contactForPrice: value.contactForPrice ?? false,
     ptaStatus:
       value.trackingType === 'SERIALIZED' ? (value.ptaStatus || undefined) : undefined,
-    authenticity:
-      value.trackingType === 'QUANTITY' && value.authenticity
-        ? value.authenticity
-        : undefined
+    authenticity: value.authenticity ? value.authenticity : undefined
   };
 }
 

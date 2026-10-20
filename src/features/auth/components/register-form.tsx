@@ -18,6 +18,7 @@ import { INPUT_LIMITS } from '@/lib/input-limits';
 import { SHOP_HOME } from '@/lib/auth/routes';
 import { registerOwnerAccountWithOptionalLogo } from '@/features/auth/api/service';
 import { shopLogoSrc } from '@/constants/placeholders';
+import { prepareShopLogo } from '@/lib/prepare-image';
 import type { RegisterFormValues, RegisterFormProps } from '@/types/auth';
 
 export function RegisterForm({ title, description, footer }: RegisterFormProps) {
@@ -116,10 +117,23 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
     if (logoInputRef.current) logoInputRef.current.value = '';
   };
 
-  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
-    setLogoFile(file);
-    setLogoPreview(file ? URL.createObjectURL(file) : null);
+    if (!file) {
+      setLogoFile(null);
+      setLogoPreview(null);
+      return;
+    }
+    try {
+      const prepared = await prepareShopLogo(file);
+      setLogoFile(prepared);
+      setLogoPreview(URL.createObjectURL(prepared));
+    } catch {
+      setLogoFile(null);
+      setLogoPreview(null);
+    } finally {
+      if (logoInputRef.current) logoInputRef.current.value = '';
+    }
   };
 
   return (
@@ -249,7 +263,7 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
               <Label>{t('auth.shopLogoOptional')}</Label>
               <p className='text-xs text-muted-foreground'>{t('auth.shopLogoHint')}</p>
               <div className='flex items-center gap-3'>
-                <div className='relative h-16 w-16 overflow-hidden rounded-xl border bg-muted'>
+                <div className='relative h-16 w-16 overflow-hidden rounded-full border bg-muted'>
                   <Image
                     src={logoPreview || shopLogoSrc(null)}
                     alt=''

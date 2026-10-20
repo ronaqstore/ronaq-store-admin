@@ -22,6 +22,7 @@ import { useDataTable } from '@/hooks/use-data-table';
 import { parseBooleanFacet, useDukaanListParams } from '@/components/data-table/list-params';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { formatDate } from '@/lib/format';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import type {
   ExpenseCategoryDTO,
   ExpenseCategorySortField,
@@ -145,8 +146,8 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
   const activateMutation = useMutation({
     ...updateExpenseCategoryMutation,
     onSuccess: () => {
-      toast.success(t('expenses.categoryActivated'));
       void qc.invalidateQueries({ queryKey: expenseKeys.all });
+      toastSuccessAfterClose(t('expenses.categoryActivated'));
     },
     onError: (e: Error) => {
       toast.error(e.message || t('expenses.categoryActivateFailed'));
@@ -156,9 +157,9 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
   const deactivateMutation = useMutation({
     ...deleteExpenseCategoryMutation,
     onSuccess: () => {
-      toast.success(t('expenses.categoryDeactivated'));
       setDeactivateTarget(null);
       void qc.invalidateQueries({ queryKey: expenseKeys.all });
+      toastSuccessAfterClose(t('expenses.categoryDeactivated'));
     },
     onError: (e: Error) => {
       toast.error(e.message || t('expenses.categoryDeactivateFailed'));

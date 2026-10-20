@@ -350,7 +350,7 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
             aria-label={t('batteryMinPlaceholder')}
           />
           <div className='relative w-full sm:w-64'>
-            <IconSearch className='absolute start-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
+            <IconSearch className='absolute inset-s-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
             <Input
               type='search'
               placeholder={t('searchImei')}

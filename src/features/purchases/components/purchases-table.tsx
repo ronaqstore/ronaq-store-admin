@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { parseAsString, useQueryState } from 'nuqs';
 import { Badge } from '@/components/ui/badge';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
@@ -17,6 +17,7 @@ import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-h
 import { useDataTable } from '@/hooks/use-data-table';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
+import { useRouter } from '@/i18n/navigation';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
   parseActiveCancelledStatus,
@@ -32,12 +33,9 @@ import { CancelPurchaseDialog } from './cancel-purchase-dialog';
 
 function PurchaseRowActions({ purchase }: PurchaseRowActionsProps) {
   const t = useT();
+  const router = useRouter();
   const [cancelOpen, setCancelOpen] = useState(false);
   const isCancelled = purchase.status === 'CANCELLED';
-
-  if (isCancelled) {
-    return null;
-  }
 
   return (
     <div
@@ -53,11 +51,20 @@ function PurchaseRowActions({ purchase }: PurchaseRowActionsProps) {
       <RowActionsMenu
         actions={[
           {
-            label: t('common.cancel'),
-            icon: Icons.close,
-            variant: 'destructive',
-            onClick: () => setCancelOpen(true)
-          }
+            label: t('common.view'),
+            icon: Icons.page,
+            onClick: () => router.push(`/dashboard/purchases/${purchase.id}`)
+          },
+          ...(!isCancelled
+            ? [
+                {
+                  label: t('common.cancel'),
+                  icon: Icons.close,
+                  variant: 'destructive' as const,
+                  onClick: () => setCancelOpen(true)
+                }
+              ]
+            : [])
         ]}
       />
     </div>
@@ -80,36 +87,10 @@ const purchaseMobileItem: MobileItemConfig<PurchaseDTO> = {
   ariaLabel: (row) => `${row.purchaseNo}, ${row.supplierName ?? ''}, ${formatPkr(row.totalAmount)}`
 };
 
-const purchaseDetail: DetailConfig<PurchaseDTO> = {
-  mode: 'sheet',
-  title: (row) => row.purchaseNo,
-  badge: (row) => ({ label: formatLabel(row.status), status: row.status }),
-  value: (row) => formatPkr(row.totalAmount),
-  sections: (row) => [
-    {
-      title: 'Purchase Information',
-      fields: [
-        { label: 'Purchase #', value: row.purchaseNo },
-        { label: 'Date', value: formatIsoDate(row.purchaseDate) },
-        { label: 'Supplier', value: row.supplierName ?? '—' },
-        { label: 'Supplier Invoice', value: row.supplierInvoiceRef ?? '—' },
-        { label: 'Total Amount', value: formatPkr(row.totalAmount) },
-        { label: 'Status', value: <StatusBadge status={row.status} /> },
-        ...(row.isOpeningStock
-          ? [
-              {
-                label: 'Type',
-                value: 'Opening Stock'
-              }
-            ]
-          : [])
-      ]
-    }
-  ]
-};
-
 export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
   const t = useT();
+  const router = useRouter();
+  const [peekCancelPurchase, setPeekCancelPurchase] = useState<PurchaseDTO | null>(null);
   const sortableColumnIds = [
     'purchaseDate',
     'purchaseNo',
@@ -319,14 +300,71 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
     }
   ];
 
+  const purchaseDetail: DetailConfig<PurchaseDTO> = useMemo(
+    () => ({
+      mode: 'sheet',
+      title: (row) => row.purchaseNo,
+      badge: (row) => ({ label: formatLabel(row.status), status: row.status }),
+      value: (row) => formatPkr(row.totalAmount),
+      sections: (row) => [
+        {
+          title: t('pages.purchases.title'),
+          fields: [
+            { label: t('purchases.purchaseNoCol'), value: row.purchaseNo },
+            { label: t('table.col.date'), value: formatIsoDate(row.purchaseDate) },
+            { label: t('table.col.supplier'), value: row.supplierName ?? '—' },
+            { label: t('table.col.supplierInvoice'), value: row.supplierInvoiceRef ?? '—' },
+            { label: t('table.col.total'), value: formatPkr(row.totalAmount) },
+            { label: t('table.col.status'), value: <StatusBadge status={row.status} /> },
+            ...(row.isOpeningStock
+              ? [
+                  {
+                    label: t('purchases.openingBadge'),
+                    value: t('purchases.openingBadge')
+                  }
+                ]
+              : [])
+          ]
+        }
+      ],
+      actions: (row) => [
+        {
+          label: t('common.view'),
+          onClick: () => router.push(`/dashboard/purchases/${row.id}`)
+        },
+        ...(row.status !== 'CANCELLED'
+          ? [
+              {
+                label: t('common.cancel'),
+                variant: 'destructive' as const,
+                onClick: () => setPeekCancelPurchase(row)
+              }
+            ]
+          : [])
+      ]
+    }),
+    [router, t]
+  );
+
   return (
-    <ResponsiveDataTable
-      table={table}
-      toolbarAction={toolbarAction}
-      mobileItem={purchaseMobileItem}
-      detail={purchaseDetail}
-      quickFilters={purchaseQuickFilters}
-      isLoading={isFetching}
-    />
+    <>
+      {peekCancelPurchase ? (
+        <CancelPurchaseDialog
+          purchase={peekCancelPurchase}
+          open
+          onOpenChange={(open) => {
+            if (!open) setPeekCancelPurchase(null);
+          }}
+        />
+      ) : null}
+      <ResponsiveDataTable
+        table={table}
+        toolbarAction={toolbarAction}
+        mobileItem={purchaseMobileItem}
+        detail={purchaseDetail}
+        quickFilters={purchaseQuickFilters}
+        isLoading={isFetching}
+      />
+    </>
   );
 }

@@ -40,5 +40,3 @@ export const createProductFormSchema = (t: Translator) =>
       .nullable(),
     authenticity: z.enum(['ORIGINAL', 'COPY', '']).optional().nullable()
   });
-
-export type ProductFormValues = z.infer<ReturnType<typeof createProductFormSchema>>;

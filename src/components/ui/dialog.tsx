@@ -39,6 +39,7 @@ function DialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) 
 
 function DialogContent({
   className,
+  overlayClassName,
   children,
   showCloseButton = true,
   closeLabel,
@@ -46,13 +47,14 @@ function DialogContent({
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean;
   closeLabel?: string;
+  overlayClassName?: string;
 }) {
   const t = useTranslations();
   const resolvedCloseLabel = closeLabel ?? t('common.close');
 
   return (
     <DialogPortal>
-      <DialogOverlay />
+      <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Popup
         data-slot='dialog-content'
         className={cn(
@@ -65,7 +67,7 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot='dialog-close'
-            render={<Button variant='ghost' className='absolute top-2 end-2' size='icon-sm' />}
+            render={<Button variant='ghost' className='absolute top-2 inset-e-2' size='icon-sm' />}
           >
             <IconX />
             <span className='sr-only'>{resolvedCloseLabel}</span>

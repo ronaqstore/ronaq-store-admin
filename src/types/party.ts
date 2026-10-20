@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { FormNumber } from './common';
 
 export interface BasePartyRecord {
   id: string;
@@ -45,7 +46,7 @@ export interface BasePartyFormState {
   cnic?: string;
   address?: string;
   notes?: string;
-  opening_balance: number;
+  opening_balance: FormNumber;
 }
 
 export interface BasePartyDialogProps {
@@ -74,6 +75,7 @@ export interface PartyCellActionProps {
   isActive: boolean;
   isSystem?: boolean;
   ledgerHref?: string;
+  editHref?: string;
   deactivateTitle: string;
   deactivateDescription: string;
   deactivateConfirmLabel?: string;
@@ -85,5 +87,5 @@ export interface PartyCellActionProps {
   onDeactivate: (id: string) => Promise<unknown>;
   onActivate: (id: string) => Promise<unknown>;
   invalidateQueryKey: readonly unknown[];
-  renderEditDialog: (open: boolean, onOpenChange: (open: boolean) => void) => ReactNode;
+  renderEditDialog?: (open: boolean, onOpenChange: (open: boolean) => void) => ReactNode;
 }

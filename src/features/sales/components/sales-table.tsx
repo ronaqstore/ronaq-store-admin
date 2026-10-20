@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { parseAsString, useQueryState } from 'nuqs';
 import { Badge } from '@/components/ui/badge';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
@@ -18,6 +18,7 @@ import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-h
 import { useDataTable } from '@/hooks/use-data-table';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
+import { useRouter } from '@/i18n/navigation';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
   parseActiveCancelledStatus,
@@ -105,60 +106,11 @@ const saleMobileItem: MobileItemConfig<SaleDTO> = {
     `${row.saleNo}, ${row.customerName ?? 'Walk-in'}, ${formatPkr(row.totalAmount)}`
 };
 
-const saleDetail: DetailConfig<SaleDTO> = {
-  mode: 'sheet',
-  title: (row) => row.saleNo,
-  badge: (row) => ({
-    label: row.status === 'CANCELLED' ? 'Cancelled' : 'Active',
-    status: row.status
-  }),
-  value: (row) => formatPkr(row.totalAmount),
-  sections: (row) => [
-    {
-      title: 'Sale Information',
-      fields: [
-        { label: 'Sale #', value: row.saleNo },
-        { label: 'Sale Date', value: formatIsoDate(row.saleDate) },
-        { label: 'Customer', value: row.customerName ?? 'Walk-in' },
-        { label: 'Total Amount', value: formatPkr(row.totalAmount) },
-        {
-          label: 'Paid',
-          value: formatPkr(
-            (row.payments ?? [])
-              .filter((p) => p.status === 'ACTIVE')
-              .reduce((acc, p) => acc + p.amount, 0)
-          )
-        },
-        {
-          label: 'Status',
-          value: (
-            <StatusBadge
-              status={row.status}
-              label={row.status === 'CANCELLED' ? 'Cancelled' : 'Active'}
-            />
-          )
-        }
-      ]
-    },
-    ...(row.status === 'CANCELLED' && row.cancelledAt
-      ? [
-          {
-            title: 'Cancellation Details',
-            fields: [
-              { label: 'Reason', value: row.cancelReason || '—' },
-              {
-                label: 'Cancelled At',
-                value: formatIsoDate(row.cancelledAt)
-              }
-            ]
-          }
-        ]
-      : [])
-  ]
-};
-
 export function SalesTable({ toolbarAction }: SalesTableProps) {
   const t = useT();
+  const router = useRouter();
+  const [peekCancelSale, setPeekCancelSale] = useState<SaleDTO | null>(null);
+  const [peekReturnSale, setPeekReturnSale] = useState<SaleDTO | null>(null);
 
   const sortableColumnIds = [
     'saleDate',
@@ -374,14 +326,120 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
     }
   ];
 
+  const saleDetail: DetailConfig<SaleDTO> = useMemo(
+    () => ({
+      mode: 'sheet',
+      title: (row) => row.saleNo,
+      badge: (row) => ({
+        label: row.status === 'CANCELLED' ? t('status.cancelled') : t('status.active'),
+        status: row.status
+      }),
+      value: (row) => formatPkr(row.totalAmount),
+      sections: (row) => [
+        {
+          title: t('pages.sales.title'),
+          fields: [
+            { label: t('sales.saleNoCol'), value: row.saleNo },
+            { label: t('table.col.date'), value: formatIsoDate(row.saleDate) },
+            {
+              label: t('table.col.customer'),
+              value: row.customerName ?? t('sales.walkInBadge')
+            },
+            { label: t('table.col.total'), value: formatPkr(row.totalAmount) },
+            {
+              label: t('table.col.paid'),
+              value: formatPkr(
+                (row.payments ?? [])
+                  .filter((p) => p.status === 'ACTIVE')
+                  .reduce((acc, p) => acc + p.amount, 0)
+              )
+            },
+            {
+              label: t('table.col.status'),
+              value: (
+                <StatusBadge
+                  status={row.status}
+                  label={row.status === 'CANCELLED' ? t('status.cancelled') : t('status.active')}
+                />
+              )
+            }
+          ]
+        },
+        ...(row.status === 'CANCELLED' && row.cancelledAt
+          ? [
+              {
+                title: t('status.cancelled'),
+                fields: [
+                  { label: t('table.col.note'), value: row.cancelReason || '—' },
+                  {
+                    label: t('table.col.date'),
+                    value: formatIsoDate(row.cancelledAt)
+                  }
+                ]
+              }
+            ]
+          : [])
+      ],
+      actions: (row) => {
+        const isCancelled = row.status === 'CANCELLED';
+        const hasReturns = (row.returns?.length ?? 0) > 0;
+        return [
+          {
+            label: t('common.view'),
+            onClick: () => router.push(`/dashboard/sales/${row.id}`)
+          },
+          ...(!isCancelled
+            ? [
+                {
+                  label: t('sales.returnBadge'),
+                  variant: 'secondary' as const,
+                  onClick: () => setPeekReturnSale(row)
+                }
+              ]
+            : []),
+          ...(!isCancelled && !hasReturns
+            ? [
+                {
+                  label: t('common.cancel'),
+                  variant: 'destructive' as const,
+                  onClick: () => setPeekCancelSale(row)
+                }
+              ]
+            : [])
+        ];
+      }
+    }),
+    [router, t]
+  );
+
   return (
-    <ResponsiveDataTable
-      table={table}
-      toolbarAction={toolbarAction}
-      mobileItem={saleMobileItem}
-      detail={saleDetail}
-      quickFilters={salesQuickFilters}
-      isLoading={isFetching}
-    />
+    <>
+      {peekCancelSale ? (
+        <CancelSaleDialog
+          sale={peekCancelSale}
+          open
+          onOpenChange={(open) => {
+            if (!open) setPeekCancelSale(null);
+          }}
+        />
+      ) : null}
+      {peekReturnSale ? (
+        <ReturnSaleDialog
+          sale={peekReturnSale}
+          open
+          onOpenChange={(open) => {
+            if (!open) setPeekReturnSale(null);
+          }}
+        />
+      ) : null}
+      <ResponsiveDataTable
+        table={table}
+        toolbarAction={toolbarAction}
+        mobileItem={saleMobileItem}
+        detail={saleDetail}
+        quickFilters={salesQuickFilters}
+        isLoading={isFetching}
+      />
+    </>
   );
 }

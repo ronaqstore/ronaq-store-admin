@@ -327,15 +327,21 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
           ]
         : [])
     ],
-    actions: (row) =>
-      row.trackingType === 'SERIALIZED'
+    actions: (row) => [
+      ...(row.trackingType === 'SERIALIZED'
         ? [
             {
               label: t('inventory.viewSerializedUnits'),
               onClick: () => router.push(`/dashboard/inventory/${row.id}`)
             }
           ]
-        : []
+        : []),
+      {
+        label: t('common.adjustStock'),
+        variant: 'secondary' as const,
+        onClick: () => handleAdjust(row)
+      }
+    ]
   };
 
   const inventoryQuickFilters: QuickFilterChip[] = [

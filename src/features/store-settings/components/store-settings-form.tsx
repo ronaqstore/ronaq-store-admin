@@ -11,6 +11,7 @@ import { PreviewableImage } from '@/components/media/previewable-image';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { PLACEHOLDER_SHOP_LOGO } from '@/constants/placeholders';
 import { formatEmpty } from '@/lib/format-empty';
+import { prepareShopLogo } from '@/lib/prepare-image';
 import { useT } from '@/i18n/use-t';
 import type { StoreProfileDetailRow } from '@/types/store-settings';
 import { storeSettingsQueryOptions } from '../api/queries';
@@ -30,6 +31,7 @@ export function StoreSettingsForm() {
   const removeMutation = useRemoveShopLogo();
   const [profileOpen, setProfileOpen] = useState(false);
   const [enabledConfirm, setEnabledConfirm] = useState<boolean | null>(null);
+  const [logoPreparing, setLogoPreparing] = useState(false);
 
   const profileRows: StoreProfileDetailRow[] = [
     { label: t('storeSettings.displayName'), value: formatEmpty(data.displayName) },
@@ -42,14 +44,22 @@ export function StoreSettingsForm() {
     { label: t('storeSettings.googleMaps'), value: formatEmpty(data.googleMapsUrl) }
   ];
 
-  const handleLogoSelect = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleLogoSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    uploadMutation.mutate(file, {
-      onSettled: () => {
-        if (fileInputRef.current) fileInputRef.current.value = '';
-      }
-    });
+    try {
+      setLogoPreparing(true);
+      const prepared = await prepareShopLogo(file);
+      uploadMutation.mutate(prepared, {
+        onSettled: () => {
+          setLogoPreparing(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+      });
+    } catch {
+      setLogoPreparing(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const handlePickLogo = () => {
@@ -108,7 +118,7 @@ export function StoreSettingsForm() {
             <PreviewableImage
               src={data.logoUrl}
               alt={formatEmpty(data.displayName)}
-              className='relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border bg-muted shadow-sm'
+              className='relative h-20 w-20 shrink-0 overflow-hidden rounded-full border bg-muted shadow-sm'
               imageClassName='object-cover'
               sizes='80px'
               fallbackSrc={PLACEHOLDER_SHOP_LOGO}
@@ -132,7 +142,7 @@ export function StoreSettingsForm() {
               type='button'
               variant='outline'
               onClick={handlePickLogo}
-              isLoading={uploadMutation.isPending}
+              isLoading={logoPreparing || uploadMutation.isPending}
             >
               <Icons.upload className='me-2 h-4 w-4' />
               {data.logoUrl ? t('storeSettings.changeLogo') : t('storeSettings.uploadLogo')}

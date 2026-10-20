@@ -128,7 +128,7 @@ roots.forEach((root) => {
               r.addViolation(
                 relPath,
                 line || p.node.loc.start.line,
-                `Forbidden RTL-unsafe class in className ("${rtlMatch[0]}") — use logical utilities (ms-, me-, ps-, pe-, start-, end-, text-start, text-end)`,
+                `Forbidden RTL-unsafe class in className ("${rtlMatch[0]}") — use logical utilities (ms-, me-, ps-, pe-, inset-s-, inset-e-, text-start, text-end)`,
               );
             }
             const hexMatch = str.match(HEX_COLOR_REGEX);

@@ -117,7 +117,7 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
       >
         <div className='p-2 pb-1.5'>
           <div className='relative flex items-center overflow-hidden rounded-md border border-border bg-muted/40'>
-            <Icons.search className='pointer-events-none absolute start-2.5 size-4 text-muted-foreground' />
+            <Icons.search className='pointer-events-none absolute inset-s-2.5 size-4 text-muted-foreground' />
             <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
@@ -129,7 +129,7 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
               <button
                 type='button'
                 onClick={() => onSearchChange('')}
-                className='absolute end-2.5 text-muted-foreground hover:text-foreground'
+                className='absolute inset-e-2.5 text-muted-foreground hover:text-foreground'
               >
                 <Icons.close className='size-3.5' />
               </button>

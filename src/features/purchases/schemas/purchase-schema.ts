@@ -29,14 +29,23 @@ export const createPurchaseFormSchema = (t: Translator) =>
       supplier_id: z.string().min(1, t('validation.supplierRequired')),
       supplier_invoice_ref: z.string(),
       is_opening_stock: z.boolean(),
-      paid_now: z.number().min(0, t('validation.valueNonNegative')),
+      paid_now: z.union([
+        z.number().min(0, t('validation.valueNonNegative')),
+        z.literal('')
+      ]),
       lines: z
         .array(
           z
             .object({
               product_id: z.string().min(1, t('validation.productRequired')),
-              quantity: z.number().int().positive(t('validation.quantityPositive')),
-              unit_cost: z.number().min(0, t('validation.valueNonNegative')),
+              quantity: z.union([
+                z.number().int().positive(t('validation.quantityPositive')),
+                z.literal('')
+              ]),
+              unit_cost: z.union([
+                z.number().min(0, t('validation.valueNonNegative')),
+                z.literal('')
+              ]),
               phone_units: z.array(phoneUnitSchema(t)),
               condition: z.enum(['NEW', 'USED']),
               tracking_type: z.enum(['QUANTITY', 'SERIALIZED']).optional()
@@ -53,7 +62,9 @@ export const createPurchaseFormSchema = (t: Translator) =>
 
               if (line.tracking_type !== 'SERIALIZED') return;
 
-              if (line.quantity > INPUT_LIMITS.imeiCountMax) {
+              const quantity = Number(line.quantity) || 0;
+
+              if (quantity > INPUT_LIMITS.imeiCountMax) {
                 ctx.addIssue({
                   code: 'custom',
                   path: ['quantity'],
@@ -64,12 +75,12 @@ export const createPurchaseFormSchema = (t: Translator) =>
                 return;
               }
 
-              if (line.phone_units.length !== line.quantity) {
+              if (line.phone_units.length !== quantity) {
                 ctx.addIssue({
                   code: 'custom',
                   path: ['phone_units'],
                   message: t('validation.phoneUnitsCountMismatch', {
-                    quantity: line.quantity
+                    quantity
                   })
                 });
               }

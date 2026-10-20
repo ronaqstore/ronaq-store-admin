@@ -1,8 +1,11 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useQueryState, parseAsString } from 'nuqs';
+import { toast } from 'sonner';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import {
   ResponsiveDataTable,
   type DetailConfig,
@@ -13,6 +16,8 @@ import { useDataTable } from '@/hooks/use-data-table';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { t } from '@/i18n';
+import { useRouter } from '@/i18n/navigation';
+import { AlertModal } from '@/components/modal/alert-modal';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
   parseBooleanFacet,
@@ -22,9 +27,13 @@ import { formatPkr } from '@/lib/dukaan/numbers';
 import type { CustomerDTO } from '@/lib/api/types';
 import { customerKeys, customersQueryOptions } from '../api/queries';
 import { deactivateCustomer, reactivateCustomer } from '../api/service';
-import type { CustomerListFilters } from '@/types';
+import type {
+  CustomerCellActionProps,
+  CustomerListFilters,
+  CustomersTableProps,
+  EntityStatusConfirm
+} from '@/types';
 import { CustomerDialog } from './customer-dialog';
-import type { CustomerCellActionProps, CustomersTableProps } from '@/types';
 import {
   createPartyPhoneColumn,
   createPartyCreatedAtColumn,
@@ -119,14 +128,14 @@ const customerMobileItem: MobileItemConfig<CustomerDTO> = buildPartyMobileItem<C
   t('dukaan.party.customerOpeningBalance')
 );
 
-const customerDetail: DetailConfig<CustomerDTO> = buildPartyDetail<CustomerDTO>({
-  partyName: t('dukaan.party.name'),
-  balance: t('table.balance'),
-  openingBalance: t('dukaan.party.customerOpeningBalance')
-});
-
 export function CustomersTable({ toolbarAction }: CustomersTableProps) {
   const t = useT();
+  const router = useRouter();
+  const qc = useQueryClient();
+  const [editCustomer, setEditCustomer] = useState<CustomerDTO | null>(null);
+  const [statusConfirm, setStatusConfirm] = useState<EntityStatusConfirm | null>(
+    null
+  );
 
   const sortableColumnIds = ['name', 'phone', 'openingBalance', 'createdAt', 'isActive'];
   const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<
@@ -166,6 +175,57 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
     }
   });
 
+  const statusMutation = useMutation({
+    mutationFn: async () => {
+      if (!statusConfirm) return;
+      if (statusConfirm.nextActive) await reactivateCustomer(statusConfirm.id);
+      else await deactivateCustomer(statusConfirm.id);
+    },
+    onSuccess: () => {
+      const message = statusConfirm?.nextActive
+        ? t('dukaan.party.customerActivated')
+        : t('dukaan.party.customerArchived');
+      setStatusConfirm(null);
+      void qc.invalidateQueries({ queryKey: customerKeys.all });
+      toastSuccessAfterClose(message);
+    },
+    onError: (e: Error) => toast.error(e.message)
+  });
+
+  const customerDetail: DetailConfig<CustomerDTO> = useMemo(
+    () =>
+      buildPartyDetail<CustomerDTO>(
+        {
+          partyName: t('dukaan.party.name'),
+          balance: t('table.balance'),
+          openingBalance: t('dukaan.party.customerOpeningBalance')
+        },
+        (row) => [
+          {
+            label: t('common.edit'),
+            onClick: () => setEditCustomer(row)
+          },
+          {
+            label: t('table.openLedger'),
+            variant: 'secondary',
+            onClick: () => router.push(`/dashboard/customers/${row.id}`)
+          },
+          row.isActive
+            ? {
+                label: t('common.archive'),
+                variant: 'destructive',
+                onClick: () => setStatusConfirm({ id: row.id, nextActive: false })
+              }
+            : {
+                label: t('common.activate'),
+                variant: 'secondary',
+                onClick: () => setStatusConfirm({ id: row.id, nextActive: true })
+              }
+        ]
+      ),
+    [router, t]
+  );
+
   const customerQuickFilters = getActiveStatusQuickFilters(
     t('table.all'),
     t('status.active'),
@@ -173,13 +233,44 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
   );
 
   return (
-    <ResponsiveDataTable
-      table={table}
-      toolbarAction={toolbarAction}
-      mobileItem={customerMobileItem}
-      detail={customerDetail}
-      quickFilters={customerQuickFilters}
-      isLoading={isFetching}
-    />
+    <>
+      {editCustomer ? (
+        <CustomerDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setEditCustomer(null);
+          }}
+          customer={editCustomer}
+        />
+      ) : null}
+      <AlertModal
+        isOpen={statusConfirm != null}
+        onClose={() => setStatusConfirm(null)}
+        onConfirm={() => statusMutation.mutate()}
+        loading={statusMutation.isPending}
+        title={
+          statusConfirm?.nextActive
+            ? t('dukaan.party.customerActivateTitle')
+            : t('dukaan.party.customerArchiveTitle')
+        }
+        description={
+          statusConfirm?.nextActive
+            ? t('dukaan.party.customerActivateDescription')
+            : t('dukaan.party.customerArchiveDescription')
+        }
+        confirmLabel={
+          statusConfirm?.nextActive ? t('common.activate') : t('common.archive')
+        }
+        confirmVariant={statusConfirm?.nextActive ? 'default' : 'destructive'}
+      />
+      <ResponsiveDataTable
+        table={table}
+        toolbarAction={toolbarAction}
+        mobileItem={customerMobileItem}
+        detail={customerDetail}
+        quickFilters={customerQuickFilters}
+        isLoading={isFetching}
+      />
+    </>
   );
 }

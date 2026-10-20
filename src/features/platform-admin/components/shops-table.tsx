@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import {
   ResponsiveDataTable,
   type DetailConfig,
@@ -149,20 +150,20 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
 
   const suspend = useMutation({
     mutationFn: () => updateShopSubscription(shop.id, { isActive: false }),
-    onSuccess: async () => {
-      toast.success(t('platform.suspendSuccess', { name: shop.name }));
+    onSuccess: () => {
       setSuspendOpen(false);
-      await qc.invalidateQueries({ queryKey: platformKeys.all });
+      void qc.invalidateQueries({ queryKey: platformKeys.all });
+      toastSuccessAfterClose(t('platform.suspendSuccess', { name: shop.name }));
     },
     onError: (err: Error) => toast.error(err.message || t('platform.suspendFailed'))
   });
 
   const reactivate = useMutation({
     mutationFn: () => updateShopSubscription(shop.id, { isActive: true }),
-    onSuccess: async () => {
-      toast.success(t('platform.reactivateSuccess', { name: shop.name }));
+    onSuccess: () => {
       setReactivateOpen(false);
-      await qc.invalidateQueries({ queryKey: platformKeys.all });
+      void qc.invalidateQueries({ queryKey: platformKeys.all });
+      toastSuccessAfterClose(t('platform.reactivateSuccess', { name: shop.name }));
     },
     onError: (err: Error) => toast.error(err.message || t('platform.reactivateFailed'))
   });

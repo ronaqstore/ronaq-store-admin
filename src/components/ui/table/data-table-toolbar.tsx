@@ -103,7 +103,7 @@ function DataTableToolbarFilter<TData>({ column }: DataTableToolbarFilterProps<T
                 className={cn('h-8 w-[120px]', columnMeta.unit && 'pe-8')}
               />
               {columnMeta.unit && (
-                <span className='bg-accent text-muted-foreground absolute top-0 end-0 bottom-0 flex items-center rounded-e-md px-2 text-sm'>
+                <span className='bg-accent text-muted-foreground absolute top-0 inset-e-0 bottom-0 flex items-center rounded-e-md px-2 text-sm'>
                   {columnMeta.unit}
                 </span>
               )}

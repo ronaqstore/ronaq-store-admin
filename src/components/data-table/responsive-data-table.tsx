@@ -174,13 +174,14 @@ export function ResponsiveDataTable<TData>({
                 table={table}
                 mobileItem={mobileItem}
                 detail={detail}
+                layout={mode === 'cards' ? 'cards' : 'list'}
                 isLoading={isLoading}
                 skeletonRowCount={skeletonRowCount}
                 onNavigate={(href) => router.push(href)}
                 onRowClick={handleRowClick}
               />
             )}
-            <LoadMore table={table} />
+            {!isLoading ? <LoadMore table={table} /> : null}
           </div>
         </div>
       ) : (
@@ -268,7 +269,7 @@ function CompactOrFullTable<TData>({
                     className={cn(
                       'bg-background sticky top-0 z-20 shadow-[0_1px_0_0_var(--border)]',
                       isActions && 'w-20 text-end pe-3',
-                      isSticky && 'sticky start-0 z-30 shadow-[1px_1px_0_0_var(--border)]'
+                      isSticky && 'sticky inset-s-0 z-30 shadow-[1px_1px_0_0_var(--border)]'
                     )}
                   >
                     {header.isPlaceholder
@@ -305,7 +306,7 @@ function CompactOrFullTable<TData>({
                       className={cn(
                         isActions && 'w-20 text-end pe-3',
                         isSticky &&
-                          'bg-background sticky start-0 z-10 shadow-[1px_0_0_0_var(--border)]'
+                          'bg-background sticky inset-s-0 z-10 shadow-[1px_0_0_0_var(--border)]'
                       )}
                     >
                       {isActions ? (
@@ -329,7 +330,7 @@ function CompactOrFullTable<TData>({
                         const target = e.target as HTMLElement;
                         if (
                           target.closest(
-                            '[data-slot="dropdown-menu-trigger"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-item"], [data-slot="action-cell"], [role="menuitem"], [role="menu"], button, a'
+                            '[data-slot="dropdown-menu-trigger"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-item"], [data-slot="action-cell"], [data-slot="previewable-image"], [role="menuitem"], [role="menu"], button, a'
                           )
                         ) {
                           return;
@@ -357,7 +358,7 @@ function CompactOrFullTable<TData>({
                       className={cn(
                         isActions && 'w-20 text-end pe-3',
                         isSticky &&
-                          'bg-background sticky start-0 z-10 shadow-[1px_0_0_0_var(--border)]'
+                          'bg-background sticky inset-s-0 z-10 shadow-[1px_0_0_0_var(--border)]'
                       )}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

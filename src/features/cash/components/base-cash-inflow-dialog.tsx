@@ -21,6 +21,7 @@ import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { cn } from '@/lib/utils';
 import { toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import type { BaseCashInflowDialogProps } from '@/types/cash';
 import { cashKeys } from '../api/queries';
 import { useT } from '@/i18n/use-t';
@@ -47,13 +48,13 @@ export function BaseCashInflowDialog({
 
   const createMutation = useMutation({
     mutationFn: mutateFn,
-    onSuccess: async () => {
-      toast.success(successMessage);
-      await qc.invalidateQueries({ queryKey: cashKeys.all });
-      await qc.invalidateQueries({ queryKey: ['dashboard'] });
+    onSuccess: () => {
       setAmountStr('');
       setNotes('');
       onOpenChange(false);
+      void qc.invalidateQueries({ queryKey: cashKeys.all });
+      void qc.invalidateQueries({ queryKey: ['dashboard'] });
+      toastSuccessAfterClose(successMessage);
     },
     onError: (err: Error) => {
       toast.error(err.message || failedMessage);
@@ -113,7 +114,7 @@ export function BaseCashInflowDialog({
               {amountLabel} <span className='text-destructive'>*</span>
             </Label>
             <div className='relative w-full'>
-              <span className='absolute start-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>
+              <span className='absolute inset-s-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>
                 {t('common.currency')}
               </span>
               <Input
@@ -122,7 +123,7 @@ export function BaseCashInflowDialog({
                 min={1}
                 max={INPUT_LIMITS.amountRupeesMax}
                 step='any'
-                placeholder='0.00'
+                placeholder={t('common.amountPlaceholder')}
                 value={amountStr}
                 onChange={handleAmountChange}
                 onKeyDown={(e) => blockInvalidNumberKeys(e)}

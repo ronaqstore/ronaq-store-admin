@@ -9,8 +9,14 @@ export const createSaleFormSchema = (t: Translator) =>
   z
     .object({
       customer_id: z.string(),
-      discount: z.number().min(0, t('validation.valueNonNegative')),
-      paid_now: z.number().min(0, t('validation.valueNonNegative')),
+      discount: z.union([
+        z.number().min(0, t('validation.valueNonNegative')),
+        z.literal('')
+      ]),
+      paid_now: z.union([
+        z.number().min(0, t('validation.valueNonNegative')),
+        z.literal('')
+      ]),
       notes: z.string(),
       lines: z
         .array(
@@ -18,7 +24,10 @@ export const createSaleFormSchema = (t: Translator) =>
             .object({
               product_id: z.string().min(1, t('validation.productRequired')),
               quantity: z.number().int().positive(t('validation.quantityPositive')),
-              unit_price: z.number().min(0, t('validation.valueNonNegative')),
+              unit_price: z.union([
+                z.number().min(0, t('validation.valueNonNegative')),
+                z.literal('')
+              ]),
               inventory_unit_id: z.string().optional(),
               tracking_type: z.enum(['QUANTITY', 'SERIALIZED']).optional(),
               unit_condition: z.enum(['NEW', 'USED']).optional(),

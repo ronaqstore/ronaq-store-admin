@@ -7,6 +7,7 @@ import type {
   CreateReturnInput
 } from '@/lib/api/types';
 import type { ProductAuthenticity, TrackingType } from '@/lib/api/types';
+import type { FormNumber } from './common';
 
 export interface SaleOverdraftPrompt {
   confirmOverdraft?: boolean;
@@ -91,7 +92,7 @@ export interface SalesListClientProps {
 export interface SaleLineItem {
   product_id: string;
   quantity: number;
-  unit_price: number;
+  unit_price: FormNumber;
   inventory_unit_id?: string;
   tracking_type?: TrackingType;
   unit_condition?: 'NEW' | 'USED';
@@ -123,10 +124,14 @@ export interface SaleLineImeiFieldProps {
 
 export interface SaleFormValues {
   customer_id: string;
-  discount: number;
-  paid_now: number;
+  discount: FormNumber;
+  paid_now: FormNumber;
   lines: SaleLineItem[];
   notes?: string;
+}
+
+export interface SaleTotalsSelectorState {
+  values: SaleFormValues;
 }
 
 export interface SaleFormSubmitContext {

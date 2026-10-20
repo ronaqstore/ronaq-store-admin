@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import type { CancelPurchaseInput, PurchaseDTO } from '@/lib/api/types';
 import type { TrackingType } from '@/lib/api/types';
 import type { ProductPickerItem } from '@/types/picker';
+import type { FormNumber } from './common';
+import type { OverdraftPrompt } from './cash';
 
 export interface QuickVariantDialogProps {
   open: boolean;
@@ -69,8 +71,8 @@ export type PurchasePhoneUnitDraft = {
 export interface PurchaseLineItem {
   product_id: string;
   product_label?: string;
-  quantity: number;
-  unit_cost: number;
+  quantity: FormNumber;
+  unit_cost: FormNumber;
   phone_units: PurchasePhoneUnitDraft[];
   condition: 'NEW' | 'USED';
   tracking_type?: TrackingType;
@@ -81,7 +83,7 @@ export interface PurchaseFormValues {
   supplier_id: string;
   supplier_invoice_ref: string;
   is_opening_stock: boolean;
-  paid_now: number;
+  paid_now: FormNumber;
   lines: PurchaseLineItem[];
 }
 
@@ -106,4 +108,23 @@ export interface PurchasesHeaderActionProps {
 
 export interface PurchasesListClientProps {
   defaultOpenAdd?: boolean;
+}
+
+export interface PurchaseSummaryCardProps {
+  isOpeningStock: boolean;
+  lines: PurchaseLineItem[];
+  paidNow: FormNumber;
+  paidNowField: ReactNode;
+  warning: OverdraftPrompt | null;
+  saving: boolean;
+  onConfirmOverdraft: () => void;
+  onCancel: () => void;
+}
+
+export interface PurchaseSummarySelectorState {
+  values: PurchaseFormValues;
+}
+
+export interface OpeningStockChangeArgs {
+  value: boolean;
 }

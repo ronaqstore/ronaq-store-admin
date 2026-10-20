@@ -1,12 +1,13 @@
 import { todayIsoDate } from '@/lib/dates';
 import { toPaisa } from '@/lib/dukaan/numbers';
 import type { CreateSaleInput, CreateSaleItemInput } from '@/lib/api/types';
-import type { SaleLineItem } from '@/types/sales';
+import type { SaleLineItem, SaleTotalsSelectorState } from '@/types/sales';
+import { EMPTY_FORM_NUMBER, type FormNumber } from '@/types/common';
 
 export const emptySaleLine: SaleLineItem = {
   product_id: '',
   quantity: 1,
-  unit_price: 0,
+  unit_price: EMPTY_FORM_NUMBER,
   inventory_unit_id: '',
   unit_condition: undefined,
   warranty_days: '',
@@ -46,5 +47,27 @@ export function buildCreateSalePayload(
     discount: toPaisa(Number(discount) || 0),
     paidNow: toPaisa(Number(paidNow) || 0),
     notes: notes?.trim() || undefined
+  };
+}
+
+export function calcSaleTotals(
+  lines: SaleLineItem[],
+  discount: FormNumber,
+  paidNow: FormNumber
+) {
+  const subtotalRs = lines.reduce(
+    (sum, line) => sum + (Number(line.quantity) || 0) * (Number(line.unit_price) || 0),
+    0
+  );
+  const totalRs = Math.max(0, subtotalRs - (Number(discount) || 0));
+  const udharRs = Math.max(0, totalRs - (Number(paidNow) || 0));
+  return { subtotalRs, totalRs, udharRs };
+}
+
+export function selectSaleTotals(state: SaleTotalsSelectorState) {
+  return {
+    lines: state.values.lines,
+    discount: state.values.discount,
+    paidNow: state.values.paid_now
   };
 }

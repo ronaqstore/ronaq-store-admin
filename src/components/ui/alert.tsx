@@ -62,7 +62,7 @@ function AlertDescription({ className, ...props }: React.ComponentProps<'div'>) 
 
 function AlertAction({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div data-slot='alert-action' className={cn('absolute top-2 end-2', className)} {...props} />
+    <div data-slot='alert-action' className={cn('absolute top-2 inset-e-2', className)} {...props} />
   );
 }
 

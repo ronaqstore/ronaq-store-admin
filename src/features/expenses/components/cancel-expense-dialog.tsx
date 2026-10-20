@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import {
   Dialog,
   DialogContent,
@@ -47,9 +48,9 @@ export function CancelExpenseDialog({
   const cancel = useMutation({
     ...cancelExpenseMutation,
     onSuccess: () => {
-      toast.success(t('expenses.cancelSuccess'));
-      void qc.invalidateQueries({ queryKey: expenseKeys.all });
       onOpenChange(false);
+      void qc.invalidateQueries({ queryKey: expenseKeys.all });
+      toastSuccessAfterClose(t('expenses.cancelSuccess'));
       onSuccess?.();
     },
     onError: (err: Error) => {

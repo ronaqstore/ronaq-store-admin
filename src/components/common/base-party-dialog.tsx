@@ -19,8 +19,10 @@ import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
 import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import { isValidationApiError } from '@/lib/api/is-validation-error';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import type { BasePartyDialogProps, BasePartyDialogBodyProps, BasePartyFormState } from '@/types';
+import { EMPTY_FORM_NUMBER } from '@/types/common';
 
 export function BasePartyDialog({
   open,
@@ -105,9 +107,9 @@ function BasePartyDialogBody({
       return onSave(payload, party?.id);
     },
     onSuccess: () => {
-      toast.success(isEdit ? successUpdated : successCreated);
-      void qc.invalidateQueries({ queryKey: invalidateQueryKey });
       onOpenChange(false);
+      void qc.invalidateQueries({ queryKey: invalidateQueryKey });
+      toastSuccessAfterClose(isEdit ? successUpdated : successCreated);
     },
     onError: (e: Error) => {
       if (isValidationApiError(e)) {
@@ -118,19 +120,21 @@ function BasePartyDialogBody({
     }
   });
 
+  const defaultValues: BasePartyFormState = {
+    name: party?.name ?? '',
+    phone: party?.phone ?? '',
+    cnic: party?.cnic ?? '',
+    address: party?.address ?? '',
+    notes: party?.notes ?? '',
+    opening_balance: party ? fromPaisa(party.openingBalance) : EMPTY_FORM_NUMBER
+  };
+
   const form = useAppForm({
-    defaultValues: {
-      name: party?.name ?? '',
-      phone: party?.phone ?? '',
-      cnic: party?.cnic ?? '',
-      address: party?.address ?? '',
-      notes: party?.notes ?? '',
-      opening_balance: party ? fromPaisa(party.openingBalance) : 0
-    },
+    defaultValues,
     validators: schema ? { onSubmit: schema as never } : undefined,
     onSubmit: ({ value }) => {
       setFormApiError(null);
-      save.mutate(value as BasePartyFormState);
+      save.mutate(value);
     }
   });
 

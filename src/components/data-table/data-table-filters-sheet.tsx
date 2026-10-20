@@ -83,7 +83,10 @@ export function DataTableFiltersSheet<TData>({
                 items={[
                   { value: '__none__', label: '—' },
                   ...sortable.flatMap((column) => {
-                    const label = column.columnDef.meta?.label ?? column.id;
+                    const label = translateMaybe(
+                      column.columnDef.meta?.label ?? column.id,
+                      t
+                    );
                     return [
                       { value: `${column.id}:asc`, label: `${label} ↑` },
                       { value: `${column.id}:desc`, label: `${label} ↓` }
@@ -96,11 +99,19 @@ export function DataTableFiltersSheet<TData>({
                 <SelectTrigger id='table-sort' className='h-11 w-full'>
                   <SelectValue placeholder={t('table.sortBy')} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  alignItemWithTrigger={false}
+                  side='bottom'
+                  sideOffset={8}
+                  className='z-[60] w-[min(100vw-2rem,var(--anchor-width))] max-h-[min(50dvh,24rem)]'
+                >
                   <SelectGroup>
                     <SelectItem value='__none__'>—</SelectItem>
                     {sortable.map((column) => {
-                      const label = column.columnDef.meta?.label ?? column.id;
+                      const label = translateMaybe(
+                        column.columnDef.meta?.label ?? column.id,
+                        t
+                      );
                       return (
                         <React.Fragment key={column.id}>
                           <SelectItem value={`${column.id}:asc`}>{label} ↑</SelectItem>
@@ -133,7 +144,12 @@ export function DataTableFiltersSheet<TData>({
               <SelectTrigger id='table-page-size' className='h-11 w-full'>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                alignItemWithTrigger={false}
+                side='bottom'
+                sideOffset={8}
+                className='z-[60] w-[min(100vw-2rem,var(--anchor-width))]'
+              >
                 <SelectGroup>
                   {pageSizeOptions.map((size) => (
                     <SelectItem key={size} value={`${size}`}>
@@ -184,6 +200,7 @@ function FilterBlock<TData>({ column }: FilterBlockProps<TData>) {
             title={label}
             config={meta.asyncOptions}
             multiple={meta.variant === 'multiSelect'}
+            presentation='sheet'
           />
         ) : (
           <DataTableFacetedFilter
@@ -191,6 +208,7 @@ function FilterBlock<TData>({ column }: FilterBlockProps<TData>) {
             title={label}
             options={options}
             multiple={meta.variant === 'multiSelect'}
+            presentation='sheet'
           />
         )}
       </div>

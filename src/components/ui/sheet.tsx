@@ -39,6 +39,7 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
 
 function SheetContent({
   className,
+  overlayClassName,
   children,
   side = 'right',
   showCloseButton = true,
@@ -48,13 +49,14 @@ function SheetContent({
   side?: 'top' | 'right' | 'bottom' | 'left';
   showCloseButton?: boolean;
   closeLabel?: string;
+  overlayClassName?: string;
 }) {
   const t = useTranslations();
   const resolvedCloseLabel = closeLabel ?? t('common.close');
 
   return (
     <SheetPortal>
-      <SheetOverlay />
+      <SheetOverlay className={overlayClassName} />
       <SheetPrimitive.Popup
         data-slot='sheet-content'
         data-side={side}
@@ -68,7 +70,7 @@ function SheetContent({
         {showCloseButton && (
           <SheetPrimitive.Close
             data-slot='sheet-close'
-            render={<Button variant='ghost' className='absolute top-3 end-3' size='icon-sm' />}
+            render={<Button variant='ghost' className='absolute top-3 inset-e-3' size='icon-sm' />}
           >
             <IconX />
             <span className='sr-only'>{resolvedCloseLabel}</span>

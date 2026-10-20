@@ -21,7 +21,8 @@ export const createSupplierFormSchema = (t: Translator) =>
       .refine(isOptionalPkCnic, t('validation.cnicInvalid')),
     address: z.string().trim().max(300),
     notes: z.string().trim().max(1000),
-    opening_balance: z
-      .number({ error: t('validation.openingBalanceRequired') })
-      .min(0, t('validation.valueNonNegative'))
+    opening_balance: z.union([
+      z.number().min(0, t('validation.valueNonNegative')),
+      z.literal('')
+    ])
   });

@@ -13,9 +13,10 @@ export const createPartyFormSchema = (t: Translator) =>
       .refine(isOptionalPkMobile, t('validation.phoneInvalidPk')),
     address: z.string(),
     notes: z.string(),
-    opening_balance: z
-      .number({ error: t('validation.openingBalanceRequired') })
-      .min(0, t('validation.valueNonNegative')),
+    opening_balance: z.union([
+      z.number().min(0, t('validation.valueNonNegative')),
+      z.literal('')
+    ]),
     isActive: z.boolean().optional()
   });
 

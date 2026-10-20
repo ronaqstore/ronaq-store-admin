@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
@@ -75,11 +76,11 @@ export function RecordExpenseDialog({
         return;
       }
 
-      toast.success(t('expenses.recordSuccess', { amount: amountStr }));
-      void qc.invalidateQueries({ queryKey: expenseKeys.all });
       onOpenChange(false);
       resetForm();
+      void qc.invalidateQueries({ queryKey: expenseKeys.all });
       onSuccess?.();
+      toastSuccessAfterClose(t('expenses.recordSuccess', { amount: amountStr }));
     },
     onError: (err: Error) => {
       toast.error(err.message || t('expenses.recordFailed'));
@@ -200,7 +201,7 @@ export function RecordExpenseDialog({
                 {t('expenses.amountPkr')} <span className='text-destructive'>*</span>
               </Label>
               <div className='relative w-full'>
-                <span className='absolute start-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>
+                <span className='absolute inset-s-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>
                   {t('common.currency')}
                 </span>
                 <Input
@@ -209,7 +210,7 @@ export function RecordExpenseDialog({
                   min={1}
                   max={INPUT_LIMITS.amountRupeesMax}
                   step='any'
-                  placeholder='0.00'
+                  placeholder={t('common.amountPlaceholder')}
                   value={amountStr}
                   onChange={handleAmountChange}
                   onKeyDown={(e) => blockInvalidNumberKeys(e)}

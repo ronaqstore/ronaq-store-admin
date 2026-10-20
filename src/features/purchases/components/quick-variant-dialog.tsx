@@ -22,6 +22,7 @@ import { INPUT_LIMITS } from '@/lib/input-limits';
 import { isValidationApiError } from '@/lib/api/is-validation-error';
 import { mapProductToPicker } from '@/lib/api/picker';
 import { AppError } from '@/lib/errors';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import {
   buildProductPayload,
   emptyProductForm,
@@ -110,9 +111,9 @@ function QuickVariantDialogBody({
         const product = await getProduct(id);
         void qc.invalidateQueries({ queryKey: productsQueryKeys.all });
         void qc.invalidateQueries({ queryKey: ['products', 'picker'] });
-        toast.success(t('productCreated'));
         onCreated(mapProductToPicker(product));
         onOpenChange(false);
+        toastSuccessAfterClose(t('productCreated'));
       } catch (err) {
         if (isValidationApiError(err)) {
           setFormApiError(err.message);
@@ -294,6 +295,15 @@ function QuickVariantDialogBody({
                 }
               />
             </div>
+            <form.AppField
+              name='authenticity'
+              children={(field) => (
+                <field.RadioGroupField
+                  label={t('authenticity')}
+                  options={getAuthenticityOptions(t)}
+                />
+              )}
+            />
             <form.Subscribe
               selector={(s) => s.values.trackingType}
               children={(tt) =>
@@ -321,17 +331,7 @@ function QuickVariantDialogBody({
                       )}
                     />
                   </>
-                ) : (
-                  <form.AppField
-                    name='authenticity'
-                    children={(field) => (
-                      <field.RadioGroupField
-                        label={t('authenticity')}
-                        options={getAuthenticityOptions(t)}
-                      />
-                    )}
-                  />
-                )
+                ) : null
               }
             />
             <div className='grid gap-3 sm:grid-cols-2'>

@@ -9,6 +9,15 @@ export type TranslateMaybeFn = {
   has?: (key: string) => boolean;
 };
 
+export interface EntityStatusConfirm {
+  id: string;
+  nextActive: boolean;
+}
+
+export type FormNumber = number | '';
+
+export const EMPTY_FORM_NUMBER: FormNumber = '';
+
 export interface AppearanceProviderProps {
   children: ReactNode;
 }
@@ -268,6 +277,7 @@ export interface SimpleEntityDialogBodyProps extends SimpleEntityDialogProps {}
 export interface SimpleEntityCellActionProps {
   id: string;
   isActive: boolean;
+  editHref?: string;
   deactivateTitle: string;
   deactivateDescription: string;
   deactivateSuccess: string;
@@ -277,7 +287,7 @@ export interface SimpleEntityCellActionProps {
   onDeactivate: (id: string) => Promise<unknown>;
   onActivate: (id: string) => Promise<unknown>;
   invalidateQueryKey: readonly unknown[];
-  renderDialog: (open: boolean, onOpenChange: (open: boolean) => void) => ReactNode;
+  renderDialog?: (open: boolean, onOpenChange: (open: boolean) => void) => ReactNode;
 }
 
 export interface NotFoundViewProps {

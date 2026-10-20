@@ -4,6 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import {
   StatusBadge,
+  type DetailAction,
   type DetailConfig,
   type MobileItemConfig,
   type QuickFilterChip
@@ -120,7 +121,8 @@ export function buildPartyMobileItem<T extends BasePartyRecord>(
 }
 
 export function buildPartyDetail<T extends BasePartyRecord>(
-  labels: PartyDetailLabels
+  labels: PartyDetailLabels,
+  actions?: (row: T) => DetailAction[]
 ): DetailConfig<T> {
   return {
     mode: 'sheet',
@@ -181,7 +183,8 @@ export function buildPartyDetail<T extends BasePartyRecord>(
           }
         ]
       }
-    ]
+    ],
+    actions
   };
 }
 

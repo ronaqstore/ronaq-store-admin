@@ -11,18 +11,19 @@ import { INPUT_LIMITS } from '@/lib/input-limits';
 import { formatPkr, fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import { listProducts } from '@/features/products/api/service';
 import { mapProductToPicker, toPickerPage } from '@/lib/api/picker';
-import type { PurchaseLineDraft } from '@/types/purchases';
+import type { PurchaseFormValues, PurchaseLineDraft } from '@/types/purchases';
 import type { PickerFetchFilters, ProductPickerItem } from '@/types';
 import type { SubFieldApi } from '@/types/forms';
+import { EMPTY_FORM_NUMBER } from '@/types/common';
 import { isAppleBrandName } from '@/lib/device-family';
 import { resizePhoneUnits } from '../schemas/purchase-schema';
 import { QuickVariantDialog } from './quick-variant-dialog';
 
-const emptyDefaults = {
+const emptyDefaults: PurchaseFormValues = {
   supplier_id: '',
   supplier_invoice_ref: '',
   is_opening_stock: false,
-  paid_now: 0,
+  paid_now: EMPTY_FORM_NUMBER,
   lines: [] as PurchaseLineDraft[]
 };
 

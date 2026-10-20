@@ -14,6 +14,7 @@ import {
 import { FieldGroup } from '@/components/ui/field';
 import { useAppForm } from '@/lib/form';
 import { useT } from '@/i18n/use-t';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { platformKeys } from '../api/queries';
@@ -69,9 +70,9 @@ function RenewSubscriptionDialogBody({
     mutationFn: (subscriptionEndsAt: string) =>
       updateShopSubscription(shopId, { subscriptionEndsAt }),
     onSuccess: async (res) => {
-      toast.success(t('platform.renewSuccess', { name: res.shopName }));
-      await qc.invalidateQueries({ queryKey: platformKeys.all });
       onOpenChange(false);
+      void qc.invalidateQueries({ queryKey: platformKeys.all });
+      toastSuccessAfterClose(t('platform.renewSuccess', { name: res.shopName }));
     },
     onError: (err: Error) => {
       toast.error(err.message || t('platform.renewFailed'));

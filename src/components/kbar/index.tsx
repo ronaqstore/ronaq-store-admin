@@ -77,7 +77,7 @@ const KBarComponent = ({ children }: KBarComponentProps) => {
             <div className='bg-popover sticky top-0 z-10 border-b'>
               <KBarSearch
                 defaultPlaceholder={t('searchPlaceholder')}
-                className='placeholder:text-muted-foreground w-full border-none bg-transparent px-4 py-3.5 text-sm outline-hidden focus:ring-0 focus:outline-hidden'
+                className='placeholder:text-muted-foreground/55 w-full border-none bg-transparent px-4 py-3.5 text-sm outline-hidden focus:ring-0 focus:outline-hidden'
               />
             </div>
             <div className='h-[400px]'>

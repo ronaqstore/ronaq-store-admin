@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { BaseCancelDialog } from '@/components/common/base-cancel-dialog';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { useT } from '@/i18n/use-t';
@@ -29,9 +30,11 @@ export function CancelPurchaseDialog({
   const cancel = useMutation({
     ...cancelPurchaseMutation,
     onSuccess: () => {
-      toast.success(t('purchases.cancelDialog.success', { purchaseNo: purchase.purchaseNo }));
-      void qc.invalidateQueries({ queryKey: purchaseKeys.all });
       onOpenChange(false);
+      void qc.invalidateQueries({ queryKey: purchaseKeys.all });
+      toastSuccessAfterClose(
+        t('purchases.cancelDialog.success', { purchaseNo: purchase.purchaseNo })
+      );
       onSuccess?.();
     },
     onError: (err: Error) => {

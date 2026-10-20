@@ -1,8 +1,11 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useQueryState, parseAsString } from 'nuqs';
+import { toast } from 'sonner';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { Badge } from '@/components/ui/badge';
 import {
   ResponsiveDataTable,
@@ -14,6 +17,7 @@ import { useDataTable } from '@/hooks/use-data-table';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { t } from '@/i18n';
+import { AlertModal } from '@/components/modal/alert-modal';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
   parseBooleanFacet,
@@ -23,7 +27,7 @@ import { formatPkr } from '@/lib/dukaan/numbers';
 import type { SupplierDTO } from '@/lib/api/types';
 import { supplierKeys, suppliersQueryOptions } from '../api/queries';
 import { deactivateSupplier, reactivateSupplier } from '../api/service';
-import type { SupplierListFilters } from '@/types';
+import type { EntityStatusConfirm, SupplierListFilters } from '@/types';
 import { SupplierDialog } from './supplier-dialog';
 import type { SupplierCellActionProps, SuppliersTableProps } from '@/types/suppliers';
 import {
@@ -129,14 +133,13 @@ const supplierMobileItem: MobileItemConfig<SupplierDTO> = buildPartyMobileItem<S
   t('dukaan.party.supplierOpeningBalance')
 );
 
-const supplierDetail: DetailConfig<SupplierDTO> = buildPartyDetail<SupplierDTO>({
-  partyName: t('dukaan.party.name'),
-  balance: t('table.balance'),
-  openingBalance: t('dukaan.party.supplierOpeningBalance')
-});
-
 export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
   const t = useT();
+  const qc = useQueryClient();
+  const [editSupplier, setEditSupplier] = useState<SupplierDTO | null>(null);
+  const [statusConfirm, setStatusConfirm] = useState<EntityStatusConfirm | null>(
+    null
+  );
 
   const sortableColumnIds = ['name', 'phone', 'openingBalance', 'createdAt', 'isActive'];
   const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<
@@ -176,6 +179,59 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
     }
   });
 
+  const statusMutation = useMutation({
+    mutationFn: async () => {
+      if (!statusConfirm) return;
+      if (statusConfirm.nextActive) await reactivateSupplier(statusConfirm.id);
+      else await deactivateSupplier(statusConfirm.id);
+    },
+    onSuccess: () => {
+      const message = statusConfirm?.nextActive
+        ? t('dukaan.party.supplierActivated')
+        : t('dukaan.party.supplierDeactivated');
+      setStatusConfirm(null);
+      void qc.invalidateQueries({ queryKey: supplierKeys.all });
+      toastSuccessAfterClose(message);
+    },
+    onError: (e: Error) => toast.error(e.message)
+  });
+
+  const supplierDetail: DetailConfig<SupplierDTO> = useMemo(
+    () =>
+      buildPartyDetail<SupplierDTO>(
+        {
+          partyName: t('dukaan.party.name'),
+          balance: t('table.balance'),
+          openingBalance: t('dukaan.party.supplierOpeningBalance')
+        },
+        (row) => [
+          {
+            label: t('common.edit'),
+            onClick: () => setEditSupplier(row)
+          },
+          ...(!row.isSystem && row.isActive
+            ? [
+                {
+                  label: t('common.deactivate'),
+                  variant: 'destructive' as const,
+                  onClick: () => setStatusConfirm({ id: row.id, nextActive: false })
+                }
+              ]
+            : []),
+          ...(!row.isSystem && !row.isActive
+            ? [
+                {
+                  label: t('common.activate'),
+                  variant: 'secondary' as const,
+                  onClick: () => setStatusConfirm({ id: row.id, nextActive: true })
+                }
+              ]
+            : [])
+        ]
+      ),
+    [t]
+  );
+
   const supplierQuickFilters = getActiveStatusQuickFilters(
     t('table.all'),
     t('status.active'),
@@ -183,13 +239,44 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
   );
 
   return (
-    <ResponsiveDataTable
-      table={table}
-      toolbarAction={toolbarAction}
-      mobileItem={supplierMobileItem}
-      detail={supplierDetail}
-      quickFilters={supplierQuickFilters}
-      isLoading={isFetching}
-    />
+    <>
+      {editSupplier ? (
+        <SupplierDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setEditSupplier(null);
+          }}
+          supplier={editSupplier}
+        />
+      ) : null}
+      <AlertModal
+        isOpen={statusConfirm != null}
+        onClose={() => setStatusConfirm(null)}
+        onConfirm={() => statusMutation.mutate()}
+        loading={statusMutation.isPending}
+        title={
+          statusConfirm?.nextActive
+            ? t('dukaan.party.supplierActivateTitle')
+            : t('dukaan.party.supplierDeactivateTitle')
+        }
+        description={
+          statusConfirm?.nextActive
+            ? t('dukaan.party.supplierActivateDescription')
+            : t('dukaan.party.supplierDeactivateDescription')
+        }
+        confirmLabel={
+          statusConfirm?.nextActive ? t('common.activate') : t('common.deactivate')
+        }
+        confirmVariant={statusConfirm?.nextActive ? 'default' : 'destructive'}
+      />
+      <ResponsiveDataTable
+        table={table}
+        toolbarAction={toolbarAction}
+        mobileItem={supplierMobileItem}
+        detail={supplierDetail}
+        quickFilters={supplierQuickFilters}
+        isLoading={isFetching}
+      />
+    </>
   );
 }

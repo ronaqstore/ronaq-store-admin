@@ -131,7 +131,7 @@ export function TextField({
       ) : (
         <div className='relative'>
           <Input className={className} {...sharedInputProps} />
-          {isValidating && <Spinner className='absolute top-1/2 end-3 h-4 w-4 -translate-y-1/2' />}
+          {isValidating && <Spinner className='absolute top-1/2 inset-e-3 h-4 w-4 -translate-y-1/2' />}
         </div>
       )}
       {description && <FieldDescription>{description}</FieldDescription>}

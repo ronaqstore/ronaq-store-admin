@@ -6,6 +6,7 @@ import type { SimpleEntityCellActionProps } from '@/types/common';
 export function SimpleEntityCellAction({
   id,
   isActive,
+  editHref,
   deactivateTitle,
   deactivateDescription,
   deactivateSuccess,
@@ -21,6 +22,7 @@ export function SimpleEntityCellAction({
     <PartyCellAction
       id={id}
       isActive={isActive}
+      editHref={editHref}
       deactivateTitle={deactivateTitle}
       deactivateDescription={deactivateDescription}
       deactivateSuccess={deactivateSuccess}

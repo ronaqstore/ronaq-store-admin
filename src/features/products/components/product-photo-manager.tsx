@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { PreviewableImage } from '@/components/media/previewable-image';
-import { AppError } from '@/lib/errors';
+import { prepareProductImage } from '@/lib/prepare-image';
 
 import {
   useDeleteProductImage,
@@ -26,8 +26,9 @@ export function ProductPhotoManager({
   onRemovePendingFile
 }: ProductPhotoManagerProps) {
   const t = useTranslations('dukaan.product');
+  const tCommon = useTranslations('common');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isIconUploading, setIsIconUploading] = useState(false);
+  const [isLocalUploading, setIsLocalUploading] = useState(false);
 
   const uploadMutation = useUploadProductImage(productId ?? '');
   const deleteMutation = useDeleteProductImage(productId ?? '');
@@ -38,17 +39,13 @@ export function ProductPhotoManager({
     if (!file) return;
 
     try {
-      setIsIconUploading(true);
-      const resizedBlob = await resizeImage(file, 1600);
-      const resizedFile = new File([resizedBlob], file.name, {
-        type: 'image/jpeg',
-        lastModified: Date.now()
-      });
+      setIsLocalUploading(true);
+      const resizedFile = await prepareProductImage(file);
 
       if (productId) {
         uploadMutation.mutate(resizedFile, {
           onSettled: () => {
-            setIsIconUploading(false);
+            setIsLocalUploading(false);
             if (fileInputRef.current) {
               fileInputRef.current.value = '';
             }
@@ -64,13 +61,13 @@ export function ProductPhotoManager({
         };
         onChange([...images, newImage]);
         onAddPendingFile?.(resizedFile, localId);
-        setIsIconUploading(false);
+        setIsLocalUploading(false);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
       }
     } catch (error) {
-      setIsIconUploading(false);
+      setIsLocalUploading(false);
       toast.error((error as Error).message || t('imageTypeError'));
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -100,17 +97,21 @@ export function ProductPhotoManager({
 
   return (
     <div className='space-y-3'>
-      <div className='flex items-center justify-between'>
-        <h3 className='text-sm font-medium'>{t('images')}</h3>
+      <div className='flex items-center justify-between gap-3'>
+        <div className='min-w-0'>
+          <h3 className='text-sm font-medium'>{t('images')}</h3>
+          <p className='text-xs text-muted-foreground'>{t('imagesHint')}</p>
+        </div>
         <Button
           type='button'
           variant='outline'
           size='sm'
+          className='shrink-0'
           onClick={() => fileInputRef.current?.click()}
-          isLoading={isIconUploading || uploadMutation.isPending}
+          isLoading={isLocalUploading || uploadMutation.isPending}
         >
           <IconPlus className='me-2 h-4 w-4' />
-          {isIconUploading || uploadMutation.isPending ? t('uploading') : t('uploadImage')}
+          {isLocalUploading || uploadMutation.isPending ? t('uploading') : t('uploadImage')}
         </Button>
         <input
           ref={fileInputRef}
@@ -136,12 +137,15 @@ export function ProductPhotoManager({
       ) : (
         <div className='grid grid-cols-2 gap-3 sm:grid-cols-4'>
           {images.map((image, index) => (
-            <div key={image.id} className='group relative overflow-hidden rounded-lg border'>
+            <div
+              key={image.id}
+              className='group relative aspect-square overflow-hidden rounded-lg border bg-muted'
+            >
               <PreviewableImage
                 src={image.url}
                 alt={`${t('images')} ${index + 1}`}
-                className='relative h-32 w-full'
-                imageClassName='object-cover'
+                className='relative h-full w-full'
+                imageClassName='object-contain p-2'
                 sizes='200px'
               />
               <div className='pointer-events-none absolute inset-0 flex items-center justify-center gap-1 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100'>
@@ -150,7 +154,7 @@ export function ProductPhotoManager({
                   variant='secondary'
                   size='icon'
                   className='pointer-events-auto h-8 w-8'
-                  aria-label={t('common.moveUp')}
+                  aria-label={tCommon('moveUp')}
                   onClick={() => handleMove(index, index - 1)}
                   disabled={index === 0 || reorderMutation.isPending}
                 >
@@ -161,7 +165,7 @@ export function ProductPhotoManager({
                   variant='destructive'
                   size='icon'
                   className='pointer-events-auto h-8 w-8'
-                  aria-label={t('common.delete')}
+                  aria-label={tCommon('delete')}
                   onClick={() => handleDelete(image.id)}
                   disabled={deleteMutation.isPending}
                 >
@@ -172,7 +176,7 @@ export function ProductPhotoManager({
                   variant='secondary'
                   size='icon'
                   className='pointer-events-auto h-8 w-8'
-                  aria-label={t('common.moveDown')}
+                  aria-label={tCommon('moveDown')}
                   onClick={() => handleMove(index, index + 1)}
                   disabled={index === images.length - 1 || reorderMutation.isPending}
                 >
@@ -180,7 +184,7 @@ export function ProductPhotoManager({
                 </Button>
               </div>
               {index === 0 && (
-                <div className='absolute start-1 top-1 rounded bg-primary px-1.5 py-0.5 text-xs text-primary-foreground'>
+                <div className='absolute inset-s-1 top-1 rounded bg-primary px-1.5 py-0.5 text-xs text-primary-foreground'>
                   {t('cover')}
                 </div>
               )}
@@ -190,45 +194,4 @@ export function ProductPhotoManager({
       )}
     </div>
   );
-}
-
-async function resizeImage(file: File, maxSize: number): Promise<Blob> {
-  const img = await loadImage(file);
-  const { width, height } = getScaledDimensions(img.width, img.height, maxSize);
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new AppError('Canvas context not available');
-  ctx.drawImage(img, 0, 0, width, height);
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) resolve(blob);
-        else reject(new AppError('Failed to resize image'));
-      },
-      'image/jpeg',
-      0.85
-    );
-  });
-}
-
-function loadImage(file: File): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new window.Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = e.target?.result as string;
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-function getScaledDimensions(w: number, h: number, max: number) {
-  if (w <= max && h <= max) return { width: w, height: h };
-  const ratio = Math.min(max / w, max / h);
-  return { width: Math.round(w * ratio), height: Math.round(h * ratio) };
 }

@@ -17,6 +17,7 @@ import { INPUT_LIMITS } from '@/lib/input-limits';
 import { isFieldMetaInvalid } from '@/lib/form-context';
 import { createClientRequestId, fromPaisa } from '@/lib/dukaan/numbers';
 import { isValidationApiError } from '@/lib/api/is-validation-error';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import type { SubFieldApi } from '@/types/forms';
 import type { PickerFetchFilters, ProductPickerItem } from '@/types/picker';
 import { listCustomers } from '@/features/customers/api/service';
@@ -28,16 +29,20 @@ import { createSaleMutation } from '../api/mutations';
 import { createSaleFormSchema } from '../schemas/sale-schema';
 import {
   buildCreateSalePayload,
-  emptySaleLine
+  calcSaleTotals,
+  emptySaleLine,
+  selectSaleTotals
 } from '../helpers/sale-create-helpers';
 import { SaleLineImeiField } from './sale-line-imei-field';
 import { SaleTotalsSummary } from './sale-totals-summary';
 import type { SaleDTO } from '@/lib/api/types';
 import type {
   SaleFormSubmitContext,
+  SaleFormValues,
   SaleCreateFormProps,
   SaleUnitPriceHint
 } from '@/types/sales';
+import { EMPTY_FORM_NUMBER } from '@/types/common';
 
 export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
   const qc = useQueryClient();
@@ -49,11 +54,11 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
   const save = useMutation({
     ...createSaleMutation,
     onSuccess: (res: SaleDTO) => {
-      toast.success(t('dukaan.sale.saved', { saleNo: res.saleNo }));
       void qc.invalidateQueries({ queryKey: saleKeys.all });
       void qc.invalidateQueries({ queryKey: ['inventory'] });
       onDone?.();
       router.push(`/dashboard/sales/${res.id}`);
+      toastSuccessAfterClose(t('dukaan.sale.saved', { saleNo: res.saleNo }));
     },
     onError: (e: Error) => {
       if (isValidationApiError(e)) {
@@ -64,14 +69,16 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
     }
   });
 
+  const defaultValues: SaleFormValues = {
+    customer_id: '__walkin__',
+    discount: EMPTY_FORM_NUMBER,
+    paid_now: EMPTY_FORM_NUMBER,
+    notes: '',
+    lines: [{ ...emptySaleLine }]
+  };
+
   const form = useAppForm({
-    defaultValues: {
-      customer_id: '__walkin__',
-      discount: 0,
-      paid_now: 0,
-      notes: '',
-      lines: [{ ...emptySaleLine }]
-    },
+    defaultValues,
     validators: { onSubmit: createSaleFormSchema(t) as never },
     onSubmit: ({ value }: SaleFormSubmitContext) => {
       setFormApiError(null);
@@ -244,7 +251,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
                         type='button'
                         variant='ghost'
                         size='sm'
-                        className='absolute end-2 top-2 h-7 text-muted-foreground hover:text-destructive'
+                        className='absolute inset-e-2 top-2 h-7 text-muted-foreground hover:text-destructive'
                         onClick={() => field.removeValue(idx)}
                       >
                         <Icons.trash className='me-1 h-4 w-4' />
@@ -425,26 +432,10 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
           />
         </div>
         <form.Subscribe
-          selector={(s) => ({
-            lines: s.values.lines,
-            discount: s.values.discount,
-            paidNow: s.values.paid_now
-          })}
-          children={({ lines, discount, paidNow }) => {
-            const subtotalRs = lines.reduce(
-              (sum, l) => sum + (Number(l.quantity) || 0) * (Number(l.unit_price) || 0),
-              0
-            );
-            const totalRs = Math.max(0, subtotalRs - (Number(discount) || 0));
-            const udharRs = Math.max(0, totalRs - (Number(paidNow) || 0));
-            return (
-              <SaleTotalsSummary
-                subtotalRs={subtotalRs}
-                totalRs={totalRs}
-                udharRs={udharRs}
-              />
-            );
-          }}
+          selector={selectSaleTotals}
+          children={({ lines, discount, paidNow }) => (
+            <SaleTotalsSummary {...calcSaleTotals(lines, discount, paidNow)} />
+          )}
         />
       </div>
 

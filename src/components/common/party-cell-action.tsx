@@ -7,6 +7,7 @@ import { useT } from '@/i18n/use-t';
 import { Icons } from '@/components/icons';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import type { PartyCellActionProps } from '@/types/party';
 
 export function PartyCellAction({
@@ -14,6 +15,7 @@ export function PartyCellAction({
   isActive,
   isSystem = false,
   ledgerHref,
+  editHref,
   deactivateTitle,
   deactivateDescription,
   deactivateConfirmLabel,
@@ -36,9 +38,9 @@ export function PartyCellAction({
   const deactivate = useMutation({
     mutationFn: () => onDeactivate(id),
     onSuccess: () => {
-      toast.success(deactivateSuccess);
       setDeactivateOpen(false);
       void qc.invalidateQueries({ queryKey: invalidateQueryKey });
+      toastSuccessAfterClose(deactivateSuccess);
     },
     onError: (e: Error) => toast.error(e.message)
   });
@@ -46,9 +48,9 @@ export function PartyCellAction({
   const activate = useMutation({
     mutationFn: () => onActivate(id),
     onSuccess: () => {
-      toast.success(activateSuccess);
       setActivateOpen(false);
       void qc.invalidateQueries({ queryKey: invalidateQueryKey });
+      toastSuccessAfterClose(activateSuccess);
     },
     onError: (e: Error) => toast.error(e.message)
   });
@@ -79,7 +81,7 @@ export function PartyCellAction({
         confirmLabel={activateConfirmLabel ?? t('common.activate')}
         confirmVariant='default'
       />
-      {renderEditDialog(editOpen, setEditOpen)}
+      {renderEditDialog ? renderEditDialog(editOpen, setEditOpen) : null}
       <RowActionsMenu
         actions={[
           ...(ledgerHref
@@ -94,7 +96,9 @@ export function PartyCellAction({
           {
             label: t('common.edit'),
             icon: Icons.edit,
-            onClick: () => setEditOpen(true)
+            ...(editHref
+              ? { href: editHref }
+              : { onClick: () => setEditOpen(true) })
           },
           ...(!isSystem && isActive
             ? [

@@ -15,14 +15,12 @@ import {
 import { productsQueryKeys } from './queries';
 
 export function useCreateProduct() {
-  const t = useTranslations('dukaan.product');
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (input: CreateProductInput) => createProduct(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productsQueryKeys.lists() });
-      toast.success(t('productCreated'));
+      void queryClient.invalidateQueries({ queryKey: productsQueryKeys.lists() });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -31,15 +29,13 @@ export function useCreateProduct() {
 }
 
 export function useUpdateProduct(id: string) {
-  const t = useTranslations('dukaan.product');
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (input: UpdateProductInput) => updateProduct(id, input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productsQueryKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: productsQueryKeys.detail(id) });
-      toast.success(t('productUpdated'));
+      void queryClient.invalidateQueries({ queryKey: productsQueryKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: productsQueryKeys.detail(id) });
     },
     onError: (error: Error) => {
       toast.error(error.message);

@@ -18,6 +18,7 @@ import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dia
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { cn } from '@/lib/utils';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
 import { createExpenseCategoryMutation, updateExpenseCategoryMutation } from '../api/mutations';
 import { expenseKeys } from '../api/queries';
@@ -44,8 +45,8 @@ function ExpenseCategoryDialogBody({
   const createMutation = useMutation({
     ...createExpenseCategoryMutation,
     onSuccess: async () => {
-      toast.success(t('expenses.categoryCreated', { name: name.trim() }));
-      await qc.invalidateQueries({ queryKey: expenseKeys.all });
+      const message = t('expenses.categoryCreated', { name: name.trim() });
+      void qc.invalidateQueries({ queryKey: expenseKeys.all });
 
       if (onCategoryCreated) {
         try {
@@ -64,6 +65,7 @@ function ExpenseCategoryDialogBody({
       }
 
       onOpenChange(false);
+      toastSuccessAfterClose(message);
     },
     onError: (err: Error) => {
       toast.error(err.message || t('expenses.categoryCreateFailed'));
@@ -72,10 +74,11 @@ function ExpenseCategoryDialogBody({
 
   const updateMutation = useMutation({
     ...updateExpenseCategoryMutation,
-    onSuccess: async () => {
-      toast.success(t('expenses.categoryUpdated', { name: name.trim() }));
-      await qc.invalidateQueries({ queryKey: expenseKeys.all });
+    onSuccess: () => {
+      const message = t('expenses.categoryUpdated', { name: name.trim() });
       onOpenChange(false);
+      void qc.invalidateQueries({ queryKey: expenseKeys.all });
+      toastSuccessAfterClose(message);
     },
     onError: (err: Error) => {
       toast.error(err.message || t('expenses.categoryUpdateFailed'));

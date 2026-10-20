@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import {
   Dialog,
   DialogContent,
@@ -82,9 +83,9 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
         return;
       }
 
-      toast.success(t('sales.returnDialog.success'));
-      void qc.invalidateQueries({ queryKey: saleKeys.all });
       onOpenChange(false);
+      void qc.invalidateQueries({ queryKey: saleKeys.all });
+      toastSuccessAfterClose(t('sales.returnDialog.success'));
       onSuccess?.();
     },
     onError: (err: Error) => {
@@ -320,7 +321,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
                 value={refundPkr}
                 onChange={handleRefundChange}
                 onKeyDown={(e) => blockInvalidNumberKeys(e)}
-                placeholder='0'
+                placeholder={t('common.amountPlaceholder')}
                 aria-invalid={!!refundError}
                 className={cn(refundError && 'border-destructive')}
               />

@@ -1,7 +1,9 @@
 'use client';
 
+import Image from 'next/image';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Icons } from '@/components/icons';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/constants/placeholders';
 import { cn } from '@/lib/utils';
 import { StatusBadge } from './status-badge';
 import type { MobileListItemProps } from './types';
@@ -19,7 +21,8 @@ export function MobileListItem<TData>({
   row,
   config,
   onOpen,
-  actionsSlot
+  actionsSlot,
+  density = 'list'
 }: MobileListItemProps<TData>) {
   const title = config.title(row);
   const subtitle = config.subtitle?.(row);
@@ -31,34 +34,68 @@ export function MobileListItem<TData>({
     .map((fn) => fn(row))
     .filter((node) => node != null && node !== false && node !== '');
   const aria = config.ariaLabel?.(row) ?? (typeof title === 'string' ? title : undefined);
+  const imageUrl = config.imageUrl?.(row)?.trim() || null;
 
   const LeadingIcon = config.leadingIcon ?? Icons.box;
+  const isCard = density === 'card';
 
   return (
-    <div className='relative flex min-h-16 items-stretch gap-2 px-3 py-2.5'>
+    <div
+      className={cn(
+        'relative flex items-stretch gap-2',
+        isCard ? 'min-h-20 flex-col px-3 py-3' : 'min-h-16 px-3 py-2.5'
+      )}
+    >
       <button
         type='button'
         onClick={onOpen}
         aria-label={aria}
         className={cn(
-          'flex min-w-0 flex-1 items-start gap-3 text-start',
+          'flex min-w-0 flex-1 text-start',
+          isCard ? 'flex-col gap-2.5' : 'items-start gap-3',
           'rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
         )}
       >
         {config.leading === 'avatar' ? (
-          <Avatar className='size-10 shrink-0'>
+          <Avatar className={cn('shrink-0', isCard ? 'size-12' : 'size-10')}>
             <AvatarFallback className='bg-muted text-muted-foreground text-xs font-medium'>
               {initials(typeof title === 'string' ? title : String(aria ?? ''))}
             </AvatarFallback>
           </Avatar>
-        ) : config.leading === 'icon' || config.leading === 'thumbnail' ? (
-          <div className='bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg'>
-            <LeadingIcon className='size-5' />
+        ) : config.leading === 'thumbnail' ? (
+          <div
+            className={cn(
+              'relative shrink-0 overflow-hidden rounded-lg border bg-muted',
+              isCard ? 'aspect-square w-full' : 'size-10'
+            )}
+          >
+            <Image
+              src={imageUrl || PLACEHOLDER_PRODUCT_IMAGE}
+              alt=''
+              fill
+              unoptimized
+              className='object-contain p-0.5'
+              sizes={isCard ? '200px' : '40px'}
+            />
+          </div>
+        ) : config.leading === 'icon' ? (
+          <div
+            className={cn(
+              'bg-muted text-muted-foreground flex shrink-0 items-center justify-center rounded-lg',
+              isCard ? 'size-12' : 'size-10'
+            )}
+          >
+            <LeadingIcon className={isCard ? 'size-6' : 'size-5'} />
           </div>
         ) : null}
 
         <div className='min-w-0 flex-1'>
-          <div className='flex min-w-0 items-start justify-between gap-3'>
+          <div
+            className={cn(
+              'flex min-w-0 gap-3',
+              isCard ? 'flex-col items-stretch' : 'items-start justify-between'
+            )}
+          >
             <div className='min-w-0 flex-1'>
               <p className='truncate text-sm font-semibold'>{title}</p>
               {subtitle != null ? (
@@ -84,10 +121,16 @@ export function MobileListItem<TData>({
             </div>
 
             {value != null ? (
-              <div className='ms-1 w-[5.5rem] shrink-0 text-end sm:w-24'>
+              <div
+                className={cn(
+                  'shrink-0',
+                  isCard ? 'flex items-baseline justify-between gap-2' : 'ms-1 w-[5.5rem] text-end sm:w-24'
+                )}
+              >
                 <p
                   className={cn(
                     'truncate text-sm font-semibold tabular-nums',
+                    !isCard && 'text-end',
                     config.valueClassName?.(row)
                   )}
                 >

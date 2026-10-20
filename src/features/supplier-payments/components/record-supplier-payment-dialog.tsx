@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { formatPkr, toPaisa, fromPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
 import type {
   SupplierDTO,
@@ -98,17 +99,16 @@ export function RecordSupplierPaymentDialog({
         return;
       }
 
-      toast.success(
-        t('supplierPayments.recordSuccess', {
-          amount: amountStr,
-          supplier:
-            selectedSupplier?.name || payableData?.supplierName || t('supplierPayments.supplier')
-        })
-      );
-      void qc.invalidateQueries({ queryKey: supplierPaymentKeys.all });
+      const message = t('supplierPayments.recordSuccess', {
+        amount: amountStr,
+        supplier:
+          selectedSupplier?.name || payableData?.supplierName || t('supplierPayments.supplier')
+      });
       onOpenChange(false);
       resetForm();
+      void qc.invalidateQueries({ queryKey: supplierPaymentKeys.all });
       onSuccess?.();
+      toastSuccessAfterClose(message);
     },
     onError: (err: Error) => {
       toast.error(err.message || t('supplierPayments.recordFailed'));
@@ -309,7 +309,7 @@ export function RecordSupplierPaymentDialog({
               )}
             </div>
             <div className='relative'>
-              <span className='absolute start-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>
+              <span className='absolute inset-s-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>
                 {t('common.currency')}
               </span>
               <Input
@@ -318,7 +318,7 @@ export function RecordSupplierPaymentDialog({
                 min={1}
                 max={INPUT_LIMITS.amountRupeesMax}
                 step='any'
-                placeholder='0.00'
+                placeholder={t('common.amountPlaceholder')}
                 value={amountStr}
                 onChange={handleAmountChange}
                 onKeyDown={(e) => blockInvalidNumberKeys(e)}
