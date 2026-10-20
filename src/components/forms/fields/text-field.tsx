@@ -28,6 +28,7 @@ export function TextField({
   min,
   max,
   maxLength,
+  sanitize,
   onKeyDown,
   ...inputProps
 }: TextFieldProps) {
@@ -66,10 +67,11 @@ export function TextField({
     },
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!isNumber) {
+        const sanitized = sanitize ? sanitize(e.target.value) : e.target.value;
         const next =
           resolvedMaxLength !== undefined
-            ? clampText(e.target.value, resolvedMaxLength)
-            : e.target.value;
+            ? clampText(sanitized, resolvedMaxLength)
+            : sanitized;
         field.handleChange(next);
         return;
       }

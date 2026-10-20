@@ -95,6 +95,7 @@ export type IconComponent = React.ComponentType<{ className?: string }>;
 export type TextFieldProps = BaseFieldProps &
   Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange' | 'onBlur'> & {
     startIcon?: IconComponent;
+    sanitize?: (value: string) => string;
   };
 
 export interface NamedEntity {

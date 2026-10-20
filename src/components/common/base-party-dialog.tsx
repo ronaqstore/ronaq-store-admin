@@ -17,6 +17,7 @@ import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
+import { sanitizePkCnicInput, sanitizePkMobileInput } from '@/lib/validation/pk';
 import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import { isValidationApiError } from '@/lib/api/is-validation-error';
 import { mapPartyApiError } from '@/lib/api/map-party-api-error';
@@ -188,7 +189,8 @@ function BasePartyDialogBody({
                   label={t('dukaan.party.phone')}
                   type='tel'
                   inputMode='numeric'
-                  maxLength={INPUT_LIMITS.phone}
+                  maxLength={INPUT_LIMITS.phonePk}
+                  sanitize={sanitizePkMobileInput}
                   placeholder={t('users.phonePlaceholder')}
                   startIcon={Icons.phone}
                   description={t('dukaan.party.phoneHelp')}
@@ -203,6 +205,7 @@ function BasePartyDialogBody({
                     label={t('dukaan.party.cnic')}
                     inputMode='numeric'
                     maxLength={INPUT_LIMITS.cnic}
+                    sanitize={sanitizePkCnicInput}
                     placeholder={t('dukaan.party.cnicPlaceholder')}
                     description={t('dukaan.party.cnicHelp')}
                   />

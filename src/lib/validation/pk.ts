@@ -1,4 +1,5 @@
 import { normalizePhone } from '@/lib/auth/phone';
+import { INPUT_LIMITS } from '@/lib/input-limits';
 
 export function isValidPkMobileNumber(phone: string): boolean {
   const trimmed = phone.trim();
@@ -24,4 +25,15 @@ export function isOptionalPkCnic(cnic: string): boolean {
   const trimmed = cnic.trim();
   if (!trimmed) return true;
   return isValidPkCnic(trimmed);
+}
+
+export function sanitizePkMobileInput(value: string): string {
+  return value.replace(/\D/g, '').slice(0, INPUT_LIMITS.phonePk);
+}
+
+export function sanitizePkCnicInput(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, INPUT_LIMITS.cnicDigits);
+  if (digits.length <= 5) return digits;
+  if (digits.length <= 12) return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  return `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}`;
 }
