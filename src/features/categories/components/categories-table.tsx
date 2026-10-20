@@ -2,7 +2,6 @@
 
 import type { ColumnDef } from '@tanstack/react-table';
 import { ResponsiveDataTable } from '@/components/data-table';
-import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
 import { useQuery } from '@tanstack/react-query';
 import { Icons } from '@/components/icons';
@@ -14,6 +13,7 @@ import { deactivateCategory, reactivateCategory } from '../api/service';
 import type { CategoryDTO } from '@/lib/api/types';
 import type { CategoryCellActionProps, CategoriesTableProps } from '@/types';
 import {
+  createPartyNameColumn,
   createPartyIsActiveColumn,
   buildSimpleEntityMobileItem,
   buildSimpleEntityDetail
@@ -50,21 +50,7 @@ function CategoryCellAction({ data }: CategoryCellActionProps) {
 }
 
 const categoryColumns: ColumnDef<CategoryDTO>[] = [
-  {
-    id: 'name',
-    accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.name')} />,
-    meta: {
-      label: 'table.col.name',
-      placeholderKey: 'search.categories' as const,
-      variant: 'text',
-      icon: Icons.search,
-      type: 'text',
-      primary: true,
-      priority: 1
-    },
-    enableColumnFilter: true
-  },
+  createPartyNameColumn<CategoryDTO>({ placeholderKey: 'search.categories' }),
   createPartyIsActiveColumn<CategoryDTO>(),
   {
     id: 'actions',

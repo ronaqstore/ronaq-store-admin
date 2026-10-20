@@ -2,7 +2,6 @@
 
 import type { ColumnDef } from '@tanstack/react-table';
 import { ResponsiveDataTable } from '@/components/data-table';
-import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
 import { useQuery } from '@tanstack/react-query';
 import { Icons } from '@/components/icons';
@@ -14,6 +13,7 @@ import { deactivateBrand, reactivateBrand } from '../api/service';
 import type { BrandDTO } from '@/lib/api/types';
 import type { BrandCellActionProps, BrandsTableProps } from '@/types';
 import {
+  createPartyNameColumn,
   createPartyIsActiveColumn,
   buildSimpleEntityMobileItem,
   buildSimpleEntityDetail
@@ -50,21 +50,7 @@ function BrandCellAction({ data }: BrandCellActionProps) {
 }
 
 const brandColumns: ColumnDef<BrandDTO>[] = [
-  {
-    id: 'name',
-    accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.name')} />,
-    meta: {
-      label: 'table.col.name',
-      placeholderKey: 'search.brands' as const,
-      variant: 'text',
-      icon: Icons.search,
-      type: 'text',
-      primary: true,
-      priority: 1
-    },
-    enableColumnFilter: true
-  },
+  createPartyNameColumn<BrandDTO>({ placeholderKey: 'search.brands' }),
   createPartyIsActiveColumn<BrandDTO>(),
   {
     id: 'actions',

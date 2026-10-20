@@ -31,6 +31,7 @@ import type {
 } from '@/types/expense';
 import { expenseCategoriesQueryOptions, expenseKeys } from '../api/queries';
 import { deleteExpenseCategoryMutation, updateExpenseCategoryMutation } from '../api/mutations';
+import { TruncateText } from '@/components/common/truncate-text';
 import { ExpenseCategoryDialog } from './expense-category-dialog';
 
 function ExpenseCategoryCellAction({
@@ -177,7 +178,9 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('expenses.nameCol')} />
       ),
-      cell: ({ row }) => <span className='font-medium text-foreground'>{row.original.name}</span>,
+      cell: ({ row }) => (
+        <TruncateText className='font-medium text-foreground'>{row.original.name}</TruncateText>
+      ),
       meta: {
         label: 'table.col.name',
         placeholderKey: 'search.categories',

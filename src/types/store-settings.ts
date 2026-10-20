@@ -1,3 +1,8 @@
+export interface OpeningHoursRange {
+  opens: string;
+  closes: string;
+}
+
 export interface StoreSettingsDTO {
   shopId: string;
   slug: string;

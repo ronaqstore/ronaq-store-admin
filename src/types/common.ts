@@ -313,3 +313,10 @@ export interface SettingsSectionProps {
   icon: Icon;
   children: ReactNode;
 }
+
+export interface TruncateTextProps {
+  children: ReactNode;
+  className?: string;
+  title?: string;
+  lines?: 1 | 2 | 3;
+}

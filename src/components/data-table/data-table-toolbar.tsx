@@ -29,10 +29,17 @@ export function DataTableToolbar<TData>({
   const filterCount =
     table.getState().columnFilters.length + (table.getState().sorting.length > 0 ? 1 : 0);
 
-  const columns = React.useMemo(
-    () => table.getAllColumns().filter((column) => column.getCanFilter()),
-    [table]
-  );
+  const columns = React.useMemo(() => {
+    const filterable = table.getAllColumns().filter((column) => column.getCanFilter());
+    const rank = (variant: string | undefined) => {
+      if (variant === 'text') return 0;
+      if (variant === 'date' || variant === 'dateRange') return 1;
+      return 2;
+    };
+    return [...filterable].sort(
+      (a, b) => rank(a.columnDef.meta?.variant) - rank(b.columnDef.meta?.variant)
+    );
+  }, [table]);
 
   const textColumn = columns.find((column) => column.columnDef.meta?.variant === 'text');
   const phoneMode = mode === 'list' || mode === 'cards';
@@ -76,7 +83,10 @@ export function DataTableToolbar<TData>({
                   ? translateMaybe(textColumn.columnDef.meta.label, t)
                   : t('table.search')
               }
-              value={(textColumn.getFilterValue() as string) ?? ''}
+              value={(() => {
+                const raw = textColumn.getFilterValue();
+                return Array.isArray(raw) ? raw.join(' ') : ((raw as string) ?? '');
+              })()}
               onChange={(event) => textColumn.setFilterValue(event.target.value)}
               className='h-11 min-h-11 flex-1'
             />
@@ -161,7 +171,9 @@ function DataTableToolbarFilter<TData>({ column }: DataTableToolbarFilterProps<T
   const label = columnMeta.label ? getLabel(columnMeta.label) : column.id;
 
   switch (columnMeta.variant) {
-    case 'text':
+    case 'text': {
+      const raw = column.getFilterValue();
+      const textValue = Array.isArray(raw) ? raw.join(' ') : ((raw as string) ?? '');
       return (
         <Input
           placeholder={
@@ -170,11 +182,12 @@ function DataTableToolbarFilter<TData>({ column }: DataTableToolbarFilterProps<T
               : columnMeta.placeholder) ?? label
           }
           aria-label={label ?? t('table.search')}
-          value={(column.getFilterValue() as string) ?? ''}
+          value={textValue}
           onChange={(event) => column.setFilterValue(event.target.value)}
           className='h-8 w-40 lg:w-56'
         />
       );
+    }
     case 'number':
       return (
         <div className='relative'>

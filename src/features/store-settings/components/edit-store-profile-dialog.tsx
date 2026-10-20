@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,10 +12,25 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { cn } from '@/lib/utils';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
+import {
+  OPENING_HOUR_TIME_OPTIONS,
+  composeOpeningHours,
+  formatTimeOptionLabel,
+  isClosingAfterOpening,
+  parseOpeningHours
+} from '@/lib/opening-hours';
 import { useT } from '@/i18n/use-t';
 import type {
   EditStoreProfileDialogBodyProps,
@@ -44,26 +59,52 @@ function EditStoreProfileDialogBody({
   const t = useT();
   const updateMutation = useUpdateStoreSettings();
 
+  const initialHours = parseOpeningHours(settings.openingHours);
+
   const [displayName, setDisplayName] = useState(settings.displayName ?? '');
   const [about, setAbout] = useState(settings.about ?? '');
   const [whatsappNumber, setWhatsappNumber] = useState(settings.whatsappNumber ?? '');
   const [phoneNumber, setPhoneNumber] = useState(settings.phoneNumber ?? '');
   const [address, setAddress] = useState(settings.address ?? '');
   const [city, setCity] = useState(settings.city ?? '');
-  const [openingHours, setOpeningHours] = useState(settings.openingHours ?? '');
+  const [opensAt, setOpensAt] = useState(initialHours?.opens ?? '');
+  const [closesAt, setClosesAt] = useState(initialHours?.closes ?? '');
   const [googleMapsUrl, setGoogleMapsUrl] = useState(settings.googleMapsUrl ?? '');
   const [displayNameError, setDisplayNameError] = useState('');
+  const [hoursError, setHoursError] = useState('');
+
+  const timeItems = useMemo(
+    () =>
+      OPENING_HOUR_TIME_OPTIONS.map((value) => ({
+        value,
+        label: formatTimeOptionLabel(value)
+      })),
+    []
+  );
 
   useEffect(() => {
+    const parsed = parseOpeningHours(settings.openingHours);
     setDisplayName(settings.displayName ?? '');
     setAbout(settings.about ?? '');
     setWhatsappNumber(settings.whatsappNumber ?? '');
     setPhoneNumber(settings.phoneNumber ?? '');
     setAddress(settings.address ?? '');
     setCity(settings.city ?? '');
-    setOpeningHours(settings.openingHours ?? '');
+    setOpensAt(parsed?.opens ?? '');
+    setClosesAt(parsed?.closes ?? '');
     setGoogleMapsUrl(settings.googleMapsUrl ?? '');
+    setHoursError('');
   }, [settings]);
+
+  const handleOpensAtChange = (val: string | null) => {
+    setOpensAt(val ?? '');
+    setHoursError('');
+  };
+
+  const handleClosesAtChange = (val: string | null) => {
+    setClosesAt(val ?? '');
+    setHoursError('');
+  };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -73,6 +114,16 @@ function EditStoreProfileDialogBody({
     }
     setDisplayNameError('');
 
+    if ((opensAt && !closesAt) || (!opensAt && closesAt)) {
+      setHoursError(t('storeSettings.openingHoursBothRequired'));
+      return;
+    }
+    if (opensAt && closesAt && !isClosingAfterOpening(opensAt, closesAt)) {
+      setHoursError(t('storeSettings.openingHoursInvalidRange'));
+      return;
+    }
+    setHoursError('');
+
     updateMutation.mutate(
       {
         displayName: displayName.trim(),
@@ -81,7 +132,7 @@ function EditStoreProfileDialogBody({
         phoneNumber: phoneNumber.trim() || null,
         address: address.trim() || null,
         city: city.trim() || null,
-        openingHours: openingHours.trim() || null,
+        openingHours: composeOpeningHours(opensAt, closesAt),
         googleMapsUrl: googleMapsUrl.trim() || null
       },
       {
@@ -97,10 +148,6 @@ function EditStoreProfileDialogBody({
 
   const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCity(clampText(e.target.value, INPUT_LIMITS.city));
-  };
-
-  const handleOpeningHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOpeningHours(clampText(e.target.value, INPUT_LIMITS.openingHours));
   };
 
   const handleAboutChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -147,7 +194,7 @@ function EditStoreProfileDialogBody({
             />
             <DialogFieldError id='edit-displayName-error' message={displayNameError} />
           </div>
-          <div className='space-y-2'>
+          <div className='space-y-2 sm:col-span-2'>
             <Label htmlFor='edit-city'>{t('storeSettings.city')}</Label>
             <Input
               id='edit-city'
@@ -156,14 +203,75 @@ function EditStoreProfileDialogBody({
               maxLength={INPUT_LIMITS.city}
             />
           </div>
-          <div className='space-y-2'>
-            <Label htmlFor='edit-hours'>{t('storeSettings.openingHours')}</Label>
-            <Input
-              id='edit-hours'
-              value={openingHours}
-              onChange={handleOpeningHoursChange}
-              maxLength={INPUT_LIMITS.openingHours}
-            />
+          <div className='space-y-2 sm:col-span-2'>
+            <Label>{t('storeSettings.openingHours')}</Label>
+            <div className='grid gap-3 sm:grid-cols-2'>
+              <div className='space-y-1.5'>
+                <Label
+                  htmlFor='edit-opens-at'
+                  className='text-xs font-normal text-muted-foreground'
+                >
+                  {t('storeSettings.opensAt')}
+                </Label>
+                <Select
+                  value={opensAt || null}
+                  onValueChange={handleOpensAtChange}
+                  items={timeItems}
+                >
+                  <SelectTrigger
+                    id='edit-opens-at'
+                    className={cn(
+                      'h-9 w-full justify-between text-sm font-normal',
+                      hoursError && 'border-destructive'
+                    )}
+                  >
+                    <SelectValue placeholder={t('storeSettings.selectTime')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {OPENING_HOUR_TIME_OPTIONS.map((value) => (
+                        <SelectItem key={value} value={value} className='text-sm'>
+                          {formatTimeOptionLabel(value)}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className='space-y-1.5'>
+                <Label
+                  htmlFor='edit-closes-at'
+                  className='text-xs font-normal text-muted-foreground'
+                >
+                  {t('storeSettings.closesAt')}
+                </Label>
+                <Select
+                  value={closesAt || null}
+                  onValueChange={handleClosesAtChange}
+                  items={timeItems}
+                >
+                  <SelectTrigger
+                    id='edit-closes-at'
+                    className={cn(
+                      'h-9 w-full justify-between text-sm font-normal',
+                      hoursError && 'border-destructive'
+                    )}
+                  >
+                    <SelectValue placeholder={t('storeSettings.selectTime')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {OPENING_HOUR_TIME_OPTIONS.map((value) => (
+                        <SelectItem key={value} value={value} className='text-sm'>
+                          {formatTimeOptionLabel(value)}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFieldError id='edit-hours-error' message={hoursError} />
           </div>
         </div>
 
@@ -224,11 +332,7 @@ function EditStoreProfileDialogBody({
 
         <DialogFooter>
           <DialogCancelButton onClick={() => onOpenChange(false)} disabled={busy} />
-          <DialogPrimaryButton
-            mode='save'
-            loading={busy}
-            disabled={busy}
-          />
+          <DialogPrimaryButton mode='save' loading={busy} disabled={busy} />
         </DialogFooter>
       </form>
     </DialogContent>

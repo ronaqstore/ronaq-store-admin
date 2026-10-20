@@ -259,6 +259,16 @@ function CompactOrFullTable<TData>({
                 }
                 const isActions = header.column.id === 'actions';
                 const isSticky = stickyFirst && index === 0 && !isActions;
+                const metaType = header.column.columnDef.meta?.type;
+                const relaxOverflow =
+                  isActions ||
+                  metaType === 'image' ||
+                  metaType === 'boolean' ||
+                  metaType === 'money' ||
+                  metaType === 'number' ||
+                  metaType === 'phone' ||
+                  metaType === 'status' ||
+                  metaType === 'date';
                 const colSize = isActions
                   ? Math.max(header.column.columnDef.size ?? 0, 72)
                   : header.column.columnDef.size;
@@ -269,6 +279,7 @@ function CompactOrFullTable<TData>({
                     className={cn(
                       'bg-background sticky top-0 z-20 shadow-[0_1px_0_0_var(--border)]',
                       isActions && 'w-20 text-end pe-3',
+                      relaxOverflow && 'max-w-none',
                       isSticky && 'sticky inset-s-0 z-30 shadow-[1px_1px_0_0_var(--border)]'
                     )}
                   >
@@ -296,6 +307,16 @@ function CompactOrFullTable<TData>({
                   }
                   const isActions = header.column.id === 'actions';
                   const isSticky = stickyFirst && index === 0 && !isActions;
+                  const metaType = header.column.columnDef.meta?.type;
+                  const relaxOverflow =
+                    isActions ||
+                    metaType === 'image' ||
+                    metaType === 'boolean' ||
+                    metaType === 'money' ||
+                    metaType === 'number' ||
+                    metaType === 'phone' ||
+                    metaType === 'status' ||
+                    metaType === 'date';
                   const colSize = isActions
                     ? Math.max(header.column.columnDef.size ?? 0, 72)
                     : header.column.columnDef.size;
@@ -304,7 +325,8 @@ function CompactOrFullTable<TData>({
                       key={header.id}
                       style={{ width: colSize ? `${colSize}px` : undefined }}
                       className={cn(
-                        isActions && 'w-20 text-end pe-3',
+                        isActions && 'w-20 max-w-none text-end pe-3',
+                        relaxOverflow && 'max-w-none',
                         isSticky &&
                           'bg-background sticky inset-s-0 z-10 shadow-[1px_0_0_0_var(--border)]'
                       )}
@@ -346,6 +368,16 @@ function CompactOrFullTable<TData>({
                   }
                   const isActions = cell.column.id === 'actions';
                   const isSticky = stickyFirst && index === 0 && !isActions;
+                  const metaType = cell.column.columnDef.meta?.type;
+                  const relaxOverflow =
+                    isActions ||
+                    metaType === 'image' ||
+                    metaType === 'boolean' ||
+                    metaType === 'money' ||
+                    metaType === 'number' ||
+                    metaType === 'phone' ||
+                    metaType === 'status' ||
+                    metaType === 'date';
                   const colSize = isActions
                     ? Math.max(cell.column.columnDef.size ?? 0, 72)
                     : cell.column.columnDef.size;
@@ -356,7 +388,8 @@ function CompactOrFullTable<TData>({
                       data-slot={isActions ? 'action-cell' : undefined}
                       onClick={isActions ? (e) => e.stopPropagation() : undefined}
                       className={cn(
-                        isActions && 'w-20 text-end pe-3',
+                        isActions && 'w-20 max-w-none text-end pe-3',
+                        relaxOverflow && 'max-w-none',
                         isSticky &&
                           'bg-background sticky inset-s-0 z-10 shadow-[1px_0_0_0_var(--border)]'
                       )}

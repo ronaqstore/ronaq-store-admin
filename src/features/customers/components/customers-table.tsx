@@ -13,7 +13,6 @@ import {
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
-import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { t } from '@/i18n';
 import { useRouter } from '@/i18n/navigation';
@@ -35,6 +34,7 @@ import type {
 } from '@/types';
 import { CustomerDialog } from './customer-dialog';
 import {
+  createPartyNameColumn,
   createPartyPhoneColumn,
   createPartyAddressColumn,
   createPartyIsActiveColumn,
@@ -73,23 +73,7 @@ function CustomerCellAction({ data }: CustomerCellActionProps) {
 }
 
 const customerColumns: ColumnDef<CustomerDTO>[] = [
-  {
-    id: 'name',
-    accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.name')} />,
-    meta: {
-      label: 'table.col.name',
-      placeholderKey: 'search.customers' as const,
-      variant: 'text',
-      icon: Icons.search,
-      type: 'text',
-      primary: true,
-      priority: 1,
-      mobile: 'title'
-    },
-    enableColumnFilter: true,
-    enableSorting: true
-  },
+  createPartyNameColumn<CustomerDTO>({ placeholderKey: 'search.customers' }),
   createPartyPhoneColumn<CustomerDTO>(),
   createPartyAddressColumn<CustomerDTO>(),
   {

@@ -38,6 +38,7 @@ import { getActiveStatusQuickFilters } from '@/components/common/party-table-hel
 import type { ProductsTableProps } from '@/types/products';
 import type { EntityStatusConfirm } from '@/types/common';
 import type { AsyncFacetedFilterConfig } from '@/types/data-table';
+import { TruncateText } from '@/components/common/truncate-text';
 import { ProductCellAction, ProductImagesField } from './products-table-cells';
 
 const categoryAsyncFilter: AsyncFacetedFilterConfig = {
@@ -149,6 +150,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       {
         id: 'image',
         accessorKey: 'imageUrl',
+        size: 56,
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={staticT('tableColumns.image')} />
         ),
@@ -171,6 +173,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       {
         id: 'name',
         accessorKey: 'name',
+        size: 240,
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={staticT('table.col.name')} />
         ),
@@ -184,20 +187,22 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
           priority: 1
         },
         enableColumnFilter: true,
-        cell: ({ row }) => (
-          <div className='flex flex-col'>
-            <span className='font-medium'>{formatEmpty(row.original.name)}</span>
-            <span className='text-xs text-muted-foreground'>
-              {row.original.sku
-                ? `SKU: ${row.original.sku}`
-                : formatEmpty(row.original.brandName)}
-            </span>
-          </div>
-        )
+        cell: ({ row }) => {
+          const skuLine = row.original.sku
+            ? `SKU: ${row.original.sku}`
+            : formatEmpty(row.original.brandName);
+          return (
+            <div className='min-w-0 space-y-0.5'>
+              <TruncateText className='font-medium'>{formatEmpty(row.original.name)}</TruncateText>
+              <TruncateText className='text-xs text-muted-foreground'>{skuLine}</TruncateText>
+            </div>
+          );
+        }
       },
       {
         id: 'categoryId',
         accessorKey: 'categoryId',
+        size: 140,
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={staticT('dukaan.product.category')} />
         ),
@@ -211,11 +216,14 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
         },
         enableColumnFilter: true,
         enableSorting: false,
-        cell: ({ row }) => <span>{formatEmpty(row.original.categoryName)}</span>
+        cell: ({ row }) => (
+          <TruncateText>{formatEmpty(row.original.categoryName)}</TruncateText>
+        )
       },
       {
         id: 'brandId',
         accessorKey: 'brandId',
+        size: 120,
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={staticT('dukaan.product.brand')} />
         ),
@@ -229,11 +237,12 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
         },
         enableColumnFilter: true,
         enableSorting: false,
-        cell: ({ row }) => <span>{formatEmpty(row.original.brandName)}</span>
+        cell: ({ row }) => <TruncateText>{formatEmpty(row.original.brandName)}</TruncateText>
       },
       {
         id: 'defaultSellingPrice',
         accessorKey: 'defaultSellingPrice',
+        size: 110,
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={staticT('dukaan.product.sellingPrice')} />
         ),
@@ -243,6 +252,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       {
         id: 'quantityOnHand',
         accessorKey: 'quantityOnHand',
+        size: 72,
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={staticT('dukaan.product.stock')} />
         ),
@@ -252,6 +262,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       {
         id: 'isActive',
         accessorKey: 'isActive',
+        size: 110,
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={staticT('table.col.status')} />
         ),

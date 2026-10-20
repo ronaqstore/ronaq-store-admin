@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
-import { parseAsString, useQueryState } from 'nuqs';
+import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
 import { useT } from '@/i18n/use-t';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { TruncateText } from '@/components/common/truncate-text';
 import {
   ResponsiveDataTable,
   type DetailConfig,
@@ -27,10 +28,22 @@ import type {
   CashTableProps
 } from '@/types/cash';
 import { CASH_TYPE_OPTIONS } from '../constants/cash-constants';
-import { cashMovementsQueryOptions } from '../api/queries';
+import { cashMovementsQueryOptions, cashOpeningStatusQueryOptions } from '../api/queries';
 import { OpeningCashDialog } from './opening-cash-dialog';
 import { OwnerInvestmentDialog } from './owner-investment-dialog';
 import { OwnerWithdrawalDialog } from './owner-withdrawal-dialog';
+
+function timestampToYmd(value?: string | null): string | undefined {
+  if (value == null || value === '') return undefined;
+  const ms = Number(value);
+  if (!Number.isFinite(ms)) return undefined;
+  const date = new Date(ms);
+  if (Number.isNaN(date.getTime())) return undefined;
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
 
 const cashMobileItem: MobileItemConfig<CashMovementDTO> = {
   title: (row: CashMovementDTO) => formatLabel(row.type),
@@ -89,8 +102,12 @@ export function CashTable({ toolbarAction }: CashTableProps) {
   const [investmentOpen, setInvestmentOpen] = useState(false);
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
 
+  const { data: openingStatus } = useQuery(cashOpeningStatusQueryOptions());
+  const hasOpeningCash = openingStatus?.hasOpening === true;
+  const showOpeningButton = openingStatus?.hasOpening === false;
+
   const sortableColumnIds = ['movementDate', 'amount', 'createdAt'];
-  const { params, filters, sortBy, sortOrder, getPageCount } =
+  const { params, filters, search: noteSearch, sortBy, sortOrder, getPageCount } =
     useDukaanListParams<CashMovementSortField>(
       sortableColumnIds,
       'note',
@@ -99,12 +116,14 @@ export function CashTable({ toolbarAction }: CashTableProps) {
       'desc'
     );
 
-  const [searchParam] = useQueryState('search', parseAsString);
-  const [noteParam] = useQueryState('note', parseAsString);
   const [typeParam] = useQueryState('type', parseAsString);
   const [directionParam] = useQueryState('direction', parseAsString);
+  const [movementDateParam] = useQueryState(
+    'movementDate',
+    parseAsArrayOf(parseAsString, ',')
+  );
 
-  const search = searchParam || noteParam || undefined;
+  const search = noteSearch?.trim() || undefined;
 
   const rawType = (filters as Record<string, unknown>).type ?? typeParam;
   let typeFilter: CashMovementType | undefined;
@@ -122,12 +141,17 @@ export function CashTable({ toolbarAction }: CashTableProps) {
   const rawDir = (filters as Record<string, unknown>).direction ?? directionParam;
   const directionFilter = parseBinaryFacet<CashDirection>(rawDir, 'IN', 'OUT');
 
+  const from = timestampToYmd(movementDateParam?.[0]);
+  const to = timestampToYmd(movementDateParam?.[1]);
+
   const queryFilter: CashMovementQueryFilter = {
     page: params.page,
     pageSize: params.perPage,
     ...(search ? { search } : {}),
     ...(typeFilter ? { type: typeFilter } : {}),
     ...(directionFilter ? { direction: directionFilter } : {}),
+    ...(from ? { from } : {}),
+    ...(to ? { to } : {}),
     sortBy,
     sortOrder
   };
@@ -151,11 +175,11 @@ export function CashTable({ toolbarAction }: CashTableProps) {
       },
       meta: {
         label: 'table.col.when',
-        variant: 'date',
+        variant: 'dateRange',
         priority: 2,
         mobile: 'meta'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
     {
@@ -257,17 +281,13 @@ export function CashTable({ toolbarAction }: CashTableProps) {
         const note = row.original.note;
         const rev = row.original.reversesMovementId;
         if (!note && !rev) return <span className='text-muted-foreground'>—</span>;
-        return (
-          <span className='font-normal text-muted-foreground truncate max-w-[320px] inline-block'>
-            {note ?? ''}
-            {rev ? (
-              <span className='text-amber-600 dark:text-amber-400 font-mono text-xs'>
-                {note ? ' · ' : ''}
-                {t('table.reverses')} {rev.slice(0, 8)}…
-              </span>
-            ) : null}
-          </span>
-        );
+        const label = [
+          note ?? '',
+          rev ? `${t('table.reverses')} ${rev.slice(0, 8)}…` : ''
+        ]
+          .filter(Boolean)
+          .join(' · ');
+        return <TruncateText className='font-normal text-muted-foreground'>{label}</TruncateText>;
       },
       meta: {
         label: 'table.col.note',
@@ -297,13 +317,14 @@ export function CashTable({ toolbarAction }: CashTableProps) {
   });
 
   const toolbarActionButton = (
-    <div className='flex items-center gap-2'>
+    <div className='flex flex-wrap items-center justify-end gap-2'>
       {toolbarAction}
       <Button
         type='button'
         size='sm'
         className='h-8 gap-1.5'
         onClick={() => setInvestmentOpen(true)}
+        title={hasOpeningCash ? t('dukaan.cash.openingAlreadySetHint') : undefined}
       >
         <Icons.add className='h-3.5 w-3.5' />
         <span>{t('common.investCash')}</span>
@@ -314,28 +335,31 @@ export function CashTable({ toolbarAction }: CashTableProps) {
         variant='outline'
         className='h-8 gap-1.5'
         onClick={() => setWithdrawalOpen(true)}
+        title={hasOpeningCash ? t('dukaan.cash.openingAlreadySetHint') : undefined}
       >
         <Icons.minus className='h-3.5 w-3.5' />
         <span>{t('common.withdraw')}</span>
       </Button>
-      <Button
-        type='button'
-        size='sm'
-        variant='outline'
-        className='h-8 gap-1.5'
-        onClick={() => setOpeningCashOpen(true)}
-      >
-        <Icons.wallet className='h-3.5 w-3.5' />
-        <span>{t('common.openingBalance')}</span>
-      </Button>
+      {showOpeningButton ? (
+        <Button
+          type='button'
+          size='sm'
+          variant='outline'
+          className='h-8 gap-1.5'
+          onClick={() => setOpeningCashOpen(true)}
+        >
+          <Icons.wallet className='h-3.5 w-3.5' />
+          <span>{t('common.openingBalance')}</span>
+        </Button>
+      ) : null}
     </div>
   );
 
   return (
     <>
-      {openingCashOpen && (
+      {openingCashOpen && showOpeningButton ? (
         <OpeningCashDialog open={openingCashOpen} onOpenChange={setOpeningCashOpen} />
-      )}
+      ) : null}
 
       {investmentOpen && (
         <OwnerInvestmentDialog open={investmentOpen} onOpenChange={setInvestmentOpen} />

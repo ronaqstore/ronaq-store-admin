@@ -30,6 +30,7 @@ import { formatLabel, formatPkr } from '@/lib/dukaan/numbers';
 import type { InventoryItemDTO } from '@/lib/api/types';
 import type { InventoryRowActionsProps, InventoryTableProps } from '@/types/inventory';
 import { inventoryStockQueryOptions } from '../api/queries';
+import { TruncateText } from '@/components/common/truncate-text';
 import { StockAdjustDialog } from './stock-adjust-dialog';
 
 function InventoryRowActions({ item, onAdjust, onViewUnits }: InventoryRowActionsProps) {
@@ -125,31 +126,33 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.product')} />
       ),
-      cell: ({ row }) => (
-        <div className='flex flex-col gap-0.5'>
-          {row.original.trackingType === 'SERIALIZED' ? (
-            <Link
-              href={`/dashboard/inventory/${row.original.id}`}
-              className='font-normal text-foreground hover:underline hover:text-primary transition-colors'
-              onClick={(e) => e.stopPropagation()}
-            >
-              {row.original.name}
-            </Link>
-          ) : (
-            <span className='font-normal text-foreground'>{row.original.name}</span>
-          )}
-          <div className='flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground'>
-            {row.original.brandName && <span>{row.original.brandName}</span>}
-            {row.original.brandName && row.original.categoryName && <span>·</span>}
-            {row.original.categoryName && <span>{row.original.categoryName}</span>}
-            {row.original.sku && (
-              <Badge variant='outline' className='text-[10px] px-1 py-0 h-4 font-mono'>
-                {row.original.sku}
-              </Badge>
+      cell: ({ row }) => {
+        const meta = [row.original.brandName, row.original.categoryName].filter(Boolean).join(' · ');
+        return (
+          <div className='min-w-0 space-y-0.5'>
+            {row.original.trackingType === 'SERIALIZED' ? (
+              <Link
+                href={`/dashboard/inventory/${row.original.id}`}
+                className='block min-w-0 truncate font-normal text-foreground hover:underline hover:text-primary transition-colors'
+                title={row.original.name}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {row.original.name}
+              </Link>
+            ) : (
+              <TruncateText className='font-normal text-foreground'>{row.original.name}</TruncateText>
             )}
+            <div className='flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground'>
+              {meta ? <TruncateText>{meta}</TruncateText> : null}
+              {row.original.sku && (
+                <Badge variant='outline' className='shrink-0 text-[10px] px-1 py-0 h-4 font-mono'>
+                  {row.original.sku}
+                </Badge>
+              )}
+            </div>
           </div>
-        </div>
-      ),
+        );
+      },
       meta: {
         label: 'table.col.product',
         placeholderKey: 'search.inventory',

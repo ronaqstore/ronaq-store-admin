@@ -19,6 +19,12 @@ export interface PartyDetailLabels {
   openingBalance: string;
 }
 
+export interface PartyNameColumnOptions<T extends { name: string }> {
+  placeholderKey?: string;
+  size?: number;
+  cellExtra?: (row: T) => ReactNode;
+}
+
 export type PartyApiField = 'phone' | 'cnic';
 
 export interface MappedPartyApiError {

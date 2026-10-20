@@ -11,6 +11,7 @@ import { PreviewableImage } from '@/components/media/previewable-image';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { PLACEHOLDER_SHOP_LOGO } from '@/constants/placeholders';
 import { formatEmpty } from '@/lib/format-empty';
+import { formatOpeningHoursDisplay } from '@/lib/opening-hours';
 import { prepareShopLogo } from '@/lib/prepare-image';
 import { useT } from '@/i18n/use-t';
 import type { StoreProfileDetailRow } from '@/types/store-settings';
@@ -39,7 +40,10 @@ export function StoreSettingsForm() {
     { label: t('storeSettings.phone'), value: formatEmpty(data.phoneNumber) },
     { label: t('storeSettings.whatsapp'), value: formatEmpty(data.whatsappNumber) },
     { label: t('storeSettings.address'), value: formatEmpty(data.address) },
-    { label: t('storeSettings.openingHours'), value: formatEmpty(data.openingHours) },
+    {
+      label: t('storeSettings.openingHours'),
+      value: formatEmpty(formatOpeningHoursDisplay(data.openingHours))
+    },
     { label: t('storeSettings.about'), value: formatEmpty(data.about) },
     { label: t('storeSettings.googleMaps'), value: formatEmpty(data.googleMapsUrl) }
   ];

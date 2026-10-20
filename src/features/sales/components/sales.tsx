@@ -4,6 +4,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@/i18n/navigation';
 import { useState } from 'react';
 import { FloatingActionButton } from '@/components/common/floating-action-button';
+import { TruncateText } from '@/components/common/truncate-text';
 import { TablePageBody } from '@/components/layout/table-page-body';
 import { Icons } from '@/components/icons';
 import { Badge } from '@/components/ui/badge';
@@ -182,18 +183,22 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
           <TableBody>
             {(data.items ?? []).map((item) => (
               <TableRow key={item.id}>
-                <TableCell className='font-medium'>{item.productName}</TableCell>
-                <TableCell>{item.imei ?? '—'}</TableCell>
-                <TableCell>{item.quantity}</TableCell>
-                <TableCell>
+                <TableCell className='font-medium'>
+                  <TruncateText>{item.productName}</TruncateText>
+                </TableCell>
+                <TableCell className='max-w-none'>{item.imei ?? '—'}</TableCell>
+                <TableCell className='max-w-none'>{item.quantity}</TableCell>
+                <TableCell className='max-w-none'>
                   {item.imei
                     ? item.warrantyDays
                       ? t('dukaan.sale.warrantyDays', { days: item.warrantyDays })
                       : t('dukaan.sale.companyWarranty')
                     : '—'}
                 </TableCell>
-                <TableCell>{formatPkr(item.unitPrice)}</TableCell>
-                <TableCell className='text-end font-semibold'>{formatPkr(item.total)}</TableCell>
+                <TableCell className='max-w-none'>{formatPkr(item.unitPrice)}</TableCell>
+                <TableCell className='max-w-none text-end font-semibold'>
+                  {formatPkr(item.total)}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

@@ -13,29 +13,20 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Separator } from '@/components/ui/separator';
 import { formatDate } from '@/lib/format';
 
-type DateSelection = Date[] | DateRange;
-
-function getIsDateRange(value: DateSelection): value is DateRange {
-  return value && typeof value === 'object' && !Array.isArray(value);
-}
-
 function parseAsDate(timestamp: number | string | undefined): Date | undefined {
-  if (!timestamp) return undefined;
+  if (timestamp === null || timestamp === undefined || timestamp === '') return undefined;
   const numericTimestamp = typeof timestamp === 'string' ? Number(timestamp) : timestamp;
+  if (!Number.isFinite(numericTimestamp)) return undefined;
   const date = new Date(numericTimestamp);
   return !Number.isNaN(date.getTime()) ? date : undefined;
 }
 
-function parseColumnFilterValue(value: unknown) {
-  if (value === null || value === undefined) {
-    return [];
-  }
+function parseColumnFilterValue(value: unknown): Array<string | number | undefined> {
+  if (value === null || value === undefined) return [];
 
   if (Array.isArray(value)) {
     return value.map((item) => {
-      if (typeof item === 'number' || typeof item === 'string') {
-        return item;
-      }
+      if (typeof item === 'number' || typeof item === 'string') return item;
       return undefined;
     });
   }
@@ -45,6 +36,12 @@ function parseColumnFilterValue(value: unknown) {
   }
 
   return [];
+}
+
+function startOfDay(date: Date): Date {
+  const next = new Date(date);
+  next.setHours(0, 0, 0, 0);
+  return next;
 }
 
 interface DataTableDateFilterProps<TData> {
@@ -61,40 +58,73 @@ export function DataTableDateFilter<TData>({
   const t = useTranslations();
   const columnFilterValue = column.getFilterValue();
 
-  const selectedDates = React.useMemo<DateSelection>(() => {
-    if (!columnFilterValue) {
-      return multiple ? { from: undefined, to: undefined } : [];
-    }
-
-    if (multiple) {
-      const timestamps = parseColumnFilterValue(columnFilterValue);
-      return {
-        from: parseAsDate(timestamps[0]),
-        to: parseAsDate(timestamps[1])
-      };
-    }
-
+  const range = React.useMemo<DateRange>(() => {
+    if (!multiple) return { from: undefined, to: undefined };
     const timestamps = parseColumnFilterValue(columnFilterValue);
-    const date = parseAsDate(timestamps[0]);
-    return date ? [date] : [];
+    return {
+      from: parseAsDate(timestamps[0]),
+      to: parseAsDate(timestamps[1])
+    };
   }, [columnFilterValue, multiple]);
 
-  const onSelect = React.useCallback(
-    (date: Date | DateRange | undefined) => {
-      if (!date) {
+  const singleDate = React.useMemo(() => {
+    if (multiple) return undefined;
+    const timestamps = parseColumnFilterValue(columnFilterValue);
+    return parseAsDate(timestamps[0]);
+  }, [columnFilterValue, multiple]);
+
+  const applyRange = React.useCallback(
+    (from?: Date, to?: Date) => {
+      if (!from && !to) {
         column.setFilterValue(undefined);
         return;
       }
 
-      if (multiple && !('getTime' in date)) {
-        const from = date.from?.getTime();
-        const to = date.to?.getTime();
-        column.setFilterValue(from || to ? [from, to] : undefined);
-      } else if (!multiple && 'getTime' in date) {
-        column.setFilterValue(date.getTime());
+      let fromTs = from ? startOfDay(from).getTime() : undefined;
+      let toTs = to ? startOfDay(to).getTime() : undefined;
+
+      // Keep range ordered when both ends are set.
+      if (fromTs != null && toTs != null && toTs < fromTs) {
+        const swap = fromTs;
+        fromTs = toTs;
+        toTs = swap;
       }
+
+      if (fromTs != null && toTs != null) {
+        column.setFilterValue([fromTs, toTs]);
+        return;
+      }
+
+      // From-only (open-ended) or To-only (up to date).
+      if (fromTs != null) {
+        column.setFilterValue([fromTs]);
+        return;
+      }
+
+      column.setFilterValue(['', toTs]);
     },
-    [column, multiple]
+    [column]
+  );
+
+  const onSelectFrom = React.useCallback(
+    (date: Date | undefined) => {
+      applyRange(date, range.to);
+    },
+    [applyRange, range.to]
+  );
+
+  const onSelectTo = React.useCallback(
+    (date: Date | undefined) => {
+      applyRange(range.from, date);
+    },
+    [applyRange, range.from]
+  );
+
+  const onSelectSingle = React.useCallback(
+    (date: Date | undefined) => {
+      column.setFilterValue(date ? startOfDay(date).getTime() : undefined);
+    },
+    [column]
   );
 
   const onReset = React.useCallback(
@@ -105,36 +135,35 @@ export function DataTableDateFilter<TData>({
     [column]
   );
 
-  const hasValue = React.useMemo(() => {
-    if (multiple) {
-      if (!getIsDateRange(selectedDates)) return false;
-      return selectedDates.from || selectedDates.to;
-    }
-    if (!Array.isArray(selectedDates)) return false;
-    return selectedDates.length > 0;
-  }, [multiple, selectedDates]);
+  const hasValue = multiple ? !!(range.from || range.to) : !!singleDate;
 
-  const formatDateRange = React.useCallback((range: DateRange) => {
-    if (!range.from && !range.to) return '';
-    if (range.from && range.to) {
-      return `${formatDate(range.from)} - ${formatDate(range.to)}`;
-    }
-    return formatDate(range.from ?? range.to);
-  }, []);
+  const formatRangeLabel = React.useCallback(
+    (value: DateRange) => {
+      if (value.from && value.to) {
+        return `${formatDate(value.from)} – ${formatDate(value.to)}`;
+      }
+      if (value.from) {
+        return `${t('common.from')} ${formatDate(value.from)}`;
+      }
+      if (value.to) {
+        return `${t('common.to')} ${formatDate(value.to)}`;
+      }
+      return '';
+    },
+    [t]
+  );
 
   const label = React.useMemo(() => {
     if (multiple) {
-      if (!getIsDateRange(selectedDates)) return null;
-
-      const hasSelectedDates = selectedDates.from || selectedDates.to;
+      const hasSelectedDates = !!(range.from || range.to);
       const dateText = hasSelectedDates
-        ? formatDateRange(selectedDates)
+        ? formatRangeLabel(range)
         : t('common.pickDateRange');
 
       return (
         <span className='flex items-center gap-2'>
           <span>{title}</span>
-          {hasSelectedDates && (
+          {hasSelectedDates ? (
             <>
               <Separator
                 orientation='vertical'
@@ -142,28 +171,26 @@ export function DataTableDateFilter<TData>({
               />
               <span>{dateText}</span>
             </>
-          )}
+          ) : null}
         </span>
       );
     }
 
-    if (getIsDateRange(selectedDates)) return null;
-
-    const hasSelectedDate = selectedDates.length > 0;
-    const dateText = hasSelectedDate ? formatDate(selectedDates[0]) : t('common.pickDate');
+    const hasSelectedDate = !!singleDate;
+    const dateText = hasSelectedDate ? formatDate(singleDate) : t('common.pickDate');
 
     return (
       <span className='flex items-center gap-2'>
         <span>{title}</span>
-        {hasSelectedDate && (
+        {hasSelectedDate ? (
           <>
             <Separator orientation='vertical' className='mx-0.5 data-[orientation=vertical]:h-4' />
             <span>{dateText}</span>
           </>
-        )}
+        ) : null}
       </span>
     );
-  }, [selectedDates, multiple, formatDateRange, title, t]);
+  }, [formatRangeLabel, multiple, range, singleDate, t, title]);
 
   return (
     <Popover>
@@ -173,21 +200,56 @@ export function DataTableDateFilter<TData>({
       </PopoverTrigger>
       <PopoverContent className='w-auto p-0' align='start'>
         {multiple ? (
-          <Calendar
-            autoFocus
-            mode='range'
-            selected={
-              getIsDateRange(selectedDates) ? selectedDates : { from: undefined, to: undefined }
-            }
-            onSelect={onSelect}
-          />
+          <div className='flex flex-col gap-3 p-3 sm:flex-row sm:gap-4'>
+            <div className='space-y-2'>
+              <div className='flex items-center justify-between gap-2 px-1'>
+                <p className='text-sm font-medium text-foreground'>{t('common.from')}</p>
+                {range.from ? (
+                  <button
+                    type='button'
+                    className='text-xs text-muted-foreground hover:text-foreground'
+                    onClick={() => applyRange(undefined, range.to)}
+                  >
+                    {t('common.clear')}
+                  </button>
+                ) : null}
+              </div>
+              <Calendar
+                autoFocus
+                mode='single'
+                selected={range.from}
+                onSelect={onSelectFrom}
+                disabled={range.to ? { after: range.to } : undefined}
+              />
+              <p className='px-1 text-[11px] text-muted-foreground'>{t('common.fromOptionalHint')}</p>
+            </div>
+            <Separator className='sm:hidden' />
+            <div className='hidden w-px self-stretch bg-border sm:block' aria-hidden />
+            <div className='space-y-2'>
+              <div className='flex items-center justify-between gap-2 px-1'>
+                <p className='text-sm font-medium text-foreground'>{t('common.to')}</p>
+                {range.to ? (
+                  <button
+                    type='button'
+                    className='text-xs text-muted-foreground hover:text-foreground'
+                    onClick={() => applyRange(range.from, undefined)}
+                  >
+                    {t('common.clear')}
+                  </button>
+                ) : null}
+              </div>
+              <Calendar
+                mode='single'
+                selected={range.to}
+                onSelect={onSelectTo}
+                disabled={range.from ? { before: range.from } : undefined}
+                defaultMonth={range.to ?? range.from}
+              />
+              <p className='px-1 text-[11px] text-muted-foreground'>{t('common.toOptionalHint')}</p>
+            </div>
+          </div>
         ) : (
-          <Calendar
-            autoFocus
-            mode='single'
-            selected={!getIsDateRange(selectedDates) ? selectedDates[0] : undefined}
-            onSelect={onSelect}
-          />
+          <Calendar autoFocus mode='single' selected={singleDate} onSelect={onSelectSingle} />
         )}
       </PopoverContent>
     </Popover>

@@ -21,6 +21,7 @@ import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { t as staticT } from '@/i18n/static-t';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
+import { TruncateText } from '@/components/common/truncate-text';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { formatIsoDate } from '@/lib/dates';
 import type {
@@ -50,13 +51,9 @@ const columns: ColumnDef<PlatformShop>[] = [
     cell: ({ row }) => {
       const subtitle = row.original.address || row.original.storeSlug || '—';
       return (
-        <div className='min-w-40 max-w-[220px]'>
-          <p className='font-medium truncate' title={row.original.name}>
-            {row.original.name}
-          </p>
-          <p className='text-muted-foreground truncate text-xs' title={subtitle}>
-            {subtitle}
-          </p>
+        <div className='min-w-0 space-y-0.5'>
+          <TruncateText className='font-medium'>{row.original.name}</TruncateText>
+          <TruncateText className='text-muted-foreground text-xs'>{subtitle}</TruncateText>
         </div>
       );
     },

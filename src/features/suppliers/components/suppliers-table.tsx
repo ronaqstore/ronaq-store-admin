@@ -14,7 +14,6 @@ import {
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
-import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { t } from '@/i18n';
 import { AlertModal } from '@/components/modal/alert-modal';
@@ -31,6 +30,7 @@ import type { EntityStatusConfirm, SupplierListFilters } from '@/types';
 import { SupplierDialog } from './supplier-dialog';
 import type { SupplierCellActionProps, SuppliersTableProps } from '@/types/suppliers';
 import {
+  createPartyNameColumn,
   createPartyPhoneColumn,
   createPartyCnicColumn,
   createPartyAddressColumn,
@@ -69,33 +69,15 @@ function SupplierCellAction({ data }: SupplierCellActionProps) {
 }
 
 const supplierColumns: ColumnDef<SupplierDTO>[] = [
-  {
-    id: 'name',
-    accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.name')} />,
-    meta: {
-      label: 'table.col.name',
-      placeholderKey: 'search.suppliers' as const,
-      variant: 'text',
-      icon: Icons.search,
-      type: 'text',
-      primary: true,
-      priority: 1,
-      mobile: 'title'
-    },
-    enableColumnFilter: true,
-    enableSorting: true,
-    cell: ({ row }) => (
-      <div className='flex items-center gap-2'>
-        <span className='font-medium'>{row.original.name}</span>
-        {row.original.isSystem && (
-          <Badge variant='outline' className='text-[10px] uppercase font-semibold'>
-            {t('common.system')}
-          </Badge>
-        )}
-      </div>
-    )
-  },
+  createPartyNameColumn<SupplierDTO>({
+    placeholderKey: 'search.suppliers',
+    cellExtra: (row) =>
+      row.isSystem ? (
+        <Badge variant='outline' className='shrink-0 text-[10px] uppercase font-semibold'>
+          {t('common.system')}
+        </Badge>
+      ) : null
+  }),
   createPartyPhoneColumn<SupplierDTO>(),
   createPartyCnicColumn<SupplierDTO>(),
   createPartyAddressColumn<SupplierDTO>(),

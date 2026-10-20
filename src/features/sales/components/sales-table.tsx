@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { parseAsString, useQueryState } from 'nuqs';
 import { Badge } from '@/components/ui/badge';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
+import { TruncateText } from '@/components/common/truncate-text';
 import type { RowAction } from '@/types/dukaan';
 import {
   ResponsiveDataTable,
@@ -189,16 +190,18 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.customer')} />
       ),
-      cell: ({ row }) => (
-        <span className='font-normal text-foreground'>
-          {row.original.customerName || (
-            <span className='text-muted-foreground italic'>{t('sales.walkInBadge')}</span>
-          )}
-        </span>
-      ),
+      cell: ({ row }) =>
+        row.original.customerName ? (
+          <TruncateText className='font-normal text-foreground'>
+            {row.original.customerName}
+          </TruncateText>
+        ) : (
+          <span className='text-muted-foreground italic'>{t('sales.walkInBadge')}</span>
+        ),
       meta: {
         label: 'table.col.customer',
         variant: 'text',
+        type: 'text',
         priority: 2,
         mobile: 'subtitle'
       },

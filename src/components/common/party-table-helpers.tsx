@@ -13,7 +13,11 @@ import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-h
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { formatDate } from '@/lib/format';
 import { t } from '@/i18n';
-import type { BasePartyRecord, PartyDetailLabels } from '@/types/party';
+import type {
+  BasePartyRecord,
+  PartyDetailLabels,
+  PartyNameColumnOptions
+} from '@/types/party';
 import { Icons } from '@/components/icons';
 import type {
   HasStatusRecord,
@@ -22,6 +26,39 @@ import type {
   Icon,
   NamedActiveItem
 } from '@/types/common';
+import { TruncateText } from '@/components/common/truncate-text';
+
+export function createPartyNameColumn<T extends { name: string }>(
+  opts?: PartyNameColumnOptions<T>
+): ColumnDef<T> {
+  return {
+    id: 'name',
+    accessorKey: 'name',
+    size: opts?.size ?? 200,
+    header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.name')} />,
+    meta: {
+      label: 'table.col.name',
+      placeholderKey: opts?.placeholderKey,
+      variant: 'text',
+      icon: Icons.search,
+      type: 'text',
+      primary: true,
+      priority: 1,
+      mobile: 'title'
+    },
+    enableColumnFilter: true,
+    enableSorting: true,
+    cell: ({ row }) => {
+      const extra = opts?.cellExtra?.(row.original);
+      return (
+        <div className='flex min-w-0 items-center gap-2'>
+          <TruncateText className='font-medium'>{row.original.name}</TruncateText>
+          {extra}
+        </div>
+      );
+    }
+  };
+}
 
 export function createPartyPhoneColumn<T extends BasePartyRecord>(): ColumnDef<T> {
   return {
@@ -63,11 +100,7 @@ export function createPartyAddressColumn<T extends BasePartyRecord>(): ColumnDef
     cell: ({ row }) => {
       const address = (row.original as T).address?.trim();
       if (!address) return '—';
-      return (
-        <span className='block max-w-50 truncate' title={address}>
-          {address}
-        </span>
-      );
+      return <TruncateText>{address}</TruncateText>;
     }
   };
 }

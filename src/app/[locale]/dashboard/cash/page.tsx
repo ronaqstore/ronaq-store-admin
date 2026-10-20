@@ -1,5 +1,9 @@
 import PageContainer from '@/components/layout/page-container';
-import { CashLedgerClient, cashQueryOptions } from '@/features/cash';
+import {
+  CashLedgerClient,
+  cashOpeningStatusQueryOptions,
+  cashQueryOptions
+} from '@/features/cash';
 import { getQueryClient } from '@/lib/query-client';
 import { auth } from '@/auth';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
@@ -19,9 +23,15 @@ export default async function Page() {
   const token = session?.accessToken;
   const qc = getQueryClient();
   if (token) {
-    await qc.prefetchQuery(
-      cashQueryOptions({ page: 1, pageSize: 20, sortBy: 'movementDate', sortOrder: 'desc' }, token)
-    );
+    await Promise.all([
+      qc.prefetchQuery(
+        cashQueryOptions(
+          { page: 1, pageSize: 20, sortBy: 'movementDate', sortOrder: 'desc' },
+          token
+        )
+      ),
+      qc.prefetchQuery(cashOpeningStatusQueryOptions(token))
+    ]);
   }
   return (
     <PageContainer fill pageTitle='pages.cash.title' pageDescription='pages.cash.description'>

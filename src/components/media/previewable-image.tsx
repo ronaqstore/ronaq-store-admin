@@ -8,7 +8,6 @@ import { isPreviewableImageSrc } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import type { PreviewableImageProps } from '@/types/media';
 
-// Never render a <button> here — nesting buttons inside <a>/<Link> breaks hydration.
 export function PreviewableImage({
   src,
   alt,
