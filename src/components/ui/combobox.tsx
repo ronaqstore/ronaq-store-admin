@@ -127,20 +127,25 @@ function ComboboxList({ className, ...props }: ComboboxPrimitive.List.Props) {
   );
 }
 
-function ComboboxItem({ className, children, ...props }: ComboboxPrimitive.Item.Props) {
+function ComboboxItem({ className, children, title, ...props }: ComboboxPrimitive.Item.Props) {
+  const autoTitle =
+    title ??
+    (typeof children === 'string' || typeof children === 'number' ? String(children) : undefined);
+
   return (
     <ComboboxPrimitive.Item
       data-slot='combobox-item'
+      title={autoTitle}
       className={cn(
-        "relative flex w-full cursor-pointer items-center gap-2 rounded-md py-1 pe-8 ps-1.5 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground not-data-[variant=destructive]:data-highlighted:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex w-full min-w-0 cursor-pointer items-center gap-2 overflow-hidden rounded-md py-1 pe-8 ps-1.5 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground not-data-[variant=destructive]:data-highlighted:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
     >
-      {children}
+      <span className='min-w-0 flex-1 truncate'>{children}</span>
       <ComboboxPrimitive.ItemIndicator
         render={
-          <span className='pointer-events-none absolute inset-e-2 flex size-4 items-center justify-center' />
+          <span className='pointer-events-none absolute inset-e-2 flex size-4 shrink-0 items-center justify-center' />
         }
       >
         <IconCheck className='pointer-events-none' />

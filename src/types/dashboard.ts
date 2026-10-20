@@ -30,6 +30,13 @@ export interface AdjustmentsRouteShellProps {
   pageTitle: string;
   pageDescription: string;
   children: ReactNode;
+  filters: {
+    page: number;
+    pageSize: number;
+    scope: 'manual' | 'all';
+    sortBy: 'createdAt';
+    sortOrder: 'desc';
+  };
 }
 
 export interface SalePrefetchRouteProps {

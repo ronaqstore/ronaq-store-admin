@@ -1,19 +1,34 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
+import { useCallback, useEffect, useState } from 'react';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { InfiniteEntitySelect } from '@/components/forms/infinite-entity-select';
 import { useT } from '@/i18n/use-t';
 import { listInventoryUnits } from '@/features/inventory/api/service';
-import { inventoryKeys } from '@/features/inventory/api/queries';
-import type { SaleLineImeiFieldProps } from '@/types/sales';
+import { formatUnitImeiLabel } from '@/lib/inventory/format-unit-imei-label';
+import type { NamedEntity } from '@/types';
+import type { SaleLineImeiFieldProps, SaleLineImeiUnitPick } from '@/types/sales';
+
+type ImeiPickerItem = NamedEntity & SaleLineImeiUnitPick;
+
+function formatSaleUnitOption(
+  unit: {
+    imei1: string;
+    imei2?: string | null;
+    condition?: string | null;
+    batteryHealth?: number | null;
+  },
+  t: ReturnType<typeof useT>
+): string {
+  const parts = [
+    formatUnitImeiLabel(unit.imei1, unit.imei2),
+    unit.condition || null,
+    unit.batteryHealth != null
+      ? t('dukaan.sale.batteryPct', { pct: unit.batteryHealth })
+      : null
+  ].filter(Boolean);
+  return parts.join(' · ');
+}
 
 export function SaleLineImeiField({
   productId,
@@ -26,80 +41,88 @@ export function SaleLineImeiField({
   excludedUnitIds
 }: SaleLineImeiFieldProps) {
   const t = useT();
-  const unitsQuery = useQuery({
-    queryKey: [...inventoryKeys.all, 'units', productId],
-    queryFn: () => listInventoryUnits(productId),
-    enabled: !!productId
-  });
+  const [selectedLabel, setSelectedLabel] = useState('');
+  const excludedKey = excludedUnitIds.join(',');
 
-  const excluded = new Set(excludedUnitIds);
-  const units = (unitsQuery.data ?? []).filter(
-    (unit) => unit.id === value || !excluded.has(unit.id)
+  useEffect(() => {
+    if (!value) setSelectedLabel('');
+  }, [value, productId]);
+
+  const fetchImeiPage = useCallback(
+    async (filters: {
+      page?: number;
+      limit?: number;
+      pageSize?: number;
+      search?: string;
+    }) => {
+      if (!productId) {
+        return { items: [], total: 0, page: 1, limit: filters.pageSize ?? 20 };
+      }
+
+      const page = filters.page ?? 1;
+      const pageSize = filters.pageSize ?? filters.limit ?? 20;
+      const excluded = new Set(excludedKey ? excludedKey.split(',') : []);
+      const res = await listInventoryUnits(productId, 'IN_STOCK', filters.search, undefined, {
+        page,
+        pageSize
+      });
+
+      const items: ImeiPickerItem[] = res.items
+        .filter((unit) => unit.id === value || !excluded.has(unit.id))
+        .map((unit) => {
+          const condition =
+            unit.condition === 'USED' || unit.condition === 'NEW' ? unit.condition : undefined;
+          return {
+            id: unit.id,
+            name: formatSaleUnitOption(unit, t),
+            condition,
+            effectivePrice: unit.effectivePrice ?? unit.askingPrice ?? null,
+            batteryHealth: unit.batteryHealth ?? null,
+            defectNotes: unit.defectNotes ?? null
+          };
+        });
+
+      return {
+        items,
+        total: res.total,
+        page: res.page,
+        limit: res.pageSize
+      };
+    },
+    [productId, value, excludedKey, t]
   );
-  const options = units.map((unit) => {
-    const parts = [
-      `${t('inventory.imeiLabel')} ${unit.imei1}`,
-      unit.condition || null,
-      unit.batteryHealth != null
-        ? t('dukaan.sale.batteryPct', { pct: unit.batteryHealth })
-        : null
-    ].filter(Boolean);
-    return { value: unit.id, label: parts.join(' · ') };
-  });
 
-  const placeholder = unitsQuery.isLoading
-    ? t('dukaan.sale.loadingImeis')
-    : options.length === 0
-      ? t('dukaan.sale.noImeisInStock')
-      : t('dukaan.sale.selectImei');
-  const handleValueChange = (next: string | null) => {
-    const unitId = next ?? '';
-    const unit = units.find((u) => u.id === unitId);
-    const condition =
-      unit?.condition === 'USED' || unit?.condition === 'NEW'
-        ? unit.condition
-        : undefined;
-    onValueChange(unitId, condition, {
-      condition,
-      effectivePrice: unit?.effectivePrice ?? unit?.askingPrice ?? null,
-      batteryHealth: unit?.batteryHealth ?? null,
-      defectNotes: unit?.defectNotes ?? null
+  const handleValueChange = (unitId: string, item: ImeiPickerItem | null) => {
+    setSelectedLabel(item?.name ?? '');
+    onValueChange(unitId, item?.condition, {
+      condition: item?.condition,
+      effectivePrice: item?.effectivePrice ?? null,
+      batteryHealth: item?.batteryHealth ?? null,
+      defectNotes: item?.defectNotes ?? null
     });
   };
 
   return (
     <Field data-invalid={isInvalid}>
-      <FieldLabel htmlFor={name}>
-        {t('dukaan.sale.imeiUnit')} *
-      </FieldLabel>
-      <Select
-        name={name}
-        value={value || ''}
-        onValueChange={handleValueChange}
-        items={options.map((opt) => ({ value: opt.value, label: opt.label }))}
-      >
-        <SelectTrigger
-          id={name}
-          aria-invalid={isInvalid}
-          aria-describedby={isInvalid ? `${name}-error` : undefined}
-          disabled={!productId || unitsQuery.isLoading || options.length === 0}
-          onBlur={onBlur}
-        >
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {options.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-      {!unitsQuery.isLoading && options.length === 0 ? (
-        <FieldDescription>{t('dukaan.sale.noImeisInStockHelp')}</FieldDescription>
-      ) : null}
+      <FieldLabel htmlFor={name}>{t('dukaan.sale.imeiUnit')} *</FieldLabel>
+      <div onBlur={onBlur}>
+        <InfiniteEntitySelect<ImeiPickerItem>
+          value={value || ''}
+          onValueChange={handleValueChange}
+          queryKey={['inventory', 'sale-units-select', productId, excludedKey]}
+          fetchPage={fetchImeiPage}
+          selectedLabel={selectedLabel || undefined}
+          extraItems={
+            value && selectedLabel ? [{ id: value, name: selectedLabel }] : []
+          }
+          activeOnly={false}
+          disabled={!productId}
+          placeholder={t('dukaan.sale.selectImei')}
+          searchPlaceholder={t('inventory.searchImei')}
+          emptyMessage={t('dukaan.sale.noImeisInStock')}
+          className='h-9 w-full min-w-0'
+        />
+      </div>
       {isInvalid ? <FieldError id={`${name}-error`} errors={errors} /> : null}
     </Field>
   );

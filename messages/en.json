@@ -1637,6 +1637,7 @@
     "enterImeiOrId": "Unit IMEI or ID",
     "quantityToWriteOff": "Quantity to Write Off",
     "availableLabel": "Available:",
+    "noStockToWriteOff": "No stock available to write off for this product.",
     "reasonMandatory": "Reason (Mandatory)",
     "reasonPlaceholder": "Adjustment reason",
     "recordChange": "Save Adjustment",

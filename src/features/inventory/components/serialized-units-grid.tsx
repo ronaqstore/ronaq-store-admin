@@ -199,7 +199,12 @@ export function SerializedUnitsGrid({
                   type='button'
                   variant='ghost'
                   size='sm'
-                  onClick={() => onOpenWriteOff(unit.imei1)}
+                  onClick={() =>
+                    onOpenWriteOff(
+                      unit.id,
+                      unit.imei2?.trim() ? `${unit.imei1} · ${unit.imei2}` : unit.imei1
+                    )
+                  }
                   className='h-7 text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 hover:bg-rose-500/10'
                 >
                   <IconAlertTriangle className='h-3.5 w-3.5 me-1' />

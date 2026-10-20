@@ -383,6 +383,16 @@ export interface InventoryUnitDTO {
   salePrice?: number | null;
 }
 
+export type InventoryMovementType =
+  | 'ADJUSTMENT'
+  | 'DAMAGED'
+  | 'LOST'
+  | 'PURCHASE'
+  | 'SALE'
+  | 'SALE_CANCEL'
+  | 'PURCHASE_CANCEL'
+  | 'CUSTOMER_RETURN';
+
 export interface InventoryAdjustmentDTO {
   id: string;
   shopId: string;
@@ -390,7 +400,7 @@ export interface InventoryAdjustmentDTO {
   productName: string;
   inventoryUnitId?: string | null;
   imei?: string | null;
-  type: 'ADJUSTMENT' | 'DAMAGED' | 'LOST';
+  type: InventoryMovementType | string;
   quantityChange: number;
   reason: string;
   referenceType?: string | null;
@@ -539,6 +549,7 @@ export interface ProductListFilters {
   brandId?: string;
   trackingType?: TrackingType | string;
   isActive?: 'true' | 'false' | boolean | string;
+  inStockOnly?: 'true' | 'false' | boolean | string;
   sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'defaultSellingPrice';
   sortOrder?: 'asc' | 'desc';
 }

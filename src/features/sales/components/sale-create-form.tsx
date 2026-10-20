@@ -31,6 +31,7 @@ import {
   buildCreateSalePayload,
   calcSaleTotals,
   emptySaleLine,
+  isPhoneSaleLine,
   selectSaleTotals
 } from '../helpers/sale-create-helpers';
 import { SaleLineImeiField } from './sale-line-imei-field';
@@ -106,18 +107,22 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
     id: string,
     product: ProductPickerItem | null
   ) => {
+    const trackingType =
+      product?.tracking_type ??
+      (product as { trackingType?: ProductPickerItem['tracking_type'] } | null)?.trackingType;
+    const isPhone = trackingType === 'SERIALIZED';
     subField.handleChange(id);
     form.setFieldValue(
       `lines[${idx}].unit_price`,
-      product ? fromPaisa(product.default_selling_price) : 0
+      product ? fromPaisa(product.default_selling_price) : EMPTY_FORM_NUMBER
     );
-    form.setFieldValue(`lines[${idx}].tracking_type`, product?.tracking_type);
+    form.setFieldValue(`lines[${idx}].tracking_type`, trackingType ?? undefined);
     form.setFieldValue(`lines[${idx}].inventory_unit_id`, '');
     form.setFieldValue(`lines[${idx}].unit_condition`, undefined);
     form.setFieldValue(`lines[${idx}].warranty_days`, '');
     form.setFieldValue(
       `lines[${idx}].authenticity`,
-      product?.tracking_type === 'QUANTITY' ? (product.authenticity ?? null) : null
+      isPhone ? null : (product?.authenticity ?? null)
     );
     form.setFieldValue(`lines[${idx}].quantity`, 1);
   };
@@ -150,7 +155,8 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
         page: filters.page ?? 1,
         pageSize: filters.limit ?? 20,
         search: filters.search,
-        isActive: true
+        isActive: true,
+        inStockOnly: true
       }),
       mapProductToPicker
     );
@@ -164,7 +170,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
         </Alert>
       ) : null}
       <form.Subscribe
-        selector={(s) => s.values.lines.some((l) => l.tracking_type === 'SERIALIZED')}
+        selector={(s) => s.values.lines.some((l) => isPhoneSaleLine(l))}
         children={(hasPhone) =>
           hasPhone ? (
             <Alert>
@@ -180,7 +186,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
         <form.Subscribe
           selector={(s) => s.values.lines}
           children={(lines) => {
-            const hasPhone = lines.some((l) => l.tracking_type === 'SERIALIZED');
+            const hasPhone = lines.some((l) => isPhoneSaleLine(l));
             return (
               <form.Field
                 name='customer_id'
@@ -234,16 +240,27 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
           mode='array'
           children={(field) => (
             <>
-              {field.state.value.map((line, idx) => {
-                const isPhone = line.tracking_type === 'SERIALIZED';
+              {field.state.value.map((_line, idx) => {
                 const excludedUnitIds = field.state.value
                   .map((other, otherIdx) =>
                     otherIdx !== idx ? other.inventory_unit_id : undefined
                   )
                   .filter((id): id is string => !!id);
                 return (
-                  <div
+                  <form.Subscribe
                     key={idx}
+                    selector={(s) => {
+                      const current = s.values.lines[idx];
+                      return {
+                        isPhone: isPhoneSaleLine(current),
+                        productId: current?.product_id ?? '',
+                        authenticity: current?.authenticity ?? null,
+                        unitCondition: current?.unit_condition,
+                        warrantyDays: current?.warranty_days ?? ''
+                      };
+                    }}
+                    children={({ isPhone, productId, authenticity, unitCondition, warrantyDays }) => (
+                  <div
                     className='relative grid gap-2 rounded-lg border p-3 pe-24 md:grid-cols-4'
                   >
                     {field.state.value.length > 1 && (
@@ -311,22 +328,25 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
                         />
                       )}
                     />
-                    {!isPhone && line.authenticity ? (
-                      <div className='md:col-span-4'>
+                    {!isPhone && authenticity ? (
+                      <div className='md:col-span-4 space-y-2'>
                         <Badge
-                          variant={line.authenticity === 'ORIGINAL' ? 'default' : 'secondary'}
+                          variant={authenticity === 'ORIGINAL' ? 'default' : 'secondary'}
                           className='text-xs'
                         >
-                          {line.authenticity === 'ORIGINAL'
+                          {authenticity === 'ORIGINAL'
                             ? t('dukaan.product.authenticityOriginal')
                             : t('dukaan.product.authenticityCopy')}
                         </Badge>
-                        <p className='text-muted-foreground mt-1 text-xs'>
-                          {t('dukaan.sale.authenticityTellCustomer')}
-                        </p>
+                        <Alert>
+                          <Icons.warning />
+                          <AlertDescription>
+                            {t('dukaan.sale.authenticityTellCustomer')}
+                          </AlertDescription>
+                        </Alert>
                       </div>
                     ) : null}
-                    {isPhone && line.product_id ? (
+                    {isPhone && productId ? (
                       <div className='md:col-span-4 space-y-3'>
                         <form.Field
                           name={`lines[${idx}].inventory_unit_id`}
@@ -334,7 +354,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
                             const isInvalid = isFieldMetaInvalid(subField.state.meta);
                             return (
                               <SaleLineImeiField
-                                productId={line.product_id}
+                                productId={productId}
                                 name={subField.name}
                                 value={subField.state.value ?? ''}
                                 onBlur={subField.handleBlur}
@@ -344,7 +364,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
                                     idx,
                                     unitId,
                                     condition,
-                                    line.warranty_days,
+                                    warrantyDays,
                                     unit
                                   )
                                 }
@@ -355,7 +375,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
                             );
                           }}
                         />
-                        {line.unit_condition === 'USED' ? (
+                        {unitCondition === 'USED' ? (
                           <form.AppField
                             name={`lines[${idx}].warranty_days`}
                             children={(subField) => (
@@ -371,14 +391,19 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
                               />
                             )}
                           />
-                        ) : line.unit_condition === 'NEW' ? (
-                          <p className='text-muted-foreground text-sm'>
-                            {t('dukaan.sale.companyWarranty')}
-                          </p>
+                        ) : unitCondition === 'NEW' ? (
+                          <Alert>
+                            <Icons.warning />
+                            <AlertDescription>
+                              {t('dukaan.sale.companyWarranty')}
+                            </AlertDescription>
+                          </Alert>
                         ) : null}
                       </div>
                     ) : null}
                   </div>
+                    )}
+                  />
                 );
               })}
               <div className='flex justify-end'>

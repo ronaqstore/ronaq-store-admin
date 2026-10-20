@@ -391,7 +391,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
                   onCheckedChange={setConfirmOverdraft}
                   description={t('sales.returnDialog.overdraftNotice')}
                   id='return-overdraft'
-                  className='mt-2 border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200 hover:bg-amber-500/15'
+                  className='mt-2'
                 />
               )}
             </div>

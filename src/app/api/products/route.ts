@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
       'brandId',
       'trackingType',
       'isActive',
+      'inStockOnly',
       'sortBy',
       'sortOrder'
     ]

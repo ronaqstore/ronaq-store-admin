@@ -1,6 +1,11 @@
 import { queryOptions } from '@tanstack/react-query';
 import { listInventoryAdjustments, listInventoryStock, listInventoryUnits } from './service';
-import type { InventoryAdjustmentsFilters, InventoryStockFilters } from '@/types';
+import type {
+  InventoryAdjustmentsFilters,
+  InventoryStockFilters,
+  InventoryUnitsListFilters,
+  ListInventoryUnitsExtraOptions
+} from '@/types';
 
 export const inventoryKeys = {
   all: ['inventory'] as const,
@@ -9,8 +14,13 @@ export const inventoryKeys = {
     [...inventoryKeys.all, 'adjustments', filters] as const,
   movements: (filters?: InventoryAdjustmentsFilters) =>
     [...inventoryKeys.all, 'movements', filters] as const,
-  units: (productId: string, status?: string, search?: string) =>
-    [...inventoryKeys.all, 'units', productId, status, search] as const
+  units: (
+    productId: string,
+    status?: string,
+    search?: string,
+    page?: number,
+    pageSize?: number
+  ) => [...inventoryKeys.all, 'units', productId, status, search, page, pageSize] as const
 };
 
 export const inventoryStockQueryOptions = (filters: InventoryStockFilters = {}, token?: string) =>
@@ -32,9 +42,16 @@ export const inventoryUnitsQueryOptions = (
   productId: string,
   status?: string,
   search?: string,
-  token?: string
+  token?: string,
+  extra?: ListInventoryUnitsExtraOptions & InventoryUnitsListFilters
 ) =>
   queryOptions({
-    queryKey: inventoryKeys.units(productId, status, search),
-    queryFn: () => listInventoryUnits(productId, status, search, token)
+    queryKey: inventoryKeys.units(
+      productId,
+      status,
+      search,
+      extra?.page,
+      extra?.pageSize
+    ),
+    queryFn: () => listInventoryUnits(productId, status, search, token, extra)
   });

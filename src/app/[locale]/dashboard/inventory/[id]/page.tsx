@@ -28,7 +28,12 @@ export default async function Page({ params }: IdPageProps) {
   if (token) {
     await Promise.all([
       qc.prefetchQuery(productQueryOptions(id, token)),
-      qc.prefetchQuery(inventoryUnitsQueryOptions(id, 'ALL', undefined, token))
+      qc.prefetchQuery(
+        inventoryUnitsQueryOptions(id, 'ALL', undefined, token, {
+          page: 1,
+          pageSize: 100
+        })
+      )
     ]);
   }
 

@@ -9,10 +9,18 @@ export const emptySaleLine: SaleLineItem = {
   quantity: 1,
   unit_price: EMPTY_FORM_NUMBER,
   inventory_unit_id: '',
+  tracking_type: undefined,
   unit_condition: undefined,
   warranty_days: '',
   authenticity: null
 };
+
+/** Phones are SERIALIZED products — accessories / others are QUANTITY. */
+export function isPhoneSaleLine(
+  line: Pick<SaleLineItem, 'tracking_type'> | null | undefined
+): boolean {
+  return line?.tracking_type === 'SERIALIZED';
+}
 
 export function buildCreateSalePayload(
   lines: SaleLineItem[],

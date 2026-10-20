@@ -17,21 +17,42 @@ export interface ListInventoryUnitsExtraOptions {
   batteryMin?: number;
 }
 
+export interface InventoryUnitsListFilters {
+  page?: number;
+  pageSize?: number;
+}
+
+export type InventoryLedgerScope = 'manual' | 'all';
+
+export type InventoryMovementTypeFilter =
+  | 'ADJUSTMENT'
+  | 'DAMAGED'
+  | 'LOST'
+  | 'PURCHASE'
+  | 'SALE'
+  | 'SALE_CANCEL'
+  | 'PURCHASE_CANCEL'
+  | 'CUSTOMER_RETURN';
+
 export interface InventoryAdjustmentsFilters {
   page?: number;
   pageSize?: number;
   limit?: number;
   search?: string;
   productId?: string;
-  type?: 'ADJUSTMENT' | 'DAMAGED' | 'LOST';
+  type?: InventoryMovementTypeFilter;
+  scope?: InventoryLedgerScope;
   from?: string;
   to?: string;
   sortBy?: 'createdAt' | 'quantityChange';
   sortOrder?: 'asc' | 'desc';
 }
 
+export type AdjustmentsTableMode = 'adjustments' | 'movements';
+
 export interface AdjustmentsTableProps {
   toolbarAction?: ReactNode;
+  mode?: AdjustmentsTableMode;
 }
 
 export interface InventoryRowActionsProps {
@@ -48,13 +69,16 @@ export interface StockAdjustDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialProduct?: InventoryItemDTO | null;
-  initialImei?: string;
+  /** Inventory unit id (UUID) to pre-select for write-off. */
+  initialUnitId?: string;
+  initialUnitLabel?: string;
 }
 
 export interface StockAdjustFormErrors {
   productId?: string;
   reason?: string;
   imei?: string;
+  quantity?: string;
 }
 
 export interface SerializedProductUnitsPageProps {
@@ -65,7 +89,7 @@ export interface SerializedUnitsListProps {
   units: InventoryUnitDTO[];
   copiedImei: string | null;
   onCopyImei: (imei: string) => void;
-  onOpenWriteOff: (imei: string) => void;
+  onOpenWriteOff: (unitId: string, imeiLabel: string) => void;
 }
 
 export interface SerializedUnitsKpiCardsProps {

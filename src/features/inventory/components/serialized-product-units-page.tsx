@@ -42,12 +42,18 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
   const [copiedImei, setCopiedImei] = useState<string | null>(null);
 
   const [adjustOpen, setAdjustOpen] = useState(false);
-  const [selectedImeiForAdjust, setSelectedImeiForAdjust] = useState<string>('');
+  const [selectedUnitIdForAdjust, setSelectedUnitIdForAdjust] = useState<string>('');
+  const [selectedUnitLabelForAdjust, setSelectedUnitLabelForAdjust] = useState<string>('');
 
   const { data: product } = useQuery(productQueryOptions(productId));
-  const { data: rawUnits = [], isLoading } = useQuery(inventoryUnitsQueryOptions(productId, 'ALL'));
+  const { data: unitsPage, isLoading } = useQuery(
+    inventoryUnitsQueryOptions(productId, 'ALL', undefined, undefined, {
+      page: 1,
+      pageSize: 100
+    })
+  );
 
-  const units = rawUnits as InventoryUnitDTO[];
+  const units = (unitsPage?.items ?? []) as InventoryUnitDTO[];
 
   const handleCopyImei = (imei: string) => {
     navigator.clipboard.writeText(imei);
@@ -135,13 +141,15 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
     });
   }, [units, statusFilter, conditionFilter, batteryMin, search]);
 
-  const handleOpenWriteOff = (imei: string) => {
-    setSelectedImeiForAdjust(imei);
+  const handleOpenWriteOff = (unitId: string, imeiLabel: string) => {
+    setSelectedUnitIdForAdjust(unitId);
+    setSelectedUnitLabelForAdjust(imeiLabel);
     setAdjustOpen(true);
   };
 
   const handleOpenGeneralAdjust = () => {
-    setSelectedImeiForAdjust('');
+    setSelectedUnitIdForAdjust('');
+    setSelectedUnitLabelForAdjust('');
     setAdjustOpen(true);
   };
 
@@ -437,7 +445,8 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
           open={adjustOpen}
           onOpenChange={setAdjustOpen}
           initialProduct={productItemDTO}
-          initialImei={selectedImeiForAdjust}
+          initialUnitId={selectedUnitIdForAdjust}
+          initialUnitLabel={selectedUnitLabelForAdjust}
         />
       ) : null}
     </div>

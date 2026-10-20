@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
       'search',
       'productId',
       'type',
+      'scope',
       'from',
       'to',
       'sortBy',

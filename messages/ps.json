@@ -1637,6 +1637,7 @@
     "enterImeiOrId": "د واحد IMEI یا ID",
     "quantityToWriteOff": "د لرې کولو مقدار",
     "availableLabel": "موجود:",
+    "noStockToWriteOff": "د دې محصول لپاره د لیکلو لپاره هیڅ ذخیره نشته.",
     "reasonMandatory": "لامل (اړین)",
     "reasonPlaceholder": "د سمون لامل",
     "recordChange": "سمون خوندي کړئ",

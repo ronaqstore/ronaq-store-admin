@@ -1637,6 +1637,7 @@
     "enterImeiOrId": "یونٹ IMEI یا ID",
     "quantityToWriteOff": "رائٹ آف کرنے کی مقدار",
     "availableLabel": "دستیاب:",
+    "noStockToWriteOff": "اس پروڈکٹ کے لیے رائٹ آف کرنے کو اسٹاک دستیاب نہیں۔",
     "reasonMandatory": "وجہ (لازمی)",
     "reasonPlaceholder": "ایڈجسٹمنٹ کی وجہ",
     "recordChange": "ایڈجسٹ محفوظ کریں",

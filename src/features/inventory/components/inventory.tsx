@@ -15,7 +15,7 @@ export function InventoryListClient() {
 export function StockAdjustmentsClient() {
   return (
     <TablePageBody>
-      <AdjustmentsTable />
+      <AdjustmentsTable mode='adjustments' />
     </TablePageBody>
   );
 }
@@ -23,7 +23,7 @@ export function StockAdjustmentsClient() {
 export function InventoryMovementsClient() {
   return (
     <TablePageBody>
-      <AdjustmentsTable />
+      <AdjustmentsTable mode='movements' />
     </TablePageBody>
   );
 }

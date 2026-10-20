@@ -39,6 +39,7 @@ export function SelectField({
       >
         <SelectTrigger
           id={field.name}
+          className='w-full'
           aria-invalid={isInvalid}
           aria-describedby={isInvalid ? `${field.name}-error` : undefined}
         >

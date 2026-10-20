@@ -150,7 +150,12 @@ export function SerializedUnitsTable({
                       type='button'
                       variant='ghost'
                       size='sm'
-                      onClick={() => onOpenWriteOff(unit.imei1)}
+                      onClick={() =>
+                        onOpenWriteOff(
+                          unit.id,
+                          unit.imei2?.trim() ? `${unit.imei1} · ${unit.imei2}` : unit.imei1
+                        )
+                      }
                       className='h-7 text-xs text-rose-600 dark:text-rose-400'
                     >
                       {t('markDamaged')}
