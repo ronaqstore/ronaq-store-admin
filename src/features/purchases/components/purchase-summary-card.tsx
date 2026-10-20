@@ -51,9 +51,17 @@ export function PurchaseSummaryCard({
             {paidNowField}
             <div className='flex items-baseline justify-between rounded-lg border border-border/60 bg-muted/20 px-3 py-2'>
               <span className='text-muted-foreground text-xs font-medium'>
-                {t('dukaan.purchase.balanceDue')}
+                {dueRs > 0
+                  ? t('dukaan.purchase.supplierPayable')
+                  : t('dukaan.purchase.balanceDue')}
               </span>
-              <span className='text-base font-semibold tabular-nums text-amber-700 dark:text-amber-400'>
+              <span
+                className={
+                  dueRs > 0
+                    ? 'text-base font-semibold tabular-nums text-amber-700 dark:text-amber-400'
+                    : 'text-base font-semibold tabular-nums text-foreground'
+                }
+              >
                 {formatPkr(toPaisa(dueRs))}
               </span>
             </div>

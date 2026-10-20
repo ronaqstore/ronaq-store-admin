@@ -27,6 +27,7 @@ import { InfiniteEntitySelect } from '@/components/forms/infinite-entity-select'
 import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { cn } from '@/lib/utils';
+import type { ListFilters } from '@/lib/dukaan';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
 import type { NamedEntity } from '@/types';
@@ -107,12 +108,7 @@ export function StockAdjustDialog({
   }, [productId, initialUnitId, initialUnitLabel, initialProduct?.id]);
 
   const fetchImeiPage = useCallback(
-    async (filters: {
-      page?: number;
-      limit?: number;
-      pageSize?: number;
-      search?: string;
-    }) => {
+    async (filters: ListFilters) => {
       const page = filters.page ?? 1;
       const pageSize = filters.pageSize ?? filters.limit ?? 20;
       const res = await listInventoryUnits(productId, 'IN_STOCK', filters.search, undefined, {

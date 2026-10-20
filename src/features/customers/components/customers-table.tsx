@@ -11,7 +11,6 @@ import {
   type DetailConfig,
   type MobileItemConfig
 } from '@/components/data-table';
-import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
 import { useT } from '@/i18n/use-t';
 import { t } from '@/i18n';
@@ -22,7 +21,6 @@ import {
   parseBooleanFacet,
   useDukaanListParams
 } from '@/components/data-table/list-params';
-import { formatPkr } from '@/lib/dukaan/numbers';
 import type { CustomerDTO } from '@/lib/api/types';
 import { customerKeys, customersQueryOptions } from '../api/queries';
 import { deactivateCustomer, reactivateCustomer } from '../api/service';
@@ -37,13 +35,14 @@ import {
   createPartyNameColumn,
   createPartyPhoneColumn,
   createPartyAddressColumn,
+  createPartyCurrentBalanceColumn,
+  createPartyOpeningBalanceColumn,
   createPartyIsActiveColumn,
   PartyActionsHeader,
   buildPartyMobileItem,
   buildPartyDetail,
   getActiveStatusQuickFilters
 } from '@/components/common/party-table-helpers';
-
 import { PartyCellAction } from '@/components/common/party-cell-action';
 
 function CustomerCellAction({ data }: CustomerCellActionProps) {
@@ -76,22 +75,8 @@ const customerColumns: ColumnDef<CustomerDTO>[] = [
   createPartyNameColumn<CustomerDTO>({ placeholderKey: 'search.customers' }),
   createPartyPhoneColumn<CustomerDTO>(),
   createPartyAddressColumn<CustomerDTO>(),
-  {
-    id: 'openingBalance',
-    accessorKey: 'openingBalance',
-    size: 180,
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={t('dukaan.party.customerOpeningBalance')} />
-    ),
-    meta: {
-      label: 'dukaan.party.customerOpeningBalance',
-      type: 'money',
-      priority: 2,
-      mobile: 'value'
-    },
-    enableSorting: true,
-    cell: ({ row }) => formatPkr(row.original.openingBalance)
-  },
+  createPartyCurrentBalanceColumn<CustomerDTO>('dukaan.party.currentUdhar'),
+  createPartyOpeningBalanceColumn<CustomerDTO>('dukaan.party.customerOpeningBalance'),
   createPartyIsActiveColumn<CustomerDTO>(),
   {
     id: 'actions',
@@ -109,7 +94,7 @@ const customerColumns: ColumnDef<CustomerDTO>[] = [
 ];
 
 const customerMobileItem: MobileItemConfig<CustomerDTO> = buildPartyMobileItem<CustomerDTO>(() =>
-  t('dukaan.party.customerOpeningBalance')
+  t('dukaan.party.currentUdhar')
 );
 
 export function CustomersTable({ toolbarAction }: CustomersTableProps) {
@@ -182,6 +167,7 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
         {
           partyName: t('dukaan.party.name'),
           balance: t('table.balance'),
+          currentBalance: t('dukaan.party.currentUdhar'),
           openingBalance: t('dukaan.party.customerOpeningBalance')
         },
         (row) => [

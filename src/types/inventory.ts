@@ -69,7 +69,6 @@ export interface StockAdjustDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialProduct?: InventoryItemDTO | null;
-  /** Inventory unit id (UUID) to pre-select for write-off. */
   initialUnitId?: string;
   initialUnitLabel?: string;
 }

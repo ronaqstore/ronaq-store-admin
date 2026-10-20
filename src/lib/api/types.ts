@@ -27,6 +27,7 @@ export interface CustomerDTO {
   address: string | null;
   notes: string | null;
   openingBalance: number;
+  currentBalance: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -279,6 +280,13 @@ export interface PurchaseItemDTO {
   imeis?: string[];
 }
 
+export interface PurchasePaymentDTO {
+  id: string;
+  amount: number;
+  paymentDate: string;
+  status: 'ACTIVE' | 'CANCELLED' | string;
+}
+
 export interface PurchaseDTO {
   id: string;
   shopId: string;
@@ -299,6 +307,7 @@ export interface PurchaseDTO {
   createdAt: string;
   updatedAt: string;
   items: PurchaseItemDTO[];
+  payments?: PurchasePaymentDTO[];
 }
 
 export interface CreatePurchasePhoneUnitInput {
@@ -432,6 +441,7 @@ export interface SupplierDTO {
   address?: string | null;
   notes?: string | null;
   openingBalance: number;
+  currentBalance: number;
   isSystem: boolean;
   isActive: boolean;
   createdAt: string;
@@ -566,6 +576,10 @@ export interface RouteSupplierIdParams {
   supplierId: string;
 }
 
+export interface RouteCustomerIdParams {
+  customerId: string;
+}
+
 export interface RouteProductImageParams {
   id: string;
   imageId: string;
@@ -577,6 +591,10 @@ export interface RouteIdContext {
 
 export interface RouteSupplierIdContext {
   params: Promise<RouteSupplierIdParams>;
+}
+
+export interface RouteCustomerIdContext {
+  params: Promise<RouteCustomerIdParams>;
 }
 
 export interface RouteProductImageContext {

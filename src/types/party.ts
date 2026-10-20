@@ -9,6 +9,7 @@ export interface BasePartyRecord {
   address?: string | null;
   notes?: string | null;
   openingBalance: number;
+  currentBalance?: number;
   isActive: boolean;
   createdAt: string;
 }
@@ -17,6 +18,7 @@ export interface PartyDetailLabels {
   partyName: string;
   balance: string;
   openingBalance: string;
+  currentBalance?: string;
 }
 
 export interface PartyNameColumnOptions<T extends { name: string }> {

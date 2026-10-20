@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { PaymentsListFilters } from '@/types';
-import { getPaymentCancelImpact, listPayments } from './service';
+import { getCustomerReceivable, getPaymentCancelImpact, listPayments } from './service';
 
 export const paymentKeys = {
   all: ['payments'] as const,
@@ -8,6 +8,8 @@ export const paymentKeys = {
   list: (filters?: PaymentsListFilters) => [...paymentKeys.lists(), filters] as const,
   details: () => [...paymentKeys.all, 'detail'] as const,
   detail: (id: string) => [...paymentKeys.details(), id] as const,
+  receivables: () => [...paymentKeys.all, 'receivable'] as const,
+  receivable: (customerId: string) => [...paymentKeys.receivables(), customerId] as const,
   cancelImpacts: () => [...paymentKeys.all, 'cancelImpact'] as const,
   cancelImpact: (id: string) => [...paymentKeys.cancelImpacts(), id] as const
 };
@@ -23,4 +25,11 @@ export const paymentCancelImpactQueryOptions = (id: string, token?: string) =>
     queryKey: paymentKeys.cancelImpact(id),
     queryFn: () => getPaymentCancelImpact(id, token),
     enabled: !!id
+  });
+
+export const customerReceivableQueryOptions = (customerId: string, token?: string) =>
+  queryOptions({
+    queryKey: paymentKeys.receivable(customerId),
+    queryFn: () => getCustomerReceivable(customerId, token),
+    enabled: !!customerId
   });

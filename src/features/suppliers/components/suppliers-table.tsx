@@ -12,7 +12,6 @@ import {
   type DetailConfig,
   type MobileItemConfig
 } from '@/components/data-table';
-import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
 import { useT } from '@/i18n/use-t';
 import { t } from '@/i18n';
@@ -22,7 +21,6 @@ import {
   parseBooleanFacet,
   useDukaanListParams
 } from '@/components/data-table/list-params';
-import { formatPkr } from '@/lib/dukaan/numbers';
 import type { SupplierDTO } from '@/lib/api/types';
 import { supplierKeys, suppliersQueryOptions } from '../api/queries';
 import { deactivateSupplier, reactivateSupplier } from '../api/service';
@@ -34,6 +32,8 @@ import {
   createPartyPhoneColumn,
   createPartyCnicColumn,
   createPartyAddressColumn,
+  createPartyCurrentBalanceColumn,
+  createPartyOpeningBalanceColumn,
   createPartyIsActiveColumn,
   PartyActionsHeader,
   buildPartyMobileItem,
@@ -81,22 +81,8 @@ const supplierColumns: ColumnDef<SupplierDTO>[] = [
   createPartyPhoneColumn<SupplierDTO>(),
   createPartyCnicColumn<SupplierDTO>(),
   createPartyAddressColumn<SupplierDTO>(),
-  {
-    id: 'openingBalance',
-    accessorKey: 'openingBalance',
-    size: 180,
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={t('dukaan.party.supplierOpeningBalance')} />
-    ),
-    meta: {
-      label: 'dukaan.party.supplierOpeningBalance',
-      type: 'money',
-      priority: 2,
-      mobile: 'value'
-    },
-    enableSorting: true,
-    cell: ({ row }) => formatPkr(row.original.openingBalance)
-  },
+  createPartyCurrentBalanceColumn<SupplierDTO>('dukaan.party.currentPayable'),
+  createPartyOpeningBalanceColumn<SupplierDTO>('dukaan.party.supplierOpeningBalance'),
   createPartyIsActiveColumn<SupplierDTO>(),
   {
     id: 'actions',
@@ -114,7 +100,7 @@ const supplierColumns: ColumnDef<SupplierDTO>[] = [
 ];
 
 const supplierMobileItem: MobileItemConfig<SupplierDTO> = buildPartyMobileItem<SupplierDTO>(() =>
-  t('dukaan.party.supplierOpeningBalance')
+  t('dukaan.party.currentPayable')
 );
 
 export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
@@ -186,6 +172,7 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
         {
           partyName: t('dukaan.party.name'),
           balance: t('table.balance'),
+          currentBalance: t('dukaan.party.currentPayable'),
           openingBalance: t('dukaan.party.supplierOpeningBalance')
         },
         (row) => [

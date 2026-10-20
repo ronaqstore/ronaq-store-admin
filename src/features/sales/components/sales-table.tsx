@@ -16,9 +16,17 @@ import {
   type QuickFilterChip
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
+import {
+  createDocumentOutstandingColumn,
+  createDocumentPaidColumn,
+  createDocumentPayStatusColumn,
+  createDocumentTotalColumn,
+  documentOutstandingMeta
+} from '@/components/common/document-payment-columns';
 import { useDataTable } from '@/hooks/use-data-table';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
+import { t as staticT } from '@/i18n';
 import { useRouter } from '@/i18n/navigation';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
@@ -27,6 +35,8 @@ import {
 } from '@/components/data-table/list-params';
 import { formatIsoDate } from '@/lib/dates';
 import { formatPkr } from '@/lib/dukaan/numbers';
+import { salePayBadge } from '@/lib/dukaan/document-payment-badges';
+import { outstandingAmount, sumActivePaid } from '@/lib/dukaan/document-payment-state';
 import type { SaleDTO } from '@/lib/api/types';
 import type { SaleRowActionsProps, SalesTableProps } from '@/types/sales';
 import { salesQueryOptions } from '../api/queries';
@@ -97,12 +107,12 @@ const saleMobileItem: MobileItemConfig<SaleDTO> = {
   leadingIcon: Icons.receipt,
   title: (row) => row.saleNo,
   subtitle: (row) => row.customerName ?? 'Walk-in',
-  badge: (row) => ({
-    label: row.status === 'CANCELLED' ? 'Cancelled' : 'Active',
-    status: row.status
-  }),
+  badge: (row) => salePayBadge(row, staticT),
   value: (row) => formatPkr(row.totalAmount),
-  meta: [(row: SaleDTO) => formatIsoDate(row.saleDate)],
+  meta: [
+    (row: SaleDTO) => formatIsoDate(row.saleDate),
+    (row: SaleDTO) => documentOutstandingMeta(row, staticT)
+  ],
   ariaLabel: (row: SaleDTO) =>
     `${row.saleNo}, ${row.customerName ?? 'Walk-in'}, ${formatPkr(row.totalAmount)}`
 };
@@ -118,6 +128,7 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
     'saleNo',
     'totalAmount',
     'paid',
+    'outstanding',
     'status',
     'createdAt',
     'updatedAt'
@@ -224,73 +235,13 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
       enableColumnFilter: false,
       enableSorting: true
     },
-    {
-      id: 'totalAmount',
-      accessorKey: 'totalAmount',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('table.col.total')} />
-      ),
-      cell: ({ row }) => (
-        <span className='font-normal text-foreground'>{formatPkr(row.original.totalAmount)}</span>
-      ),
-      meta: {
-        label: 'table.col.total',
-        variant: 'number',
-        priority: 3,
-        mobile: 'value'
-      },
-      enableColumnFilter: false,
-      enableSorting: true
-    },
-    {
-      id: 'paid',
-      accessorFn: (row) => {
-        const activePayments = (row.payments ?? []).filter((p) => p.status === 'ACTIVE');
-        return activePayments.reduce((acc, p) => acc + p.amount, 0);
-      },
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.paid')} />,
-      cell: ({ row }) => {
-        const activePayments = (row.original.payments ?? []).filter((p) => p.status === 'ACTIVE');
-        const paid = activePayments.reduce((acc, p) => acc + p.amount, 0);
-
-        return <span className='font-normal text-foreground'>{formatPkr(paid)}</span>;
-      },
-      meta: {
-        label: 'table.col.paid',
-        variant: 'number',
-        priority: 3
-      },
-      enableSorting: true
-    },
-    {
-      id: 'status',
-      accessorKey: 'status',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('table.col.status')} />
-      ),
-      cell: ({ row }) => {
-        const isCancelled = row.original.status === 'CANCELLED';
-        return (
-          <StatusBadge
-            status={row.original.status}
-            label={isCancelled ? t('status.cancelled') : t('status.active')}
-          />
-        );
-      },
-      meta: {
-        label: 'table.col.status',
-        variant: 'select',
-        icon: Icons.circle,
-        options: [
-          { label: 'Active', value: 'ACTIVE' },
-          { label: 'Cancelled', value: 'CANCELLED' }
-        ],
-        priority: 3,
-        mobile: 'badge'
-      },
-      enableColumnFilter: true,
-      enableSorting: true
-    },
+    createDocumentTotalColumn<SaleDTO>({ totalPriority: 3 }),
+    createDocumentPaidColumn<SaleDTO>({ paidPriority: 3 }),
+    createDocumentOutstandingColumn<SaleDTO>({ outstandingPriority: 2 }),
+    createDocumentPayStatusColumn<SaleDTO>(salePayBadge, [
+      { label: 'Active', value: 'ACTIVE' },
+      { label: 'Cancelled', value: 'CANCELLED' }
+    ]),
     {
       id: 'actions',
       size: 48,
@@ -333,12 +284,14 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
     () => ({
       mode: 'sheet',
       title: (row) => row.saleNo,
-      badge: (row) => ({
-        label: row.status === 'CANCELLED' ? t('status.cancelled') : t('status.active'),
-        status: row.status
-      }),
+      badge: (row) => salePayBadge(row, t),
       value: (row) => formatPkr(row.totalAmount),
-      sections: (row) => [
+      sections: (row) => {
+        const paid = sumActivePaid(row.payments);
+        const outstanding =
+          row.status === 'CANCELLED' ? 0 : outstandingAmount(row.totalAmount, paid);
+        const badge = salePayBadge(row, t);
+        return [
         {
           title: t('pages.sales.title'),
           fields: [
@@ -351,20 +304,16 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
             { label: t('table.col.total'), value: formatPkr(row.totalAmount) },
             {
               label: t('table.col.paid'),
-              value: formatPkr(
-                (row.payments ?? [])
-                  .filter((p) => p.status === 'ACTIVE')
-                  .reduce((acc, p) => acc + p.amount, 0)
-              )
+              value: formatPkr(paid)
+            },
+            {
+              label: t('table.col.outstanding'),
+              value:
+                row.status === 'CANCELLED' ? '—' : formatPkr(outstanding)
             },
             {
               label: t('table.col.status'),
-              value: (
-                <StatusBadge
-                  status={row.status}
-                  label={row.status === 'CANCELLED' ? t('status.cancelled') : t('status.active')}
-                />
-              )
+              value: <StatusBadge status={badge.status} label={badge.label} />
             }
           ]
         },
@@ -382,7 +331,8 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
               }
             ]
           : [])
-      ],
+        ];
+      },
       actions: (row) => {
         const isCancelled = row.status === 'CANCELLED';
         const hasReturns = (row.returns?.length ?? 0) > 0;

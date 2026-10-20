@@ -5,6 +5,7 @@ import { API_BASE_URL } from '@/constants/api';
 import type {
   RouteIdContext,
   RouteSupplierIdContext,
+  RouteCustomerIdContext,
   RouteProductImageContext,
   UpstreamErrorBody,
   ProxyOptions
@@ -13,6 +14,7 @@ import type {
 export type {
   RouteIdContext,
   RouteSupplierIdContext,
+  RouteCustomerIdContext,
   RouteProductImageContext,
   ProxyOptions
 };

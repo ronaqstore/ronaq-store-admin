@@ -6,20 +6,14 @@ import { InfiniteEntitySelect } from '@/components/forms/infinite-entity-select'
 import { useT } from '@/i18n/use-t';
 import { listInventoryUnits } from '@/features/inventory/api/service';
 import { formatUnitImeiLabel } from '@/lib/inventory/format-unit-imei-label';
-import type { NamedEntity } from '@/types';
-import type { SaleLineImeiFieldProps, SaleLineImeiUnitPick } from '@/types/sales';
+import type { ListFilters } from '@/lib/dukaan';
+import type {
+  SaleLineImeiFieldProps,
+  SaleLineImeiPickerItem,
+  SaleUnitOptionSource
+} from '@/types/sales';
 
-type ImeiPickerItem = NamedEntity & SaleLineImeiUnitPick;
-
-function formatSaleUnitOption(
-  unit: {
-    imei1: string;
-    imei2?: string | null;
-    condition?: string | null;
-    batteryHealth?: number | null;
-  },
-  t: ReturnType<typeof useT>
-): string {
+function formatSaleUnitOption(unit: SaleUnitOptionSource, t: ReturnType<typeof useT>): string {
   const parts = [
     formatUnitImeiLabel(unit.imei1, unit.imei2),
     unit.condition || null,
@@ -49,12 +43,7 @@ export function SaleLineImeiField({
   }, [value, productId]);
 
   const fetchImeiPage = useCallback(
-    async (filters: {
-      page?: number;
-      limit?: number;
-      pageSize?: number;
-      search?: string;
-    }) => {
+    async (filters: ListFilters) => {
       if (!productId) {
         return { items: [], total: 0, page: 1, limit: filters.pageSize ?? 20 };
       }
@@ -67,7 +56,7 @@ export function SaleLineImeiField({
         pageSize
       });
 
-      const items: ImeiPickerItem[] = res.items
+      const items: SaleLineImeiPickerItem[] = res.items
         .filter((unit) => unit.id === value || !excluded.has(unit.id))
         .map((unit) => {
           const condition =
@@ -92,7 +81,7 @@ export function SaleLineImeiField({
     [productId, value, excludedKey, t]
   );
 
-  const handleValueChange = (unitId: string, item: ImeiPickerItem | null) => {
+  const handleValueChange = (unitId: string, item: SaleLineImeiPickerItem | null) => {
     setSelectedLabel(item?.name ?? '');
     onValueChange(unitId, item?.condition, {
       condition: item?.condition,
@@ -106,7 +95,7 @@ export function SaleLineImeiField({
     <Field data-invalid={isInvalid}>
       <FieldLabel htmlFor={name}>{t('dukaan.sale.imeiUnit')} *</FieldLabel>
       <div onBlur={onBlur}>
-        <InfiniteEntitySelect<ImeiPickerItem>
+        <InfiniteEntitySelect<SaleLineImeiPickerItem>
           value={value || ''}
           onValueChange={handleValueChange}
           queryKey={['inventory', 'sale-units-select', productId, excludedKey]}

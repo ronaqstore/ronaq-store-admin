@@ -105,6 +105,59 @@ export function createPartyAddressColumn<T extends BasePartyRecord>(): ColumnDef
   };
 }
 
+export function createPartyCurrentBalanceColumn<T extends BasePartyRecord>(
+  labelKey: string
+): ColumnDef<T> {
+  return {
+    id: 'currentBalance',
+    accessorKey: 'currentBalance',
+    size: 160,
+    header: ({ column }) => <DataTableColumnHeader column={column} title={t(labelKey)} />,
+    meta: {
+      label: labelKey,
+      type: 'money',
+      priority: 2,
+      mobile: 'value'
+    },
+    enableSorting: false,
+    cell: ({ row }) => {
+      const balance = partyCurrentBalance(row.original);
+      return (
+        <span
+          className={
+            balance > 0
+              ? 'font-normal tabular-nums text-amber-700 dark:text-amber-400'
+              : 'font-normal text-foreground'
+          }
+        >
+          {formatPkr(balance)}
+        </span>
+      );
+    }
+  };
+}
+
+export function createPartyOpeningBalanceColumn<T extends BasePartyRecord>(
+  labelKey: string
+): ColumnDef<T> {
+  return {
+    id: 'openingBalance',
+    accessorKey: 'openingBalance',
+    size: 160,
+    header: ({ column }) => <DataTableColumnHeader column={column} title={t(labelKey)} />,
+    meta: {
+      label: labelKey,
+      type: 'money',
+      priority: 3,
+      mobile: 'hidden'
+    },
+    enableSorting: true,
+    cell: ({ row }) => (
+      <span className='text-muted-foreground'>{formatPkr(row.original.openingBalance)}</span>
+    )
+  };
+}
+
 export function createPartyIsActiveColumn<T extends HasIsActiveRecord>(): ColumnDef<T> {
   return {
     id: 'isActive',
@@ -151,6 +204,10 @@ export function PartyActionsHeader() {
   );
 }
 
+export function partyCurrentBalance(row: BasePartyRecord): number {
+  return row.currentBalance ?? row.openingBalance;
+}
+
 export function buildPartyMobileItem<T extends BasePartyRecord>(
   valueLabelFn: () => string
 ): MobileItemConfig<T> {
@@ -162,7 +219,7 @@ export function buildPartyMobileItem<T extends BasePartyRecord>(
       label: row.isActive ? t('status.active') : t('status.inactive'),
       status: row.isActive ? 'ACTIVE' : 'INACTIVE'
     }),
-    value: (row) => formatPkr(row.openingBalance),
+    value: (row) => formatPkr(partyCurrentBalance(row)),
     valueLabel: valueLabelFn,
     ariaLabel: (row) => `${row.name}, ${row.phone ?? ''}, ${row.isActive ? 'Active' : 'Inactive'}`
   };
@@ -179,7 +236,7 @@ export function buildPartyDetail<T extends BasePartyRecord>(
       label: row.isActive ? t('status.active') : t('status.inactive'),
       status: row.isActive ? 'ACTIVE' : 'INACTIVE'
     }),
-    value: (row) => formatPkr(row.openingBalance),
+    value: (row) => formatPkr(partyCurrentBalance(row)),
     sections: (row) => [
       {
         title: labels.partyName,
@@ -225,6 +282,14 @@ export function buildPartyDetail<T extends BasePartyRecord>(
       {
         title: labels.balance,
         fields: [
+          ...(labels.currentBalance
+            ? [
+                {
+                  label: labels.currentBalance,
+                  value: formatPkr(partyCurrentBalance(row))
+                }
+              ]
+            : []),
           {
             label: labels.openingBalance,
             value: formatPkr(row.openingBalance)

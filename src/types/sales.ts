@@ -8,6 +8,7 @@ import type {
 } from '@/lib/api/types';
 import type { ProductAuthenticity, TrackingType } from '@/lib/api/types';
 import type { FormNumber } from './common';
+import type { NamedEntity } from './forms';
 
 export interface SaleOverdraftPrompt {
   confirmOverdraft?: boolean;
@@ -105,6 +106,15 @@ export interface SaleLineImeiUnitPick {
   effectivePrice?: number | null;
   batteryHealth?: number | null;
   defectNotes?: string | null;
+}
+
+export type SaleLineImeiPickerItem = NamedEntity & SaleLineImeiUnitPick;
+
+export interface SaleUnitOptionSource {
+  imei1: string;
+  imei2?: string | null;
+  condition?: string | null;
+  batteryHealth?: number | null;
 }
 
 export interface SaleLineImeiFieldProps {

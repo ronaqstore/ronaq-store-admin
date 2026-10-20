@@ -15,7 +15,6 @@ export const emptySaleLine: SaleLineItem = {
   authenticity: null
 };
 
-/** Phones are SERIALIZED products — accessories / others are QUANTITY. */
 export function isPhoneSaleLine(
   line: Pick<SaleLineItem, 'tracking_type'> | null | undefined
 ): boolean {

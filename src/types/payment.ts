@@ -83,4 +83,49 @@ export interface PaymentCreateBody {
 export interface RecordPaymentFormErrors {
   customerId?: string;
   amount?: string;
+  saleId?: string;
+}
+
+export interface UnpaidSaleDTO {
+  id: string;
+  saleNo: string;
+  saleDate: string;
+  totalAmount: number;
+  paidAmount: number;
+  remaining: number;
+}
+
+export interface CustomerReceivableDTO {
+  customerId: string;
+  customerName: string;
+  openingBalance: number;
+  openingRemaining: number;
+  totalSales: number;
+  totalPaid: number;
+  receivable: number;
+  unpaidSales: UnpaidSaleDTO[];
+}
+
+export interface PaymentTargetLabels {
+  paymentTarget: string;
+  openingBalance: string;
+  specificBill: string;
+  billsCount: string;
+  noUnpaidBills: string;
+  saleNo: (saleNo: string) => string;
+  date: string;
+  total: string;
+  remaining: string;
+}
+
+export interface PaymentTargetSectionProps {
+  targetType: 'opening' | 'sale';
+  openingRemaining: number;
+  unpaidSales: UnpaidSaleDTO[];
+  selectedSaleId: string;
+  saleIdError?: string;
+  onTargetTypeChange: (val: string) => void;
+  onSelectSale: (saleId: string) => void;
+  onChooseSaleTarget: () => void;
+  labels: PaymentTargetLabels;
 }
