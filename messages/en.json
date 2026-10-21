@@ -1063,6 +1063,13 @@
   "storeSettings": {
     "title": "Online Store",
     "subtitle": "Manage your public storefront branding, profile, and visibility.",
+    "brandingTitle": "Store branding",
+    "brandingHint": "Cover banner and circular logo — same layout customers see on Facebook-style shop pages.",
+    "bannerTitle": "Cover banner",
+    "bannerHint": "Wide cover photo at the top of your public shop. Recommended landscape image.",
+    "uploadBanner": "Upload banner",
+    "changeBanner": "Change banner",
+    "removeBanner": "Remove banner",
     "logoTitle": "Shop logo",
     "logoHint": "Always shown as a circle on your storefront. Optional — a placeholder is used until you upload one.",
     "uploadLogo": "Upload logo",
@@ -1121,6 +1128,10 @@
     "logoUploadFailed": "Failed to upload logo",
     "logoRemoved": "Shop logo removed",
     "logoRemoveFailed": "Failed to remove logo",
+    "bannerUpdated": "Shop banner updated",
+    "bannerUploadFailed": "Failed to upload banner",
+    "bannerRemoved": "Shop banner removed",
+    "bannerRemoveFailed": "Failed to remove banner",
     "googleMapsPlaceholder": "Search and pick a Pakistan location"
   },
   "account": {

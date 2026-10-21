@@ -2,6 +2,8 @@ import { AppError } from '@/lib/errors';
 
 const PRODUCT_MAX_EDGE = 1600;
 const LOGO_EDGE = 512;
+const BANNER_WIDTH = 1600;
+const BANNER_HEIGHT = 700;
 const JPEG_QUALITY = 0.85;
 
 export async function prepareProductImage(
@@ -20,6 +22,31 @@ export async function prepareShopLogo(file: File, edge = LOGO_EDGE): Promise<Fil
   const sx = Math.floor((img.width - side) / 2);
   const sy = Math.floor((img.height - side) / 2);
   const blob = await drawToJpeg(img, edge, edge, sx, sy, side, side);
+  return toJpegFile(blob, file.name);
+}
+
+export async function prepareShopBanner(
+  file: File,
+  width = BANNER_WIDTH,
+  height = BANNER_HEIGHT
+): Promise<File> {
+  const img = await loadImage(file);
+  const targetRatio = width / height;
+  const sourceRatio = img.width / img.height;
+  let sx = 0;
+  let sy = 0;
+  let sw = img.width;
+  let sh = img.height;
+
+  if (sourceRatio > targetRatio) {
+    sw = Math.round(img.height * targetRatio);
+    sx = Math.floor((img.width - sw) / 2);
+  } else if (sourceRatio < targetRatio) {
+    sh = Math.round(img.width / targetRatio);
+    sy = Math.floor((img.height - sh) / 2);
+  }
+
+  const blob = await drawToJpeg(img, width, height, sx, sy, sw, sh);
   return toJpegFile(blob, file.name);
 }
 

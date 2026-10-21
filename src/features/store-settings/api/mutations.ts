@@ -1,7 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
-import { removeShopLogo, updateStoreSettings, uploadShopLogo } from './service';
+import {
+  removeShopBanner,
+  removeShopLogo,
+  updateStoreSettings,
+  uploadShopBanner,
+  uploadShopLogo
+} from './service';
 import { storeSettingsKeys } from './queries';
 import type { UpdateStoreSettingsInput } from '@/types/store-settings';
 
@@ -46,6 +52,36 @@ export function useRemoveShopLogo() {
     },
     onError: (error: Error) => {
       toast.error(error.message || t('logoRemoveFailed'));
+    }
+  });
+}
+
+export function useUploadShopBanner() {
+  const t = useTranslations('storeSettings');
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => uploadShopBanner(file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: storeSettingsKeys.all });
+      toast.success(t('bannerUpdated'));
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || t('bannerUploadFailed'));
+    }
+  });
+}
+
+export function useRemoveShopBanner() {
+  const t = useTranslations('storeSettings');
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => removeShopBanner(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: storeSettingsKeys.all });
+      toast.success(t('bannerRemoved'));
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || t('bannerRemoveFailed'));
     }
   });
 }

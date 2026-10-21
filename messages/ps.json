@@ -1063,6 +1063,13 @@
   "storeSettings": {
     "title": "آنلاین دوکان",
     "subtitle": "د خپل عامه دوکان برانډینګ، پروفایل او لید اداره کړئ.",
+    "brandingTitle": "د دوکان برانډینګ",
+    "brandingHint": "کاور بینر او دایره‌یی لوگو — هماغه ترتیب چې پیرودونکي په فیسبوک ډوله دوکان پاڼه کې ویني.",
+    "bannerTitle": "کاور بینر",
+    "bannerHint": "د عامه دوکان په سر کې پراخه کاور انځور. افقي انځور غوره دی.",
+    "uploadBanner": "بینر اپلوډ کړئ",
+    "changeBanner": "بینر بدل کړئ",
+    "removeBanner": "بینر لرې کړئ",
     "logoTitle": "د دوکان لوگو",
     "logoHint": "په دوکان کې تل په دایره کې ښکاري. اختیاري — تر اپلوډ پورې پلیس هولډر کارېږي.",
     "uploadLogo": "لوگو اپلوډ کړئ",
@@ -1121,6 +1128,10 @@
     "logoUploadFailed": "لوگو اپلوډ نشو",
     "logoRemoved": "د دوکان لوگو لرې شو",
     "logoRemoveFailed": "لوگو لرې نشو",
+    "bannerUpdated": "د دوکان بینر تازه شو",
+    "bannerUploadFailed": "بینر اپلوډ نشو",
+    "bannerRemoved": "د دوکان بینر لرې شو",
+    "bannerRemoveFailed": "بینر لرې نشو",
     "googleMapsPlaceholder": "په پاکستان کې موقعیت ولټوئ او وټاکئ"
   },
   "account": {
