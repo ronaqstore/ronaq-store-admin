@@ -124,7 +124,7 @@
   "nav": {
     "more": "مزید",
     "menu": "مینو کھولیں",
-    "search": "تلاش",
+    "search": "تلاش...",
     "back": "واپس",
     "group": {
       "overview": "جائزہ",
@@ -174,7 +174,7 @@
     "allStatuses": "تمام اسٹیٹس",
     "searchShops": "Search...",
     "searchTabs": "Search...",
-    "searchPlaceholder": "تلاش",
+    "searchPlaceholder": "تلاش...",
     "noMatchingTabs": "کوئی مماثل ٹیب نہیں",
     "accountMenu": "اکاؤنٹ مینو",
     "signOut": "سائن آؤٹ",
@@ -609,7 +609,7 @@
       "productDeactivated": "مصنوعہ کامیابی سے غیر فعال ہو گیا",
       "productActivated": "مصنوعہ کامیابی سے فعال ہو گیا",
       "publishUpdated": "شائع کرنے کی حیثیت اپ ڈیٹ ہو گئی",
-      "searchPlaceholder": "تلاش",
+      "searchPlaceholder": "تلاش...",
       "status": "حیثیت",
       "active": "فعال",
       "inactive": "غیر فعال",
@@ -1294,7 +1294,7 @@
     "inventoryDesc": "انوینٹری کھولیں"
   },
   "icons": {
-    "searchPlaceholder": "تلاش",
+    "searchPlaceholder": "تلاش...",
     "noIconsFound": "\"{search}\" سے مماثل کوئی آئیکن نہیں ملا",
     "browseTabler": "Tabler آئیکنز براؤز کریں"
   },
@@ -1345,7 +1345,7 @@
     "screenLoadDescription": "نیٹ ورک میں مسئلہ آنے سے صفحہ متاثر ہوا۔ دوبارہ لوڈ کریں اور جہاں چھوڑا تھا وہاں سے جاری رکھیں۔"
   },
   "kbar": {
-    "searchPlaceholder": "تلاش",
+    "searchPlaceholder": "تلاش...",
     "noResults": "کوئی نتیجہ نہیں ملا۔",
     "navigate": "منتقل ہوں",
     "open": "کھولیں",
@@ -2412,7 +2412,7 @@
     "keep": "برقرار رکھیں",
     "confirm": "تصدیق کریں",
     "clearSelection": "انتخاب صاف کریں",
-    "searchCategory": "تلاش",
+    "searchCategory": "تلاش...",
     "loadingCategories": "کیٹیگریز لوڈ ہو رہی ہیں...",
     "noCategoriesFound": "کوئی اخراجات کی کیٹیگری نہیں ملی",
     "loadingMore": "مزید لوڈ ہو رہا ہے...",
@@ -2462,7 +2462,7 @@
     "descriptionPlaceholder": "اختیاری نوٹس",
     "shortfallWarningTitle": "کیش کی کمی کی تنبیہ",
     "confirmExpenseOverdraft": "کیش کی کمی کے باوجود خرچے کی تصدیق کریں",
-    "searchCategoryPlaceholder": "تلاش",
+    "searchCategoryPlaceholder": "تلاش...",
     "clearCategorySelection": "انتخاب ختم کریں"
   },
   "payments": {

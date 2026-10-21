@@ -124,7 +124,7 @@
   "nav": {
     "more": "نور",
     "menu": "مینو پرانیزئ",
-    "search": "لټون",
+    "search": "لټون...",
     "back": "شاته",
     "group": {
       "overview": "کتنه",
@@ -174,7 +174,7 @@
     "allStatuses": "ټول حالتونه",
     "searchShops": "Search...",
     "searchTabs": "Search...",
-    "searchPlaceholder": "لټون",
+    "searchPlaceholder": "لټون...",
     "noMatchingTabs": "هیڅ ورته ټب نشته",
     "accountMenu": "د حساب مینو",
     "signOut": "وتل",
@@ -246,7 +246,7 @@
     "toggleSidebar": "د غاړې مینو واړوئ",
     "commandPalette": "د کمانډ پلیټ",
     "searchForCommand": "د کمانډ لټون وکړئ...",
-    "search": "لټون",
+    "search": "لټون...",
     "view": "کتل",
     "create": "جوړول",
     "update": "تازه کول",
@@ -614,7 +614,7 @@
       "productDeactivated": "مصنوعہ کامیابی سے غیر فعال ہو گیا",
       "productActivated": "محصول په بریا سره فعال شو",
       "publishUpdated": "شائع کرنے کی حیثیت اپ ڈیٹ ہو گئی",
-      "searchPlaceholder": "لټون",
+      "searchPlaceholder": "لټون...",
       "status": "حالت",
       "active": "فعال",
       "inactive": "غیر فعال",
@@ -1294,7 +1294,7 @@
     "inventoryDesc": "موجودي پرانیزئ"
   },
   "icons": {
-    "searchPlaceholder": "لټون",
+    "searchPlaceholder": "لټون...",
     "noIconsFound": "د \"{search}\" سره سمون کونکی هیڅ آیکون ونه موندل شو",
     "browseTabler": "Tabler آیکونونه لټون وکړئ"
   },
@@ -1345,7 +1345,7 @@
     "screenLoadDescription": "د شبکې د یوې ستونزې له امله پاڼه ځنډ شوه. بیا پورته کړئ او له هغه ځای څخه چې پریږدي ووئ دوام ورکړئ."
   },
   "kbar": {
-    "searchPlaceholder": "لټون",
+    "searchPlaceholder": "لټون...",
     "noResults": "هیڅ پایله ونه موندل شوه.",
     "navigate": "منتقل شئ",
     "open": "پرانیزئ",
@@ -2412,7 +2412,7 @@
     "keep": "وساتئ",
     "confirm": "تایید کړئ",
     "clearSelection": "انتخاب پاک کړئ",
-    "searchCategory": "لټون",
+    "searchCategory": "لټون...",
     "loadingCategories": "کټګورۍ لوډ کیږي...",
     "noCategoriesFound": "د لګښت هیڅ کټګوري ونه موندل شوه",
     "loadingMore": "نور لوډ کیږي...",
@@ -2462,7 +2462,7 @@
     "descriptionPlaceholder": "اختیاري یادښتونه",
     "shortfallWarningTitle": "د نغدو پیسو د کمښت خبرداری",
     "confirmExpenseOverdraft": "د نغدو پیسو د کمښت سره سره لګښت تایید کړئ",
-    "searchCategoryPlaceholder": "لټون",
+    "searchCategoryPlaceholder": "لټون...",
     "clearCategorySelection": "ټاکل پاک کړئ"
   },
   "payments": {
