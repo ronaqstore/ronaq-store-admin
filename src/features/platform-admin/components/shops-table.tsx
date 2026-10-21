@@ -24,6 +24,7 @@ import { RowActionsMenu } from '@/components/common/row-actions-menu';
 import { TruncateText } from '@/components/common/truncate-text';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { formatIsoDate } from '@/lib/dates';
+import { formatPkMobileLocal } from '@/lib/auth/phone';
 import type {
   PlatformShop,
   PlatformShopAccessStatus,
@@ -78,7 +79,9 @@ const columns: ColumnDef<PlatformShop>[] = [
     cell: ({ row }) => (
       <div>
         <p className='font-medium'>{row.original.ownerName ?? '—'}</p>
-        <p className='text-muted-foreground text-xs'>{row.original.ownerPhone ?? '—'}</p>
+        <p className='text-muted-foreground text-xs'>
+          {row.original.ownerPhone ? formatPkMobileLocal(row.original.ownerPhone) : '—'}
+        </p>
       </div>
     ),
     meta: { label: 'table.ownerName', type: 'text', priority: 2 },
@@ -227,7 +230,8 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
 const shopMobileItem: MobileItemConfig<PlatformShop> = {
   leading: 'avatar',
   title: (row) => row.name,
-  subtitle: (row) => `${row.ownerName ?? '—'} · ${row.ownerPhone ?? '—'}`,
+  subtitle: (row) =>
+    `${row.ownerName ?? '—'} · ${row.ownerPhone ? formatPkMobileLocal(row.ownerPhone) : '—'}`,
   badge: (row) => ({
     label: statusLabel(row.accessStatus),
     status: row.accessStatus
@@ -268,9 +272,9 @@ const shopDetail: DetailConfig<PlatformShop> = {
           value: row.ownerPhone ? (
             <a
               className='text-primary underline-offset-2 hover:underline'
-              href={`tel:${row.ownerPhone}`}
+              href={`tel:${formatPkMobileLocal(row.ownerPhone)}`}
             >
-              {row.ownerPhone}
+              {formatPkMobileLocal(row.ownerPhone)}
             </a>
           ) : (
             '—'

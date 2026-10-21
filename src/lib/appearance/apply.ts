@@ -15,7 +15,6 @@ export const ACCENT_OKLCH: Record<AppearanceState['accent'], string> = {
   teal: 'oklch(0.58 0.12 195)'
 };
 
-/** Accents are mid/dark — text on primary must stay white for contrast. */
 export const ACCENT_FOREGROUND_OKLCH = 'oklch(1 0 0)';
 
 function setAppearanceCookie(name: string, value: string) {

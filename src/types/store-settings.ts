@@ -3,6 +3,20 @@ export interface OpeningHoursRange {
   closes: string;
 }
 
+export interface StoreLocationValue {
+  placeLabel: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+export interface StoreLocationSearchProps {
+  value: StoreLocationValue;
+  onChange: (next: StoreLocationValue) => void;
+  onCitySuggest?: (city: string) => void;
+  disabled?: boolean;
+  error?: string;
+}
+
 export interface StoreSettingsDTO {
   shopId: string;
   slug: string;
@@ -15,6 +29,8 @@ export interface StoreSettingsDTO {
   phoneNumber?: string | null;
   address?: string | null;
   city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   googleMapsUrl?: string | null;
   openingHours?: string | null;
   facebookUrl?: string | null;
@@ -30,6 +46,8 @@ export interface UpdateStoreSettingsInput {
   phoneNumber?: string | null;
   address?: string | null;
   city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   googleMapsUrl?: string | null;
   openingHours?: string | null;
   facebookUrl?: string | null;

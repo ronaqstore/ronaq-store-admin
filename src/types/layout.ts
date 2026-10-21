@@ -60,6 +60,10 @@ export type AppearanceRadius = 'sharp' | 'medium' | 'round';
 export type AppearanceAccent = 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'teal';
 export type AppearanceDigits = 'western' | 'eastern';
 
+export interface LivePreviewProps {
+  mounted: boolean;
+}
+
 export interface AppearanceState {
   density: AppearanceDensity;
   radius: AppearanceRadius;

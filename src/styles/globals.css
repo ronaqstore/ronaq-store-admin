@@ -873,3 +873,8 @@ html[lang='ps'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sideb
   overflow: visible !important;
   text-overflow: clip !important;
 }
+
+/* Google Places dropdown must sit above dialogs/modals */
+.pac-container {
+  z-index: 10000 !important;
+}

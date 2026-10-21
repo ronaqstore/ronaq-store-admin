@@ -22,8 +22,8 @@ export function mapPartyApiError(
 
   const lower = raw.toLowerCase();
   if (
-    lower.includes('already used on the platform') ||
-    lower.includes('phone number is already in use') ||
+    lower.includes('already in use') ||
+    lower.includes('already used') ||
     lower.includes('already has a ronaq store account')
   ) {
     return { field: 'phone', message: t('validation.phoneAlreadyTaken') };

@@ -46,16 +46,8 @@ import type {
 
 function suggestVariantName(parts: SuggestVariantNameParts): string {
   const chunks: string[] = [];
-  if (parts.brandLabel?.trim()) chunks.push(parts.brandLabel.trim());
   if (parts.model?.trim()) chunks.push(parts.model.trim());
-  if (parts.color?.trim()) chunks.push(parts.color.trim());
-  if (parts.storage?.trim()) chunks.push(parts.storage.trim());
-  if (parts.trackingType === 'SERIALIZED' && parts.ptaStatus) {
-    chunks.push(parts.ptaStatus.replaceAll('_', ' '));
-  }
-  if (parts.trackingType === 'QUANTITY' && parts.authenticity) {
-    chunks.push(parts.authenticity);
-  }
+  else if (parts.brandLabel?.trim()) chunks.push(parts.brandLabel.trim());
   return chunks.join(' · ');
 }
 

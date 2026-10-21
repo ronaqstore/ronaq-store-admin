@@ -6,7 +6,7 @@ export const INPUT_LIMITS = {
   phoneLoose: 30,
   cnic: 15,
   cnicDigits: 13,
-  address: 300,
+  address: 500,
   addressCustomer: 255,
   city: 100,
   notes: 1000,

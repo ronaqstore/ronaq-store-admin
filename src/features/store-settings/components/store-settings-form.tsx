@@ -11,6 +11,7 @@ import { PreviewableImage } from '@/components/media/previewable-image';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { PLACEHOLDER_SHOP_LOGO } from '@/constants/placeholders';
 import { formatEmpty } from '@/lib/format-empty';
+import { formatPkMobileLocal } from '@/lib/auth/phone';
 import { formatOpeningHoursDisplay } from '@/lib/opening-hours';
 import { prepareShopLogo } from '@/lib/prepare-image';
 import { useT } from '@/i18n/use-t';
@@ -37,15 +38,27 @@ export function StoreSettingsForm() {
   const profileRows: StoreProfileDetailRow[] = [
     { label: t('storeSettings.displayName'), value: formatEmpty(data.displayName) },
     { label: t('storeSettings.city'), value: formatEmpty(data.city) },
-    { label: t('storeSettings.phone'), value: formatEmpty(data.phoneNumber) },
-    { label: t('storeSettings.whatsapp'), value: formatEmpty(data.whatsappNumber) },
+    {
+      label: t('storeSettings.phone'),
+      value: formatEmpty(formatPkMobileLocal(data.phoneNumber) || null)
+    },
+    {
+      label: t('storeSettings.whatsapp'),
+      value: formatEmpty(formatPkMobileLocal(data.whatsappNumber) || null)
+    },
     { label: t('storeSettings.address'), value: formatEmpty(data.address) },
+    {
+      label: t('storeSettings.googleMaps'),
+      value:
+        data.latitude != null && data.longitude != null
+          ? `${Number(data.latitude).toFixed(5)}, ${Number(data.longitude).toFixed(5)}`
+          : formatEmpty(null)
+    },
     {
       label: t('storeSettings.openingHours'),
       value: formatEmpty(formatOpeningHoursDisplay(data.openingHours))
     },
-    { label: t('storeSettings.about'), value: formatEmpty(data.about) },
-    { label: t('storeSettings.googleMaps'), value: formatEmpty(data.googleMapsUrl) }
+    { label: t('storeSettings.about'), value: formatEmpty(data.about) }
   ];
 
   const handleLogoSelect = async (e: ChangeEvent<HTMLInputElement>) => {

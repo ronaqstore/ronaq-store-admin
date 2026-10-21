@@ -12,6 +12,7 @@ import {
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { formatDate } from '@/lib/format';
+import { formatPkMobileLocal } from '@/lib/auth/phone';
 import { t } from '@/i18n';
 import type {
   BasePartyRecord,
@@ -70,7 +71,10 @@ export function createPartyPhoneColumn<T extends BasePartyRecord>(): ColumnDef<T
     header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.phone')} />,
     meta: { label: 'table.col.phone', type: 'phone', priority: 2, mobile: 'subtitle' },
     enableSorting: true,
-    cell: ({ row }) => (row.original as T).phone || '—'
+    cell: ({ row }) => {
+      const phone = (row.original as T).phone;
+      return phone ? formatPkMobileLocal(phone) : '—';
+    }
   };
 }
 
@@ -230,14 +234,15 @@ export function buildPartyMobileItem<T extends BasePartyRecord>(
   return {
     leading: 'avatar',
     title: (row) => row.name,
-    subtitle: (row) => row.phone ?? undefined,
+    subtitle: (row) => (row.phone ? formatPkMobileLocal(row.phone) : undefined),
     badge: (row) => ({
       label: row.isActive ? t('status.active') : t('status.inactive'),
       status: row.isActive ? 'ACTIVE' : 'INACTIVE'
     }),
     value: (row) => formatPkr(partyCurrentBalance(row)),
     valueLabel: valueLabelFn,
-    ariaLabel: (row) => `${row.name}, ${row.phone ?? ''}, ${row.isActive ? 'Active' : 'Inactive'}`
+    ariaLabel: (row) =>
+      `${row.name}, ${row.phone ? formatPkMobileLocal(row.phone) : ''}, ${row.isActive ? 'Active' : 'Inactive'}`
   };
 }
 
@@ -263,9 +268,9 @@ export function buildPartyDetail<T extends BasePartyRecord>(
             value: row.phone ? (
               <a
                 className='text-primary underline-offset-2 hover:underline'
-                href={`tel:${row.phone}`}
+                href={`tel:${formatPkMobileLocal(row.phone)}`}
               >
-                {row.phone}
+                {formatPkMobileLocal(row.phone)}
               </a>
             ) : (
               '—'

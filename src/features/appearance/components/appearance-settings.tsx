@@ -23,6 +23,7 @@ import { useRouter, usePathname } from '@/i18n/navigation';
 import { useLocale } from 'next-intl';
 import type { AppLocale } from '@/i18n/request';
 import { delocalize } from '@/lib/auth/routes';
+import type { LivePreviewProps } from '@/types/layout';
 
 const ACCENT_OPTIONS: AppearanceAccent[] = ['blue', 'green', 'purple', 'orange', 'red', 'teal'];
 
@@ -35,7 +36,7 @@ const ACCENT_CLASS: Record<AppearanceAccent, string> = {
   teal: 'bg-teal-500'
 };
 
-function LivePreview({ mounted }: { mounted: boolean }) {
+function LivePreview({ mounted }: LivePreviewProps) {
   const digits = useAppearanceStore((s) => s.digits);
   const t = useT();
   const previewDigits = mounted ? digits : DEFAULT_APPEARANCE.digits;
@@ -100,7 +101,6 @@ export function AppearanceSettings() {
     setMounted(true);
   }, []);
 
-  // Match SSR defaults on first paint; reveal persisted prefs only after mount.
   const selectedAccent = mounted ? prefs.accent : DEFAULT_APPEARANCE.accent;
   const density = mounted ? prefs.density : DEFAULT_APPEARANCE.density;
   const radius = mounted ? prefs.radius : DEFAULT_APPEARANCE.radius;

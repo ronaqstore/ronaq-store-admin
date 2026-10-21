@@ -30,8 +30,6 @@ export const DEFAULT_APPEARANCE = {
 export const useAppearanceStore = create<AppearanceState>()(
   persist(
     (set, get) => ({
-      // Always start from defaults so SSR HTML matches the first client render.
-      // Persist rehydrates from localStorage after mount.
       ...DEFAULT_APPEARANCE,
       setDensity: (density) => {
         applyAppearancePrefs({ ...get(), density });
