@@ -19,10 +19,3 @@ export const createPartyFormSchema = (t: Translator) =>
     ]),
     isActive: z.boolean().optional()
   });
-
-export const createReceivePaymentSchema = (t: Translator) =>
-  z.object({
-    amount: z
-      .number({ error: t('validation.amountRequired') })
-      .positive(t('validation.amountPositive'))
-  });

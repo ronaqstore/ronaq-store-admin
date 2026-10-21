@@ -27,6 +27,11 @@ export interface PartyNameColumnOptions<T extends { name: string }> {
   cellExtra?: (row: T) => ReactNode;
 }
 
+export interface PartyBalanceColumnOptions<T> {
+  labelKey: string;
+  ledgerHref?: (row: T) => string | undefined;
+}
+
 export type PartyApiField = 'phone' | 'cnic';
 
 export interface MappedPartyApiError {
@@ -86,6 +91,64 @@ export interface BasePartyDialogProps {
 }
 
 export interface BasePartyDialogBodyProps extends BasePartyDialogProps {}
+
+export interface PartyLedgerRow {
+  id: string;
+  date: string;
+  type: string;
+  reference?: string | null;
+  status?: string;
+  amount: number;
+  running_balance: number;
+}
+
+export interface PartyLedgerViewProps {
+  name: string;
+  phone: string | null;
+  address: string | null;
+  notes: string | null;
+  openingBalance: number;
+  currentBalance: number;
+  openingBalanceLabel: string;
+  currentBalanceLabel: string;
+  paymentLabel: string;
+  isPaying: boolean;
+  onPay: (amount: number) => Promise<unknown>;
+  ledger: PartyLedgerRow[];
+  backHref: string;
+  backLabel: string;
+  outstanding: {
+    openingRemaining: number;
+    bills: PartyOutstandingBill[];
+  };
+  outstandingBillKind: string;
+}
+
+export interface PartyLedgerRowsProps {
+  openingBalance: number;
+  ledger: PartyLedgerRow[];
+  openingLabel: string;
+  runningLabel: string;
+}
+
+export interface PartyOutstandingBill {
+  id: string;
+  reference: string;
+  date: string;
+  totalAmount: number;
+  paidAmount: number;
+  remaining: number;
+  href?: string;
+}
+
+export interface PartyOutstandingBreakdownProps {
+  currentBalance: number;
+  openingRemaining: number;
+  openingLabel: string;
+  bills: PartyOutstandingBill[];
+  billKindLabel: string;
+  totalLabel: string;
+}
 
 export interface PartyCellActionProps {
   id: string;

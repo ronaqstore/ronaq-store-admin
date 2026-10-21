@@ -28,3 +28,49 @@ export interface SupplierCellActionProps {
 export interface SuppliersTableProps {
   toolbarAction?: ReactNode;
 }
+
+export interface SupplierLedgerClientProps {
+  id: string;
+}
+
+export interface SupplierLedgerEntryDTO {
+  id: string;
+  type: string;
+  date: string;
+  reference?: string | null;
+  notes?: string | null;
+  amount: number;
+  delta: number;
+  balance: number;
+  status: string;
+}
+
+export interface SupplierLedgerDTO {
+  supplierId: string;
+  supplierName: string;
+  openingBalance: number;
+  balance: number;
+  page: number;
+  pageSize: number;
+  total: number;
+  items: SupplierLedgerEntryDTO[];
+}
+
+export interface SupplierLedgerView {
+  id: string;
+  name: string;
+  phone: string | null;
+  address: string | null;
+  notes: string | null;
+  openingBalance: number;
+  payable: number;
+  ledger: Array<{
+    id: string;
+    date: string;
+    type: string;
+    reference?: string | null;
+    status?: string;
+    amount: number;
+    running_balance: number;
+  }>;
+}

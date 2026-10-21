@@ -15,6 +15,7 @@ import { formatDate } from '@/lib/format';
 import { t } from '@/i18n';
 import type {
   BasePartyRecord,
+  PartyBalanceColumnOptions,
   PartyDetailLabels,
   PartyNameColumnOptions
 } from '@/types/party';
@@ -27,6 +28,7 @@ import type {
   NamedActiveItem
 } from '@/types/common';
 import { TruncateText } from '@/components/common/truncate-text';
+import { Link } from '@/i18n/navigation';
 
 export function createPartyNameColumn<T extends { name: string }>(
   opts?: PartyNameColumnOptions<T>
@@ -106,8 +108,10 @@ export function createPartyAddressColumn<T extends BasePartyRecord>(): ColumnDef
 }
 
 export function createPartyCurrentBalanceColumn<T extends BasePartyRecord>(
-  labelKey: string
+  opts: PartyBalanceColumnOptions<T> | string
 ): ColumnDef<T> {
+  const labelKey = typeof opts === 'string' ? opts : opts.labelKey;
+  const ledgerHref = typeof opts === 'string' ? undefined : opts.ledgerHref;
   return {
     id: 'currentBalance',
     accessorKey: 'currentBalance',
@@ -122,6 +126,18 @@ export function createPartyCurrentBalanceColumn<T extends BasePartyRecord>(
     enableSorting: false,
     cell: ({ row }) => {
       const balance = partyCurrentBalance(row.original);
+      const href = ledgerHref?.(row.original);
+      const className =
+        balance > 0
+          ? 'font-normal tabular-nums text-amber-700 underline-offset-2 hover:underline dark:text-amber-400'
+          : 'font-normal text-foreground underline-offset-2 hover:underline';
+      if (href) {
+        return (
+          <Link href={href} className={className} onClick={(e) => e.stopPropagation()}>
+            {formatPkr(balance)}
+          </Link>
+        );
+      }
       return (
         <span
           className={

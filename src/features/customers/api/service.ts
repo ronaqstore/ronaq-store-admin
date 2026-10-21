@@ -51,11 +51,6 @@ export async function getCustomerLedger(
   return appFetch<CustomerLedgerDTO>(`/api/customers/${id}/ledger${qs}`);
 }
 
-function ledgerLabel(type: string, reference?: string | null, status?: string): string {
-  const base = reference ? `${type} ${reference}` : type;
-  return status && status !== 'ACTIVE' ? `${base} (${status})` : base;
-}
-
 export async function getCustomerLedgerView(
   id: string,
   token?: string
@@ -71,11 +66,15 @@ export async function getCustomerLedgerView(
     phone: customer.phone,
     address: customer.address,
     notes: customer.notes,
+    openingBalance: ledger.openingBalance,
     udhar: ledger.balance,
     ledger: ledger.items.map((row) => ({
       id: row.id,
       date: row.date,
-      label: ledgerLabel(row.type, row.reference, row.status),
+      type: row.type,
+      reference: row.reference ?? null,
+      status: row.status,
+      label: row.reference ? `${row.type} ${row.reference}` : row.type,
       amount: row.delta,
       running_balance: row.balance
     }))

@@ -75,7 +75,10 @@ const customerColumns: ColumnDef<CustomerDTO>[] = [
   createPartyNameColumn<CustomerDTO>({ placeholderKey: 'search.customers' }),
   createPartyPhoneColumn<CustomerDTO>(),
   createPartyAddressColumn<CustomerDTO>(),
-  createPartyCurrentBalanceColumn<CustomerDTO>('dukaan.party.currentUdhar'),
+  createPartyCurrentBalanceColumn<CustomerDTO>({
+    labelKey: 'dukaan.party.currentUdhar',
+    ledgerHref: (row) => `/dashboard/customers/${row.id}`
+  }),
   createPartyOpeningBalanceColumn<CustomerDTO>('dukaan.party.customerOpeningBalance'),
   createPartyIsActiveColumn<CustomerDTO>(),
   {

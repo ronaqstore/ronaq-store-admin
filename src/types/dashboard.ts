@@ -48,3 +48,8 @@ export interface CustomerLedgerPrefetchRouteProps {
   id: string;
   children: ReactNode;
 }
+
+export interface SupplierLedgerPrefetchRouteProps {
+  id: string;
+  children: ReactNode;
+}

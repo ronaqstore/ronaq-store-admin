@@ -734,7 +734,36 @@
       "customerNamePlaceholder": "د پیرودونکي نوم",
       "addressPlaceholder": "د هټۍ یا کور پته",
       "openingBalancePlaceholder": "افتتاحي اندازه",
-      "notesPlaceholder": "اختیاري یادښتونه"
+      "notesPlaceholder": "اختیاري یادښتونه",
+      "paySupplier": "عرضه کوونکي ته تادیه",
+      "ledgerOpeningSeed": "افتتاحي بیلانس (ورځ 0)",
+      "ledgerExplainUdhar": "اوسنی پور = افتتاحي + پلور − تادیات − بیرته راګرځېدنه + ریفنډ. لاندې هر قطار ښیې کوم بل یا تادیه بیلانس بدل کړ.",
+      "ledgerExplainPayable": "اوسنی د تادیې وړ = افتتاحي + پیرود − د عرضه کوونکي تادیات. لاندې هر قطار ښیې کوم بل یا تادیه بیلانس بدل کړ.",
+      "ledgerSale": "پلور {ref}",
+      "ledgerPaymentOnBill": "په بل {ref} تادیه",
+      "ledgerPaymentOnOpening": "په افتتاحي بیلانس تادیه",
+      "ledgerReturn": "بیرته راګرځېدنه {ref}",
+      "ledgerRefund": "ریفنډ {ref}",
+      "ledgerPurchase": "پیرود {ref}",
+      "ledgerSupplierPaymentOnBill": "په بل {ref} تادیه",
+      "ledgerSupplierPaymentOnOpening": "په افتتاحي بیلانس تادیه",
+      "ledgerHistory": "د کتاب تاریخ",
+      "ledgerHistoryHint": "هر قطار ښیې کوم بل یا تادیه بیلانس بدل کړ.",
+      "ledgerHistoryEmpty": "تر اوسه هیڅ بل یا تادیه نشته — یوازې افتتاحي بیلانس ښودل شوی.",
+      "backToCustomers": "پیرودونکو ته بیرته",
+      "backToSuppliers": "عرضه کوونکو ته بیرته",
+      "outstandingTitle": "لا هم پاتې",
+      "outstandingDesc": "{label} {amount} په لاندې نه تادیه شویو برخو ویشل کیږي.",
+      "outstandingOpeningStillDue": "افتتاحي بیلانس لا هم پاتې",
+      "outstandingOpeningHint": "هغه پور چې دا ګوند اضافه شو ثبت شوی.",
+      "outstandingBillDetail": "بل {total} · تادیه شوی {paid} · لا هم پاتې {remaining}",
+      "outstandingTotal": "ټول لا هم پاتې",
+      "outstandingStillDueCol": "لا هم پاتې",
+      "outstandingSale": "پلور",
+      "outstandingPurchase": "پیرود",
+      "outstandingEmptyUdhar": "هیڅ پاتې افتتاحي بیلانس یا پلور نشته — هیڅ نه دي واجب.",
+      "outstandingEmptyPayable": "هیڅ پاتې افتتاحي بیلانس یا پیرود نشته — هیڅ نه دي واجب.",
+      "ledgerSettled": "تصفیه شوی"
     }
   },
   "validation": {
@@ -743,7 +772,7 @@
     "acceptedFileTypes": "د فایل منل شوي ډولونه: {types}",
     "productNameMin2Chars": "د محصول نوم باید لږ تر لږه دوه توری ولري",
     "productNameMax100": "د محصول نوم باید له ۱۰۰ توریو څخه زیات نه وي",
-    "lowStockMax": "د کم ذخیره حد باید له ۱،۰۰۰،۰۰۰ څخه زیات نه وي",
+    "lowStockMax": "د کم   ذخیره حد باید له ۱،۰۰۰،۰۰۰ څخه زیات نه وي",
     "descriptionMin10Chars": "توضیح باید لږ تر لږه لس توری ولري",
     "firstNameMin2Chars": "لومړی نوم باید لږ تر لږه دوه توری ولري",
     "lastNameMin2Chars": "وروستی نوم باید لږ تر لږه دوه توری ولري",
@@ -855,6 +884,10 @@
     "customerLedger": {
       "title": "د پیرودونکي کتاب",
       "description": "د پور تاریخ او تادیات"
+    },
+    "supplierLedger": {
+      "title": "د عرضه کوونکي کتاب",
+      "description": "د تادیې وړ تاریخ او تادیات"
     },
     "payments": {
       "title": "تادیات",
@@ -1516,6 +1549,7 @@
     "categories": "کټګورۍ",
     "chat": "خبرو اترو",
     "customerLedger": "د پیرودونکي کتاب",
+    "supplierLedger": "د عرضه کوونکي کتاب",
     "customers": "پیرودونکي",
     "icons": "آیکونونه",
     "expenseCategories": "د لګښت کټګورۍ",

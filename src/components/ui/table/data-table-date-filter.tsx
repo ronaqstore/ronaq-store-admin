@@ -143,10 +143,10 @@ export function DataTableDateFilter<TData>({
         return `${formatDate(value.from)} – ${formatDate(value.to)}`;
       }
       if (value.from) {
-        return `${t('common.from')} ${formatDate(value.from)}`;
+        return `${t('table.from')} ${formatDate(value.from)}`;
       }
       if (value.to) {
-        return `${t('common.to')} ${formatDate(value.to)}`;
+        return `${t('table.to')} ${formatDate(value.to)}`;
       }
       return '';
     },
@@ -203,14 +203,14 @@ export function DataTableDateFilter<TData>({
           <div className='flex flex-col gap-3 p-3 sm:flex-row sm:gap-4'>
             <div className='space-y-2'>
               <div className='flex items-center justify-between gap-2 px-1'>
-                <p className='text-sm font-medium text-foreground'>{t('common.from')}</p>
+                <p className='text-sm font-medium text-foreground'>{t('table.from')}</p>
                 {range.from ? (
                   <button
                     type='button'
                     className='text-xs text-muted-foreground hover:text-foreground'
                     onClick={() => applyRange(undefined, range.to)}
                   >
-                    {t('common.clear')}
+                    {t('table.clear')}
                   </button>
                 ) : null}
               </div>
@@ -227,14 +227,14 @@ export function DataTableDateFilter<TData>({
             <div className='hidden w-px self-stretch bg-border sm:block' aria-hidden />
             <div className='space-y-2'>
               <div className='flex items-center justify-between gap-2 px-1'>
-                <p className='text-sm font-medium text-foreground'>{t('common.to')}</p>
+                <p className='text-sm font-medium text-foreground'>{t('table.to')}</p>
                 {range.to ? (
                   <button
                     type='button'
                     className='text-xs text-muted-foreground hover:text-foreground'
                     onClick={() => applyRange(range.from, undefined)}
                   >
-                    {t('common.clear')}
+                    {t('table.clear')}
                   </button>
                 ) : null}
               </div>

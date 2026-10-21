@@ -15,6 +15,7 @@ import {
 import { useDataTable } from '@/hooks/use-data-table';
 import { useT } from '@/i18n/use-t';
 import { t } from '@/i18n';
+import { useRouter } from '@/i18n/navigation';
 import { AlertModal } from '@/components/modal/alert-modal';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
@@ -50,6 +51,7 @@ function SupplierCellAction({ data }: SupplierCellActionProps) {
       id={data.id}
       isActive={data.isActive}
       isSystem={data.isSystem}
+      ledgerHref={`/dashboard/suppliers/${data.id}`}
       deactivateTitle={t('dukaan.party.supplierDeactivateTitle')}
       deactivateDescription={t('dukaan.party.supplierDeactivateDescription')}
       deactivateConfirmLabel={t('common.deactivate')}
@@ -81,7 +83,10 @@ const supplierColumns: ColumnDef<SupplierDTO>[] = [
   createPartyPhoneColumn<SupplierDTO>(),
   createPartyCnicColumn<SupplierDTO>(),
   createPartyAddressColumn<SupplierDTO>(),
-  createPartyCurrentBalanceColumn<SupplierDTO>('dukaan.party.currentPayable'),
+  createPartyCurrentBalanceColumn<SupplierDTO>({
+    labelKey: 'dukaan.party.currentPayable',
+    ledgerHref: (row) => `/dashboard/suppliers/${row.id}`
+  }),
   createPartyOpeningBalanceColumn<SupplierDTO>('dukaan.party.supplierOpeningBalance'),
   createPartyIsActiveColumn<SupplierDTO>(),
   {
@@ -105,6 +110,7 @@ const supplierMobileItem: MobileItemConfig<SupplierDTO> = buildPartyMobileItem<S
 
 export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
   const t = useT();
+  const router = useRouter();
   const qc = useQueryClient();
   const [editSupplier, setEditSupplier] = useState<SupplierDTO | null>(null);
   const [statusConfirm, setStatusConfirm] = useState<EntityStatusConfirm | null>(
@@ -180,6 +186,11 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
             label: t('common.edit'),
             onClick: () => setEditSupplier(row)
           },
+          {
+            label: t('table.openLedger'),
+            variant: 'secondary' as const,
+            onClick: () => router.push(`/dashboard/suppliers/${row.id}`)
+          },
           ...(!row.isSystem && row.isActive
             ? [
                 {
@@ -200,7 +211,7 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
             : [])
         ]
       ),
-    [t]
+    [router, t]
   );
 
   const supplierQuickFilters = getActiveStatusQuickFilters(

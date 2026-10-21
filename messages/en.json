@@ -734,7 +734,36 @@
       "customerNamePlaceholder": "Customer name",
       "addressPlaceholder": "Shop or home address",
       "openingBalancePlaceholder": "Opening amount",
-      "notesPlaceholder": "Optional notes"
+      "notesPlaceholder": "Optional notes",
+      "paySupplier": "Pay supplier",
+      "ledgerOpeningSeed": "Opening balance (day 0)",
+      "ledgerExplainUdhar": "Current Udhar = opening + sales − payments − returns + refunds. Each row below shows which bill or payment changed the balance.",
+      "ledgerExplainPayable": "Current Payable = opening + purchases − supplier payments. Each row below shows which bill or payment changed the balance.",
+      "ledgerSale": "Sale {ref}",
+      "ledgerPaymentOnBill": "Payment on bill {ref}",
+      "ledgerPaymentOnOpening": "Payment on opening balance",
+      "ledgerReturn": "Return {ref}",
+      "ledgerRefund": "Refund {ref}",
+      "ledgerPurchase": "Purchase {ref}",
+      "ledgerSupplierPaymentOnBill": "Payment on bill {ref}",
+      "ledgerSupplierPaymentOnOpening": "Payment on opening balance",
+      "ledgerHistory": "Ledger history",
+      "ledgerHistoryHint": "Each row shows which bill or payment changed the balance.",
+      "ledgerHistoryEmpty": "No bills or payments yet — only the opening balance is shown.",
+      "backToCustomers": "Back to customers",
+      "backToSuppliers": "Back to suppliers",
+      "outstandingTitle": "Still unpaid",
+      "outstandingDesc": "{label} {amount} breaks down into the unpaid parts below.",
+      "outstandingOpeningStillDue": "Opening balance still due",
+      "outstandingOpeningHint": "Debt recorded when this party was added.",
+      "outstandingBillDetail": "Bill {total} · paid {paid} · still due {remaining}",
+      "outstandingTotal": "Total still due",
+      "outstandingStillDueCol": "Still due",
+      "outstandingSale": "Sale",
+      "outstandingPurchase": "Purchase",
+      "outstandingEmptyUdhar": "No unpaid opening balance or sales — nothing is due.",
+      "outstandingEmptyPayable": "No unpaid opening balance or purchases — nothing is due.",
+      "ledgerSettled": "Settled"
     }
   },
   "validation": {
@@ -855,6 +884,10 @@
     "customerLedger": {
       "title": "Customer ledger",
       "description": "Udhar history and payments"
+    },
+    "supplierLedger": {
+      "title": "Supplier ledger",
+      "description": "Payable history and payments"
     },
     "payments": {
       "title": "Payments",
@@ -1516,6 +1549,7 @@
     "categories": "Categories",
     "chat": "Chat",
     "customerLedger": "Customer Ledger",
+    "supplierLedger": "Supplier Ledger",
     "customers": "Customers",
     "icons": "Icons",
     "expenseCategories": "Expense Categories",

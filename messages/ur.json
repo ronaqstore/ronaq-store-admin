@@ -734,7 +734,36 @@
       "customerNamePlaceholder": "کسٹمر کا نام",
       "addressPlaceholder": "دکان یا گھر کا پتہ",
       "openingBalancePlaceholder": "افتتاحی رقم",
-      "notesPlaceholder": "اختیاری نوٹس"
+      "notesPlaceholder": "اختیاری نوٹس",
+      "paySupplier": "سپلائر کو ادا کریں",
+      "ledgerOpeningSeed": "افتتاحی بیلنس (دن 0)",
+      "ledgerExplainUdhar": "موجودہ ادھار = افتتاحی + فروخت − ادائیگیاں − واپسیاں + ریفنڈ۔ نیچے ہر قطار بتاتی ہے کہ کس بل یا ادائیگی نے بیلنس بدلا۔",
+      "ledgerExplainPayable": "موجودہ قابلِ ادائیگی = افتتاحی + خریداریاں − سپلائر ادائیگیاں۔ نیچے ہر قطار بتاتی ہے کہ کس بل یا ادائیگی نے بیلنس بدلا۔",
+      "ledgerSale": "فروخت {ref}",
+      "ledgerPaymentOnBill": "بل {ref} پر ادائیگی",
+      "ledgerPaymentOnOpening": "افتتاحی بیلنس پر ادائیگی",
+      "ledgerReturn": "واپسی {ref}",
+      "ledgerRefund": "ریفنڈ {ref}",
+      "ledgerPurchase": "خریداری {ref}",
+      "ledgerSupplierPaymentOnBill": "بل {ref} پر ادائیگی",
+      "ledgerSupplierPaymentOnOpening": "افتتاحی بیلنس پر ادائیگی",
+      "ledgerHistory": "کھاتہ کی تاریخ",
+      "ledgerHistoryHint": "ہر قطار بتاتی ہے کہ کس بل یا ادائیگی نے بیلنس بدلا۔",
+      "ledgerHistoryEmpty": "ابھی کوئی بل یا ادائیگی نہیں — صرف افتتاحی بیلنس دکھایا گیا ہے۔",
+      "backToCustomers": "گاہکوں کی فہرست پر واپس",
+      "backToSuppliers": "سپلائرز کی فہرست پر واپس",
+      "outstandingTitle": "اب بھی بقایا",
+      "outstandingDesc": "{label} {amount} نیچے دیے گئے غیر ادا شدہ حصوں میں بٹتا ہے۔",
+      "outstandingOpeningStillDue": "افتتاحی بیلنس اب بھی بقایا",
+      "outstandingOpeningHint": "جب یہ پارٹی شامل کی گئی تب درج شدہ قرض۔",
+      "outstandingBillDetail": "بل {total} · ادا شدہ {paid} · اب بھی بقایا {remaining}",
+      "outstandingTotal": "کل اب بھی بقایا",
+      "outstandingStillDueCol": "اب بھی بقایا",
+      "outstandingSale": "فروخت",
+      "outstandingPurchase": "خریداری",
+      "outstandingEmptyUdhar": "کوئی بقایا افتتاحی بیلنس یا فروخت نہیں — کچھ واجب نہیں۔",
+      "outstandingEmptyPayable": "کوئی بقایا افتتاحی بیلنس یا خریداری نہیں — کچھ واجب نہیں۔",
+      "ledgerSettled": "تصفیہ شدہ"
     }
   },
   "validation": {
@@ -855,6 +884,10 @@
     "customerLedger": {
       "title": "گاہک کا کھاتہ",
       "description": "ادھار کی تاریخ اور ادائیگیاں"
+    },
+    "supplierLedger": {
+      "title": "سپلائر کا کھاتہ",
+      "description": "قابلِ ادائیگی کی تاریخ اور ادائیگیاں"
     },
     "payments": {
       "title": "ادائیگیاں",
@@ -1516,6 +1549,7 @@
     "categories": "زمرے",
     "chat": "چیٹ",
     "customerLedger": "گاہک کا لیجر",
+    "supplierLedger": "سپلائر کا لیجر",
     "customers": "گاہک",
     "icons": "آئیکنز",
     "expenseCategories": "اخراجات کے زمرے",

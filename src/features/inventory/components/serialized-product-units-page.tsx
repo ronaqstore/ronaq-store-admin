@@ -31,7 +31,7 @@ import type { SerializedProductUnitsPageProps } from '@/types/inventory';
 export function SerializedProductUnitsPage({ productId }: SerializedProductUnitsPageProps) {
   const t = useTranslations('inventory');
   const tCommon = useTranslations('common');
-  const tProduct = useTranslations('product.fields');
+  const tProduct = useTranslations('dukaan.product');
   const router = useRouter();
 
   const [search, setSearch] = useState('');
