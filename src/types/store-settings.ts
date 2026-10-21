@@ -7,6 +7,7 @@ export interface StoreLocationValue {
   placeLabel: string | null;
   latitude: number | null;
   longitude: number | null;
+  typedWithoutPin?: boolean;
 }
 
 export interface StoreLocationSearchProps {
@@ -31,6 +32,7 @@ export interface StoreSettingsDTO {
   city?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  mapPlaceName?: string | null;
   googleMapsUrl?: string | null;
   openingHours?: string | null;
   facebookUrl?: string | null;
@@ -48,6 +50,7 @@ export interface UpdateStoreSettingsInput {
   city?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  mapPlaceName?: string | null;
   googleMapsUrl?: string | null;
   openingHours?: string | null;
   facebookUrl?: string | null;

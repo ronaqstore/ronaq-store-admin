@@ -37,7 +37,8 @@ import { ApiError } from '@/lib/api/types';
 import type {
   EditStoreProfileDialogBodyProps,
   EditStoreProfileDialogProps,
-  StoreLocationValue
+  StoreLocationValue,
+  StoreSettingsDTO
 } from '@/types/store-settings';
 import { googleMapsSearchUrl } from '@/constants/api';
 import { useUpdateStoreSettings } from '../api/mutations';
@@ -57,6 +58,18 @@ export function EditStoreProfileDialog({
   );
 }
 
+function locationFromSettings(settings: StoreSettingsDTO): StoreLocationValue {
+  const lat = settings.latitude ?? null;
+  const lng = settings.longitude ?? null;
+  const hasPin =
+    lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng);
+  return {
+    placeLabel: hasPin ? settings.mapPlaceName?.trim() || null : null,
+    latitude: hasPin ? lat : null,
+    longitude: hasPin ? lng : null
+  };
+}
+
 function EditStoreProfileDialogBody({
   settings,
   onOpenChange
@@ -74,11 +87,9 @@ function EditStoreProfileDialogBody({
   const [phoneNumber, setPhoneNumber] = useState(formatPkMobileLocal(settings.phoneNumber));
   const [city, setCity] = useState(settings.city ?? '');
   const [address, setAddress] = useState(settings.address ?? '');
-  const [location, setLocation] = useState<StoreLocationValue>(() => ({
-    placeLabel: null,
-    latitude: settings.latitude ?? null,
-    longitude: settings.longitude ?? null
-  }));
+  const [location, setLocation] = useState<StoreLocationValue>(() =>
+    locationFromSettings(settings)
+  );
   const [opensAt, setOpensAt] = useState(initialHours?.opens ?? '');
   const [closesAt, setClosesAt] = useState(initialHours?.closes ?? '');
   const [displayNameError, setDisplayNameError] = useState('');
@@ -104,11 +115,7 @@ function EditStoreProfileDialogBody({
     setPhoneNumber(formatPkMobileLocal(settings.phoneNumber));
     setCity(settings.city ?? '');
     setAddress(settings.address ?? '');
-    setLocation({
-      placeLabel: null,
-      latitude: settings.latitude ?? null,
-      longitude: settings.longitude ?? null
-    });
+    setLocation(locationFromSettings(settings));
     setOpensAt(parsed?.opens ?? '');
     setClosesAt(parsed?.closes ?? '');
     setHoursError('');
@@ -157,13 +164,18 @@ function EditStoreProfileDialogBody({
     }
     setPhoneError('');
     setWhatsappError('');
-    setLocationError('');
 
     const hasCoords =
       location.latitude != null &&
       location.longitude != null &&
       Number.isFinite(location.latitude) &&
       Number.isFinite(location.longitude);
+
+    if (location.typedWithoutPin) {
+      setLocationError(t('storeSettings.locationPickRequired'));
+      return;
+    }
+    setLocationError('');
 
     updateMutation.mutate(
       {
@@ -175,6 +187,7 @@ function EditStoreProfileDialogBody({
         city: city.trim() || null,
         latitude: hasCoords ? location.latitude : null,
         longitude: hasCoords ? location.longitude : null,
+        mapPlaceName: hasCoords ? location.placeLabel?.trim() || null : null,
         googleMapsUrl:
           hasCoords && location.latitude != null && location.longitude != null
             ? googleMapsSearchUrl(location.latitude, location.longitude)
@@ -263,7 +276,7 @@ function EditStoreProfileDialogBody({
   const busy = updateMutation.isPending;
 
   return (
-    <DialogContent className='max-h-[92vh] w-full overflow-y-auto sm:max-w-lg'>
+    <DialogContent className='max-h-[92vh] w-full overflow-y-auto sm:max-w-2xl'>
       <DialogHeader>
         <DialogTitle>{t('storeSettings.editProfileTitle')}</DialogTitle>
         <DialogDescription>{t('storeSettings.editProfileDescription')}</DialogDescription>
