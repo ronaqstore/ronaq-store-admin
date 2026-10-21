@@ -26,30 +26,30 @@ export function PurchaseSummaryCard({
   const dueRs = calcPurchaseDueRs(totalRs, paidNow);
 
   return (
-    <Card className='z-10 lg:sticky lg:top-20'>
-      <CardHeader>
-        <CardTitle>{t('dukaan.purchase.totalLabel')}</CardTitle>
+    <Card className='shadow-sm'>
+      <CardHeader className='pb-3'>
+        <CardTitle className='text-base'>{t('dukaan.purchase.totalLabel')}</CardTitle>
       </CardHeader>
       <CardContent className='space-y-4'>
-        <div className='rounded-xl border border-border/80 bg-muted/40 p-4'>
-          <div className='flex items-baseline justify-between'>
-            <span className='text-muted-foreground text-sm font-medium'>
+        <div className='bg-muted/40 rounded-lg px-3.5 py-3'>
+          <div className='flex items-baseline justify-between gap-3'>
+            <span className='text-muted-foreground text-xs font-medium sm:text-sm'>
               {t('dukaan.purchase.totalLabel')}
             </span>
-            <span className='text-2xl font-bold tracking-tight tabular-nums'>
+            <span className='text-xl font-bold tracking-tight tabular-nums sm:text-2xl'>
               {formatPkr(toPaisa(totalRs))}
             </span>
           </div>
         </div>
 
         {isOpeningStock ? (
-          <p className='text-muted-foreground text-xs font-normal'>
+          <p className='text-muted-foreground text-xs'>
             {t('dukaan.purchase.noCashMovement')}
           </p>
         ) : (
-          <div className='space-y-4'>
+          <div className='space-y-3'>
             {paidNowField}
-            <div className='flex items-baseline justify-between rounded-lg border border-border/60 bg-muted/20 px-3 py-2'>
+            <div className='bg-muted/20 flex items-baseline justify-between gap-3 rounded-lg border px-3 py-2.5'>
               <span className='text-muted-foreground text-xs font-medium'>
                 {dueRs > 0
                   ? t('dukaan.purchase.supplierPayable')
@@ -59,7 +59,7 @@ export function PurchaseSummaryCard({
                 className={
                   dueRs > 0
                     ? 'text-base font-semibold tabular-nums text-amber-700 dark:text-amber-400'
-                    : 'text-base font-semibold tabular-nums text-foreground'
+                    : 'text-foreground text-base font-semibold tabular-nums'
                 }
               >
                 {formatPkr(toPaisa(dueRs))}
@@ -69,7 +69,7 @@ export function PurchaseSummaryCard({
         )}
 
         {warning ? (
-          <div className='rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm'>
+          <div className='rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm'>
             <p className='font-medium text-amber-900 dark:text-amber-200'>
               {warning.message || t('purchases.overdraftWarning')}
             </p>
@@ -91,7 +91,7 @@ export function PurchaseSummaryCard({
           </div>
         ) : null}
 
-        <div className='space-y-2 pt-2'>
+        <div className='space-y-2 pt-1'>
           <Button type='submit' className='w-full' disabled={saving} isLoading={saving}>
             <Icons.check className='me-2 size-4' />
             {t('common.save')}

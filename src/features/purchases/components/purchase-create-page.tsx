@@ -116,7 +116,7 @@ export function PurchaseCreatePageClient() {
 
   return (
     <form className='w-full' onSubmit={handleSubmit}>
-      <div className='grid grid-cols-1 items-start gap-6 lg:grid-cols-3'>
+      <div className='grid grid-cols-1 gap-6 lg:grid-cols-3'>
         <div className='space-y-8 lg:col-span-2'>
           <section className='space-y-4'>
             <h2 className='text-base font-semibold'>{t('dukaan.purchase.supplier')}</h2>
@@ -210,37 +210,39 @@ export function PurchaseCreatePageClient() {
           </section>
         </div>
 
-        <div className='space-y-6 lg:col-span-1'>
-          <form.Subscribe
-            selector={selectPurchaseSummary}
-            children={(summary) => (
-              <PurchaseSummaryCard
-                isOpeningStock={summary.isOpeningStock}
-                lines={summary.lines}
-                paidNow={summary.paidNow}
-                warning={warning}
-                saving={save.isPending}
-                onConfirmOverdraft={handleConfirmOverdraft}
-                onCancel={handleCancel}
-                paidNowField={
-                  <form.AppField
-                    name='paid_now'
-                    children={(subField) => (
-                      <subField.TextField
-                        label={t('dukaan.purchase.paidNow')}
-                        type='number'
-                        min={0}
-                        max={INPUT_LIMITS.amountRupeesMax}
-                        required
-                        placeholder={t('dukaan.purchase.paidNowPlaceholder')}
-                      />
-                    )}
-                  />
-                }
-              />
-            )}
-          />
-        </div>
+        <aside className='lg:col-span-1'>
+          <div className='lg:sticky lg:top-3 lg:z-10'>
+            <form.Subscribe
+              selector={selectPurchaseSummary}
+              children={(summary) => (
+                <PurchaseSummaryCard
+                  isOpeningStock={summary.isOpeningStock}
+                  lines={summary.lines}
+                  paidNow={summary.paidNow}
+                  warning={warning}
+                  saving={save.isPending}
+                  onConfirmOverdraft={handleConfirmOverdraft}
+                  onCancel={handleCancel}
+                  paidNowField={
+                    <form.AppField
+                      name='paid_now'
+                      children={(subField) => (
+                        <subField.TextField
+                          label={t('dukaan.purchase.paidNow')}
+                          type='number'
+                          min={0}
+                          max={INPUT_LIMITS.amountRupeesMax}
+                          required
+                          placeholder={t('dukaan.purchase.paidNowPlaceholder')}
+                        />
+                      )}
+                    />
+                  }
+                />
+              )}
+            />
+          </div>
+        </aside>
       </div>
     </form>
   );

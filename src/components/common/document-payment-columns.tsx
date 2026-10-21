@@ -151,7 +151,7 @@ export function createDocumentPayStatusColumn<T extends HasDocumentPayments>(
     meta: {
       label: 'table.col.status',
       variant: 'select',
-      icon: Icons.circle,
+      icon: Icons.status,
       options: filterOptions,
       priority: statusPriority,
       mobile: 'badge'

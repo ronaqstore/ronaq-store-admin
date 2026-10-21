@@ -98,7 +98,7 @@ export function DataTableToolbar<TData>({
             onClick={() => setFiltersOpen(true)}
             aria-label={t('table.filters')}
           >
-            <Icons.adjustments className='size-4' />
+            <Icons.filter className='size-4' />
             {t('table.filters')}
             {filterCount > 0 ? (
               <Badge variant='secondary' className='ms-0.5 h-5 min-w-5 px-1'>

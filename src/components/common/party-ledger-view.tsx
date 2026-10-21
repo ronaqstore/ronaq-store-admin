@@ -73,7 +73,7 @@ function LedgerRows({
         {rows.map((row) => (
           <div key={row.id} className='py-3'>
             <div className='flex items-start justify-between gap-3'>
-              <div className='min-w-0 space-y-1'>
+              <div className='min-w-0 space-y-0.5'>
                 <p className='text-sm font-medium leading-snug'>{row.entryLabel}</p>
                 <p className='text-muted-foreground text-xs'>{row.dateLabel}</p>
               </div>
@@ -86,7 +86,7 @@ function LedgerRows({
                 {row.signed ? formatSignedAmount(row.amount) : formatPkr(row.amount)}
               </p>
             </div>
-            <div className='text-muted-foreground mt-2 flex items-center justify-between gap-2 text-xs'>
+            <div className='text-muted-foreground mt-1.5 flex items-center justify-between gap-2 text-xs'>
               <span>{runningLabel}</span>
               <span className='text-foreground font-medium tabular-nums'>
                 {formatPkr(row.running)}
@@ -100,7 +100,7 @@ function LedgerRows({
         <Table>
           <TableHeader>
             <TableRow className='hover:bg-transparent'>
-              <TableHead className='w-[120px]'>{t('dukaan.party.date')}</TableHead>
+              <TableHead className='w-[110px]'>{t('dukaan.party.date')}</TableHead>
               <TableHead>{t('dukaan.party.entry')}</TableHead>
               <TableHead className='text-end'>{t('dukaan.party.amount')}</TableHead>
               <TableHead className='text-end'>{t('dukaan.party.running')}</TableHead>
@@ -171,7 +171,7 @@ export function PartyLedgerView({
   };
 
   return (
-    <div className='w-full min-w-0 space-y-5'>
+    <div className='mx-auto w-full min-w-0 max-w-5xl space-y-4 sm:space-y-5'>
       <Link
         href={backHref}
         className='text-muted-foreground hover:text-foreground inline-flex w-fit items-center gap-1 text-sm transition-colors'
@@ -180,10 +180,10 @@ export function PartyLedgerView({
         {backLabel}
       </Link>
 
-      <div className='rounded-xl border bg-card'>
-        <div className='flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-start lg:justify-between'>
+      <div className='overflow-hidden rounded-xl border bg-card'>
+        <div className='flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-start lg:justify-between lg:gap-6'>
           <div className='flex min-w-0 items-start gap-3'>
-            <Avatar size='lg' className='mt-0.5'>
+            <Avatar size='lg' className='mt-0.5 shrink-0'>
               <AvatarFallback className='bg-muted text-foreground font-semibold'>
                 {partyInitials(name)}
               </AvatarFallback>
@@ -204,7 +204,9 @@ export function PartyLedgerView({
                     className='inline-flex max-w-full items-center gap-1.5 hover:text-foreground'
                   >
                     <Icons.phone className='h-3.5 w-3.5 shrink-0' />
-                    <span className='truncate'>{phone}</span>
+                    <span className='truncate' dir='ltr'>
+                      {phone}
+                    </span>
                   </a>
                 ) : null}
                 {address ? (
@@ -215,33 +217,33 @@ export function PartyLedgerView({
                 ) : null}
               </div>
               {notes ? (
-                <p className='text-muted-foreground text-sm'>
-                  <span className='text-foreground/80 font-medium'>{t('dukaan.party.notes')}: </span>
-                  {notes}
-                </p>
+                <p className='text-muted-foreground line-clamp-2 text-sm'>{notes}</p>
               ) : null}
             </div>
           </div>
 
-          <div className='grid grid-cols-2 gap-4 border-t pt-4 sm:gap-8 lg:border-t-0 lg:pt-0'>
-            <div className='space-y-0.5'>
-              <p className='text-muted-foreground text-xs'>
+          <div className='grid grid-cols-2 gap-3 sm:gap-4 lg:min-w-[280px]'>
+            <div className='bg-muted/40 rounded-lg px-3 py-2.5 sm:px-3.5 sm:py-3'>
+              <p className='text-muted-foreground text-[11px] font-medium sm:text-xs'>
                 {t('dukaan.party.outstandingOpeningStillDue')}
               </p>
-              <p className='text-lg font-semibold tabular-nums tracking-tight sm:text-xl'>
+              <p className='mt-0.5 text-base font-semibold tabular-nums tracking-tight sm:text-lg'>
                 {formatPkr(outstanding.openingRemaining)}
               </p>
               {openingBalance > 0 ? (
-                <p className='text-muted-foreground text-[11px] tabular-nums'>
-                  {openingBalanceLabel}: {formatPkr(openingBalance)}
+                <p className='text-muted-foreground mt-0.5 text-[10px] tabular-nums sm:text-[11px]'>
+                  {t('dukaan.party.ledgerStartAmount')} · {formatPkr(openingBalance)}
+                  <span className='sr-only'> {openingBalanceLabel}</span>
                 </p>
               ) : null}
             </div>
-            <div className='space-y-0.5'>
-              <p className='text-muted-foreground text-xs'>{currentBalanceLabel}</p>
+            <div className='bg-muted/40 rounded-lg px-3 py-2.5 sm:px-3.5 sm:py-3'>
+              <p className='text-muted-foreground text-[11px] font-medium sm:text-xs'>
+                {currentBalanceLabel}
+              </p>
               <p
                 className={cn(
-                  'text-lg font-semibold tabular-nums tracking-tight sm:text-xl',
+                  'mt-0.5 text-base font-semibold tabular-nums tracking-tight sm:text-lg',
                   hasDue ? 'text-primary' : 'text-foreground'
                 )}
               >
@@ -252,9 +254,9 @@ export function PartyLedgerView({
         </div>
 
         {hasDue ? (
-          <div className='border-t px-4 py-4 sm:px-5'>
+          <div className='border-t px-4 py-3.5 sm:px-5 sm:py-4'>
             <form
-              className='flex max-w-md flex-col gap-3 sm:flex-row sm:items-start'
+              className='flex max-w-md flex-col gap-2.5 sm:flex-row sm:items-end sm:gap-3'
               onSubmit={handleSubmit}
             >
               <div className='min-w-0 flex-1'>
@@ -274,7 +276,7 @@ export function PartyLedgerView({
               </div>
               <Button
                 type='submit'
-                className='w-full shrink-0 sm:mt-6 sm:w-auto'
+                className='w-full shrink-0 sm:mb-0.5 sm:w-auto sm:min-w-[96px]'
                 isLoading={isPaying}
               >
                 {paymentLabel}
@@ -298,11 +300,13 @@ export function PartyLedgerView({
       ) : null}
 
       <div className='rounded-xl border bg-card p-4 sm:p-5'>
-        <h3 className='mb-3 text-sm font-semibold tracking-tight sm:text-base'>
+        <h3 className='mb-1 text-sm font-semibold tracking-tight sm:text-base'>
           {t('dukaan.party.ledgerHistory')}
         </h3>
         {ledger.length === 0 ? (
-          <p className='text-muted-foreground text-sm'>{t('dukaan.party.ledgerHistoryEmpty')}</p>
+          <p className='text-muted-foreground pt-2 text-sm'>
+            {t('dukaan.party.ledgerHistoryEmpty')}
+          </p>
         ) : (
           <LedgerRows
             openingBalance={openingBalance}

@@ -183,7 +183,7 @@ export function createPartyIsActiveColumn<T extends HasIsActiveRecord>(): Column
     meta: {
       label: 'table.col.status',
       variant: 'select',
-      icon: Icons.circle,
+      icon: Icons.status,
       options: [
         {
           get label() {
@@ -358,7 +358,7 @@ export function createActiveCancelledStatusColumn<T extends HasStatusRecord>(
     meta: {
       label: 'table.col.status',
       variant: 'select',
-      icon: Icons.circle,
+      icon: Icons.status,
       options: [
         { label: 'Active', value: 'ACTIVE' },
         { label: 'Cancelled', value: 'CANCELLED' }

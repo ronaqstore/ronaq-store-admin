@@ -156,7 +156,7 @@ export function DataTableAsyncFacetedFilter<TData, TValue>({
     });
   }, [selectedValues, options, labelCache]);
 
-  const FilterIcon = column?.columnDef.meta?.icon ?? Icons.adjustments;
+  const FilterIcon = column?.columnDef.meta?.icon ?? Icons.filter;
 
   const triggerLabel =
     selectedLabels.length === 0

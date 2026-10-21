@@ -81,7 +81,7 @@ export function DataTableFacetedFilter<TData, TValue>({
     [column]
   );
 
-  const FilterIcon = column?.columnDef.meta?.icon ?? Icons.adjustments;
+  const FilterIcon = column?.columnDef.meta?.icon ?? Icons.filter;
 
   const selectedLabels = options.filter((option) => selectedValues.has(option.value));
 

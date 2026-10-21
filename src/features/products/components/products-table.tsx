@@ -271,7 +271,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
           type: 'boolean',
           priority: 2,
           variant: 'select',
-          icon: Icons.circle,
+          icon: Icons.status,
           options: [
             { label: staticT('status.active'), value: 'true' },
             { label: staticT('status.inactive'), value: 'false' }

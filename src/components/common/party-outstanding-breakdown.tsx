@@ -35,9 +35,9 @@ export function PartyOutstandingBreakdown({
         {t('dukaan.party.outstandingTitle')}
       </h3>
 
-      <div className='divide-y md:hidden'>
+      <div className='divide-border divide-y md:hidden'>
         {hasOpening ? (
-          <div className='flex items-start justify-between gap-3 py-3'>
+          <div className='flex items-center justify-between gap-3 py-2.5'>
             <p className='text-sm font-medium'>{openingLabel}</p>
             <p className='shrink-0 text-sm font-semibold tabular-nums'>
               {formatPkr(openingRemaining)}
@@ -45,7 +45,7 @@ export function PartyOutstandingBreakdown({
           </div>
         ) : null}
         {bills.map((bill) => (
-          <div key={bill.id} className='flex items-start justify-between gap-3 py-3'>
+          <div key={bill.id} className='flex items-start justify-between gap-3 py-2.5'>
             <div className='min-w-0 space-y-0.5'>
               <p className='text-sm font-medium'>
                 {billKindLabel}{' '}
@@ -61,13 +61,9 @@ export function PartyOutstandingBreakdown({
                 )}
               </p>
               <p className='text-muted-foreground text-xs'>
-                {bill.date}
+                {bill.date.slice(0, 10)}
                 {' · '}
-                {t('dukaan.party.outstandingBillDetail', {
-                  total: formatPkr(bill.totalAmount),
-                  paid: formatPkr(bill.paidAmount),
-                  remaining: formatPkr(bill.remaining)
-                })}
+                {formatPkr(bill.paidAmount)}/{formatPkr(bill.totalAmount)}
               </p>
             </div>
             <p className='shrink-0 text-sm font-semibold tabular-nums'>
@@ -75,7 +71,7 @@ export function PartyOutstandingBreakdown({
             </p>
           </div>
         ))}
-        <div className='flex items-center justify-between gap-3 pt-3'>
+        <div className='flex items-center justify-between gap-3 pt-2.5'>
           <span className='text-sm font-semibold'>{totalLabel}</span>
           <span className='text-sm font-semibold tabular-nums'>{formatPkr(currentBalance)}</span>
         </div>
@@ -86,7 +82,7 @@ export function PartyOutstandingBreakdown({
           <TableHeader>
             <TableRow className='hover:bg-transparent'>
               <TableHead>{t('dukaan.party.entry')}</TableHead>
-              <TableHead className='w-[120px]'>{t('dukaan.party.date')}</TableHead>
+              <TableHead className='w-[110px]'>{t('dukaan.party.date')}</TableHead>
               <TableHead className='text-end'>
                 {t('dukaan.party.outstandingStillDueCol')}
               </TableHead>
@@ -129,7 +125,7 @@ export function PartyOutstandingBreakdown({
                   </div>
                 </TableCell>
                 <TableCell className='text-muted-foreground whitespace-nowrap'>
-                  {bill.date}
+                  {bill.date.slice(0, 10)}
                 </TableCell>
                 <TableCell className='text-end font-medium tabular-nums'>
                   {formatPkr(bill.remaining)}
