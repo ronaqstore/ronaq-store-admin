@@ -746,3 +746,130 @@ html[data-appearance-density='compact'] {
 [data-sonner-toast] [data-icon] {
   color: var(--primary);
 }
+
+/*
+  Locale script fonts without locking theme --font-sans.
+  Visual themes (Mono, Claude, etc.) keep owning --font-sans / colors.
+  Urdu/Pashto only prefer the script face for Arabic glyphs.
+*/
+html[lang='ur'] body {
+  font-family: var(--font-urdu), var(--font-sans);
+  line-height: 1.95;
+  letter-spacing: 0;
+}
+
+html[lang='ps'] body {
+  font-family: var(--font-pashto), var(--font-sans);
+  line-height: 1.75;
+  letter-spacing: 0;
+}
+
+html[lang='ur'] :where(h1, h2, h3, h4, h5, h6),
+html[lang='ur'] :where(.text-2xl, .text-xl, .text-lg) {
+  line-height: 2.05;
+}
+
+html[lang='ps'] :where(h1, h2, h3, h4, h5, h6),
+html[lang='ps'] :where(.text-2xl, .text-xl, .text-lg) {
+  line-height: 1.85;
+}
+
+html.font-urdu,
+.font-urdu {
+  font-family: var(--font-urdu), var(--font-sans);
+  line-height: 1.95;
+}
+
+html.font-pashto,
+.font-pashto {
+  font-family: var(--font-pashto), var(--font-sans);
+  line-height: 1.75;
+}
+
+/*
+  Nastaliq clipping fix: fixed h-8/h-7 + overflow-hidden cuts descenders.
+  Give Urdu (and slightly Pashto) room in tight chrome.
+*/
+html[lang='ur'] :where(.leading-none, .leading-tight, .leading-snug) {
+  line-height: 1.9 !important;
+}
+
+/* Expanded sidebar only — keep icon-collapsed size-8 intact */
+html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-menu-button'],
+html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='menu-button'] {
+  height: auto !important;
+  min-height: 2.5rem;
+  overflow: visible !important;
+  line-height: 2.15;
+  padding-block: 0.45rem;
+}
+
+html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-menu-button'] > span:last-child,
+html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='menu-button'] > span:last-child {
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 2.15;
+  padding-block: 0.1rem;
+}
+
+html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-group-label'],
+html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='group-label'] {
+  height: auto !important;
+  min-height: 2rem;
+  overflow: visible !important;
+  line-height: 2.1;
+  padding-block: 0.35rem;
+}
+
+html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-menu-sub-button'],
+html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='menu-sub-button'] {
+  height: auto !important;
+  min-height: 2rem;
+  overflow: visible !important;
+  line-height: 2.1;
+  padding-block: 0.35rem;
+}
+
+html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-menu-sub-button'] > span:last-child,
+html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='menu-sub-button'] > span:last-child {
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+/* Text buttons use h-*; icon buttons use size-* — only loosen text ones */
+html[lang='ur'] [data-slot='button']:is(.h-6, .h-7, .h-8, .h-9, .h-10),
+html[lang='ur'] [data-slot='badge'] {
+  height: auto !important;
+  min-height: 2rem;
+  line-height: 1.9;
+  padding-block: 0.35rem;
+  overflow: visible;
+}
+
+html[lang='ur'] [data-slot='button']:is(.h-6, .h-7),
+html[lang='ur'] [data-slot='badge'] {
+  min-height: 1.75rem;
+  padding-block: 0.25rem;
+}
+
+html[lang='ur'] [data-slot='tabs-trigger'],
+html[lang='ur'] [data-slot='breadcrumb-page'],
+html[lang='ur'] [data-slot='breadcrumb-link'] {
+  line-height: 2;
+  overflow: visible;
+}
+
+html[lang='ps'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-menu-button'],
+html[lang='ps'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='menu-button'] {
+  height: auto !important;
+  min-height: 2.25rem;
+  overflow: visible !important;
+  line-height: 1.85;
+  padding-block: 0.35rem;
+}
+
+html[lang='ps'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-menu-button'] > span:last-child,
+html[lang='ps'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='menu-button'] > span:last-child {
+  overflow: visible !important;
+  text-overflow: clip !important;
+}

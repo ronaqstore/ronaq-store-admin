@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { useThemeConfig } from '@/components/themes/active-theme';
 import { THEMES } from '@/components/themes/theme.config';
@@ -11,7 +12,11 @@ import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/components/icons';
 import { InstallPrompt } from '@/components/pwa/install-prompt';
 import { cn } from '@/lib/utils';
-import { useAppearanceStore, type AppearanceAccent } from '@/lib/appearance/store';
+import {
+  DEFAULT_APPEARANCE,
+  useAppearanceStore,
+  type AppearanceAccent
+} from '@/lib/appearance/store';
 import { translateMaybe, useT } from '@/i18n/use-t';
 import { useSearchParams } from 'next/navigation';
 import { useRouter, usePathname } from '@/i18n/navigation';
@@ -30,11 +35,12 @@ const ACCENT_CLASS: Record<AppearanceAccent, string> = {
   teal: 'bg-teal-500'
 };
 
-function LivePreview() {
+function LivePreview({ mounted }: { mounted: boolean }) {
   const digits = useAppearanceStore((s) => s.digits);
   const t = useT();
+  const previewDigits = mounted ? digits : DEFAULT_APPEARANCE.digits;
 
-  const amount = digits === 'eastern' ? 'Rs ٤٥٬٠٠٠' : 'Rs 45,000';
+  const amount = previewDigits === 'eastern' ? 'Rs ٤٥٬٠٠٠' : 'Rs 45,000';
 
   return (
     <Card className='sticky top-20'>
@@ -69,7 +75,7 @@ function LivePreview() {
             <span>{t('appearance.previewSampleItem')}</span>
             <span>1</span>
             <span className='text-end tabular-nums'>
-              {digits === 'eastern' ? '٨٥٬٠٠٠' : '85,000'}
+              {previewDigits === 'eastern' ? '٨٥٬٠٠٠' : '85,000'}
             </span>
           </div>
         </div>
@@ -88,6 +94,18 @@ export function AppearanceSettings() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentLocale = useLocale() as AppLocale;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Match SSR defaults on first paint; reveal persisted prefs only after mount.
+  const selectedAccent = mounted ? prefs.accent : DEFAULT_APPEARANCE.accent;
+  const density = mounted ? prefs.density : DEFAULT_APPEARANCE.density;
+  const radius = mounted ? prefs.radius : DEFAULT_APPEARANCE.radius;
+  const digits = mounted ? prefs.digits : DEFAULT_APPEARANCE.digits;
+  const themeMode = mounted ? (theme ?? 'system') : 'system';
 
   const onSelectLanguage = (newLocale: AppLocale) => {
     if (currentLocale === newLocale) return;
@@ -160,7 +178,7 @@ export function AppearanceSettings() {
                     key={mode.value}
                     type='button'
                     size='sm'
-                    variant={(theme ?? 'system') === mode.value ? 'default' : 'outline'}
+                    variant={themeMode === mode.value ? 'default' : 'outline'}
                     onClick={() => setTheme(mode.value)}
                   >
                     <mode.icon className='me-1 h-4 w-4' />
@@ -178,7 +196,7 @@ export function AppearanceSettings() {
                     type='button'
                     onClick={() => setActiveTheme(th.value)}
                     className={cn(
-                      'rounded-lg border px-3 py-2 text-start text-sm transition-colors',
+                      'flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-start text-sm transition-colors',
                       activeTheme === th.value
                         ? 'border-primary bg-primary/5 ring-1 ring-primary'
                         : 'hover:bg-muted/50'
@@ -188,7 +206,7 @@ export function AppearanceSettings() {
                       {translateMaybe(`appearance.themeNames.${th.value}`, t)}
                     </span>
                     {activeTheme === th.value ? (
-                      <Icons.check className='text-primary mt-1 h-4 w-4' />
+                      <Icons.check className='text-primary ms-auto h-4 w-4 shrink-0' />
                     ) : null}
                   </button>
                 ))}
@@ -218,12 +236,12 @@ export function AppearanceSettings() {
                   className={cn(
                     'relative h-9 w-9 rounded-full border-2 transition-transform hover:scale-105',
                     ACCENT_CLASS[accent],
-                    prefs.accent === accent
+                    selectedAccent === accent
                       ? 'border-foreground ring-2 ring-offset-2'
                       : 'border-transparent'
                   )}
                 >
-                  {prefs.accent === accent ? (
+                  {selectedAccent === accent ? (
                     <Icons.check className='absolute inset-0 m-auto h-4 w-4 text-white' />
                   ) : null}
                 </button>
@@ -244,15 +262,15 @@ export function AppearanceSettings() {
             <div className='space-y-2'>
               <Label>{t('appearance.density')}</Label>
               <div className='flex flex-wrap gap-2'>
-                {(['comfortable', 'compact'] as const).map((density) => (
+                {(['comfortable', 'compact'] as const).map((d) => (
                   <Button
-                    key={density}
+                    key={d}
                     type='button'
                     size='sm'
-                    variant={prefs.density === density ? 'default' : 'outline'}
-                    onClick={() => prefs.setDensity(density)}
+                    variant={density === d ? 'default' : 'outline'}
+                    onClick={() => prefs.setDensity(d)}
                   >
-                    {density === 'comfortable'
+                    {d === 'comfortable'
                       ? t('appearance.comfortable')
                       : t('appearance.compact')}
                   </Button>
@@ -262,17 +280,17 @@ export function AppearanceSettings() {
             <div className='space-y-2'>
               <Label>{t('appearance.radius')}</Label>
               <div className='flex flex-wrap gap-2'>
-                {(['sharp', 'medium', 'round'] as const).map((radius) => (
+                {(['sharp', 'medium', 'round'] as const).map((r) => (
                   <Button
-                    key={radius}
+                    key={r}
                     type='button'
                     size='sm'
-                    variant={prefs.radius === radius ? 'default' : 'outline'}
-                    onClick={() => prefs.setRadius(radius)}
+                    variant={radius === r ? 'default' : 'outline'}
+                    onClick={() => prefs.setRadius(r)}
                   >
-                    {radius === 'sharp'
+                    {r === 'sharp'
                       ? t('appearance.sharp')
-                      : radius === 'medium'
+                      : r === 'medium'
                         ? t('appearance.medium')
                         : t('appearance.round')}
                   </Button>
@@ -318,7 +336,7 @@ export function AppearanceSettings() {
             <div className='space-y-2'>
               <Label>{t('appearance.digits')}</Label>
               <RadioGroup
-                value={prefs.digits}
+                value={digits}
                 onValueChange={(v) => prefs.setDigits(v as typeof prefs.digits)}
                 className='flex gap-4'
               >
@@ -336,7 +354,7 @@ export function AppearanceSettings() {
         </Card>
       </div>
 
-      <LivePreview />
+      <LivePreview mounted={mounted} />
     </div>
   );
 }

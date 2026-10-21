@@ -60,7 +60,7 @@ function PaymentRowActions({ payment, onCancel }: PaymentRowActionsProps) {
 
 const paymentMobileItem: MobileItemConfig<PaymentDTO> = {
   title: (row: PaymentDTO) => row.customerName || 'Walk-in',
-  subtitle: (row: PaymentDTO) => (row.saleNo ? `Sale #${row.saleNo}` : 'Old Udhar'),
+  subtitle: (row: PaymentDTO) => (row.saleNo ? `Sale #${row.saleNo}` : 'Opening balance'),
   value: (row: PaymentDTO) => formatPkr(row.amount),
   badge: (row: PaymentDTO) => ({
     label: row.status === 'ACTIVE' ? 'Active' : 'Cancelled',
@@ -95,7 +95,7 @@ const paymentDetail: DetailConfig<PaymentDTO> = {
           { label: 'Customer', value: row.customerName || 'Walk-in' },
           {
             label: 'Applied To',
-            value: row.saleNo ? `Sale #${row.saleNo}` : 'Old Udhar / Opening Balance'
+            value: row.saleNo ? `Sale #${row.saleNo}` : 'Opening balance'
           },
           { label: 'Amount', value: formatPkr(row.amount) },
           { label: 'Method', value: method },

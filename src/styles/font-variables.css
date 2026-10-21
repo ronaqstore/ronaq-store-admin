@@ -14,4 +14,9 @@
   --font-jetbrains-mono: 'JetBrains Mono', ui-monospace, monospace;
   --font-merriweather: 'Merriweather', ui-serif, Georgia, serif;
   --font-playfair-display: 'Playfair Display', ui-serif, Georgia, serif;
+  --font-urdu:
+    var(--font-noto-nastaliq), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting',
+    Tahoma, sans-serif;
+  --font-pashto:
+    var(--font-noto-naskh), 'Noto Naskh Arabic', 'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
 }

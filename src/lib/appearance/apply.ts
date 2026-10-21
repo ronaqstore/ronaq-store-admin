@@ -15,6 +15,9 @@ export const ACCENT_OKLCH: Record<AppearanceState['accent'], string> = {
   teal: 'oklch(0.58 0.12 195)'
 };
 
+/** Accents are mid/dark — text on primary must stay white for contrast. */
+export const ACCENT_FOREGROUND_OKLCH = 'oklch(1 0 0)';
+
 function setAppearanceCookie(name: string, value: string) {
   if (typeof document === 'undefined') return;
   const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
@@ -34,6 +37,10 @@ export function applyAppearancePrefs(
   }
   if (prefs.accent && ACCENT_OKLCH[prefs.accent]) {
     root.style.setProperty('--primary', ACCENT_OKLCH[prefs.accent]);
+    root.style.setProperty('--primary-foreground', ACCENT_FOREGROUND_OKLCH);
+    root.style.setProperty('--sidebar-primary', ACCENT_OKLCH[prefs.accent]);
+    root.style.setProperty('--sidebar-primary-foreground', ACCENT_FOREGROUND_OKLCH);
+    root.style.setProperty('--ring', ACCENT_OKLCH[prefs.accent]);
     setAppearanceCookie('dukaan_accent', prefs.accent);
   }
   if (prefs.density) {

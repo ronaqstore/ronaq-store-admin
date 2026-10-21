@@ -20,7 +20,11 @@ import {
 import { isRtlLocale, locales } from '@/i18n/request';
 import { cn } from '@/lib/utils';
 import { env } from '@/config/env';
-import { ACCENT_OKLCH, RADIUS_REM } from '@/lib/appearance/apply';
+import {
+  ACCENT_FOREGROUND_OKLCH,
+  ACCENT_OKLCH,
+  RADIUS_REM
+} from '@/lib/appearance/apply';
 import type {
   AppearanceAccent,
   AppearanceRadius,
@@ -174,7 +178,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       data-theme={themeToApply}
       data-appearance-density={densityToApply}
       data-appearance-digits={digitsToApply}
-      className='h-full overflow-hidden'
+      className={cn(
+        'h-full overflow-hidden',
+        locale === 'ur' && 'font-urdu',
+        locale === 'ps' && 'font-pashto'
+      )}
     >
       <body
         suppressHydrationWarning
@@ -191,12 +199,20 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             __html: `
               try {
                 var ACCENTS = ${JSON.stringify(ACCENT_OKLCH)};
+                var ACCENT_FG = '${ACCENT_FOREGROUND_OKLCH}';
                 var RADIUS = ${JSON.stringify(RADIUS_REM)};
                 var rawApp = localStorage.getItem('dukaan-appearance:v2');
                 var parsedApp = rawApp ? JSON.parse(rawApp) : null;
                 var appState = (parsedApp && parsedApp.state) ? parsedApp.state : null;
                 var docEl = document.documentElement;
-                docEl.style.setProperty('--primary', '${ACCENT_OKLCH[accentToApply]}');
+                function applyAccent(color) {
+                  docEl.style.setProperty('--primary', color);
+                  docEl.style.setProperty('--primary-foreground', ACCENT_FG);
+                  docEl.style.setProperty('--sidebar-primary', color);
+                  docEl.style.setProperty('--sidebar-primary-foreground', ACCENT_FG);
+                  docEl.style.setProperty('--ring', color);
+                }
+                applyAccent('${ACCENT_OKLCH[accentToApply]}');
                 docEl.style.setProperty('--radius', '${RADIUS_REM[radiusToApply]}');
                 if (appState) {
                   var accent = appState.accent;
@@ -204,7 +220,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                   var density = appState.density;
                   var digits = appState.digits;
                   if (accent && ACCENTS[accent]) {
-                    docEl.style.setProperty('--primary', ACCENTS[accent]);
+                    applyAccent(ACCENTS[accent]);
                     document.cookie = 'dukaan_accent=' + accent + '; path=/; max-age=31536000; SameSite=Lax';
                   }
                   if (radius && RADIUS[radius]) {

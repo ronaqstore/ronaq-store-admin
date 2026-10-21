@@ -27,29 +27,12 @@ export const DEFAULT_APPEARANCE = {
   digits: 'western' as AppearanceDigits
 };
 
-function getInitialAppearance() {
-  if (typeof window === 'undefined') return DEFAULT_APPEARANCE;
-  try {
-    const raw = localStorage.getItem('dukaan-appearance:v2');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed?.state) {
-        return {
-          ...DEFAULT_APPEARANCE,
-          ...parsed.state
-        };
-      }
-    }
-  } catch {
-    return DEFAULT_APPEARANCE;
-  }
-  return DEFAULT_APPEARANCE;
-}
-
 export const useAppearanceStore = create<AppearanceState>()(
   persist(
     (set, get) => ({
-      ...getInitialAppearance(),
+      // Always start from defaults so SSR HTML matches the first client render.
+      // Persist rehydrates from localStorage after mount.
+      ...DEFAULT_APPEARANCE,
       setDensity: (density) => {
         applyAppearancePrefs({ ...get(), density });
         set({ density });
