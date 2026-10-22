@@ -58,10 +58,10 @@ function CustomerCellAction({ data }: CustomerCellActionProps) {
       id={data.id}
       isActive={data.isActive}
       ledgerHref={`/dashboard/customers/${data.id}`}
-      deactivateTitle={t('dukaan.party.customerArchiveTitle')}
-      deactivateDescription={t('dukaan.party.customerArchiveDescription')}
-      deactivateConfirmLabel={t('common.archive')}
-      deactivateSuccess={t('dukaan.party.customerArchived')}
+      deactivateTitle={t('dukaan.party.customerDeactivateTitle')}
+      deactivateDescription={t('dukaan.party.customerDeactivateDescription')}
+      deactivateConfirmLabel={t('common.deactivate')}
+      deactivateSuccess={t('dukaan.party.customerDeactivated')}
       activateTitle={t('dukaan.party.customerActivateTitle')}
       activateDescription={t('dukaan.party.customerActivateDescription')}
       activateConfirmLabel={t('common.activate')}
@@ -197,7 +197,7 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
     onSuccess: () => {
       const message = statusConfirm?.nextActive
         ? t('dukaan.party.customerActivated')
-        : t('dukaan.party.customerArchived');
+        : t('dukaan.party.customerDeactivated');
       setStatusConfirm(null);
       void qc.invalidateQueries({ queryKey: customerKeys.all });
       toastSuccessAfterClose(message);
@@ -226,7 +226,7 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
           },
           row.isActive
             ? {
-                label: t('common.archive'),
+                label: t('common.deactivate'),
                 variant: 'destructive',
                 onClick: () => setStatusConfirm({ id: row.id, nextActive: false })
               }
@@ -265,15 +265,15 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
         title={
           statusConfirm?.nextActive
             ? t('dukaan.party.customerActivateTitle')
-            : t('dukaan.party.customerArchiveTitle')
+            : t('dukaan.party.customerDeactivateTitle')
         }
         description={
           statusConfirm?.nextActive
             ? t('dukaan.party.customerActivateDescription')
-            : t('dukaan.party.customerArchiveDescription')
+            : t('dukaan.party.customerDeactivateDescription')
         }
         confirmLabel={
-          statusConfirm?.nextActive ? t('common.activate') : t('common.archive')
+          statusConfirm?.nextActive ? t('common.activate') : t('common.deactivate')
         }
         confirmVariant={statusConfirm?.nextActive ? 'default' : 'destructive'}
       />
