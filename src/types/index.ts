@@ -53,4 +53,5 @@ export * from './pages';
 export * from './party';
 export * from './picker';
 export * from './media';
+export * from './query-sync';
 

@@ -33,7 +33,9 @@ import { useT } from '@/i18n/use-t';
 import type { NamedEntity } from '@/types';
 import type { StockAdjustDialogProps, StockAdjustFormErrors } from '@/types/inventory';
 import { createInventoryAdjustment, listInventoryUnits } from '../api/service';
-import { inventoryKeys, inventoryStockQueryOptions } from '../api/queries';
+import { inventoryStockQueryOptions } from '../api/queries';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { INVENTORY_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { CreateInventoryAdjustmentInput } from '@/lib/api/types';
 import { formatUnitImeiLabel } from '@/lib/inventory/format-unit-imei-label';
 
@@ -154,7 +156,7 @@ export function StockAdjustDialog({
       const message = res.message || t('inventory.adjustSuccess');
       onOpenChange(false);
       setReason('');
-      void qc.invalidateQueries({ queryKey: inventoryKeys.all });
+      invalidateDomains({ queryClient: qc, domains: INVENTORY_SYNC_DOMAINS });
       toastSuccessAfterClose(message);
     },
     onError: (err: Error) => {

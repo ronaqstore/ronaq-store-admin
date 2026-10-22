@@ -36,8 +36,9 @@ import type { ReturnPreviewDTO, ReturnItemInput } from '@/lib/api/types';
 import { todayIsoDate } from '@/lib/dates';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
 import type { ReturnSaleDialogProps, ItemReturnState } from '@/types/sales';
-import { saleKeys } from '../api/queries';
 import { createReturnMutation, previewReturnMutation } from '../api/mutations';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { SALE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: ReturnSaleDialogProps) {
   const qc = useQueryClient();
@@ -84,7 +85,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
       }
 
       onOpenChange(false);
-      void qc.invalidateQueries({ queryKey: saleKeys.all });
+      invalidateDomains({ queryClient: qc, domains: SALE_SYNC_DOMAINS });
       toastSuccessAfterClose(t('sales.returnDialog.success'));
       onSuccess?.();
     },

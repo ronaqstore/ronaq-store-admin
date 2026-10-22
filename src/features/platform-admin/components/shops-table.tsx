@@ -30,8 +30,10 @@ import type {
   PlatformShopAccessStatus,
   ShopRowActionsProps
 } from '../api/types';
-import { platformKeys, platformShopsQueryOptions } from '../api/queries';
+import { platformShopsQueryOptions } from '../api/queries';
 import { updateShopSubscription } from '../api/service';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { PLATFORM_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import {
   PLATFORM_ACCESS_STATUS_LABEL_KEY,
   PLATFORM_ACCESS_STATUS_VALUES,
@@ -157,7 +159,7 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
     mutationFn: () => updateShopSubscription(shop.id, { isActive: false }),
     onSuccess: () => {
       setSuspendOpen(false);
-      void qc.invalidateQueries({ queryKey: platformKeys.all });
+      invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
       toastSuccessAfterClose(t('platform.suspendSuccess', { name: shop.name }));
     },
     onError: (err: Error) => toast.error(err.message || t('platform.suspendFailed'))
@@ -167,7 +169,7 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
     mutationFn: () => updateShopSubscription(shop.id, { isActive: true }),
     onSuccess: () => {
       setReactivateOpen(false);
-      void qc.invalidateQueries({ queryKey: platformKeys.all });
+      invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
       toastSuccessAfterClose(t('platform.reactivateSuccess', { name: shop.name }));
     },
     onError: (err: Error) => toast.error(err.message || t('platform.reactivateFailed'))

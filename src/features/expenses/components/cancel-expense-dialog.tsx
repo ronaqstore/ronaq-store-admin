@@ -25,7 +25,8 @@ import { cn } from '@/lib/utils';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import type { CancelExpenseDialogProps } from '@/types/expense';
 import { cancelExpenseMutation } from '../api/mutations';
-import { expenseKeys } from '../api/queries';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { EXPENSE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 const PRESET_REASONS = [
   'Duplicate entry',
@@ -49,7 +50,7 @@ export function CancelExpenseDialog({
     ...cancelExpenseMutation,
     onSuccess: () => {
       onOpenChange(false);
-      void qc.invalidateQueries({ queryKey: expenseKeys.all });
+      invalidateDomains({ queryClient: qc, domains: EXPENSE_SYNC_DOMAINS });
       toastSuccessAfterClose(t('expenses.cancelSuccess'));
       onSuccess?.();
     },

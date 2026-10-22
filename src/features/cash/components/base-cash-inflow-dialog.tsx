@@ -23,8 +23,9 @@ import { toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import type { BaseCashInflowDialogProps } from '@/types/cash';
-import { cashKeys } from '../api/queries';
 import { useT } from '@/i18n/use-t';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { CASH_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 export function BaseCashInflowDialog({
   open,
@@ -52,8 +53,7 @@ export function BaseCashInflowDialog({
       setAmountStr('');
       setNotes('');
       onOpenChange(false);
-      void qc.invalidateQueries({ queryKey: cashKeys.all });
-      void qc.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidateDomains({ queryClient: qc, domains: CASH_SYNC_DOMAINS });
       toastSuccessAfterClose(successMessage);
     },
     onError: (err: Error) => {

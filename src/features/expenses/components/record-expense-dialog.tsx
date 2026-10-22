@@ -25,7 +25,6 @@ import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { cn } from '@/lib/utils';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
 import { createExpenseMutation } from '../api/mutations';
-import { expenseKeys } from '../api/queries';
 import { CategorySelectCombobox } from './category-select';
 import { AddCategoryDialog } from './add-category-dialog';
 import type {
@@ -34,6 +33,8 @@ import type {
   RecordExpenseFormErrors
 } from '@/types/expense';
 import type { OverdraftPrompt } from '@/types';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { EXPENSE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 export function RecordExpenseDialog({
   open,
@@ -78,7 +79,7 @@ export function RecordExpenseDialog({
 
       onOpenChange(false);
       resetForm();
-      void qc.invalidateQueries({ queryKey: expenseKeys.all });
+      invalidateDomains({ queryClient: qc, domains: EXPENSE_SYNC_DOMAINS });
       onSuccess?.();
       toastSuccessAfterClose(t('expenses.recordSuccess', { amount: amountStr }));
     },

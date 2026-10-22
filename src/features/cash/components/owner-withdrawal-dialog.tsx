@@ -24,7 +24,6 @@ import { formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { createOwnerWithdrawalMutation } from '../api/mutations';
-import { cashKeys } from '../api/queries';
 import type {
   CashOverdraftPrompt,
   CreateOwnerWithdrawalResult,
@@ -32,6 +31,8 @@ import type {
 } from '@/types/cash';
 
 import { useT } from '@/i18n/use-t';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { CASH_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDialogProps) {
   const t = useT();
@@ -57,8 +58,7 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
       setOverdraftPrompt(null);
       setConfirmOverdraft(false);
       onOpenChange(false);
-      void qc.invalidateQueries({ queryKey: cashKeys.all });
-      void qc.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidateDomains({ queryClient: qc, domains: CASH_SYNC_DOMAINS });
       toastSuccessAfterClose(t('dukaan.cash.withdrawalSuccess'));
     },
     onError: (err: Error) => {

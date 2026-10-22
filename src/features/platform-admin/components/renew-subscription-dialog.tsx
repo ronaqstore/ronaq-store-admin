@@ -17,9 +17,10 @@ import { useT } from '@/i18n/use-t';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
-import { platformKeys } from '../api/queries';
 import { updateShopSubscription } from '../api/service';
 import type { RenewSubscriptionDialogProps } from '@/types';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { PLATFORM_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 function parseEndsAt(iso: string): Date {
   const d = new Date(iso);
@@ -71,7 +72,7 @@ function RenewSubscriptionDialogBody({
       updateShopSubscription(shopId, { subscriptionEndsAt }),
     onSuccess: async (res) => {
       onOpenChange(false);
-      void qc.invalidateQueries({ queryKey: platformKeys.all });
+      invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
       toastSuccessAfterClose(t('platform.renewSuccess', { name: res.shopName }));
     },
     onError: (err: Error) => {

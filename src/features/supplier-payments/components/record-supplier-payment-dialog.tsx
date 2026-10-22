@@ -27,7 +27,7 @@ import type {
 } from '@/types/supplier-payment';
 import type { OverdraftPrompt } from '@/types';
 import { createSupplierPaymentMutation } from '../api/mutations';
-import { supplierPaymentKeys, supplierPayableQueryOptions } from '../api/queries';
+import { supplierPayableQueryOptions } from '../api/queries';
 import { SupplierSelectCombobox } from './supplier-select';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
@@ -36,6 +36,8 @@ import { SupplierPaymentTargetSection } from './supplier-payment-target-section'
 import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { cn } from '@/lib/utils';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { SUPPLIER_PAYMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 export function RecordSupplierPaymentDialog({
   open,
@@ -120,7 +122,7 @@ export function RecordSupplierPaymentDialog({
       });
       onOpenChange(false);
       resetForm();
-      void qc.invalidateQueries({ queryKey: supplierPaymentKeys.all });
+      invalidateDomains({ queryClient: qc, domains: SUPPLIER_PAYMENT_SYNC_DOMAINS });
       onSuccess?.();
       toastSuccessAfterClose(message);
     },

@@ -8,8 +8,10 @@ import { BaseCancelDialog } from '@/components/common/base-cancel-dialog';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { useT } from '@/i18n/use-t';
 import type { CancelImpactItem, CancelPurchaseDialogProps } from '@/types';
-import { purchaseCancelImpactQueryOptions, purchaseKeys } from '../api/queries';
+import { purchaseCancelImpactQueryOptions } from '../api/queries';
 import { cancelPurchaseMutation } from '../api/mutations';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { PURCHASE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 export function CancelPurchaseDialog({
   purchase,
@@ -31,7 +33,7 @@ export function CancelPurchaseDialog({
     ...cancelPurchaseMutation,
     onSuccess: () => {
       onOpenChange(false);
-      void qc.invalidateQueries({ queryKey: purchaseKeys.all });
+      invalidateDomains({ queryClient: qc, domains: PURCHASE_SYNC_DOMAINS });
       toastSuccessAfterClose(
         t('purchases.cancelDialog.success', { purchaseNo: purchase.purchaseNo })
       );

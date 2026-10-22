@@ -9,8 +9,10 @@ import { formatPkr } from '@/lib/dukaan/numbers';
 import { useT } from '@/i18n/use-t';
 import type { CancelImpactItem } from '@/types';
 import type { CancelSupplierPaymentDialogProps } from '@/types/supplier-payment';
-import { supplierPaymentCancelImpactQueryOptions, supplierPaymentKeys } from '../api/queries';
+import { supplierPaymentCancelImpactQueryOptions } from '../api/queries';
 import { cancelSupplierPaymentMutation } from '../api/mutations';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { SUPPLIER_PAYMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 const PRESET_REASONS = [
   'Duplicate payment entry',
@@ -39,7 +41,7 @@ export function CancelSupplierPaymentDialog({
     ...cancelSupplierPaymentMutation,
     onSuccess: () => {
       onOpenChange(false);
-      void qc.invalidateQueries({ queryKey: supplierPaymentKeys.all });
+      invalidateDomains({ queryClient: qc, domains: SUPPLIER_PAYMENT_SYNC_DOMAINS });
       toastSuccessAfterClose(t('supplierPayments.cancelSuccess'));
       onSuccess?.();
     },

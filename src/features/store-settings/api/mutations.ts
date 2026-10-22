@@ -8,7 +8,8 @@ import {
   uploadShopBanner,
   uploadShopLogo
 } from './service';
-import { storeSettingsKeys } from './queries';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { STORE_SETTINGS_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { UpdateStoreSettingsInput } from '@/types/store-settings';
 
 export function useUpdateStoreSettings() {
@@ -17,7 +18,7 @@ export function useUpdateStoreSettings() {
   return useMutation({
     mutationFn: (input: UpdateStoreSettingsInput) => updateStoreSettings(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: storeSettingsKeys.all });
+      invalidateDomains({ queryClient, domains: STORE_SETTINGS_SYNC_DOMAINS });
       toast.success(t('saved'));
     },
     onError: (error: Error) => {
@@ -32,7 +33,7 @@ export function useUploadShopLogo() {
   return useMutation({
     mutationFn: (file: File) => uploadShopLogo(file),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: storeSettingsKeys.all });
+      invalidateDomains({ queryClient, domains: STORE_SETTINGS_SYNC_DOMAINS });
       toast.success(t('logoUpdated'));
     },
     onError: (error: Error) => {
@@ -47,7 +48,7 @@ export function useRemoveShopLogo() {
   return useMutation({
     mutationFn: () => removeShopLogo(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: storeSettingsKeys.all });
+      invalidateDomains({ queryClient, domains: STORE_SETTINGS_SYNC_DOMAINS });
       toast.success(t('logoRemoved'));
     },
     onError: (error: Error) => {
@@ -62,7 +63,7 @@ export function useUploadShopBanner() {
   return useMutation({
     mutationFn: (file: File) => uploadShopBanner(file),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: storeSettingsKeys.all });
+      invalidateDomains({ queryClient, domains: STORE_SETTINGS_SYNC_DOMAINS });
       toast.success(t('bannerUpdated'));
     },
     onError: (error: Error) => {
@@ -77,7 +78,7 @@ export function useRemoveShopBanner() {
   return useMutation({
     mutationFn: () => removeShopBanner(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: storeSettingsKeys.all });
+      invalidateDomains({ queryClient, domains: STORE_SETTINGS_SYNC_DOMAINS });
       toast.success(t('bannerRemoved'));
     },
     onError: (error: Error) => {

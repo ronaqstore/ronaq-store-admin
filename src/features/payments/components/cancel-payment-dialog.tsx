@@ -11,8 +11,10 @@ import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { useT } from '@/i18n/use-t';
 import type { CancelImpactItem, OverdraftPrompt } from '@/types';
 import type { CancelPaymentDialogProps } from '@/types/payment';
-import { paymentCancelImpactQueryOptions, paymentKeys } from '../api/queries';
+import { paymentCancelImpactQueryOptions } from '../api/queries';
 import { cancelPaymentMutation } from '../api/mutations';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { PAYMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 const PRESET_REASONS = [
   'Duplicate payment entry',
@@ -53,7 +55,7 @@ export function CancelPaymentDialog({
       }
 
       onOpenChange(false);
-      void qc.invalidateQueries({ queryKey: paymentKeys.all });
+      invalidateDomains({ queryClient: qc, domains: PAYMENT_SYNC_DOMAINS });
       toastSuccessAfterClose(t('payments.cancelSuccess'));
       onSuccess?.();
     },

@@ -21,9 +21,10 @@ import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { FormEntitySelect } from '@/components/forms/form-entity-select';
 import { listSuppliers } from '@/features/suppliers/api/service';
 import { mapSupplierToPicker, toPickerPage } from '@/lib/api/picker';
-import { purchaseKeys } from '../api/queries';
 import { createPurchaseMutation } from '../api/mutations';
 import { createPurchaseFormSchema } from '../schemas/purchase-schema';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { PURCHASE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import {
   buildCreatePurchasePayload,
   emptyPurchaseLine,
@@ -51,7 +52,7 @@ export function PurchaseCreatePageClient() {
         toast.warning(res.message || t('dukaan.actions.cashBelowZeroWarning'));
         return;
       }
-      void qc.invalidateQueries({ queryKey: purchaseKeys.all });
+      invalidateDomains({ queryClient: qc, domains: PURCHASE_SYNC_DOMAINS });
       router.push('/dashboard/purchases');
       toastSuccessAfterClose(
         res?.message ||

@@ -22,7 +22,7 @@ import { useT } from '@/i18n/use-t';
 import { t as staticT } from '@/i18n/static-t';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { useRouter } from '@/i18n/navigation';
-import { productsQueryOptions, productsQueryKeys } from '../api/queries';
+import { productsQueryOptions } from '../api/queries';
 import { deactivateProduct, reactivateProduct } from '../api/service';
 import type { ProductDTO } from '@/lib/api/types';
 import { formatPkr } from '@/lib/dukaan/numbers';
@@ -46,6 +46,8 @@ import {
   parseExactStockQuantity,
   parseRupeePriceRange
 } from './products-table-filters';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { PRODUCT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 function productCoverUrl(row: ProductDTO): string | null {
   return row.imageUrl || row.imageUrls?.[0] || null;
@@ -110,7 +112,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
         ? t('dukaan.product.productActivated')
         : t('dukaan.product.productDeactivated');
       setStatusConfirm(null);
-      void qc.invalidateQueries({ queryKey: productsQueryKeys.all });
+      invalidateDomains({ queryClient: qc, domains: PRODUCT_SYNC_DOMAINS });
       toastSuccessAfterClose(message);
     },
     onError: (e: Error) => toast.error(e.message)

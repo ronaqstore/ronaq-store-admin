@@ -40,7 +40,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { createPaymentMutation } from '../api/mutations';
-import { customerReceivableQueryOptions, paymentKeys } from '../api/queries';
+import { customerReceivableQueryOptions } from '../api/queries';
 import { CustomerSelectCombobox } from './customer-select';
 import { PaymentTargetSection } from './payment-target-section';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
@@ -48,6 +48,8 @@ import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { cn } from '@/lib/utils';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { PAYMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 export function RecordPaymentDialog({
   open,
@@ -113,7 +115,7 @@ export function RecordPaymentDialog({
       });
       onOpenChange(false);
       resetForm();
-      void qc.invalidateQueries({ queryKey: paymentKeys.all });
+      invalidateDomains({ queryClient: qc, domains: PAYMENT_SYNC_DOMAINS });
       onSuccess?.();
       toastSuccessAfterClose(message);
     },

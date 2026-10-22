@@ -12,7 +12,8 @@ import {
   updateProduct,
   uploadProductImage
 } from './service';
-import { productsQueryKeys } from './queries';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { PRODUCT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 export function useCreateProduct() {
   const queryClient = useQueryClient();
@@ -20,7 +21,7 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: (input: CreateProductInput) => createProduct(input),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: productsQueryKeys.lists() });
+      invalidateDomains({ queryClient, domains: PRODUCT_SYNC_DOMAINS });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -34,8 +35,7 @@ export function useUpdateProduct(id: string) {
   return useMutation({
     mutationFn: (input: UpdateProductInput) => updateProduct(id, input),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: productsQueryKeys.lists() });
-      void queryClient.invalidateQueries({ queryKey: productsQueryKeys.detail(id) });
+      invalidateDomains({ queryClient, domains: PRODUCT_SYNC_DOMAINS });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -50,7 +50,7 @@ export function useUploadProductImage(productId: string) {
   return useMutation({
     mutationFn: (file: File) => uploadProductImage(productId, file),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productsQueryKeys.imageList(productId) });
+      invalidateDomains({ queryClient, domains: PRODUCT_SYNC_DOMAINS });
       toast.success(t('imageAdded'));
     },
     onError: (error: Error) => {
@@ -66,7 +66,7 @@ export function useReorderProductImages(productId: string) {
   return useMutation({
     mutationFn: (items: ProductImageReorderItem[]) => reorderProductImages(productId, items),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productsQueryKeys.imageList(productId) });
+      invalidateDomains({ queryClient, domains: PRODUCT_SYNC_DOMAINS });
       toast.success(t('imageReordered'));
     },
     onError: (error: Error) => {
@@ -82,7 +82,7 @@ export function useDeleteProductImage(productId: string) {
   return useMutation({
     mutationFn: (imageId: string) => deleteProductImage(productId, imageId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productsQueryKeys.imageList(productId) });
+      invalidateDomains({ queryClient, domains: PRODUCT_SYNC_DOMAINS });
       toast.success(t('imageRemoved'));
     },
     onError: (error: Error) => {

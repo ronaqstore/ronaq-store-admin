@@ -46,6 +46,8 @@ import {
   getActiveStatusQuickFilters
 } from '@/components/common/party-table-helpers';
 import { PartyCellAction } from '@/components/common/party-cell-action';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { SUPPLIER_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 function SupplierCellAction({ data }: SupplierCellActionProps) {
   const t = useT();
@@ -196,7 +198,7 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
         ? t('dukaan.party.supplierActivated')
         : t('dukaan.party.supplierDeactivated');
       setStatusConfirm(null);
-      void qc.invalidateQueries({ queryKey: supplierKeys.all });
+      invalidateDomains({ queryClient: qc, domains: SUPPLIER_SYNC_DOMAINS });
       toastSuccessAfterClose(message);
     },
     onError: (e: Error) => toast.error(e.message)

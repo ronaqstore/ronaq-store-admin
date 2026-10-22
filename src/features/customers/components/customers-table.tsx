@@ -48,6 +48,8 @@ import {
   MONEY_RANGE_RUPEES as CUSTOMER_MONEY_RANGE_RUPEES,
   parseRupeeMoneyRange
 } from '@/lib/dukaan/money-range-filter';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { CUSTOMER_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 function CustomerCellAction({ data }: CustomerCellActionProps) {
   const t = useT();
@@ -188,7 +190,7 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
         ? t('dukaan.party.customerActivated')
         : t('dukaan.party.customerDeactivated');
       setStatusConfirm(null);
-      void qc.invalidateQueries({ queryKey: customerKeys.all });
+      invalidateDomains({ queryClient: qc, domains: CUSTOMER_SYNC_DOMAINS });
       toastSuccessAfterClose(message);
     },
     onError: (e: Error) => toast.error(e.message)

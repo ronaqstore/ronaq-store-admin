@@ -24,9 +24,10 @@ import { listCustomers } from '@/features/customers/api/service';
 import { listProducts } from '@/features/products/api/service';
 import { mapProductToPicker, toPickerPage } from '@/lib/api/picker';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
-import { saleKeys } from '../api/queries';
 import { createSaleMutation } from '../api/mutations';
 import { createSaleFormSchema } from '../schemas/sale-schema';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { SALE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import {
   buildCreateSalePayload,
   calcSaleTotals,
@@ -55,8 +56,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
   const save = useMutation({
     ...createSaleMutation,
     onSuccess: (res: SaleDTO) => {
-      void qc.invalidateQueries({ queryKey: saleKeys.all });
-      void qc.invalidateQueries({ queryKey: ['inventory'] });
+      invalidateDomains({ queryClient: qc, domains: SALE_SYNC_DOMAINS });
       onDone?.();
       router.push(`/dashboard/sales/${res.id}`);
       toastSuccessAfterClose(t('dukaan.sale.saved', { saleNo: res.saleNo }));
