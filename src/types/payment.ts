@@ -56,7 +56,7 @@ export interface PaymentsListFilters {
   saleId?: string;
   saleNo?: string;
   receiptGroupId?: string;
-  method?: 'CASH';
+  method?: 'CASH' | 'JAZZCASH' | 'EASYPAISA' | 'BANK';
   minAmount?: number;
   maxAmount?: number;
   status?: 'ACTIVE' | 'CANCELLED';

@@ -36,6 +36,10 @@ import { RecordPaymentDialog } from './record-payment-dialog';
 import type { RowAction } from '@/types/dukaan';
 import { formatPaymentMethod } from '@/lib/format-payment';
 import {
+  PAYMENT_METHOD_OPTIONS,
+  parsePaymentMethodFilter
+} from '@/lib/dukaan/payment-methods';
+import {
   createActiveCancelledStatusColumn,
   createAmountColumn
 } from '@/components/common/party-table-helpers';
@@ -157,8 +161,9 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
   const saleNoFilter =
     firstFilterValue((filters as Record<string, unknown>).saleNo) ??
     (saleNoParam?.trim() || undefined);
-  const methodRaw = firstFilterValue((filters as Record<string, unknown>).method);
-  const methodFilter = methodRaw === 'CASH' ? ('CASH' as const) : undefined;
+  const methodFilter = parsePaymentMethodFilter(
+    (filters as Record<string, unknown>).method
+  );
   const amountRange = parseRupeeMoneyRange((filters as Record<string, unknown>).amount);
   const { from, to } = parseFacetDateRange(
     (filters as Record<string, unknown>).paymentDate ?? paymentDateParam
@@ -295,7 +300,10 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
         label: 'table.col.method',
         variant: 'select',
         icon: Icons.cash,
-        options: [{ label: 'Cash', value: 'CASH' }],
+        options: PAYMENT_METHOD_OPTIONS.map((opt) => ({
+          label: opt.label,
+          value: opt.value
+        })),
         priority: 4,
         mobile: 'hidden'
       },

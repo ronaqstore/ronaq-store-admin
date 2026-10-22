@@ -22,11 +22,15 @@ import { useT } from '@/i18n/use-t';
 import { Icons } from '@/components/icons';
 import type { CustomerDTO } from '@/lib/api/types';
 import type {
-  PaymentMethodOption,
   RecordPaymentDialogProps,
   RecordPaymentFormErrors,
   UnpaidSaleDTO
 } from '@/types/payment';
+import {
+  PAYMENT_METHOD_OPTIONS,
+  isStoredPaymentMethod,
+  type StoredPaymentMethod
+} from '@/lib/dukaan/payment-methods';
 import {
   Select,
   SelectContent,
@@ -45,13 +49,6 @@ import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { cn } from '@/lib/utils';
 
-const PAYMENT_METHOD_OPTIONS = [
-  { value: 'CASH', label: 'Cash' },
-  { value: 'JAZZCASH', label: 'JazzCash' },
-  { value: 'EASYPAISA', label: 'EasyPaisa' },
-  { value: 'BANK', label: 'Bank Transfer' }
-] as const;
-
 export function RecordPaymentDialog({
   open,
   onOpenChange,
@@ -66,7 +63,7 @@ export function RecordPaymentDialog({
   const [selectedSaleId, setSelectedSaleId] = useState('');
   const [amountStr, setAmountStr] = useState('');
   const [paymentDate, setPaymentDate] = useState(todayIsoDate);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodOption>('CASH');
+  const [paymentMethod, setPaymentMethod] = useState<StoredPaymentMethod>('CASH');
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<RecordPaymentFormErrors>({});
 
@@ -362,7 +359,7 @@ export function RecordPaymentDialog({
                 <Select
                   value={paymentMethod}
                   onValueChange={(val) => {
-                    if (val) setPaymentMethod(val as PaymentMethodOption);
+                    if (isStoredPaymentMethod(val)) setPaymentMethod(val);
                   }}
                   items={PAYMENT_METHOD_OPTIONS.map((opt) => ({
                     value: opt.value,

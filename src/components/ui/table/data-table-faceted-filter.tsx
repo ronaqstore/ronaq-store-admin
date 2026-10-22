@@ -114,10 +114,12 @@ export function DataTableFacetedFilter<TData, TValue>({
                 <div
                   className={cn(
                     'border-primary flex size-4 items-center justify-center rounded-sm border',
-                    isSelected ? 'bg-primary' : 'opacity-50 [&_svg]:invisible'
+                    isSelected
+                      ? 'bg-primary text-white'
+                      : 'opacity-50 [&_svg]:invisible'
                   )}
                 >
-                  <Icons.check />
+                  <Icons.check className='size-3.5 text-current' />
                 </div>
                 {option.icon && <option.icon />}
                 <span className='truncate'>{option.label}</span>

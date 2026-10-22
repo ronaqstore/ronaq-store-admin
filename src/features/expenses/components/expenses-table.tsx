@@ -116,14 +116,12 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
     'status',
     'categoryId',
     'expenseDate',
-    'amount',
-    'description'
+    'amount'
   ], 'expenseDate');
 
   const [searchParam] = useQueryState('search', parseAsString);
   const [categoryNameParam] = useQueryState('categoryName', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
-  const [descriptionParam] = useQueryState('description', parseAsString);
   const [expenseDateParam] = useQueryState(
     'expenseDate',
     parseAsArrayOf(parseAsString, ',')
@@ -134,9 +132,6 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
     (filters as Record<string, unknown>).status ?? statusParam
   );
   const categoryId = firstFilterValue((filters as Record<string, unknown>).categoryId);
-  const descriptionFilter =
-    firstFilterValue((filters as Record<string, unknown>).description) ??
-    (descriptionParam?.trim() || undefined);
   const amountRange = parseRupeeMoneyRange((filters as Record<string, unknown>).amount);
   const { from, to } = parseFacetDateRange(
     (filters as Record<string, unknown>).expenseDate ?? expenseDateParam
@@ -148,7 +143,6 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
       pageSize: params.perPage,
       search,
       categoryId,
-      description: descriptionFilter,
       minAmount: amountRange.minAmount,
       maxAmount: amountRange.maxAmount,
       status: statusFilter,
@@ -258,13 +252,10 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
       ),
       meta: {
         label: 'table.col.description',
-        placeholderKey: 'table.col.description',
-        variant: 'text',
-        icon: Icons.search,
         priority: 3,
         mobile: 'subtitle'
       },
-      enableColumnFilter: true,
+      enableColumnFilter: false,
       enableSorting: true
     },
     createActiveCancelledStatusColumn<ExpenseDTO>(t('table.col.status')),
