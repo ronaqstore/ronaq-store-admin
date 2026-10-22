@@ -119,10 +119,7 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
     'purchaseNo',
     'totalAmount',
     'paid',
-    'outstanding',
-    'status',
-    'createdAt',
-    'updatedAt'
+    'outstanding'
   ];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     PurchasesListFilters['sortBy']
@@ -161,10 +158,7 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
     sortBy === 'purchaseNo' ||
     sortBy === 'totalAmount' ||
     sortBy === 'paid' ||
-    sortBy === 'outstanding' ||
-    sortBy === 'createdAt' ||
-    sortBy === 'updatedAt' ||
-    sortBy === 'status'
+    sortBy === 'outstanding'
       ? sortBy
       : 'purchaseDate';
 

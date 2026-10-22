@@ -36,7 +36,7 @@ export function createActiveCancelledStatusColumn<T extends HasStatusRecord>(
       mobile: 'badge'
     },
     enableColumnFilter: true,
-    enableSorting: true
+    enableSorting: false
   };
 }
 

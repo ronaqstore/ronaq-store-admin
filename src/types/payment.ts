@@ -68,7 +68,7 @@ export interface PaymentsListFilters {
   status?: 'ACTIVE' | 'CANCELLED';
   from?: string;
   to?: string;
-  sortBy?: 'paymentDate' | 'amount' | 'createdAt' | 'updatedAt' | 'customerName' | 'method';
+  sortBy?: 'paymentDate' | 'amount' | 'customerName';
   sortOrder?: 'asc' | 'desc';
 }
 

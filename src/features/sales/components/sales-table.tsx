@@ -93,10 +93,7 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
     'saleNo',
     'totalAmount',
     'paid',
-    'outstanding',
-    'status',
-    'createdAt',
-    'updatedAt'
+    'outstanding'
   ];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     SalesListFilters['sortBy']
@@ -146,10 +143,7 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
     sortBy === 'saleNo' ||
     sortBy === 'totalAmount' ||
     sortBy === 'paid' ||
-    sortBy === 'outstanding' ||
-    sortBy === 'createdAt' ||
-    sortBy === 'updatedAt' ||
-    sortBy === 'status'
+    sortBy === 'outstanding'
       ? sortBy
       : 'saleDate';
 

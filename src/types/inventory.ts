@@ -7,7 +7,7 @@ export interface InventoryStockFilters {
   limit?: number;
   search?: string;
   productId?: string;
-  sortBy?: 'name' | 'inStock' | 'stockValue' | 'trackingType' | 'lowStock';
+  sortBy?: 'name' | 'inStock' | 'stockValue';
   sortOrder?: 'asc' | 'desc';
   trackingType?: 'QUANTITY' | 'SERIALIZED';
   lowStock?: boolean | string;

@@ -111,14 +111,7 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
   const [cancelPaymentTarget, setCancelPaymentTarget] = useState<SupplierPaymentDTO | null>(null);
   const [detailPayment, setDetailPayment] = useState<SupplierPaymentDTO | null>(null);
 
-  const sortableColumnIds = [
-    'supplierName',
-    'paymentDate',
-    'amount',
-    'status',
-    'createdAt',
-    'updatedAt'
-  ];
+  const sortableColumnIds = ['supplierName', 'paymentDate', 'amount'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     SupplierPaymentQueryFilter['sortBy']
   >(sortableColumnIds, 'supplierName', [

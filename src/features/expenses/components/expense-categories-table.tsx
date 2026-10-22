@@ -117,7 +117,7 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
   const [deactivateTarget, setDeactivateTarget] = useState<ExpenseCategoryDTO | null>(null);
   const [activateTarget, setActivateTarget] = useState<ExpenseCategoryDTO | null>(null);
 
-  const sortableColumnIds = ['name', 'createdAt', 'updatedAt'];
+  const sortableColumnIds = ['name', 'createdAt'];
   const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<ExpenseCategorySortField>(
     sortableColumnIds,
     'name',

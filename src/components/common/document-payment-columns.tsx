@@ -186,6 +186,6 @@ export function createDocumentPayStatusColumn<T extends HasDocumentPayments>(
       mobile: 'badge'
     },
     enableColumnFilter: true,
-    enableSorting: true
+    enableSorting: false
   };
 }

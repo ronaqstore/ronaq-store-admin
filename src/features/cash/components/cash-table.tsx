@@ -100,7 +100,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
   const hasOpeningCash = openingStatus?.hasOpening === true;
   const showOpeningButton = openingStatus?.hasOpening === false;
 
-  const sortableColumnIds = ['movementDate', 'amount', 'createdAt'];
+  const sortableColumnIds = ['movementDate', 'amount'];
   const { params, filters, search: noteSearch, sortBy, sortOrder, getPageCount } =
     useDukaanListParams<CashMovementSortField>(
       sortableColumnIds,

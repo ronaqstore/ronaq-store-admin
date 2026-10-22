@@ -129,7 +129,7 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
     null
   );
 
-  const sortableColumnIds = ['name', 'phone', 'openingBalance', 'isActive'];
+  const sortableColumnIds = ['name', 'openingBalance'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     SupplierListFilters['sortBy']
   >(

@@ -72,8 +72,8 @@ const brandMobileItem = buildSimpleEntityMobileItem<BrandDTO>(Icons.tag);
 const brandDetail = buildSimpleEntityDetail<BrandDTO>(t('table.col.brand'));
 
 export function BrandsTable({ toolbarAction }: BrandsTableProps) {
-  const sortableColumnIds = ['name', 'createdAt', 'updatedAt'];
-  const { params, filters, sortBy, sortOrder } = useDukaanListParams(
+  const sortableColumnIds = ['name'];
+  const { params, filters, sortOrder } = useDukaanListParams(
     sortableColumnIds,
     'name',
     ['isActive'],
@@ -90,7 +90,7 @@ export function BrandsTable({ toolbarAction }: BrandsTableProps) {
       pageSize: params.perPage,
       search: filters.search,
       isActive: isActiveFilter,
-      sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | undefined,
+      sortBy: 'name',
       sortOrder
     })
   );

@@ -88,7 +88,7 @@ export function createPartyPhoneColumn<T extends BasePartyRecord>(
         : {})
     },
     enableColumnFilter: enableFilter,
-    enableSorting: true,
+    enableSorting: false,
     cell: ({ row }) => {
       const phone = (row.original as T).phone;
       return phone ? formatPkMobileLocal(phone) : '—';
@@ -286,7 +286,7 @@ export function createPartyIsActiveColumn<T extends HasIsActiveRecord>(): Column
       mobile: 'badge'
     },
     enableColumnFilter: true,
-    enableSorting: true,
+    enableSorting: false,
     cell: ({ row }) => (
       <Badge variant={(row.original as T).isActive ? 'default' : 'secondary'}>
         {(row.original as T).isActive ? t('status.active') : t('status.inactive')}

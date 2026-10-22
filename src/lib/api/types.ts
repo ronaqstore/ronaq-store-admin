@@ -564,7 +564,7 @@ export interface ProductListFilters {
   quantityOnHand?: number;
   minSellingPrice?: number;
   maxSellingPrice?: number;
-  sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'defaultSellingPrice';
+  sortBy?: 'name' | 'defaultSellingPrice';
   sortOrder?: 'asc' | 'desc';
 }
 

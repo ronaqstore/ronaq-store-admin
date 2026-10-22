@@ -102,14 +102,7 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
   const [cancelExpenseTarget, setCancelExpenseTarget] = useState<ExpenseDTO | null>(null);
   const [detailExpense, setDetailExpense] = useState<ExpenseDTO | null>(null);
 
-  const sortableColumnIds = [
-    'expenseDate',
-    'categoryName',
-    'amount',
-    'description',
-    'status',
-    'createdAt'
-  ];
+  const sortableColumnIds = ['expenseDate', 'categoryName', 'amount'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     ExpenseQueryFilter['sortBy']
   >(sortableColumnIds, 'categoryName', [
@@ -256,7 +249,7 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
         mobile: 'subtitle'
       },
       enableColumnFilter: false,
-      enableSorting: true
+      enableSorting: false
     },
     createActiveCancelledStatusColumn<ExpenseDTO>(t('table.col.status')),
     {

@@ -11,7 +11,7 @@ export interface SupplierListFilters {
   minCurrentBalance?: number;
   maxCurrentBalance?: number;
   isActive?: boolean;
-  sortBy?: 'name' | 'phone' | 'createdAt' | 'updatedAt' | 'openingBalance' | 'isActive';
+  sortBy?: 'name' | 'openingBalance';
   sortOrder?: 'asc' | 'desc';
 }
 

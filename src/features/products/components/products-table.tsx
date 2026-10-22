@@ -57,7 +57,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
   const qc = useQueryClient();
   const [statusConfirm, setStatusConfirm] = useState<EntityStatusConfirm | null>(null);
 
-  const sortableColumnIds = ['name', 'createdAt', 'updatedAt', 'defaultSellingPrice'];
+  const sortableColumnIds = ['name', 'defaultSellingPrice'];
   const { params, filters, sortBy, sortOrder } = useDukaanListParams(
     sortableColumnIds,
     'name',
@@ -91,7 +91,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       quantityOnHand: stockFilter,
       minSellingPrice: priceRange.minSellingPrice,
       maxSellingPrice: priceRange.maxSellingPrice,
-      sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | 'defaultSellingPrice' | undefined,
+      sortBy: sortBy as 'name' | 'defaultSellingPrice' | undefined,
       sortOrder
     })
   );
@@ -158,6 +158,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
           priority: 1
         },
         enableColumnFilter: true,
+        enableSorting: true,
         cell: ({ row }) => {
           const skuLine = row.original.sku
             ? `SKU: ${row.original.sku}`
@@ -227,6 +228,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
           icon: Icons.cash
         },
         enableColumnFilter: true,
+        enableSorting: true,
         cell: ({ row }) => formatPkr(row.original.defaultSellingPrice)
       },
       {

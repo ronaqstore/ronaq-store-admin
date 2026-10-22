@@ -83,9 +83,9 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
   const [adjustOpen, setAdjustOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<InventoryItemDTO | null>(null);
 
-  const sortableColumnIds = ['name', 'trackingType', 'inStock', 'stockValue', 'lowStock'];
+  const sortableColumnIds = ['name', 'inStock', 'stockValue'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
-    'name' | 'inStock' | 'stockValue' | 'trackingType' | 'lowStock'
+    'name' | 'inStock' | 'stockValue'
   >(
     sortableColumnIds,
     'name',
@@ -237,7 +237,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
         mobile: 'subtitle'
       },
       enableColumnFilter: true,
-      enableSorting: true
+      enableSorting: false
     },
     {
       id: 'inStock',
@@ -297,7 +297,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
         mobile: 'badge'
       },
       enableColumnFilter: true,
-      enableSorting: true
+      enableSorting: false
     },
     {
       id: 'actions',

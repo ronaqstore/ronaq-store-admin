@@ -11,7 +11,7 @@ export interface CustomerListFilters {
   minCurrentBalance?: number;
   maxCurrentBalance?: number;
   isActive?: boolean;
-  sortBy?: 'name' | 'phone' | 'isActive' | 'openingBalance' | 'createdAt' | 'updatedAt';
+  sortBy?: 'name' | 'openingBalance';
   sortOrder?: 'asc' | 'desc';
 }
 

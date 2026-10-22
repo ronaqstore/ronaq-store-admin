@@ -22,7 +22,7 @@ export function isValidPkCnic(cnic: string): boolean {
 }
 
 export function isOptionalPkCnic(cnic: string): boolean {
-  const trimmed = cnic.trim();
+  const trimmed = cnic.trim();  
   if (!trimmed) return true;
   return isValidPkCnic(trimmed);
 }

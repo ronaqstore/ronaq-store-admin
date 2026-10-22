@@ -72,8 +72,8 @@ const categoryMobileItem = buildSimpleEntityMobileItem<CategoryDTO>(Icons.folder
 const categoryDetail = buildSimpleEntityDetail<CategoryDTO>(t('table.col.category'));
 
 export function CategoriesTable({ toolbarAction }: CategoriesTableProps) {
-  const sortableColumnIds = ['name', 'createdAt', 'updatedAt'];
-  const { params, filters, sortBy, sortOrder } = useDukaanListParams(
+  const sortableColumnIds = ['name'];
+  const { params, filters, sortOrder } = useDukaanListParams(
     sortableColumnIds,
     'name',
     ['isActive'],
@@ -90,7 +90,7 @@ export function CategoriesTable({ toolbarAction }: CategoriesTableProps) {
       pageSize: params.perPage,
       search: filters.search,
       isActive: isActiveFilter,
-      sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | undefined,
+      sortBy: 'name',
       sortOrder
     })
   );

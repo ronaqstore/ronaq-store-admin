@@ -124,15 +124,7 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
   const [recordOpen, setRecordOpen] = useState(false);
   const [cancelPaymentTarget, setCancelPaymentTarget] = useState<PaymentDTO | null>(null);
 
-  const sortableColumnIds = [
-    'customerName',
-    'paymentDate',
-    'amount',
-    'method',
-    'status',
-    'createdAt',
-    'updatedAt'
-  ];
+  const sortableColumnIds = ['customerName', 'paymentDate', 'amount'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     PaymentsListFilters['sortBy']
   >(sortableColumnIds, 'customerName', [
@@ -299,7 +291,7 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
         mobile: 'hidden'
       },
       enableColumnFilter: true,
-      enableSorting: true
+      enableSorting: false
     },
     createActiveCancelledStatusColumn<PaymentDTO>(t('table.col.status')),
     {

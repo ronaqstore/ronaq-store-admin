@@ -35,15 +35,7 @@ export interface SalesListFilters {
   maxPaidAmount?: number;
   minOutstandingAmount?: number;
   maxOutstandingAmount?: number;
-  sortBy?:
-    | 'saleDate'
-    | 'saleNo'
-    | 'totalAmount'
-    | 'paid'
-    | 'outstanding'
-    | 'status'
-    | 'createdAt'
-    | 'updatedAt';
+  sortBy?: 'saleDate' | 'saleNo' | 'totalAmount' | 'paid' | 'outstanding';
   sortOrder?: 'asc' | 'desc';
 }
 

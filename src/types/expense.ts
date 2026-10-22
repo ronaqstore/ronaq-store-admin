@@ -67,7 +67,7 @@ export interface ExpenseQueryFilter {
   status?: 'ACTIVE' | 'CANCELLED';
   from?: string;
   to?: string;
-  sortBy?: 'expenseDate' | 'amount' | 'createdAt' | 'categoryName' | 'description' | 'status';
+  sortBy?: 'expenseDate' | 'amount' | 'categoryName';
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -76,7 +76,7 @@ export interface CreateExpenseCategoryInput {
   isActive?: boolean;
 }
 
-export type ExpenseCategorySortField = 'name' | 'createdAt' | 'updatedAt';
+export type ExpenseCategorySortField = 'name' | 'createdAt';
 
 export interface ExpenseCategoryQueryFilter {
   page?: number;

@@ -121,7 +121,7 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
     null
   );
 
-  const sortableColumnIds = ['name', 'phone', 'openingBalance', 'isActive'];
+  const sortableColumnIds = ['name', 'openingBalance'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     CustomerListFilters['sortBy']
   >(

@@ -43,15 +43,7 @@ export interface PurchasesListFilters {
   maxPaidAmount?: number;
   minOutstandingAmount?: number;
   maxOutstandingAmount?: number;
-  sortBy?:
-    | 'purchaseDate'
-    | 'purchaseNo'
-    | 'totalAmount'
-    | 'paid'
-    | 'outstanding'
-    | 'status'
-    | 'createdAt'
-    | 'updatedAt';
+  sortBy?: 'purchaseDate' | 'purchaseNo' | 'totalAmount' | 'paid' | 'outstanding';
   sortOrder?: 'asc' | 'desc';
 }
 

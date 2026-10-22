@@ -6,7 +6,7 @@ export interface CategoryListFilters {
   pageSize?: number;
   search?: string;
   isActive?: boolean;
-  sortBy?: 'name' | 'createdAt' | 'updatedAt';
+  sortBy?: 'name';
   sortOrder?: 'asc' | 'desc';
 }
 

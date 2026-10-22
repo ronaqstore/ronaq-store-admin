@@ -27,7 +27,7 @@ export interface CashMovementDTO {
   createdAt: string;
 }
 
-export type CashMovementSortField = 'movementDate' | 'amount' | 'createdAt';
+export type CashMovementSortField = 'movementDate' | 'amount';
 
 export interface CashMovementQueryFilter {
   page?: number;
