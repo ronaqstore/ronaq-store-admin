@@ -140,14 +140,12 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
     'customerId',
     'paymentDate',
     'amount',
-    'saleNo',
     'method'
   ], 'paymentDate');
 
   const [searchParam] = useQueryState('search', parseAsString);
   const [customerNameParam] = useQueryState('customerName', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
-  const [saleNoParam] = useQueryState('saleNo', parseAsString);
   const [paymentDateParam] = useQueryState(
     'paymentDate',
     parseAsArrayOf(parseAsString, ',')
@@ -158,9 +156,6 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
     (filters as Record<string, unknown>).status ?? statusParam
   );
   const customerId = firstFilterValue((filters as Record<string, unknown>).customerId);
-  const saleNoFilter =
-    firstFilterValue((filters as Record<string, unknown>).saleNo) ??
-    (saleNoParam?.trim() || undefined);
   const methodFilter = parsePaymentMethodFilter(
     (filters as Record<string, unknown>).method
   );
@@ -175,7 +170,6 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
       pageSize: params.perPage,
       search,
       customerId,
-      saleNo: saleNoFilter,
       method: methodFilter,
       minAmount: amountRange.minAmount,
       maxAmount: amountRange.maxAmount,
@@ -276,13 +270,10 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
       ),
       meta: {
         label: 'nav.sales',
-        placeholderKey: 'nav.sales',
-        variant: 'text',
-        icon: Icons.search,
         priority: 3,
         mobile: 'subtitle'
       },
-      enableColumnFilter: true,
+      enableColumnFilter: false,
       enableSorting: false
     },
     {

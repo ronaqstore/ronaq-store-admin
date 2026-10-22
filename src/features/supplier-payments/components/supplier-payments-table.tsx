@@ -125,16 +125,12 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
     'status',
     'supplierId',
     'paymentDate',
-    'amount',
-    'target',
-    'notes'
+    'amount'
   ], 'paymentDate');
 
   const [searchParam] = useQueryState('search', parseAsString);
   const [supplierNameParam] = useQueryState('supplierName', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
-  const [notesParam] = useQueryState('notes', parseAsString);
-  const [targetParam] = useQueryState('target', parseAsString);
   const [paymentDateParam] = useQueryState(
     'paymentDate',
     parseAsArrayOf(parseAsString, ',')
@@ -145,12 +141,6 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
     (filters as Record<string, unknown>).status ?? statusParam
   );
   const supplierId = firstFilterValue((filters as Record<string, unknown>).supplierId);
-  const notesFilter =
-    firstFilterValue((filters as Record<string, unknown>).notes) ??
-    (notesParam?.trim() || undefined);
-  const purchaseNoFilter =
-    firstFilterValue((filters as Record<string, unknown>).target) ??
-    (targetParam?.trim() || undefined);
   const amountRange = parseRupeeMoneyRange((filters as Record<string, unknown>).amount);
   const { from, to } = parseFacetDateRange(
     (filters as Record<string, unknown>).paymentDate ?? paymentDateParam
@@ -162,8 +152,6 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
       pageSize: params.perPage,
       search,
       supplierId,
-      purchaseNo: purchaseNoFilter,
-      notes: notesFilter,
       minAmount: amountRange.minAmount,
       maxAmount: amountRange.maxAmount,
       status: statusFilter,
@@ -260,13 +248,10 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
       ),
       meta: {
         label: 'table.col.target',
-        placeholderKey: 'table.col.target',
-        variant: 'text',
-        icon: Icons.search,
         priority: 3,
         mobile: 'subtitle'
       },
-      enableColumnFilter: true,
+      enableColumnFilter: false,
       enableSorting: false
     },
     {
@@ -283,13 +268,10 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
       ),
       meta: {
         label: 'table.col.notes',
-        placeholderKey: 'table.col.notes',
-        variant: 'text',
-        icon: Icons.search,
         priority: 4,
         mobile: 'hidden'
       },
-      enableColumnFilter: true,
+      enableColumnFilter: false,
       enableSorting: false
     },
     createActiveCancelledStatusColumn<SupplierPaymentDTO>(t('table.col.status')),

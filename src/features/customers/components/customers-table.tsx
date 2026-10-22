@@ -45,7 +45,6 @@ import {
 } from '@/components/common/party-table-helpers';
 import { PartyCellAction } from '@/components/common/party-cell-action';
 import {
-  firstFilterValue as firstCustomerFilterValue,
   MONEY_RANGE_RUPEES as CUSTOMER_MONEY_RANGE_RUPEES,
   parseRupeeMoneyRange
 } from '@/lib/dukaan/money-range-filter';
@@ -78,8 +77,8 @@ function CustomerCellAction({ data }: CustomerCellActionProps) {
 
 const customerColumns: ColumnDef<CustomerDTO>[] = [
   createPartyNameColumn<CustomerDTO>({ placeholderKey: 'search.customers' }),
-  createPartyPhoneColumn<CustomerDTO>({ enableFilter: true }),
-  createPartyAddressColumn<CustomerDTO>({ enableFilter: true }),
+  createPartyPhoneColumn<CustomerDTO>(),
+  createPartyAddressColumn<CustomerDTO>(),
   createPartyCurrentBalanceColumn<CustomerDTO>({
     labelKey: 'dukaan.party.currentUdhar',
     ledgerHref: (row) => `/dashboard/customers/${row.id}`,
@@ -128,7 +127,7 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
   >(
     sortableColumnIds,
     'name',
-    ['isActive', 'phone', 'address', 'currentBalance', 'openingBalance'],
+    ['isActive', 'currentBalance', 'openingBalance'],
     'name',
     'asc'
   );
@@ -136,19 +135,11 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
   const [nameParam] = useQueryState('name', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
   const [isActiveParam] = useQueryState('isActive', parseAsString);
-  const [phoneParam] = useQueryState('phone', parseAsString);
-  const [addressParam] = useQueryState('address', parseAsString);
 
   const search = searchParam || nameParam || undefined;
   const isActiveFilter = parseBooleanFacet(
     (filters as Record<string, unknown>).isActive ?? isActiveParam
   );
-  const phoneFilter =
-    firstCustomerFilterValue((filters as Record<string, unknown>).phone) ??
-    (phoneParam?.trim() || undefined);
-  const addressFilter =
-    firstCustomerFilterValue((filters as Record<string, unknown>).address) ??
-    (addressParam?.trim() || undefined);
   const creditRange = parseRupeeMoneyRange(
     (filters as Record<string, unknown>).currentBalance
   );
@@ -161,8 +152,6 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
       page: params.page,
       pageSize: params.perPage,
       search: search || undefined,
-      phone: phoneFilter,
-      address: addressFilter,
       minOpeningBalance: openingRange.minAmount,
       maxOpeningBalance: openingRange.maxAmount,
       minCurrentBalance: creditRange.minAmount,

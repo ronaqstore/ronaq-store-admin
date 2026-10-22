@@ -7,8 +7,6 @@ export async function GET(request: NextRequest) {
       'page',
       'pageSize',
       'search',
-      'phone',
-      'address',
       'minOpeningBalance',
       'maxOpeningBalance',
       'minCurrentBalance',

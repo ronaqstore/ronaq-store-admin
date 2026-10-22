@@ -24,7 +24,6 @@ import {
 } from '@/components/data-table/list-params';
 import type { SupplierDTO } from '@/lib/api/types';
 import {
-  firstFilterValue,
   MONEY_RANGE_RUPEES,
   parseRupeeMoneyRange
 } from '@/lib/dukaan/money-range-filter';
@@ -85,9 +84,9 @@ const supplierColumns: ColumnDef<SupplierDTO>[] = [
         </Badge>
       ) : null
   }),
-  createPartyPhoneColumn<SupplierDTO>({ enableFilter: true }),
-  createPartyCnicColumn<SupplierDTO>({ enableFilter: true }),
-  createPartyAddressColumn<SupplierDTO>({ enableFilter: true }),
+  createPartyPhoneColumn<SupplierDTO>(),
+  createPartyCnicColumn<SupplierDTO>(),
+  createPartyAddressColumn<SupplierDTO>(),
   createPartyCurrentBalanceColumn<SupplierDTO>({
     labelKey: 'dukaan.party.currentPayable',
     ledgerHref: (row) => `/dashboard/suppliers/${row.id}`,
@@ -136,7 +135,7 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
   >(
     sortableColumnIds,
     'name',
-    ['isActive', 'phone', 'cnic', 'address', 'currentBalance', 'openingBalance'],
+    ['isActive', 'currentBalance', 'openingBalance'],
     'name',
     'asc'
   );
@@ -144,23 +143,11 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
   const [nameParam] = useQueryState('name', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
   const [isActiveParam] = useQueryState('isActive', parseAsString);
-  const [phoneParam] = useQueryState('phone', parseAsString);
-  const [cnicParam] = useQueryState('cnic', parseAsString);
-  const [addressParam] = useQueryState('address', parseAsString);
 
   const search = searchParam || nameParam || undefined;
   const isActiveFilter = parseBooleanFacet(
     (filters as Record<string, unknown>).isActive ?? isActiveParam
   );
-  const phoneFilter =
-    firstFilterValue((filters as Record<string, unknown>).phone) ??
-    (phoneParam?.trim() || undefined);
-  const cnicFilter =
-    firstFilterValue((filters as Record<string, unknown>).cnic) ??
-    (cnicParam?.trim() || undefined);
-  const addressFilter =
-    firstFilterValue((filters as Record<string, unknown>).address) ??
-    (addressParam?.trim() || undefined);
   const creditRange = parseRupeeMoneyRange(
     (filters as Record<string, unknown>).currentBalance
   );
@@ -173,9 +160,6 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
       page: params.page,
       pageSize: params.perPage,
       search: search || undefined,
-      phone: phoneFilter,
-      cnic: cnicFilter,
-      address: addressFilter,
       minOpeningBalance: openingRange.minAmount,
       maxOpeningBalance: openingRange.maxAmount,
       minCurrentBalance: creditRange.minAmount,

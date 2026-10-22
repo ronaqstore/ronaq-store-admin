@@ -15,6 +15,13 @@ export type PaymentMethodOption =
   | 'CHEQUE'
   | 'OTHER';
 
+export type StoredPaymentMethod = 'CASH' | 'JAZZCASH' | 'EASYPAISA' | 'BANK';
+
+export interface PaymentMethodSelectOption {
+  value: StoredPaymentMethod;
+  label: string;
+}
+
 export interface PaymentRowActionsProps {
   payment: PaymentDTO;
   onCancel: (payment: PaymentDTO) => void;
@@ -54,7 +61,6 @@ export interface PaymentsListFilters {
   search?: string;
   customerId?: string;
   saleId?: string;
-  saleNo?: string;
   receiptGroupId?: string;
   method?: 'CASH' | 'JAZZCASH' | 'EASYPAISA' | 'BANK';
   minAmount?: number;

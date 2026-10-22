@@ -10,7 +10,6 @@ export async function GET(request: NextRequest) {
       'search',
       'customerId',
       'saleId',
-      'saleNo',
       'receiptGroupId',
       'method',
       'minAmount',

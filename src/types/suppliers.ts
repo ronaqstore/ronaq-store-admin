@@ -6,9 +6,6 @@ export interface SupplierListFilters {
   pageSize?: number;
   limit?: number;
   search?: string;
-  phone?: string;
-  cnic?: string;
-  address?: string;
   minOpeningBalance?: number;
   maxOpeningBalance?: number;
   minCurrentBalance?: number;

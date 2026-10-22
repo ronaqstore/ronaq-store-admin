@@ -6,8 +6,6 @@ export interface CustomerListFilters {
   pageSize?: number;
   limit?: number;
   search?: string;
-  phone?: string;
-  address?: string;
   minOpeningBalance?: number;
   maxOpeningBalance?: number;
   minCurrentBalance?: number;

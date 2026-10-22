@@ -1,4 +1,10 @@
-import type { PaymentMethodOption } from '@/types/payment';
+import type {
+  PaymentMethodOption,
+  PaymentMethodSelectOption,
+  StoredPaymentMethod
+} from '@/types/payment';
+
+export type { StoredPaymentMethod };
 
 export const PAYMENT_METHOD_VALUES = [
   'CASH',
@@ -7,12 +13,7 @@ export const PAYMENT_METHOD_VALUES = [
   'BANK'
 ] as const satisfies readonly PaymentMethodOption[];
 
-export type StoredPaymentMethod = (typeof PAYMENT_METHOD_VALUES)[number];
-
-export const PAYMENT_METHOD_OPTIONS: {
-  value: StoredPaymentMethod;
-  label: string;
-}[] = [
+export const PAYMENT_METHOD_OPTIONS: PaymentMethodSelectOption[] = [
   { value: 'CASH', label: 'Cash' },
   { value: 'JAZZCASH', label: 'JazzCash' },
   { value: 'EASYPAISA', label: 'EasyPaisa' },
