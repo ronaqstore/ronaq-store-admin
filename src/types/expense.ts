@@ -61,6 +61,9 @@ export interface ExpenseQueryFilter {
   limit?: number;
   search?: string;
   categoryId?: string;
+  description?: string;
+  minAmount?: number;
+  maxAmount?: number;
   status?: 'ACTIVE' | 'CANCELLED';
   from?: string;
   to?: string;

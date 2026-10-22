@@ -27,9 +27,23 @@ export interface PartyNameColumnOptions<T extends { name: string }> {
   cellExtra?: (row: T) => ReactNode;
 }
 
+export interface PartyTextColumnFilterOptions {
+  enableFilter?: boolean;
+  placeholderKey?: string;
+}
+
 export interface PartyBalanceColumnOptions<T> {
   labelKey: string;
   ledgerHref?: (row: T) => string | undefined;
+  enableRangeFilter?: boolean;
+  range?: [number, number];
+  unit?: string;
+}
+
+export interface AmountColumnOptions {
+  enableRangeFilter?: boolean;
+  range?: [number, number];
+  unit?: string;
 }
 
 export type PartyApiField = 'phone' | 'cnic';

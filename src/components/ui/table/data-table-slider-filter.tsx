@@ -56,6 +56,7 @@ interface DataTableSliderFilterProps<TData> {
 export function DataTableSliderFilter<TData>({ column, title }: DataTableSliderFilterProps<TData>) {
   const id = React.useId();
   const t = useT();
+  const [open, setOpen] = React.useState(false);
 
   const columnFilterValue = getIsValidRange(column.getFilterValue())
     ? (column.getFilterValue() as RangeValue)
@@ -183,7 +184,7 @@ export function DataTableSliderFilter<TData>({ column, title }: DataTableSliderF
   );
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger render={<Button variant='outline' size='sm' className='border-dashed' />}>
         {columnFilterValue ? (
           <DataTableFilterClear title={title} onReset={onReset} />
@@ -201,9 +202,21 @@ export function DataTableSliderFilter<TData>({ column, title }: DataTableSliderF
       </PopoverTrigger>
       <PopoverContent align='start' className='flex w-80 flex-col gap-4'>
         <div className='flex flex-col gap-3'>
-          <p className='leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
-            {title}
-          </p>
+          <div className='flex items-center justify-between gap-2'>
+            <p className='leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+              {title}
+            </p>
+            <Button
+              type='button'
+              variant='ghost'
+              size='icon'
+              className='size-7 shrink-0 text-muted-foreground hover:text-foreground'
+              aria-label={t('common.close')}
+              onClick={() => setOpen(false)}
+            >
+              <Icons.close className='size-4' />
+            </Button>
+          </div>
           <div className='grid grid-cols-2 gap-2'>
             <div className='min-w-0'>
               <Label htmlFor={`${id}-from`} className='sr-only'>

@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { parseAsString, useQueryState } from 'nuqs';
 import { toast } from 'sonner';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { Badge } from '@/components/ui/badge';
@@ -42,6 +43,7 @@ import {
   brandAsyncFilter,
   categoryAsyncFilter,
   firstFilterValue,
+  parseExactStockQuantity,
   parseRupeePriceRange
 } from './products-table-filters';
 
@@ -56,13 +58,15 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
   const [statusConfirm, setStatusConfirm] = useState<EntityStatusConfirm | null>(null);
 
   const sortableColumnIds = ['name', 'createdAt', 'updatedAt', 'defaultSellingPrice'];
-  const { params, filters, sortBy, sortOrder } = useDukaanListParams(sortableColumnIds, 'name', [
-    'categoryId',
-    'brandId',
-    'isActive',
-    'isPublished',
-    'defaultSellingPrice'
-  ]);
+  const { params, filters, sortBy, sortOrder } = useDukaanListParams(
+    sortableColumnIds,
+    'name',
+    ['categoryId', 'brandId', 'isActive', 'isPublished', 'defaultSellingPrice'],
+    'name',
+    'desc'
+  );
+
+  const [stockParam] = useQueryState('quantityOnHand', parseAsString);
 
   const categoryId = firstFilterValue((filters as Record<string, unknown>).categoryId);
   const brandId = firstFilterValue((filters as Record<string, unknown>).brandId);
@@ -70,6 +74,9 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
   const isPublishedFilter = parseBooleanFacet((filters as Record<string, unknown>).isPublished);
   const priceRange = parseRupeePriceRange(
     (filters as Record<string, unknown>).defaultSellingPrice
+  );
+  const stockFilter = parseExactStockQuantity(
+    (filters as Record<string, unknown>).quantityOnHand ?? stockParam
   );
 
   const { data, isFetching } = useQuery(
@@ -81,6 +88,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       brandId,
       isActive: isActiveFilter,
       isPublished: isPublishedFilter,
+      quantityOnHand: stockFilter,
       minSellingPrice: priceRange.minSellingPrice,
       maxSellingPrice: priceRange.maxSellingPrice,
       sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | 'defaultSellingPrice' | undefined,
@@ -228,7 +236,15 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={staticT('dukaan.product.stock')} />
         ),
-        meta: { label: 'dukaan.product.stock', type: 'number', priority: 2 },
+        meta: {
+          label: 'dukaan.product.stock',
+          type: 'number',
+          priority: 2,
+          variant: 'number',
+          placeholderKey: 'dukaan.product.stock',
+          icon: Icons.box
+        },
+        enableColumnFilter: true,
         cell: ({ row }) => <span>{row.original.quantityOnHand ?? 0}</span>
       },
       {

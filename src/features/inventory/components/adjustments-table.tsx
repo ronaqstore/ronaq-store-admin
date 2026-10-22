@@ -229,6 +229,7 @@ export function AdjustmentsTable({
     {
       id: 'reason',
       accessorKey: 'reason',
+      accessorFn: (row) => row.reason ?? '',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.reason')} />
       ),
@@ -239,11 +240,12 @@ export function AdjustmentsTable({
       ),
       meta: {
         label: 'table.col.reason',
+        placeholder: 'Reason',
         placeholderKey: 'table.col.reason',
         variant: 'text',
         icon: Icons.search,
         type: 'text',
-        priority: 3,
+        priority: 1,
         mobile: 'subtitle'
       },
       enableColumnFilter: true,

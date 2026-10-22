@@ -3,11 +3,9 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import { parseAsString, useQueryState } from 'nuqs';
+import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
 import { Badge } from '@/components/ui/badge';
-import { RowActionsMenu } from '@/components/common/row-actions-menu';
 import { TruncateText } from '@/components/common/truncate-text';
-import type { RowAction } from '@/types/dukaan';
 import {
   ResponsiveDataTable,
   StatusBadge,
@@ -38,10 +36,27 @@ import { formatPkr } from '@/lib/dukaan/numbers';
 import { salePayBadge } from '@/lib/dukaan/document-payment-badges';
 import { outstandingAmount, sumActivePaid } from '@/lib/dukaan/document-payment-state';
 import type { SaleDTO } from '@/lib/api/types';
-import type { SaleRowActionsProps, SalesTableProps } from '@/types/sales';
+import type { DocumentStatusFilterOption } from '@/types/document-payment';
+import type { SalesTableProps } from '@/types/sales';
 import { salesQueryOptions } from '../api/queries';
 import type { SalesListFilters } from '@/types';
 import dynamic from 'next/dynamic';
+import { SaleRowActions } from './sale-row-actions';
+import {
+  SALE_MONEY_RANGE_RUPEES,
+  customerAsyncFilter,
+  firstSaleFilterValue,
+  parseRupeeMoneyRange,
+  parseSalePayStatus,
+  timestampToYmd
+} from './sales-table-filters';
+
+const STATUS_FILTER_OPTIONS: DocumentStatusFilterOption[] = [
+  { label: staticT('status.paid'), value: 'PAID' },
+  { label: staticT('status.partial'), value: 'PARTIAL' },
+  { label: staticT('status.udhar'), value: 'UDHAR' },
+  { label: staticT('status.cancelled'), value: 'CANCELLED' }
+];
 
 const CancelSaleDialog = dynamic(
   () => import('./cancel-sale-dialog').then((mod) => mod.CancelSaleDialog),
@@ -51,56 +66,6 @@ const ReturnSaleDialog = dynamic(
   () => import('./return-sale-dialog').then((mod) => mod.ReturnSaleDialog),
   { ssr: false }
 );
-
-function SaleRowActions({ sale }: SaleRowActionsProps) {
-  const t = useT();
-  const [cancelOpen, setCancelOpen] = useState(false);
-  const [returnOpen, setReturnOpen] = useState(false);
-
-  const hasReturns = (sale.returns?.length ?? 0) > 0;
-  const isCancelled = sale.status === 'CANCELLED';
-
-  const actions: RowAction[] = [
-    {
-      label: t('common.view'),
-      icon: Icons.page,
-      href: `/dashboard/sales/${sale.id}`
-    },
-    ...(!isCancelled
-      ? [
-          {
-            label: t('sales.returnBadge'),
-            icon: Icons.history,
-            className: 'text-blue-500',
-            onClick: () => setReturnOpen(true)
-          }
-        ]
-      : []),
-    ...(!isCancelled && !hasReturns
-      ? [
-          {
-            label: t('common.cancel'),
-            icon: Icons.trash,
-            variant: 'destructive' as const,
-            onClick: () => setCancelOpen(true)
-          }
-        ]
-      : [])
-  ];
-
-  return (
-    <div onClick={(e) => e.stopPropagation()} data-slot='action-cell'>
-      {cancelOpen && (
-        <CancelSaleDialog sale={sale} open={cancelOpen} onOpenChange={setCancelOpen} />
-      )}
-      {returnOpen && (
-        <ReturnSaleDialog sale={sale} open={returnOpen} onOpenChange={setReturnOpen} />
-      )}
-
-      <RowActionsMenu actions={actions} />
-    </div>
-  );
-}
 
 const saleMobileItem: MobileItemConfig<SaleDTO> = {
   leading: 'icon',
@@ -133,24 +98,78 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
     'createdAt',
     'updatedAt'
   ];
-  const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<
+  const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     SalesListFilters['sortBy']
-  >(sortableColumnIds, 'saleDate', ['status'], 'createdAt');
+  >(sortableColumnIds, 'saleDate', [
+    'status',
+    'customerId',
+    'saleDate',
+    'totalAmount',
+    'paid',
+    'outstanding'
+  ], 'saleDate');
 
   const [saleNoParam] = useQueryState('saleNo', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
+  const [saleDateParam] = useQueryState('saleDate', parseAsArrayOf(parseAsString, ','));
 
   const search = searchParam || saleNoParam || undefined;
-  const statusFilter = parseActiveCancelledStatus(statusParam);
+  const documentStatusFilter = parseActiveCancelledStatus(
+    (filters as Record<string, unknown>).status ?? statusParam
+  );
+  const payStatusFilter = parseSalePayStatus(
+    (filters as Record<string, unknown>).status ?? statusParam
+  );
+  const customerId = firstSaleFilterValue(
+    (filters as Record<string, unknown>).customerId
+  );
+  const totalRange = parseRupeeMoneyRange(
+    (filters as Record<string, unknown>).totalAmount
+  );
+  const paidRange = parseRupeeMoneyRange((filters as Record<string, unknown>).paid);
+  const outstandingRange = parseRupeeMoneyRange(
+    (filters as Record<string, unknown>).outstanding
+  );
+  const dateRaw =
+    (filters as Record<string, unknown>).saleDate ?? saleDateParam;
+  const dateParts = Array.isArray(dateRaw)
+    ? (dateRaw as string[])
+    : typeof dateRaw === 'string'
+      ? dateRaw.split(',')
+      : [];
+  const from = timestampToYmd(dateParts[0]);
+  const to = timestampToYmd(dateParts[1]);
+
+  const backendSortBy =
+    sortBy === 'saleDate' ||
+    sortBy === 'saleNo' ||
+    sortBy === 'totalAmount' ||
+    sortBy === 'paid' ||
+    sortBy === 'outstanding' ||
+    sortBy === 'createdAt' ||
+    sortBy === 'updatedAt' ||
+    sortBy === 'status'
+      ? sortBy
+      : 'saleDate';
 
   const { data, isFetching } = useQuery(
     salesQueryOptions({
       page: params.page,
       pageSize: params.perPage,
       search: search || undefined,
-      status: statusFilter,
-      sortBy,
+      customerId,
+      status: documentStatusFilter,
+      payStatus: payStatusFilter,
+      from,
+      to,
+      minTotalAmount: totalRange.minAmount,
+      maxTotalAmount: totalRange.maxAmount,
+      minPaidAmount: paidRange.minAmount,
+      maxPaidAmount: paidRange.maxAmount,
+      minOutstandingAmount: outstandingRange.minAmount,
+      maxOutstandingAmount: outstandingRange.maxAmount,
+      sortBy: backendSortBy,
       sortOrder
     })
   );
@@ -196,8 +215,9 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
       enableSorting: true
     },
     {
-      id: 'customerName',
-      accessorKey: 'customerName',
+      id: 'customerId',
+      accessorKey: 'customerId',
+      accessorFn: (row) => row.customerId ?? '',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.customer')} />
       ),
@@ -211,37 +231,51 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
         ),
       meta: {
         label: 'table.col.customer',
-        variant: 'text',
-        type: 'text',
+        variant: 'select',
+        icon: Icons.user,
+        asyncOptions: customerAsyncFilter,
         priority: 2,
         mobile: 'subtitle'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: false
     },
     {
       id: 'saleDate',
       accessorKey: 'saleDate',
+      accessorFn: (row) => row.saleDate,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.date')} />,
       cell: ({ row }) => (
         <span className='font-normal text-foreground'>{formatIsoDate(row.original.saleDate)}</span>
       ),
       meta: {
         label: 'table.col.date',
-        variant: 'date',
-        priority: 4,
+        variant: 'dateRange',
+        priority: 2,
         mobile: 'meta'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
-    createDocumentTotalColumn<SaleDTO>({ totalPriority: 3 }),
-    createDocumentPaidColumn<SaleDTO>({ paidPriority: 3 }),
-    createDocumentOutstandingColumn<SaleDTO>({ outstandingPriority: 2 }),
-    createDocumentPayStatusColumn<SaleDTO>(salePayBadge, [
-      { label: 'Active', value: 'ACTIVE' },
-      { label: 'Cancelled', value: 'CANCELLED' }
-    ]),
+    createDocumentTotalColumn<SaleDTO>({
+      totalPriority: 1,
+      enableRangeFilter: true,
+      range: SALE_MONEY_RANGE_RUPEES,
+      unit: 'Rs'
+    }),
+    createDocumentPaidColumn<SaleDTO>({
+      paidPriority: 2,
+      enableRangeFilter: true,
+      range: SALE_MONEY_RANGE_RUPEES,
+      unit: 'Rs'
+    }),
+    createDocumentOutstandingColumn<SaleDTO>({
+      outstandingPriority: 2,
+      enableRangeFilter: true,
+      range: SALE_MONEY_RANGE_RUPEES,
+      unit: 'Rs'
+    }),
+    createDocumentPayStatusColumn<SaleDTO>(salePayBadge, STATUS_FILTER_OPTIONS, 1),
     {
       id: 'actions',
       size: 48,
@@ -267,10 +301,22 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
   const salesQuickFilters: QuickFilterChip[] = [
     { id: 'all', label: t('table.all') },
     {
-      id: 'active',
-      label: t('status.active'),
+      id: 'udhar',
+      label: t('status.udhar'),
       columnId: 'status',
-      value: ['ACTIVE']
+      value: ['UDHAR']
+    },
+    {
+      id: 'partial',
+      label: t('status.partial'),
+      columnId: 'status',
+      value: ['PARTIAL']
+    },
+    {
+      id: 'paid',
+      label: t('status.paid'),
+      columnId: 'status',
+      value: ['PAID']
     },
     {
       id: 'cancelled',
@@ -371,7 +417,7 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
         <CancelSaleDialog
           sale={peekCancelSale}
           open
-          onOpenChange={(open) => {
+          onOpenChange={(open: boolean) => {
             if (!open) setPeekCancelSale(null);
           }}
         />
@@ -380,7 +426,7 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
         <ReturnSaleDialog
           sale={peekReturnSale}
           open
-          onOpenChange={(open) => {
+          onOpenChange={(open: boolean) => {
             if (!open) setPeekReturnSale(null);
           }}
         />

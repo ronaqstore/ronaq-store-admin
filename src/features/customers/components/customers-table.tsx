@@ -44,6 +44,11 @@ import {
   getActiveStatusQuickFilters
 } from '@/components/common/party-table-helpers';
 import { PartyCellAction } from '@/components/common/party-cell-action';
+import {
+  firstFilterValue as firstCustomerFilterValue,
+  MONEY_RANGE_RUPEES as CUSTOMER_MONEY_RANGE_RUPEES,
+  parseRupeeMoneyRange
+} from '@/lib/dukaan/money-range-filter';
 
 function CustomerCellAction({ data }: CustomerCellActionProps) {
   const t = useT();
@@ -73,13 +78,21 @@ function CustomerCellAction({ data }: CustomerCellActionProps) {
 
 const customerColumns: ColumnDef<CustomerDTO>[] = [
   createPartyNameColumn<CustomerDTO>({ placeholderKey: 'search.customers' }),
-  createPartyPhoneColumn<CustomerDTO>(),
-  createPartyAddressColumn<CustomerDTO>(),
+  createPartyPhoneColumn<CustomerDTO>({ enableFilter: true }),
+  createPartyAddressColumn<CustomerDTO>({ enableFilter: true }),
   createPartyCurrentBalanceColumn<CustomerDTO>({
     labelKey: 'dukaan.party.currentUdhar',
-    ledgerHref: (row) => `/dashboard/customers/${row.id}`
+    ledgerHref: (row) => `/dashboard/customers/${row.id}`,
+    enableRangeFilter: true,
+    range: CUSTOMER_MONEY_RANGE_RUPEES,
+    unit: 'Rs'
   }),
-  createPartyOpeningBalanceColumn<CustomerDTO>('dukaan.party.customerOpeningBalance'),
+  createPartyOpeningBalanceColumn<CustomerDTO>({
+    labelKey: 'dukaan.party.customerOpeningBalance',
+    enableRangeFilter: true,
+    range: CUSTOMER_MONEY_RANGE_RUPEES,
+    unit: 'Rs'
+  }),
   createPartyIsActiveColumn<CustomerDTO>(),
   {
     id: 'actions',
@@ -110,22 +123,50 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
   );
 
   const sortableColumnIds = ['name', 'phone', 'openingBalance', 'isActive'];
-  const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<
+  const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     CustomerListFilters['sortBy']
-  >(sortableColumnIds, 'name', ['isActive'], 'name', 'asc');
+  >(
+    sortableColumnIds,
+    'name',
+    ['isActive', 'phone', 'address', 'currentBalance', 'openingBalance'],
+    'name',
+    'asc'
+  );
 
   const [nameParam] = useQueryState('name', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
   const [isActiveParam] = useQueryState('isActive', parseAsString);
+  const [phoneParam] = useQueryState('phone', parseAsString);
+  const [addressParam] = useQueryState('address', parseAsString);
 
   const search = searchParam || nameParam || undefined;
-  const isActiveFilter = parseBooleanFacet(isActiveParam);
+  const isActiveFilter = parseBooleanFacet(
+    (filters as Record<string, unknown>).isActive ?? isActiveParam
+  );
+  const phoneFilter =
+    firstCustomerFilterValue((filters as Record<string, unknown>).phone) ??
+    (phoneParam?.trim() || undefined);
+  const addressFilter =
+    firstCustomerFilterValue((filters as Record<string, unknown>).address) ??
+    (addressParam?.trim() || undefined);
+  const creditRange = parseRupeeMoneyRange(
+    (filters as Record<string, unknown>).currentBalance
+  );
+  const openingRange = parseRupeeMoneyRange(
+    (filters as Record<string, unknown>).openingBalance
+  );
 
   const { data, isFetching } = useQuery(
     customersQueryOptions({
       page: params.page,
       pageSize: params.perPage,
       search: search || undefined,
+      phone: phoneFilter,
+      address: addressFilter,
+      minOpeningBalance: openingRange.minAmount,
+      maxOpeningBalance: openingRange.maxAmount,
+      minCurrentBalance: creditRange.minAmount,
+      maxCurrentBalance: creditRange.maxAmount,
       isActive: isActiveFilter,
       sortBy,
       sortOrder

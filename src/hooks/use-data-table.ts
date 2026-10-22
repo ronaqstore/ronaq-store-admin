@@ -169,7 +169,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   const [filterValues, setFilterValues] = useQueryStates(filterParsers);
 
   const debouncedSetFilterValues = useDebouncedCallback((values: typeof filterValues) => {
-    void setPage(1);
+    if (page !== 1) void setPage(1);
     void setFilterValues(values);
   }, debounceMs);
 

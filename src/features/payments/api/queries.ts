@@ -1,5 +1,6 @@
-import { queryOptions } from '@tanstack/react-query';
+import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import type { PaymentsListFilters } from '@/types';
+import { compactFilters } from '@/lib/api/compact-filters';
 import { getCustomerReceivable, getPaymentCancelImpact, listPayments } from './service';
 
 export const paymentKeys = {
@@ -14,11 +15,14 @@ export const paymentKeys = {
   cancelImpact: (id: string) => [...paymentKeys.cancelImpacts(), id] as const
 };
 
-export const paymentsQueryOptions = (filters: PaymentsListFilters = {}, token?: string) =>
-  queryOptions({
-    queryKey: paymentKeys.list(filters),
-    queryFn: () => listPayments(filters, token)
+export const paymentsQueryOptions = (filters: PaymentsListFilters = {}, token?: string) => {
+  const compact = compactFilters(filters as Record<string, unknown>) as PaymentsListFilters;
+  return queryOptions({
+    queryKey: paymentKeys.list(compact),
+    queryFn: () => listPayments(compact, token),
+    placeholderData: keepPreviousData
   });
+};
 
 export const paymentCancelImpactQueryOptions = (id: string, token?: string) =>
   queryOptions({

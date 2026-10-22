@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
-import { parseAsString, useQueryState } from 'nuqs';
+import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
 import { useT } from '@/i18n/use-t';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -22,9 +22,16 @@ import {
 import { formatIsoDate } from '@/lib/dates';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import {
+  firstFilterValue,
+  MONEY_RANGE_RUPEES,
+  parseFacetDateRange,
+  parseRupeeMoneyRange
+} from '@/lib/dukaan/money-range-filter';
+import {
   createActiveCancelledStatusColumn,
   createAmountColumn
 } from '@/components/common/party-table-helpers';
+import { supplierAsyncFilter } from '@/components/common/supplier-filter';
 import type {
   SupplierPaymentDTO,
   SupplierPaymentQueryFilter,
@@ -112,23 +119,56 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
     'createdAt',
     'updatedAt'
   ];
-  const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<
+  const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     SupplierPaymentQueryFilter['sortBy']
-  >(sortableColumnIds, 'paymentDate', ['status'], 'paymentDate');
+  >(sortableColumnIds, 'supplierName', [
+    'status',
+    'supplierId',
+    'paymentDate',
+    'amount',
+    'target',
+    'notes'
+  ], 'paymentDate');
 
   const [searchParam] = useQueryState('search', parseAsString);
   const [supplierNameParam] = useQueryState('supplierName', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
+  const [notesParam] = useQueryState('notes', parseAsString);
+  const [targetParam] = useQueryState('target', parseAsString);
+  const [paymentDateParam] = useQueryState(
+    'paymentDate',
+    parseAsArrayOf(parseAsString, ',')
+  );
 
-  const statusFilter = parseActiveCancelledStatus(statusParam);
   const search = searchParam || supplierNameParam || undefined;
+  const statusFilter = parseActiveCancelledStatus(
+    (filters as Record<string, unknown>).status ?? statusParam
+  );
+  const supplierId = firstFilterValue((filters as Record<string, unknown>).supplierId);
+  const notesFilter =
+    firstFilterValue((filters as Record<string, unknown>).notes) ??
+    (notesParam?.trim() || undefined);
+  const purchaseNoFilter =
+    firstFilterValue((filters as Record<string, unknown>).target) ??
+    (targetParam?.trim() || undefined);
+  const amountRange = parseRupeeMoneyRange((filters as Record<string, unknown>).amount);
+  const { from, to } = parseFacetDateRange(
+    (filters as Record<string, unknown>).paymentDate ?? paymentDateParam
+  );
 
   const { data, isFetching } = useQuery(
     supplierPaymentsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
       search,
+      supplierId,
+      purchaseNo: purchaseNoFilter,
+      notes: notesFilter,
+      minAmount: amountRange.minAmount,
+      maxAmount: amountRange.maxAmount,
       status: statusFilter,
+      from,
+      to,
       sortBy,
       sortOrder
     })
@@ -164,8 +204,27 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
       enableSorting: true
     },
     {
+      id: 'supplierId',
+      accessorKey: 'supplierId',
+      accessorFn: (row) => row.supplierId ?? '',
+      header: () => null,
+      cell: () => null,
+      meta: {
+        label: 'table.col.supplier',
+        variant: 'select',
+        icon: Icons.user,
+        asyncOptions: supplierAsyncFilter,
+        priority: 2,
+        mobile: 'hidden'
+      },
+      enableColumnFilter: true,
+      enableSorting: false,
+      enableHiding: true
+    },
+    {
       id: 'paymentDate',
       accessorKey: 'paymentDate',
+      accessorFn: (row) => row.paymentDate,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.date')} />,
       cell: ({ row }) => (
         <span className='font-normal text-foreground'>
@@ -174,16 +233,21 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
       ),
       meta: {
         label: 'table.col.date',
-        variant: 'date',
+        variant: 'dateRange',
         priority: 2,
         mobile: 'meta'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
-    createAmountColumn<SupplierPaymentDTO>(t('table.col.amount')),
+    createAmountColumn<SupplierPaymentDTO>(t('table.col.amount'), {
+      enableRangeFilter: true,
+      range: MONEY_RANGE_RUPEES,
+      unit: 'Rs'
+    }),
     {
       id: 'target',
+      accessorFn: (row) => row.purchaseNo ?? '',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('supplierPayments.appliedTo')} />
       ),
@@ -196,16 +260,19 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
       ),
       meta: {
         label: 'table.col.target',
+        placeholderKey: 'table.col.target',
         variant: 'text',
+        icon: Icons.search,
         priority: 3,
         mobile: 'subtitle'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: false
     },
     {
       id: 'notes',
       accessorKey: 'notes',
+      accessorFn: (row) => row.notes ?? '',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.notes')} />
       ),
@@ -216,11 +283,13 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
       ),
       meta: {
         label: 'table.col.notes',
+        placeholderKey: 'table.col.notes',
         variant: 'text',
+        icon: Icons.search,
         priority: 4,
         mobile: 'hidden'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: false
     },
     createActiveCancelledStatusColumn<SupplierPaymentDTO>(t('table.col.status')),

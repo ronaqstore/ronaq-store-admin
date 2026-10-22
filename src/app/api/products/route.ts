@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
       'isActive',
       'isPublished',
       'inStockOnly',
+      'quantityOnHand',
       'minSellingPrice',
       'maxSellingPrice',
       'sortBy',

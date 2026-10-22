@@ -158,6 +158,10 @@ export interface DataTableToolbarProps<TData> extends React.ComponentProps<'div'
   children?: React.ReactNode;
 }
 
+export interface PrimaryTextColumn {
+  columnDef: { meta?: { variant?: string; primary?: boolean } };
+}
+
 export interface DataTableToolbarFilterProps<TData> {
   column: Column<TData, unknown>;
 }

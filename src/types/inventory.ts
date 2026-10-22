@@ -6,6 +6,7 @@ export interface InventoryStockFilters {
   pageSize?: number;
   limit?: number;
   search?: string;
+  productId?: string;
   sortBy?: 'name' | 'inStock' | 'stockValue' | 'trackingType' | 'lowStock';
   sortOrder?: 'asc' | 'desc';
   trackingType?: 'QUANTITY' | 'SERIALIZED';

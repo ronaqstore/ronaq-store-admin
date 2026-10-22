@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
       'page',
       'pageSize',
       'search',
+      'productId',
       'sortBy',
       'sortOrder',
       'trackingType',

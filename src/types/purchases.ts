@@ -26,11 +26,6 @@ export interface SuggestVariantNameParts {
   trackingType: string;
 }
 
-export interface PurchaseMoneyRangeFilter {
-  minAmount?: number;
-  maxAmount?: number;
-}
-
 export interface PurchasesListFilters {
   page?: number;
   pageSize?: number;
@@ -48,7 +43,15 @@ export interface PurchasesListFilters {
   maxPaidAmount?: number;
   minOutstandingAmount?: number;
   maxOutstandingAmount?: number;
-  sortBy?: 'purchaseDate' | 'purchaseNo' | 'totalAmount' | 'status' | 'createdAt' | 'updatedAt';
+  sortBy?:
+    | 'purchaseDate'
+    | 'purchaseNo'
+    | 'totalAmount'
+    | 'paid'
+    | 'outstanding'
+    | 'status'
+    | 'createdAt'
+    | 'updatedAt';
   sortOrder?: 'asc' | 'desc';
 }
 

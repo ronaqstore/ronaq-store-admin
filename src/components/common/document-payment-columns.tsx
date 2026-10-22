@@ -74,6 +74,7 @@ export function createDocumentPaidColumn<T extends HasDocumentPayments>(
   const enableRange = opts?.enableRangeFilter === true;
   return {
     id: 'paid',
+    accessorKey: 'paid',
     accessorFn: (row) =>
       hideOpening && row.isOpeningStock ? row.totalAmount : sumActivePaid(row.payments),
     header: ({ column }) => (
@@ -117,6 +118,7 @@ export function createDocumentOutstandingColumn<T extends HasDocumentPayments>(
   const enableRange = opts?.enableRangeFilter === true;
   return {
     id: 'outstanding',
+    accessorKey: 'outstanding',
     accessorFn: (row) => {
       if (row.status === 'CANCELLED' || (hideOpening && row.isOpeningStock)) return 0;
       return outstandingAmount(row.totalAmount, sumActivePaid(row.payments));

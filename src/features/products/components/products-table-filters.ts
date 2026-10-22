@@ -50,11 +50,7 @@ export const brandAsyncFilter: AsyncFacetedFilterConfig = {
   }
 };
 
-export function firstFilterValue(value: unknown): string | undefined {
-  if (Array.isArray(value)) return typeof value[0] === 'string' ? value[0] : undefined;
-  if (typeof value === 'string' && value.trim()) return value.split(',')[0]?.trim() || undefined;
-  return undefined;
-}
+export { firstFilterValue, parseExactNonNegativeInt as parseExactStockQuantity } from '@/lib/dukaan/money-range-filter';
 
 export function parseRupeePriceRange(value: unknown): ProductSellingPriceRangeFilter {
   if (typeof value !== 'string' || !value.trim()) return {};

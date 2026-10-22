@@ -26,9 +26,24 @@ export interface SalesListFilters {
   search?: string;
   customerId?: string;
   status?: 'ACTIVE' | 'CANCELLED';
+  payStatus?: 'PAID' | 'PARTIAL' | 'UDHAR' | 'CANCELLED';
   from?: string;
   to?: string;
-  sortBy?: 'saleDate' | 'saleNo' | 'totalAmount' | 'paid' | 'status' | 'createdAt' | 'updatedAt';
+  minTotalAmount?: number;
+  maxTotalAmount?: number;
+  minPaidAmount?: number;
+  maxPaidAmount?: number;
+  minOutstandingAmount?: number;
+  maxOutstandingAmount?: number;
+  sortBy?:
+    | 'saleDate'
+    | 'saleNo'
+    | 'totalAmount'
+    | 'paid'
+    | 'outstanding'
+    | 'status'
+    | 'createdAt'
+    | 'updatedAt';
   sortOrder?: 'asc' | 'desc';
 }
 

@@ -1,5 +1,6 @@
-import { queryOptions } from '@tanstack/react-query';
+import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import type { BrandListFilters } from '@/types';
+import { compactFilters } from '@/lib/api/compact-filters';
 import { listBrands } from './service';
 
 export const brandKeys = {
@@ -8,8 +9,11 @@ export const brandKeys = {
   list: (filters?: BrandListFilters) => [...brandKeys.lists(), filters] as const
 };
 
-export const brandsQueryOptions = (filters: BrandListFilters = {}, token?: string) =>
-  queryOptions({
-    queryKey: brandKeys.list(filters),
-    queryFn: () => listBrands(filters, token)
+export const brandsQueryOptions = (filters: BrandListFilters = {}, token?: string) => {
+  const compact = compactFilters(filters as Record<string, unknown>) as BrandListFilters;
+  return queryOptions({
+    queryKey: brandKeys.list(compact),
+    queryFn: () => listBrands(compact, token),
+    placeholderData: keepPreviousData
   });
+};

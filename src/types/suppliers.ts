@@ -6,8 +6,15 @@ export interface SupplierListFilters {
   pageSize?: number;
   limit?: number;
   search?: string;
+  phone?: string;
+  cnic?: string;
+  address?: string;
+  minOpeningBalance?: number;
+  maxOpeningBalance?: number;
+  minCurrentBalance?: number;
+  maxCurrentBalance?: number;
   isActive?: boolean;
-  sortBy?: 'name' | 'phone' | 'createdAt' | 'updatedAt' | 'openingBalance';
+  sortBy?: 'name' | 'phone' | 'createdAt' | 'updatedAt' | 'openingBalance' | 'isActive';
   sortOrder?: 'asc' | 'desc';
 }
 

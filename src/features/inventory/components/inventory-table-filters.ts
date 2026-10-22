@@ -1,7 +1,11 @@
+import { createProductAsyncFilter } from '@/components/common/product-async-filter';
 import { toPaisa } from '@/lib/dukaan/numbers';
 import type { InventoryStockValueRangeFilter } from '@/types/inventory';
+export { firstFilterValue as firstInventoryFilterValue } from '@/lib/dukaan/money-range-filter';
 
 export const INVENTORY_COST_RANGE_RUPEES: [number, number] = [0, 10_000_000];
+
+export const inventoryProductAsyncFilter = createProductAsyncFilter('inventory-filter');
 
 export function parseInventoryCostRange(value: unknown): InventoryStockValueRangeFilter {
   if (typeof value !== 'string' || !value.trim()) return {};
@@ -14,14 +18,4 @@ export function parseInventoryCostRange(value: unknown): InventoryStockValueRang
   };
 }
 
-export function parseExactQuantity(value: unknown): number | undefined {
-  const raw = Array.isArray(value)
-    ? value[0]
-    : typeof value === 'string'
-      ? value.trim()
-      : value;
-  if (raw === undefined || raw === null || raw === '') return undefined;
-  const qty = Number(raw);
-  if (!Number.isFinite(qty) || qty < 0 || !Number.isInteger(qty)) return undefined;
-  return qty;
-}
+export { parseExactNonNegativeInt as parseExactQuantity } from '@/lib/dukaan/money-range-filter';

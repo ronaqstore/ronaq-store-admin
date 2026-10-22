@@ -1,33 +1,7 @@
-import { listProducts } from '@/features/products/api/service';
-import type { AsyncFacetedFilterConfig } from '@/types/data-table';
+import { createProductAsyncFilter } from '@/components/common/product-async-filter';
+export { firstFilterValue as firstAdjustmentFilterValue } from '@/lib/dukaan/money-range-filter';
 
-export const productAsyncFilter: AsyncFacetedFilterConfig = {
-  queryKey: ['products', 'adjustment-filter'],
-  searchPlaceholderKey: 'search.products',
-  activeOnly: true,
-  fetchPage: async ({ page, pageSize, search }) => {
-    const res = await listProducts({
-      page,
-      pageSize,
-      search,
-      isActive: true,
-      sortBy: 'name',
-      sortOrder: 'asc'
-    });
-    return {
-      items: res.items,
-      total: res.total,
-      page: res.page,
-      pageSize: res.pageSize
-    };
-  }
-};
-
-export function firstAdjustmentFilterValue(value: unknown): string | undefined {
-  if (Array.isArray(value)) return typeof value[0] === 'string' ? value[0] : undefined;
-  if (typeof value === 'string' && value.trim()) return value.split(',')[0]?.trim() || undefined;
-  return undefined;
-}
+export const productAsyncFilter = createProductAsyncFilter('adjustment-filter');
 
 export function parseExactQuantityChange(value: unknown): number | undefined {
   const raw = Array.isArray(value)

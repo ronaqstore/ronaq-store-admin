@@ -18,18 +18,18 @@ import type {
   BasePartyRecord,
   PartyBalanceColumnOptions,
   PartyDetailLabels,
-  PartyNameColumnOptions
+  PartyNameColumnOptions,
+  PartyTextColumnFilterOptions
 } from '@/types/party';
 import { Icons } from '@/components/icons';
-import type {
-  HasStatusRecord,
-  HasAmountRecord,
-  HasIsActiveRecord,
-  Icon,
-  NamedActiveItem
-} from '@/types/common';
+import type { HasIsActiveRecord } from '@/types/common';
 import { TruncateText } from '@/components/common/truncate-text';
 import { Link } from '@/i18n/navigation';
+
+export {
+  createActiveCancelledStatusColumn,
+  createAmountColumn
+} from '@/components/common/party-amount-status-columns';
 
 export function createPartyNameColumn<T extends { name: string }>(
   opts?: PartyNameColumnOptions<T>
@@ -63,13 +63,30 @@ export function createPartyNameColumn<T extends { name: string }>(
   };
 }
 
-export function createPartyPhoneColumn<T extends BasePartyRecord>(): ColumnDef<T> {
+export function createPartyPhoneColumn<T extends BasePartyRecord>(
+  opts?: PartyTextColumnFilterOptions
+): ColumnDef<T> {
+  const enableFilter = opts?.enableFilter === true;
   return {
     id: 'phone',
     accessorKey: 'phone',
+    accessorFn: (row) => row.phone ?? '',
     size: 160,
     header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.phone')} />,
-    meta: { label: 'table.col.phone', type: 'phone', priority: 2, mobile: 'subtitle' },
+    meta: {
+      label: 'table.col.phone',
+      type: 'phone',
+      priority: 2,
+      mobile: 'subtitle',
+      ...(enableFilter
+        ? {
+            variant: 'text' as const,
+            placeholderKey: opts?.placeholderKey ?? 'table.col.phone',
+            icon: Icons.phone
+          }
+        : {})
+    },
+    enableColumnFilter: enableFilter,
     enableSorting: true,
     cell: ({ row }) => {
       const phone = (row.original as T).phone;
@@ -78,13 +95,30 @@ export function createPartyPhoneColumn<T extends BasePartyRecord>(): ColumnDef<T
   };
 }
 
-export function createPartyCnicColumn<T extends BasePartyRecord>(): ColumnDef<T> {
+export function createPartyCnicColumn<T extends BasePartyRecord>(
+  opts?: PartyTextColumnFilterOptions
+): ColumnDef<T> {
+  const enableFilter = opts?.enableFilter === true;
   return {
     id: 'cnic',
     accessorKey: 'cnic',
+    accessorFn: (row) => row.cnic ?? '',
     size: 160,
     header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.cnic')} />,
-    meta: { label: 'table.col.cnic', type: 'text', priority: 3, mobile: 'hidden' },
+    meta: {
+      label: 'table.col.cnic',
+      type: 'text',
+      priority: 3,
+      mobile: 'hidden',
+      ...(enableFilter
+        ? {
+            variant: 'text' as const,
+            placeholderKey: opts?.placeholderKey ?? 'table.col.cnic',
+            icon: Icons.creditCard
+          }
+        : {})
+    },
+    enableColumnFilter: enableFilter,
     enableSorting: false,
     cell: ({ row }) => {
       const cnic = (row.original as T).cnic?.trim();
@@ -93,15 +127,32 @@ export function createPartyCnicColumn<T extends BasePartyRecord>(): ColumnDef<T>
   };
 }
 
-export function createPartyAddressColumn<T extends BasePartyRecord>(): ColumnDef<T> {
+export function createPartyAddressColumn<T extends BasePartyRecord>(
+  opts?: PartyTextColumnFilterOptions
+): ColumnDef<T> {
+  const enableFilter = opts?.enableFilter === true;
   return {
     id: 'address',
     accessorKey: 'address',
+    accessorFn: (row) => row.address ?? '',
     size: 200,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title={t('table.col.address')} />
     ),
-    meta: { label: 'table.col.address', type: 'text', priority: 3, mobile: 'hidden' },
+    meta: {
+      label: 'table.col.address',
+      type: 'text',
+      priority: 3,
+      mobile: 'hidden',
+      ...(enableFilter
+        ? {
+            variant: 'text' as const,
+            placeholderKey: opts?.placeholderKey ?? 'table.col.address',
+            icon: Icons.mapPin
+          }
+        : {})
+    },
+    enableColumnFilter: enableFilter,
     enableSorting: false,
     cell: ({ row }) => {
       const address = (row.original as T).address?.trim();
@@ -116,17 +167,30 @@ export function createPartyCurrentBalanceColumn<T extends BasePartyRecord>(
 ): ColumnDef<T> {
   const labelKey = typeof opts === 'string' ? opts : opts.labelKey;
   const ledgerHref = typeof opts === 'string' ? undefined : opts.ledgerHref;
+  const enableRange = typeof opts === 'string' ? false : opts.enableRangeFilter === true;
+  const range = typeof opts === 'string' ? undefined : opts.range;
+  const unit = typeof opts === 'string' ? undefined : opts.unit;
   return {
     id: 'currentBalance',
     accessorKey: 'currentBalance',
+    accessorFn: (row) => partyCurrentBalance(row),
     size: 160,
     header: ({ column }) => <DataTableColumnHeader column={column} title={t(labelKey)} />,
     meta: {
       label: labelKey,
       type: 'money',
       priority: 2,
-      mobile: 'value'
+      mobile: 'value',
+      ...(enableRange
+        ? {
+            variant: 'range' as const,
+            range,
+            unit,
+            icon: Icons.cash
+          }
+        : {})
     },
+    enableColumnFilter: enableRange,
     enableSorting: false,
     cell: ({ row }) => {
       const balance = partyCurrentBalance(row.original);
@@ -158,8 +222,13 @@ export function createPartyCurrentBalanceColumn<T extends BasePartyRecord>(
 }
 
 export function createPartyOpeningBalanceColumn<T extends BasePartyRecord>(
-  labelKey: string
+  labelKeyOrOpts: string | PartyBalanceColumnOptions<T>
 ): ColumnDef<T> {
+  const labelKey = typeof labelKeyOrOpts === 'string' ? labelKeyOrOpts : labelKeyOrOpts.labelKey;
+  const enableRange =
+    typeof labelKeyOrOpts === 'string' ? false : labelKeyOrOpts.enableRangeFilter === true;
+  const range = typeof labelKeyOrOpts === 'string' ? undefined : labelKeyOrOpts.range;
+  const unit = typeof labelKeyOrOpts === 'string' ? undefined : labelKeyOrOpts.unit;
   return {
     id: 'openingBalance',
     accessorKey: 'openingBalance',
@@ -169,8 +238,17 @@ export function createPartyOpeningBalanceColumn<T extends BasePartyRecord>(
       label: labelKey,
       type: 'money',
       priority: 3,
-      mobile: 'hidden'
+      mobile: 'hidden',
+      ...(enableRange
+        ? {
+            variant: 'range' as const,
+            range,
+            unit,
+            icon: Icons.cash
+          }
+        : {})
     },
+    enableColumnFilter: enableRange,
     enableSorting: true,
     cell: ({ row }) => (
       <span className='text-muted-foreground'>{formatPkr(row.original.openingBalance)}</span>
@@ -342,97 +420,4 @@ export function getActiveStatusQuickFilters(
       value: ['false']
     }
   ];
-}
-
-export function createActiveCancelledStatusColumn<T extends HasStatusRecord>(
-  statusTitle: string
-): ColumnDef<T> {
-  return {
-    id: 'status',
-    accessorKey: 'status' as keyof T,
-    header: ({ column }) => <DataTableColumnHeader column={column} title={statusTitle} />,
-    cell: ({ row }) => {
-      const isCancelled = (row.original as T).status === 'CANCELLED';
-      return (
-        <StatusBadge
-          status={(row.original as T).status}
-          label={isCancelled ? 'Cancelled' : 'Active'}
-        />
-      );
-    },
-    meta: {
-      label: 'table.col.status',
-      variant: 'select',
-      icon: Icons.status,
-      options: [
-        { label: 'Active', value: 'ACTIVE' },
-        { label: 'Cancelled', value: 'CANCELLED' }
-      ],
-      priority: 2,
-      mobile: 'badge'
-    },
-    enableColumnFilter: true,
-    enableSorting: true
-  };
-}
-
-export function createAmountColumn<T extends HasAmountRecord>(amountTitle: string): ColumnDef<T> {
-  return {
-    id: 'amount',
-    accessorKey: 'amount' as keyof T,
-    header: ({ column }) => <DataTableColumnHeader column={column} title={amountTitle} />,
-    cell: ({ row }) => (
-      <span className='font-normal text-foreground'>{formatPkr((row.original as T).amount)}</span>
-    ),
-    meta: {
-      label: 'table.col.amount',
-      variant: 'number',
-      priority: 1,
-      mobile: 'value'
-    },
-    enableColumnFilter: false,
-    enableSorting: true
-  };
-}
-
-export function buildSimpleEntityMobileItem<T extends NamedActiveItem>(
-  leadingIcon: Icon
-): MobileItemConfig<T> {
-  return {
-    leading: 'icon',
-    leadingIcon,
-    title: (row) => row.name,
-    subtitle: (row) => (row.isActive ? t('status.active') : t('status.inactive')),
-    ariaLabel: (row) => `${row.name}, ${row.isActive ? t('status.active') : t('status.inactive')}`
-  };
-}
-
-export function buildSimpleEntityDetail<T extends NamedActiveItem>(
-  sectionTitle: string
-): DetailConfig<T> {
-  return {
-    mode: 'sheet',
-    title: (row) => row.name,
-    badge: (row) => ({
-      label: row.isActive ? t('status.active') : t('status.inactive'),
-      status: row.isActive ? 'ACTIVE' : 'INACTIVE'
-    }),
-    sections: (row) => [
-      {
-        title: sectionTitle,
-        fields: [
-          { label: t('table.col.name'), value: row.name },
-          {
-            label: t('table.col.status'),
-            value: (
-              <StatusBadge
-                status={row.isActive ? 'ACTIVE' : 'INACTIVE'}
-                label={row.isActive ? t('status.active') : t('status.inactive')}
-              />
-            )
-          }
-        ]
-      }
-    ]
-  };
 }

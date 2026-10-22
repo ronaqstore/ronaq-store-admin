@@ -2,6 +2,7 @@ import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 
 import type { ProductListFilters } from '@/lib/api/types';
 import type { ProductImageQueryExtraOptions } from '@/types';
+import { compactFilters } from '@/lib/api/compact-filters';
 
 import { getProduct, listProductImages, listProducts } from './service';
 
@@ -16,9 +17,10 @@ export const productsQueryKeys = {
 };
 
 export function productsQueryOptions(filters: ProductListFilters = {}, token?: string) {
+  const compact = compactFilters(filters as Record<string, unknown>) as ProductListFilters;
   return queryOptions({
-    queryKey: productsQueryKeys.list(filters),
-    queryFn: () => listProducts(filters, token),
+    queryKey: productsQueryKeys.list(compact),
+    queryFn: () => listProducts(compact, token),
     placeholderData: keepPreviousData
   });
 }

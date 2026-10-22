@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -13,6 +14,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { DataTableAsyncFacetedFilter } from '@/components/ui/table/data-table-async-faceted-filter';
+import { DataTableDateFilter } from '@/components/ui/table/data-table-date-filter';
 import { DataTableFacetedFilter } from '@/components/ui/table/data-table-faceted-filter';
 import { DataTableSliderFilter } from '@/components/ui/table/data-table-slider-filter';
 import { useTranslations } from 'next-intl';
@@ -27,18 +29,22 @@ export function DataTableFiltersSheet<TData>({
   pageSizeOptions = [20, 30, 50, 100]
 }: DataTableFiltersSheetProps<TData>) {
   const t = useTranslations();
-  const filterColumns = React.useMemo(
-    () =>
-      table
-        .getAllColumns()
-        .filter(
-          (column) =>
-            column.getCanFilter() &&
-            column.columnDef.meta?.variant &&
-            column.columnDef.meta.variant !== 'text'
-        ),
-    [table]
-  );
+  const filterColumns = React.useMemo(() => {
+    const filterable = table
+      .getAllColumns()
+      .filter((column) => column.getCanFilter() && column.columnDef.meta?.variant);
+
+    const primaryText =
+      filterable.find(
+        (column) =>
+          column.columnDef.meta?.variant === 'text' && column.columnDef.meta?.primary === true
+      ) ?? filterable.find((column) => column.columnDef.meta?.variant === 'text');
+
+    return filterable.filter((column) => {
+      if (column.columnDef.meta?.variant !== 'text') return true;
+      return column.id !== primaryText?.id;
+    });
+  }, [table]);
 
   const sortable = React.useMemo(
     () => table.getAllColumns().filter((column) => column.getCanSort() && column.id !== 'actions'),
@@ -190,11 +196,69 @@ function FilterBlock<TData>({ column }: FilterBlockProps<TData>) {
   };
   const label = meta.label ? translateMaybe(meta.label, t) : column.id;
 
+  if (meta.variant === 'text') {
+    const raw = column.getFilterValue();
+    const textValue = Array.isArray(raw) ? raw.join(' ') : ((raw as string) ?? '');
+    return (
+      <div className='grid gap-2'>
+        <Label htmlFor={`filter-${column.id}`}>{label}</Label>
+        <Input
+          id={`filter-${column.id}`}
+          className='h-11 w-full'
+          placeholder={
+            (meta.placeholderKey ? translate(meta.placeholderKey) : meta.placeholder) ?? label
+          }
+          value={textValue}
+          onChange={(event) => column.setFilterValue(event.target.value)}
+        />
+      </div>
+    );
+  }
+
+  if (meta.variant === 'number') {
+    return (
+      <div className='grid gap-2'>
+        <Label htmlFor={`filter-${column.id}`}>{label}</Label>
+        <div className='relative'>
+          <Input
+            id={`filter-${column.id}`}
+            type='number'
+            inputMode='numeric'
+            className={cn('h-11 w-full', meta.unit && 'pe-10')}
+            placeholder={
+              (meta.placeholderKey ? translate(meta.placeholderKey) : meta.placeholder) ?? label
+            }
+            value={(column.getFilterValue() as string) ?? ''}
+            onChange={(event) => column.setFilterValue(event.target.value)}
+          />
+          {meta.unit ? (
+            <span className='bg-accent text-muted-foreground absolute inset-e-0 top-0 bottom-0 flex items-center rounded-e-md px-3 text-sm'>
+              {meta.unit}
+            </span>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
   if (meta.variant === 'range') {
     return (
       <div className='grid gap-2'>
         <Label>{label}</Label>
         <DataTableSliderFilter column={column} title={label} />
+      </div>
+    );
+  }
+
+  if (meta.variant === 'date' || meta.variant === 'dateRange') {
+    return (
+      <div className='grid gap-2'>
+        <Label>{label}</Label>
+        <DataTableDateFilter
+          column={column}
+          title={label}
+          multiple={meta.variant === 'dateRange'}
+        />
       </div>
     );
   }

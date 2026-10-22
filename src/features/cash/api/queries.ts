@@ -1,6 +1,7 @@
-import { queryOptions } from '@tanstack/react-query';
+import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import type { CashMovementQueryFilter } from '@/types/cash';
 import type { PaymentsListFilters } from '@/types';
+import { compactFilters } from '@/lib/api/compact-filters';
 import { listCashMovements } from './service';
 
 export const cashKeys = {
@@ -11,11 +12,17 @@ export const cashKeys = {
   openingStatus: () => [...cashKeys.all, 'opening-status'] as const
 };
 
-export const cashMovementsQueryOptions = (filters: CashMovementQueryFilter = {}, token?: string) =>
-  queryOptions({
-    queryKey: cashKeys.movements(filters),
-    queryFn: () => listCashMovements(filters, token)
+export const cashMovementsQueryOptions = (
+  filters: CashMovementQueryFilter = {},
+  token?: string
+) => {
+  const compact = compactFilters(filters as Record<string, unknown>) as CashMovementQueryFilter;
+  return queryOptions({
+    queryKey: cashKeys.movements(compact),
+    queryFn: () => listCashMovements(compact, token),
+    placeholderData: keepPreviousData
   });
+};
 
 export const cashQueryOptions = (filters: CashMovementQueryFilter = {}, token?: string) =>
   cashMovementsQueryOptions(filters, token);

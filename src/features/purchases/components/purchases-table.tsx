@@ -160,6 +160,8 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
     sortBy === 'purchaseDate' ||
     sortBy === 'purchaseNo' ||
     sortBy === 'totalAmount' ||
+    sortBy === 'paid' ||
+    sortBy === 'outstanding' ||
     sortBy === 'createdAt' ||
     sortBy === 'updatedAt' ||
     sortBy === 'status'

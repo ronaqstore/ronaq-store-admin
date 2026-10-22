@@ -14,10 +14,12 @@ import type { BrandDTO } from '@/lib/api/types';
 import type { BrandCellActionProps, BrandsTableProps } from '@/types';
 import {
   createPartyNameColumn,
-  createPartyIsActiveColumn,
+  createPartyIsActiveColumn
+} from '@/components/common/party-table-helpers';
+import {
   buildSimpleEntityMobileItem,
   buildSimpleEntityDetail
-} from '@/components/common/party-table-helpers';
+} from '@/components/common/entity-builders';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
   parseBooleanFacet,

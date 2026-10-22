@@ -6,6 +6,12 @@ export interface CustomerListFilters {
   pageSize?: number;
   limit?: number;
   search?: string;
+  phone?: string;
+  address?: string;
+  minOpeningBalance?: number;
+  maxOpeningBalance?: number;
+  minCurrentBalance?: number;
+  maxCurrentBalance?: number;
   isActive?: boolean;
   sortBy?: 'name' | 'phone' | 'isActive' | 'openingBalance' | 'createdAt' | 'updatedAt';
   sortOrder?: 'asc' | 'desc';

@@ -54,7 +54,11 @@ export interface PaymentsListFilters {
   search?: string;
   customerId?: string;
   saleId?: string;
+  saleNo?: string;
   receiptGroupId?: string;
+  method?: 'CASH';
+  minAmount?: number;
+  maxAmount?: number;
   status?: 'ACTIVE' | 'CANCELLED';
   from?: string;
   to?: string;

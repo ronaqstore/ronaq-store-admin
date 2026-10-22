@@ -1,4 +1,5 @@
-import { queryOptions } from '@tanstack/react-query';
+import { keepPreviousData, queryOptions } from '@tanstack/react-query';
+import { compactFilters } from '@/lib/api/compact-filters';
 import type { PlatformShopFilters } from './types';
 import * as platform from './service';
 
@@ -14,8 +15,11 @@ export const platformOverviewQueryOptions = (token?: string) =>
     queryFn: () => platform.getPlatformOverview(token)
   });
 
-export const platformShopsQueryOptions = (filters: PlatformShopFilters, token?: string) =>
-  queryOptions({
-    queryKey: platformKeys.shops(filters),
-    queryFn: () => platform.listPlatformShops(filters, token)
+export const platformShopsQueryOptions = (filters: PlatformShopFilters, token?: string) => {
+  const compact = compactFilters(filters as Record<string, unknown>) as PlatformShopFilters;
+  return queryOptions({
+    queryKey: platformKeys.shops(compact),
+    queryFn: () => platform.listPlatformShops(compact, token),
+    placeholderData: keepPreviousData
   });
+};

@@ -14,7 +14,18 @@ import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { translateMaybe } from '@/i18n/translate-maybe';
 import { DataTableFiltersSheet } from './data-table-filters-sheet';
-import type { DataTableToolbarProps, DataTableToolbarFilterProps } from './types';
+import type {
+  DataTableToolbarProps,
+  DataTableToolbarFilterProps,
+  PrimaryTextColumn
+} from './types';
+
+const FILTER_INPUT_CLASS =
+  'h-8 w-full min-w-0 max-w-full basis-[calc(50%-0.25rem)] grow sm:basis-auto sm:w-36 sm:grow-0 md:w-40 lg:w-44';
+
+function isPrimaryTextColumn(column: PrimaryTextColumn): boolean {
+  return column.columnDef.meta?.variant === 'text' && column.columnDef.meta?.primary === true;
+}
 
 export function DataTableToolbar<TData>({
   table,
@@ -40,9 +51,11 @@ export function DataTableToolbar<TData>({
     return [...filterable].sort(
       (a, b) => rank(a.columnDef.meta?.variant) - rank(b.columnDef.meta?.variant)
     );
-  }, [table]); 
+  }, [table]);
 
-  const textColumn = columns.find((column) => column.columnDef.meta?.variant === 'text');
+  const primaryTextColumn =
+    columns.find((column) => isPrimaryTextColumn(column)) ??
+    columns.find((column) => column.columnDef.meta?.variant === 'text');
   const phoneMode = mode === 'list' || mode === 'cards';
 
   const onReset = React.useCallback(() => {
@@ -59,11 +72,11 @@ export function DataTableToolbar<TData>({
         )}
         {...props}
       >
-        <div className='flex items-center gap-2'>
-          {textColumn ? (
+        <div className='flex min-w-0 items-center gap-2'>
+          {primaryTextColumn ? (
             <Input
               placeholder={(() => {
-                const pk = textColumn.columnDef.meta?.placeholderKey;
+                const pk = primaryTextColumn.columnDef.meta?.placeholderKey;
                 if (pk) {
                   try {
                     return (t as (k: string) => string)(pk);
@@ -72,24 +85,24 @@ export function DataTableToolbar<TData>({
                   }
                 }
                 return (
-                  textColumn.columnDef.meta?.placeholder ??
-                  (textColumn.columnDef.meta?.label
-                    ? translateMaybe(textColumn.columnDef.meta.label, t)
+                  primaryTextColumn.columnDef.meta?.placeholder ??
+                  (primaryTextColumn.columnDef.meta?.label
+                    ? translateMaybe(primaryTextColumn.columnDef.meta.label, t)
                     : undefined) ??
                   t('table.search')
                 );
               })()}
               aria-label={
-                textColumn.columnDef.meta?.label
-                  ? translateMaybe(textColumn.columnDef.meta.label, t)
+                primaryTextColumn.columnDef.meta?.label
+                  ? translateMaybe(primaryTextColumn.columnDef.meta.label, t)
                   : t('table.search')
               }
               value={(() => {
-                const raw = textColumn.getFilterValue();
+                const raw = primaryTextColumn.getFilterValue();
                 return Array.isArray(raw) ? raw.join(' ') : ((raw as string) ?? '');
               })()}
-              onChange={(event) => textColumn.setFilterValue(event.target.value)}
-              className='h-11 min-h-11 flex-1'
+              onChange={(event) => primaryTextColumn.setFilterValue(event.target.value)}
+              className='h-11 min-h-11 min-w-0 flex-1'
             />
           ) : null}
           <Button
@@ -100,7 +113,7 @@ export function DataTableToolbar<TData>({
             aria-label={t('table.filters')}
           >
             <Icons.filter className='size-4' />
-            {t('table.filters')}
+            <span className='hidden min-[380px]:inline'>{t('table.filters')}</span>
             {filterCount > 0 ? (
               <Badge variant='secondary' className='ms-0.5 h-5 min-w-5 px-1'>
                 {filterCount}
@@ -117,10 +130,10 @@ export function DataTableToolbar<TData>({
     <div
       role='toolbar'
       aria-orientation='horizontal'
-      className={cn('flex w-full items-start justify-between gap-2 p-1', className)}
+      className={cn('flex w-full min-w-0 flex-col gap-2 p-1 sm:flex-row sm:items-start sm:justify-between', className)}
       {...props}
     >
-      <div className='flex flex-1 flex-wrap items-center gap-2'>
+      <div className='flex min-w-0 w-full flex-1 flex-wrap items-center gap-2'>
         {columns.map((column) => (
           <DataTableToolbarFilter key={column.id} column={column} />
         ))}
@@ -130,7 +143,7 @@ export function DataTableToolbar<TData>({
             aria-label={t('table.resetFilters')}
             variant='outline'
             size='sm'
-            className='border-dashed'
+            className='border-dashed shrink-0'
             onClick={onReset}
           >
             <Icons.close />
@@ -138,7 +151,7 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <div className='flex items-center gap-2'>
+      <div className='flex shrink-0 flex-wrap items-center justify-end gap-2'>
         {mode === 'full' ? <DataTableViewOptions table={table} /> : null}
         {children}
       </div>
@@ -185,13 +198,13 @@ function DataTableToolbarFilter<TData>({ column }: DataTableToolbarFilterProps<T
           aria-label={label ?? t('table.search')}
           value={textValue}
           onChange={(event) => column.setFilterValue(event.target.value)}
-          className='h-8 w-40 lg:w-56'
+          className={FILTER_INPUT_CLASS}
         />
       );
     }
     case 'number':
       return (
-        <div className='relative'>
+        <div className={cn('relative', FILTER_INPUT_CLASS, 'sm:w-30 md:w-30 lg:w-32')}>
           <Input
             type='number'
             inputMode='numeric'
@@ -203,7 +216,7 @@ function DataTableToolbarFilter<TData>({ column }: DataTableToolbarFilterProps<T
             aria-label={label ?? t('table.search')}
             value={(column.getFilterValue() as string) ?? ''}
             onChange={(event) => column.setFilterValue(event.target.value)}
-            className={cn('h-8 w-[120px]', columnMeta.unit && 'pe-8')}
+            className={cn('h-8 w-full', columnMeta.unit && 'pe-8')}
           />
           {columnMeta.unit ? (
             <span className='bg-accent text-muted-foreground absolute inset-e-0 top-0 bottom-0 flex items-center rounded-e-md px-2 text-sm'>
@@ -213,39 +226,46 @@ function DataTableToolbarFilter<TData>({ column }: DataTableToolbarFilterProps<T
         </div>
       );
     case 'range':
-      return <DataTableSliderFilter column={column} title={label} />;
+      return (
+        <div className='min-w-0 max-w-full shrink-0'>
+          <DataTableSliderFilter column={column} title={label} />
+        </div>
+      );
     case 'date':
     case 'dateRange':
       return (
-        <DataTableDateFilter
-          column={column}
-          title={label}
-          multiple={columnMeta.variant === 'dateRange'}
-        />
+        <div className='min-w-0 max-w-full shrink-0'>
+          <DataTableDateFilter
+            column={column}
+            title={label}
+            multiple={columnMeta.variant === 'dateRange'}
+          />
+        </div>
       );
     case 'select':
     case 'multiSelect':
-      if (columnMeta.asyncOptions) {
-        return (
-          <DataTableAsyncFacetedFilter
-            column={column}
-            title={label}
-            config={columnMeta.asyncOptions}
-            multiple={columnMeta.variant === 'multiSelect'}
-          />
-        );
-      }
       return (
-        <DataTableFacetedFilter
-          column={column}
-          title={label}
-          options={
-            typeof columnMeta.options === 'function'
-              ? columnMeta.options(translate)
-              : (columnMeta.options ?? [])
-          }
-          multiple={columnMeta.variant === 'multiSelect'}
-        />
+        <div className='min-w-0 max-w-full shrink-0'>
+          {columnMeta.asyncOptions ? (
+            <DataTableAsyncFacetedFilter
+              column={column}
+              title={label}
+              config={columnMeta.asyncOptions}
+              multiple={columnMeta.variant === 'multiSelect'}
+            />
+          ) : (
+            <DataTableFacetedFilter
+              column={column}
+              title={label}
+              options={
+                typeof columnMeta.options === 'function'
+                  ? columnMeta.options(translate)
+                  : (columnMeta.options ?? [])
+              }
+              multiple={columnMeta.variant === 'multiSelect'}
+            />
+          )}
+        </div>
       );
     default:
       return null;

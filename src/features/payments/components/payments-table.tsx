@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
-import { parseAsString, useQueryState } from 'nuqs';
+import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
 import { useT } from '@/i18n/use-t';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,12 @@ import {
 } from '@/components/data-table/list-params';
 import { formatIsoDate } from '@/lib/dates';
 import { formatPkr } from '@/lib/dukaan/numbers';
+import {
+  firstFilterValue,
+  MONEY_RANGE_RUPEES,
+  parseFacetDateRange,
+  parseRupeeMoneyRange
+} from '@/lib/dukaan/money-range-filter';
 import type { PaymentDTO } from '@/lib/api/types';
 import { useState } from 'react';
 import { paymentsQueryOptions } from '../api/queries';
@@ -33,6 +39,7 @@ import {
   createActiveCancelledStatusColumn,
   createAmountColumn
 } from '@/components/common/party-table-helpers';
+import { customerAsyncFilter } from '@/components/common/customer-filter';
 
 import type { PaymentRowActionsProps, PaymentsTableProps } from '@/types/payment';
 
@@ -122,23 +129,54 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
     'createdAt',
     'updatedAt'
   ];
-  const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<
+  const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     PaymentsListFilters['sortBy']
-  >(sortableColumnIds, 'paymentDate', ['status'], 'paymentDate');
+  >(sortableColumnIds, 'customerName', [
+    'status',
+    'customerId',
+    'paymentDate',
+    'amount',
+    'saleNo',
+    'method'
+  ], 'paymentDate');
 
   const [searchParam] = useQueryState('search', parseAsString);
   const [customerNameParam] = useQueryState('customerName', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
+  const [saleNoParam] = useQueryState('saleNo', parseAsString);
+  const [paymentDateParam] = useQueryState(
+    'paymentDate',
+    parseAsArrayOf(parseAsString, ',')
+  );
 
-  const statusFilter = parseActiveCancelledStatus(statusParam);
   const search = searchParam || customerNameParam || undefined;
+  const statusFilter = parseActiveCancelledStatus(
+    (filters as Record<string, unknown>).status ?? statusParam
+  );
+  const customerId = firstFilterValue((filters as Record<string, unknown>).customerId);
+  const saleNoFilter =
+    firstFilterValue((filters as Record<string, unknown>).saleNo) ??
+    (saleNoParam?.trim() || undefined);
+  const methodRaw = firstFilterValue((filters as Record<string, unknown>).method);
+  const methodFilter = methodRaw === 'CASH' ? ('CASH' as const) : undefined;
+  const amountRange = parseRupeeMoneyRange((filters as Record<string, unknown>).amount);
+  const { from, to } = parseFacetDateRange(
+    (filters as Record<string, unknown>).paymentDate ?? paymentDateParam
+  );
 
   const { data, isFetching } = useQuery(
     paymentsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
       search,
+      customerId,
+      saleNo: saleNoFilter,
+      method: methodFilter,
+      minAmount: amountRange.minAmount,
+      maxAmount: amountRange.maxAmount,
       status: statusFilter,
+      from,
+      to,
       sortBy,
       sortOrder
     })
@@ -176,8 +214,27 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
       enableSorting: true
     },
     {
+      id: 'customerId',
+      accessorKey: 'customerId',
+      accessorFn: (row) => row.customerId ?? '',
+      header: () => null,
+      cell: () => null,
+      meta: {
+        label: 'table.col.customer',
+        variant: 'select',
+        icon: Icons.user,
+        asyncOptions: customerAsyncFilter,
+        priority: 2,
+        mobile: 'hidden'
+      },
+      enableColumnFilter: true,
+      enableSorting: false,
+      enableHiding: true
+    },
+    {
       id: 'paymentDate',
       accessorKey: 'paymentDate',
+      accessorFn: (row) => row.paymentDate,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.date')} />,
       cell: ({ row }) => (
         <span className='font-normal text-foreground'>
@@ -186,17 +243,22 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
       ),
       meta: {
         label: 'table.col.date',
-        variant: 'date',
+        variant: 'dateRange',
         priority: 2,
         mobile: 'meta'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
-    createAmountColumn<PaymentDTO>(t('table.col.amount')),
+    createAmountColumn<PaymentDTO>(t('table.col.amount'), {
+      enableRangeFilter: true,
+      range: MONEY_RANGE_RUPEES,
+      unit: 'Rs'
+    }),
     {
       id: 'saleNo',
       accessorKey: 'saleNo',
+      accessorFn: (row) => row.saleNo ?? '',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('payments.appliedTo')} />
       ),
@@ -209,11 +271,13 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
       ),
       meta: {
         label: 'nav.sales',
+        placeholderKey: 'nav.sales',
         variant: 'text',
+        icon: Icons.search,
         priority: 3,
         mobile: 'subtitle'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: false
     },
     {
@@ -229,11 +293,13 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
       ),
       meta: {
         label: 'table.col.method',
-        variant: 'text',
+        variant: 'select',
+        icon: Icons.cash,
+        options: [{ label: 'Cash', value: 'CASH' }],
         priority: 4,
         mobile: 'hidden'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
     createActiveCancelledStatusColumn<PaymentDTO>(t('table.col.status')),

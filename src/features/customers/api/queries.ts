@@ -1,5 +1,6 @@
-import { queryOptions } from '@tanstack/react-query';
+import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import type { CustomerListFilters } from '@/types';
+import { compactFilters } from '@/lib/api/compact-filters';
 import { listCustomers } from './service';
 
 export const customerKeys = {
@@ -10,8 +11,11 @@ export const customerKeys = {
   detail: (id: string) => [...customerKeys.details(), id] as const
 };
 
-export const customersQueryOptions = (filters: CustomerListFilters = {}, token?: string) =>
-  queryOptions({
-    queryKey: customerKeys.list(filters),
-    queryFn: () => listCustomers(filters, token)
+export const customersQueryOptions = (filters: CustomerListFilters = {}, token?: string) => {
+  const compact = compactFilters(filters as Record<string, unknown>) as CustomerListFilters;
+  return queryOptions({
+    queryKey: customerKeys.list(compact),
+    queryFn: () => listCustomers(compact, token),
+    placeholderData: keepPreviousData
   });
+};

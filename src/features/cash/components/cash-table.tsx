@@ -19,6 +19,12 @@ import { useDataTable } from '@/hooks/use-data-table';
 import { parseBinaryFacet, useDukaanListParams } from '@/components/data-table/list-params';
 import { cn } from '@/lib/utils';
 import { formatDateTime, formatLabel, formatPkr } from '@/lib/dukaan/numbers';
+import {
+  firstFilterValue,
+  MONEY_RANGE_RUPEES,
+  parseFacetDateRange,
+  parseRupeeMoneyRange
+} from '@/lib/dukaan/money-range-filter';
 import type {
   CashMovementDTO,
   CashMovementQueryFilter,
@@ -32,18 +38,6 @@ import { cashMovementsQueryOptions, cashOpeningStatusQueryOptions } from '../api
 import { OpeningCashDialog } from './opening-cash-dialog';
 import { OwnerInvestmentDialog } from './owner-investment-dialog';
 import { OwnerWithdrawalDialog } from './owner-withdrawal-dialog';
-
-function timestampToYmd(value?: string | null): string | undefined {
-  if (value == null || value === '') return undefined;
-  const ms = Number(value);
-  if (!Number.isFinite(ms)) return undefined;
-  const date = new Date(ms);
-  if (Number.isNaN(date.getTime())) return undefined;
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
 
 const cashMobileItem: MobileItemConfig<CashMovementDTO> = {
   title: (row: CashMovementDTO) => formatLabel(row.type),
@@ -111,19 +105,23 @@ export function CashTable({ toolbarAction }: CashTableProps) {
     useDukaanListParams<CashMovementSortField>(
       sortableColumnIds,
       'note',
-      ['type', 'direction'],
+      ['type', 'direction', 'movementDate', 'amount'],
       'movementDate',
       'desc'
     );
 
   const [typeParam] = useQueryState('type', parseAsString);
   const [directionParam] = useQueryState('direction', parseAsString);
+  const [noteParam] = useQueryState('note', parseAsString);
   const [movementDateParam] = useQueryState(
     'movementDate',
     parseAsArrayOf(parseAsString, ',')
   );
 
   const search = noteSearch?.trim() || undefined;
+  const noteFilter =
+    firstFilterValue((filters as Record<string, unknown>).note) ??
+    (noteParam?.trim() || undefined);
 
   const rawType = (filters as Record<string, unknown>).type ?? typeParam;
   let typeFilter: CashMovementType | undefined;
@@ -141,17 +139,26 @@ export function CashTable({ toolbarAction }: CashTableProps) {
   const rawDir = (filters as Record<string, unknown>).direction ?? directionParam;
   const directionFilter = parseBinaryFacet<CashDirection>(rawDir, 'IN', 'OUT');
 
-  const from = timestampToYmd(movementDateParam?.[0]);
-  const to = timestampToYmd(movementDateParam?.[1]);
+  const { from, to } = parseFacetDateRange(
+    (filters as Record<string, unknown>).movementDate ?? movementDateParam
+  );
+  const amountRange = parseRupeeMoneyRange((filters as Record<string, unknown>).amount);
 
   const queryFilter: CashMovementQueryFilter = {
     page: params.page,
     pageSize: params.perPage,
     ...(search ? { search } : {}),
+    ...(noteFilter && noteFilter !== search ? { note: noteFilter } : {}),
     ...(typeFilter ? { type: typeFilter } : {}),
     ...(directionFilter ? { direction: directionFilter } : {}),
     ...(from ? { from } : {}),
     ...(to ? { to } : {}),
+    ...(amountRange.minAmount !== undefined
+      ? { minAmount: amountRange.minAmount }
+      : {}),
+    ...(amountRange.maxAmount !== undefined
+      ? { maxAmount: amountRange.maxAmount }
+      : {}),
     sortBy,
     sortOrder
   };
@@ -166,6 +173,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
     {
       id: 'movementDate',
       accessorKey: 'movementDate',
+      accessorFn: (row) => row.movementDate,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.when')} />,
       cell: ({ row }) => {
         const raw = row.original.movementDate ?? row.original.createdAt;
@@ -266,16 +274,20 @@ export function CashTable({ toolbarAction }: CashTableProps) {
       },
       meta: {
         label: 'table.col.amount',
-        variant: 'number',
+        variant: 'range',
+        range: MONEY_RANGE_RUPEES,
+        unit: 'Rs',
+        icon: Icons.cash,
         priority: 1,
         mobile: 'value'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
     {
       id: 'note',
       accessorKey: 'note',
+      accessorFn: (row) => row.note ?? '',
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.note')} />,
       cell: ({ row }) => {
         const note = row.original.note;

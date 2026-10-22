@@ -86,7 +86,8 @@ export function DataTableAsyncFacetedFilter<TData, TValue>({
       const loaded = last.page * last.pageSize;
       return loaded < last.total ? last.page + 1 : undefined;
     },
-    enabled: open
+    enabled: open,
+    staleTime: 60_000
   });
 
   const options = React.useMemo(() => {

@@ -92,6 +92,10 @@ export interface SupplierPaymentQueryFilter {
   search?: string;
   supplierId?: string;
   purchaseId?: string;
+  purchaseNo?: string;
+  notes?: string;
+  minAmount?: number;
+  maxAmount?: number;
   status?: 'ACTIVE' | 'CANCELLED';
   from?: string;
   to?: string;

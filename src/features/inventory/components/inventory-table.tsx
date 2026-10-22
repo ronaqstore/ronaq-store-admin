@@ -34,6 +34,8 @@ import { TruncateText } from '@/components/common/truncate-text';
 import { StockAdjustDialog } from './stock-adjust-dialog';
 import {
   INVENTORY_COST_RANGE_RUPEES,
+  firstInventoryFilterValue,
+  inventoryProductAsyncFilter,
   parseExactQuantity,
   parseInventoryCostRange
 } from './inventory-table-filters';
@@ -84,15 +86,26 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
   const sortableColumnIds = ['name', 'trackingType', 'inStock', 'stockValue', 'lowStock'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     'name' | 'inStock' | 'stockValue' | 'trackingType' | 'lowStock'
-  >(sortableColumnIds, 'name', ['trackingType', 'lowStock', 'stockValue'], 'name', 'asc');
+  >(
+    sortableColumnIds,
+    'name',
+    ['productId', 'trackingType', 'lowStock', 'stockValue'],
+    'name',
+    'asc'
+  );
 
   const [nameParam] = useQueryState('name', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
+  const [productIdParam] = useQueryState('productId', parseAsString);
   const [trackingTypeParam] = useQueryState('trackingType', parseAsString);
   const [lowStockParam] = useQueryState('lowStock', parseAsString);
   const [inStockParam] = useQueryState('inStock', parseAsString);
 
   const search = searchParam || nameParam || undefined;
+
+  const productIdFilter =
+    firstInventoryFilterValue((filters as Record<string, unknown>).productId) ??
+    firstInventoryFilterValue(productIdParam);
 
   const rawTracking = (filters as Record<string, unknown>).trackingType ?? trackingTypeParam;
   const trackingFilter = parseBinaryFacet<'QUANTITY' | 'SERIALIZED'>(
@@ -111,6 +124,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       page: params.page,
       pageSize: params.perPage,
       search: search || undefined,
+      productId: productIdFilter,
       sortBy,
       sortOrder,
       trackingType: trackingFilter,
@@ -134,6 +148,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
     {
       id: 'name',
       accessorKey: 'name',
+      accessorFn: (row) => row.name,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.product')} />
       ),
@@ -176,6 +191,24 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       },
       enableColumnFilter: true,
       enableSorting: true
+    },
+    {
+      id: 'productId',
+      accessorKey: 'id',
+      accessorFn: (row) => row.id,
+      header: () => null,
+      cell: () => null,
+      meta: {
+        label: 'table.col.product',
+        variant: 'select',
+        icon: Icons.box,
+        asyncOptions: inventoryProductAsyncFilter,
+        priority: 2,
+        mobile: 'hidden'
+      },
+      enableColumnFilter: true,
+      enableSorting: false,
+      enableHiding: true
     },
     {
       id: 'trackingType',
@@ -393,7 +426,8 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
     shallow: true,
     debounceMs: 400,
     initialState: {
-      pagination: { pageIndex: 0, pageSize: DUKAAN_DEFAULT_PAGE_SIZE }
+      pagination: { pageIndex: 0, pageSize: DUKAAN_DEFAULT_PAGE_SIZE },
+      columnVisibility: { productId: false }
     }
   });
 

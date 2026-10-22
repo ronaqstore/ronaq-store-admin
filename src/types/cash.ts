@@ -36,6 +36,9 @@ export interface CashMovementQueryFilter {
   type?: CashMovementType;
   direction?: CashDirection;
   search?: string;
+  note?: string;
+  minAmount?: number;
+  maxAmount?: number;
   from?: string;
   to?: string;
   sortBy?: CashMovementSortField;

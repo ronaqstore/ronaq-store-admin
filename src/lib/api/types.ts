@@ -561,6 +561,7 @@ export interface ProductListFilters {
   isActive?: 'true' | 'false' | boolean | string;
   isPublished?: 'true' | 'false' | boolean | string;
   inStockOnly?: 'true' | 'false' | boolean | string;
+  quantityOnHand?: number;
   minSellingPrice?: number;
   maxSellingPrice?: number;
   sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'defaultSellingPrice';

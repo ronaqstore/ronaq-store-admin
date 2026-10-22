@@ -23,6 +23,11 @@ import {
   useDukaanListParams
 } from '@/components/data-table/list-params';
 import type { SupplierDTO } from '@/lib/api/types';
+import {
+  firstFilterValue,
+  MONEY_RANGE_RUPEES,
+  parseRupeeMoneyRange
+} from '@/lib/dukaan/money-range-filter';
 import { supplierKeys, suppliersQueryOptions } from '../api/queries';
 import { deactivateSupplier, reactivateSupplier } from '../api/service';
 import type { EntityStatusConfirm, SupplierListFilters } from '@/types';
@@ -80,14 +85,22 @@ const supplierColumns: ColumnDef<SupplierDTO>[] = [
         </Badge>
       ) : null
   }),
-  createPartyPhoneColumn<SupplierDTO>(),
-  createPartyCnicColumn<SupplierDTO>(),
-  createPartyAddressColumn<SupplierDTO>(),
+  createPartyPhoneColumn<SupplierDTO>({ enableFilter: true }),
+  createPartyCnicColumn<SupplierDTO>({ enableFilter: true }),
+  createPartyAddressColumn<SupplierDTO>({ enableFilter: true }),
   createPartyCurrentBalanceColumn<SupplierDTO>({
     labelKey: 'dukaan.party.currentPayable',
-    ledgerHref: (row) => `/dashboard/suppliers/${row.id}`
+    ledgerHref: (row) => `/dashboard/suppliers/${row.id}`,
+    enableRangeFilter: true,
+    range: MONEY_RANGE_RUPEES,
+    unit: 'Rs'
   }),
-  createPartyOpeningBalanceColumn<SupplierDTO>('dukaan.party.supplierOpeningBalance'),
+  createPartyOpeningBalanceColumn<SupplierDTO>({
+    labelKey: 'dukaan.party.supplierOpeningBalance',
+    enableRangeFilter: true,
+    range: MONEY_RANGE_RUPEES,
+    unit: 'Rs'
+  }),
   createPartyIsActiveColumn<SupplierDTO>(),
   {
     id: 'actions',
@@ -118,22 +131,55 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
   );
 
   const sortableColumnIds = ['name', 'phone', 'openingBalance', 'isActive'];
-  const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<
+  const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     SupplierListFilters['sortBy']
-  >(sortableColumnIds, 'name', ['isActive'], 'name', 'asc');
+  >(
+    sortableColumnIds,
+    'name',
+    ['isActive', 'phone', 'cnic', 'address', 'currentBalance', 'openingBalance'],
+    'name',
+    'asc'
+  );
 
   const [nameParam] = useQueryState('name', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
   const [isActiveParam] = useQueryState('isActive', parseAsString);
+  const [phoneParam] = useQueryState('phone', parseAsString);
+  const [cnicParam] = useQueryState('cnic', parseAsString);
+  const [addressParam] = useQueryState('address', parseAsString);
 
   const search = searchParam || nameParam || undefined;
-  const isActiveFilter = parseBooleanFacet(isActiveParam);
+  const isActiveFilter = parseBooleanFacet(
+    (filters as Record<string, unknown>).isActive ?? isActiveParam
+  );
+  const phoneFilter =
+    firstFilterValue((filters as Record<string, unknown>).phone) ??
+    (phoneParam?.trim() || undefined);
+  const cnicFilter =
+    firstFilterValue((filters as Record<string, unknown>).cnic) ??
+    (cnicParam?.trim() || undefined);
+  const addressFilter =
+    firstFilterValue((filters as Record<string, unknown>).address) ??
+    (addressParam?.trim() || undefined);
+  const creditRange = parseRupeeMoneyRange(
+    (filters as Record<string, unknown>).currentBalance
+  );
+  const openingRange = parseRupeeMoneyRange(
+    (filters as Record<string, unknown>).openingBalance
+  );
 
   const { data, isFetching } = useQuery(
     suppliersQueryOptions({
       page: params.page,
       pageSize: params.perPage,
       search: search || undefined,
+      phone: phoneFilter,
+      cnic: cnicFilter,
+      address: addressFilter,
+      minOpeningBalance: openingRange.minAmount,
+      maxOpeningBalance: openingRange.maxAmount,
+      minCurrentBalance: creditRange.minAmount,
+      maxCurrentBalance: creditRange.maxAmount,
       isActive: isActiveFilter,
       sortBy,
       sortOrder
