@@ -199,9 +199,12 @@ function EditStoreProfileDialogBody({
         onError: (error) => {
           if (!(error instanceof ApiError)) return;
           const code = error.details?.code;
-          const raw = Array.isArray(error.details?.message)
-            ? error.details.message.join(' ')
-            : error.message;
+          const raw =
+            (Array.isArray(error.details?.message)
+              ? error.details.message.map(String).join(' ')
+              : typeof error.details?.message === 'string'
+                ? error.details.message
+                : '') || error.message;
           const lower = raw.toLowerCase();
           const taken =
             code === 'PHONE_ALREADY_TAKEN' ||

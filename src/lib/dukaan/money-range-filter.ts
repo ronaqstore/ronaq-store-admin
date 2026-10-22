@@ -4,8 +4,14 @@ import type { FacetDateRangeFilter, MoneyRangeFilter } from '@/types/money-filte
 export const MONEY_RANGE_RUPEES: [number, number] = [0, 10_000_000];
 
 export function firstFilterValue(value: unknown): string | undefined {
-  if (Array.isArray(value)) return typeof value[0] === 'string' ? value[0] : undefined;
-  if (typeof value === 'string' && value.trim()) return value.split(',')[0]?.trim() || undefined;
+  if (value == null || value === '') return undefined;
+  if (Array.isArray(value)) {
+    const first = value[0];
+    if (first == null || first === '') return undefined;
+    return String(first).trim() || undefined;
+  }
+  if (typeof value === 'string') return value.split(',')[0]?.trim() || undefined;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
   return undefined;
 }
 

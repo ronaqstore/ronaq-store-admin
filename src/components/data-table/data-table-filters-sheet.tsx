@@ -198,7 +198,11 @@ function FilterBlock<TData>({ column }: FilterBlockProps<TData>) {
 
   if (meta.variant === 'text') {
     const raw = column.getFilterValue();
-    const textValue = Array.isArray(raw) ? raw.join(' ') : ((raw as string) ?? '');
+    const textValue = Array.isArray(raw)
+      ? raw.map(String).join(' ')
+      : raw == null
+        ? ''
+        : String(raw);
     return (
       <div className='grid gap-2'>
         <Label htmlFor={`filter-${column.id}`}>{label}</Label>

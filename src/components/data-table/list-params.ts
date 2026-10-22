@@ -1,15 +1,29 @@
 'use client';
 
-import { parseAsArrayOf, parseAsInteger, parseAsString, useQueryState, useQueryStates } from 'nuqs';
+import { parseAsInteger, parseAsString, useQueryState, useQueryStates } from 'nuqs';
 import { useMemo } from 'react';
 import { getSortingStateParser } from '@/lib/parsers';
 import type { ListFilters } from '@/lib/dukaan';
 
 export const DUKAAN_DEFAULT_PAGE_SIZE = 20;
 
-function pickFilterValue(values: string[] | null | undefined): string | undefined {
-  if (!values?.length) return undefined;
-  return values.join(',');
+export function pickFilterValue(values: unknown): string | undefined {
+  if (values == null || values === '') return undefined;
+  if (typeof values === 'string') {
+    const trimmed = values.trim();
+    return trimmed || undefined;
+  }
+  if (Array.isArray(values)) {
+    const joined = values
+      .map((item) => (item == null ? '' : String(item).trim()))
+      .filter(Boolean)
+      .join(',');
+    return joined || undefined;
+  }
+  if (typeof values === 'number' || typeof values === 'boolean') {
+    return String(values);
+  }
+  return undefined;
 }
 
 export function parseBinaryFacet<T extends string>(
@@ -67,10 +81,8 @@ export function useDukaanListParams<TSort extends string | undefined = string>(
   const filterParsers = useMemo(
     () =>
       Object.fromEntries(
-        filterKeysKey
-          ? filterKeysKey.split(',').map((key) => [key, parseAsArrayOf(parseAsString, ',')])
-          : []
-      ) as Record<string, ReturnType<typeof parseAsArrayOf<string>>>,
+        filterKeysKey ? filterKeysKey.split(',').map((key) => [key, parseAsString]) : []
+      ) as Record<string, typeof parseAsString>,
     [filterKeysKey]
   );
 
@@ -84,7 +96,7 @@ export function useDukaanListParams<TSort extends string | undefined = string>(
   };
 
   for (const key of filterKeys) {
-    const value = pickFilterValue(facetValues[key] as string[] | null | undefined);
+    const value = pickFilterValue(facetValues[key]);
     if (value) {
       (filters as Record<string, string | number | undefined>)[key] = value;
     }

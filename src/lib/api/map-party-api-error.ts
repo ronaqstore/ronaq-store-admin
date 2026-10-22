@@ -1,4 +1,5 @@
 import type { ApiError } from '@/lib/api/types';
+import { safeJoinMessages } from '@/lib/safe-string';
 import type { MappedPartyApiError, PartyErrorTranslator } from '@/types/party';
 
 const PHONE_ALREADY_TAKEN = 'PHONE_ALREADY_TAKEN';
@@ -9,9 +10,7 @@ export function mapPartyApiError(
   t: PartyErrorTranslator
 ): MappedPartyApiError {
   const code = error.details?.code;
-  const raw = Array.isArray(error.details?.message)
-    ? error.details.message.join(' ')
-    : error.message;
+  const raw = safeJoinMessages(error.details?.message) || error.message;
 
   if (code === PHONE_ALREADY_TAKEN) {
     return { field: 'phone', message: t('validation.phoneAlreadyTaken') };
