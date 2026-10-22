@@ -427,7 +427,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
             />
           </div>
 
-          <DialogFooter className='gap-2 sm:gap-0'>
+          <DialogFooter>
             <DialogCancelButton
               onClick={() => onOpenChange(false)}
               disabled={recordReturn.isPending}

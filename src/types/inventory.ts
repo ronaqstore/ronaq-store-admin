@@ -76,6 +76,14 @@ export interface InventoryTableProps {
   toolbarAction?: ReactNode;
 }
 
+export interface StockAdjustProductOption {
+  id: string;
+  name: string;
+  productName: string;
+  trackingType: 'QUANTITY' | 'SERIALIZED';
+  inStock: number;
+}
+
 export interface StockAdjustDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;

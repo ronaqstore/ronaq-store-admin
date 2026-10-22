@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import {
@@ -31,14 +31,41 @@ import type { ListFilters } from '@/lib/dukaan';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
 import type { NamedEntity } from '@/types';
-import type { StockAdjustDialogProps, StockAdjustFormErrors } from '@/types/inventory';
-import { createInventoryAdjustment, listInventoryUnits } from '../api/service';
-import { inventoryStockQueryOptions } from '../api/queries';
+import type {
+  StockAdjustDialogProps,
+  StockAdjustFormErrors,
+  StockAdjustProductOption
+} from '@/types/inventory';
+import type { InventoryItemDTO } from '@/lib/api/types';
+import { createInventoryAdjustment, listInventoryStock, listInventoryUnits } from '../api/service';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { INVENTORY_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { CreateInventoryAdjustmentInput } from '@/lib/api/types';
 import { formatUnitImeiLabel } from '@/lib/inventory/format-unit-imei-label';
 
+function toProductOption(
+  item: InventoryItemDTO,
+  inStockDot: string
+): StockAdjustProductOption {
+  return {
+    id: item.id,
+    productName: item.name,
+    trackingType: item.trackingType,
+    inStock: item.inStock,
+    name: `${item.name} · ${item.inStock} ${inStockDot} · ${item.trackingType}`
+  };
+}
+
+function toInventoryItem(option: StockAdjustProductOption): InventoryItemDTO {
+  return {
+    id: option.id,
+    name: option.productName,
+    trackingType: option.trackingType,
+    inStock: option.inStock,
+    stockValue: 0,
+    lowStock: false
+  };
+}
 
 export function StockAdjustDialog({
   open,
@@ -49,18 +76,15 @@ export function StockAdjustDialog({
 }: StockAdjustDialogProps) {
   const qc = useQueryClient();
   const t = useT();
-  const { data: stockData } = useQuery({
-    ...inventoryStockQueryOptions({ limit: 100, sortBy: 'name', sortOrder: 'asc' }),
-    enabled: open
-  });
-
-  const products = (stockData?.items ?? []).filter((p) => {
-    if (p.inStock > 0) return true;
-    if (initialProduct?.id === p.id) return true;
-    return false;
-  });
+  const inStockDot = t('inventory.inStockDot');
 
   const [productId, setProductId] = useState<string>(initialProduct?.id ?? '');
+  const [selectedProduct, setSelectedProduct] = useState<InventoryItemDTO | null>(
+    initialProduct ?? null
+  );
+  const [selectedProductLabel, setSelectedProductLabel] = useState<string>(
+    initialProduct ? toProductOption(initialProduct, inStockDot).name : ''
+  );
   const [type, setType] = useState<'ADJUSTMENT' | 'DAMAGED' | 'LOST'>('ADJUSTMENT');
   const [countedQuantity, setCountedQuantity] = useState<number>(initialProduct?.inStock ?? 0);
   const [quantity, setQuantity] = useState<number>(1);
@@ -69,28 +93,28 @@ export function StockAdjustDialog({
   const [reason, setReason] = useState<string>('');
   const [errors, setErrors] = useState<StockAdjustFormErrors>({});
 
-  const selectedProduct =
-    products.find((p) => p.id === productId) ??
-    (initialProduct?.id === productId ? initialProduct : null);
-
   const isSerialized = selectedProduct?.trackingType === 'SERIALIZED';
 
   useEffect(() => {
+    if (!open) return;
     if (initialProduct) {
+      const option = toProductOption(initialProduct, inStockDot);
       setProductId(initialProduct.id);
+      setSelectedProduct(initialProduct);
+      setSelectedProductLabel(option.name);
       setCountedQuantity(initialProduct.inStock);
       return;
     }
-    if (products.length === 0) {
-      setProductId('');
-      return;
-    }
-    const stillValid = products.some((p) => p.id === productId);
-    if (!productId || !stillValid) {
-      setProductId(products[0].id);
-      setCountedQuantity(products[0].inStock);
-    }
-  }, [initialProduct, products, productId]);
+    setProductId('');
+    setSelectedProduct(null);
+    setSelectedProductLabel('');
+    setCountedQuantity(0);
+    setType('ADJUSTMENT');
+    setSelectedUnitId('');
+    setSelectedUnitLabel('');
+    setReason('');
+    setErrors({});
+  }, [open, initialProduct, inStockDot]);
 
   useEffect(() => {
     if (!selectedProduct) return;
@@ -108,6 +132,27 @@ export function StockAdjustDialog({
       setType('DAMAGED');
     }
   }, [productId, initialUnitId, initialUnitLabel, initialProduct?.id]);
+
+  const fetchProductPage = useCallback(
+    async (filters: ListFilters) => {
+      const page = filters.page ?? 1;
+      const pageSize = filters.pageSize ?? filters.limit ?? 20;
+      const res = await listInventoryStock({
+        page,
+        pageSize,
+        search: filters.search,
+        sortBy: 'name',
+        sortOrder: 'asc'
+      });
+      return {
+        items: res.items.map((item) => toProductOption(item, inStockDot)),
+        total: res.total,
+        page: res.page,
+        limit: res.pageSize
+      };
+    },
+    [inStockDot]
+  );
 
   const fetchImeiPage = useCallback(
     async (filters: ListFilters) => {
@@ -201,8 +246,10 @@ export function StockAdjustDialog({
     mutation.mutate(payload);
   };
 
-  const handleProductChange = (val: string | null) => {
-    setProductId(val ?? '');
+  const handleProductChange = (val: string, item: StockAdjustProductOption | null) => {
+    setProductId(val);
+    setSelectedProduct(item ? toInventoryItem(item) : null);
+    setSelectedProductLabel(item?.name ?? '');
     setErrors((prev) => ({ ...prev, productId: undefined }));
   };
 
@@ -254,35 +301,23 @@ export function StockAdjustDialog({
           <div className='grid min-w-0 gap-4 py-2'>
             <div className='min-w-0 space-y-1.5'>
               <Label htmlFor='adj-product'>{t('table.col.product')}</Label>
-              <Select value={productId} onValueChange={handleProductChange}>
-                <SelectTrigger id='adj-product' className='w-full min-w-0'>
-                  <SelectValue placeholder={t('inventory.selectProduct')}>
-                    {selectedProduct ? (
-                      <span
-                        className='block min-w-0 truncate'
-                        title={`${selectedProduct.name} · ${selectedProduct.inStock} ${t('inventory.inStockDot')} · ${selectedProduct.trackingType}`}
-                      >
-                        {selectedProduct.name}
-                        <span className='text-muted-foreground'>
-                          {' '}
-                          · {selectedProduct.inStock} {t('inventory.inStockDot')} ·{' '}
-                          {selectedProduct.trackingType}
-                        </span>
-                      </span>
-                    ) : undefined}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {products.map((p, index) => {
-                    const fullLabel = `${p.name} · ${p.inStock} ${t('inventory.inStockDot')} · ${p.trackingType}`;
-                    return (
-                      <SelectItem key={`${p.id}-${index}`} value={p.id} title={fullLabel}>
-                        {fullLabel}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
+              <InfiniteEntitySelect<StockAdjustProductOption>
+                value={productId}
+                onValueChange={handleProductChange}
+                queryKey={['inventory', 'stock-adjust-products']}
+                fetchPage={fetchProductPage}
+                selectedLabel={selectedProductLabel || undefined}
+                extraItems={
+                  selectedProduct
+                    ? [toProductOption(selectedProduct, inStockDot)]
+                    : []
+                }
+                activeOnly={false}
+                placeholder={t('inventory.selectProduct')}
+                searchPlaceholder={t('search.products')}
+                emptyMessage={t('table.noResults')}
+                className='h-9 w-full min-w-0'
+              />
               <DialogFieldError message={errors.productId} />
             </div>
 
@@ -290,7 +325,13 @@ export function StockAdjustDialog({
               <Label htmlFor='adj-type'>{t('inventory.changeType')}</Label>
               <Select value={type} onValueChange={handleTypeChange}>
                 <SelectTrigger id='adj-type' className='w-full min-w-0'>
-                  <SelectValue />
+                  <SelectValue>
+                    {type === 'ADJUSTMENT'
+                      ? t('inventory.typeShelfCount')
+                      : type === 'DAMAGED'
+                        ? t('inventory.typeDamaged')
+                        : t('inventory.typeLost')}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {!isSerialized && (
@@ -319,11 +360,10 @@ export function StockAdjustDialog({
                   max={INPUT_LIMITS.quantityMax}
                   value={countedQuantity}
                   onChange={handleCountedQuantityChange}
-                  onKeyDown={(e) => blockInvalidNumberKeys(e)}
-                  required
+                  onKeyDown={blockInvalidNumberKeys}
                 />
                 {selectedProduct && (
-                  <p className='text-[11px] text-muted-foreground'>
+                  <p className='text-xs text-muted-foreground'>
                     {t('inventory.changeLabel')}{' '}
                     <span
                       className={
@@ -380,20 +420,13 @@ export function StockAdjustDialog({
                   type='number'
                   min={canWriteOffQuantity ? 1 : 0}
                   max={writeOffQtyMax}
-                  value={canWriteOffQuantity ? quantity : 0}
-                  onChange={handleWriteOffQuantityChange}
-                  onKeyDown={(e) => blockInvalidNumberKeys(e)}
+                  value={quantity}
                   disabled={!canWriteOffQuantity}
-                  required={canWriteOffQuantity}
-                  className={cn(errors.quantity && 'border-destructive')}
+                  onChange={handleWriteOffQuantityChange}
+                  onKeyDown={blockInvalidNumberKeys}
                   aria-invalid={!!errors.quantity}
                 />
-                <DialogFieldError id='adj-qty-error' message={errors.quantity} />
-                {!canWriteOffQuantity ? (
-                  <p className='text-xs text-muted-foreground'>
-                    {t('inventory.noStockToWriteOff')}
-                  </p>
-                ) : null}
+                <DialogFieldError message={errors.quantity} />
               </div>
             )}
 
@@ -401,10 +434,9 @@ export function StockAdjustDialog({
               <Label htmlFor='adj-reason'>{t('inventory.reasonMandatory')}</Label>
               <Textarea
                 id='adj-reason'
-                placeholder={t('inventory.reasonPlaceholder')}
-                rows={3}
                 value={reason}
                 onChange={handleReasonChange}
+                placeholder={t('inventory.reasonPlaceholder')}
                 maxLength={INPUT_LIMITS.cancelReason}
                 className={cn(errors.reason && 'border-destructive')}
                 aria-invalid={!!errors.reason}
@@ -414,7 +446,7 @@ export function StockAdjustDialog({
             </div>
           </div>
 
-          <DialogFooter className='gap-2 sm:gap-0'>
+          <DialogFooter>
             <DialogCancelButton onClick={() => onOpenChange(false)} disabled={mutation.isPending} />
             <DialogPrimaryButton
               mode='save'
