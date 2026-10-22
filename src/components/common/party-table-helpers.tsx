@@ -13,6 +13,7 @@ import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-h
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { formatDate } from '@/lib/format';
 import { formatPkMobileLocal } from '@/lib/auth/phone';
+import { formatPkCnic } from '@/lib/validation/pk';
 import { t } from '@/i18n';
 import type {
   BasePartyRecord,
@@ -121,7 +122,7 @@ export function createPartyCnicColumn<T extends BasePartyRecord>(
     enableColumnFilter: enableFilter,
     enableSorting: false,
     cell: ({ row }) => {
-      const cnic = (row.original as T).cnic?.trim();
+      const cnic = formatPkCnic((row.original as T).cnic);
       return cnic || '—';
     }
   };
@@ -355,7 +356,7 @@ export function buildPartyDetail<T extends BasePartyRecord>(
             )
           },
           ...(row.cnic != null
-            ? [{ label: t('dukaan.party.cnic'), value: row.cnic || '—' }]
+            ? [{ label: t('dukaan.party.cnic'), value: formatPkCnic(row.cnic) || '—' }]
             : []),
           {
             label: t('table.col.status'),

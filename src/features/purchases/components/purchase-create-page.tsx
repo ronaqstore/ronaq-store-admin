@@ -9,6 +9,7 @@ import { useRouter } from '@/i18n/navigation';
 import { useT } from '@/i18n/use-t';
 import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
+import { formatPkCnic } from '@/lib/validation/pk';
 import { isFieldMetaInvalid, joinFieldErrors } from '@/lib/form-context';
 import { createClientRequestId } from '@/lib/dukaan/numbers';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
@@ -96,7 +97,7 @@ export function PurchaseCreatePageClient() {
 
   const handleSupplierChange = (id: string, supplier: SupplierPickerItem | null) => {
     form.setFieldValue('supplier_id', id);
-    setSupplierCnic(supplier?.cnic?.trim() || null);
+    setSupplierCnic(formatPkCnic(supplier?.cnic) || null);
   };
 
   const handleOpeningStockChange = ({ value }: OpeningStockChangeArgs) => {

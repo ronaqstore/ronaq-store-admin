@@ -37,3 +37,11 @@ export function sanitizePkCnicInput(value: string): string {
   if (digits.length <= 12) return `${digits.slice(0, 5)}-${digits.slice(5)}`;
   return `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}`;
 }
+
+export function formatPkCnic(cnic: string | null | undefined): string {
+  const trimmed = cnic?.trim();
+  if (!trimmed) return '';
+  const digits = trimmed.replace(/\D/g, '');
+  if (digits.length !== 13) return trimmed;
+  return `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}`;
+}

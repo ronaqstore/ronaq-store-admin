@@ -17,7 +17,11 @@ import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
-import { sanitizePkCnicInput, sanitizePkMobileInput } from '@/lib/validation/pk';
+import {
+  formatPkCnic,
+  sanitizePkCnicInput,
+  sanitizePkMobileInput
+} from '@/lib/validation/pk';
 import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import { isValidationApiError } from '@/lib/api/is-validation-error';
 import { mapPartyApiError } from '@/lib/api/map-party-api-error';
@@ -118,7 +122,7 @@ function BasePartyDialogBody({
   const defaultValues: BasePartyFormState = {
     name: party?.name ?? '',
     phone: party?.phone ?? '',
-    cnic: party?.cnic ?? '',
+    cnic: formatPkCnic(party?.cnic) || '',
     address: party?.address ?? '',
     notes: party?.notes ?? '',
     opening_balance: party ? fromPaisa(party.openingBalance) : EMPTY_FORM_NUMBER
