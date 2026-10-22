@@ -453,12 +453,6 @@ function ProductFormBody({ productId, product }: ProductFormBodyProps) {
                 children={(field) => <field.CheckboxField label={t('isPublished')} />}
               />
             ),
-            contactForPrice: (
-              <form.AppField
-                name='contactForPrice'
-                children={(field) => <field.CheckboxField label={t('contactForPrice')} />}
-              />
-            ),
             publicDescription: (
               <form.AppField
                 name='publicDescription'

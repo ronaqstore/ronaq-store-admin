@@ -33,7 +33,6 @@ export const createProductFormSchema = (t: Translator) =>
     isActive: z.boolean().optional(),
     isPublished: z.boolean().optional(),
     publicDescription: z.string().optional().nullable(),
-    contactForPrice: z.boolean().optional(),
     ptaStatus: z
       .enum(['PTA_APPROVED', 'NON_PTA', 'JV', 'BYPASS', 'MDM_BYPASS'])
       .optional()

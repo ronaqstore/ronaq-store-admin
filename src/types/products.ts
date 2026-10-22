@@ -57,7 +57,6 @@ export interface ProductFormSidebarLabels {
 
 export interface ProductFormSidebarFields {
   isPublished: ReactNode;
-  contactForPrice: ReactNode;
   publicDescription: ReactNode;
 }
 
@@ -126,7 +125,6 @@ export interface ProductFormValues {
   isActive?: boolean;
   isPublished?: boolean;
   publicDescription?: string | null;
-  contactForPrice?: boolean;
   ptaStatus?: 'PTA_APPROVED' | 'NON_PTA' | 'JV' | 'BYPASS' | 'MDM_BYPASS' | null;
   authenticity?: 'ORIGINAL' | 'COPY' | '' | null;
 }

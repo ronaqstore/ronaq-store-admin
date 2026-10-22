@@ -24,7 +24,6 @@ export function emptyProductForm(): ProductFormValues {
     isActive: true,
     isPublished: false,
     publicDescription: '',
-    contactForPrice: false,
     ptaStatus: null,
     authenticity: ''
   };
@@ -50,7 +49,6 @@ export function productToForm(product: ProductDTO): ProductFormValues {
     isActive: product.isActive,
     isPublished: product.isPublished,
     publicDescription: product.publicDescription ?? '',
-    contactForPrice: product.contactForPrice,
     ptaStatus: product.ptaStatus ?? null,
     authenticity: product.authenticity ?? ''
   };
@@ -82,7 +80,6 @@ export function buildProductPayload(value: ProductFormValues) {
     isActive: value.isActive ?? true,
     isPublished: value.isPublished ?? false,
     publicDescription: cleanString(value.publicDescription),
-    contactForPrice: value.contactForPrice ?? false,
     ptaStatus:
       value.trackingType === 'SERIALIZED' ? (value.ptaStatus || undefined) : undefined,
     authenticity: value.authenticity ? value.authenticity : undefined

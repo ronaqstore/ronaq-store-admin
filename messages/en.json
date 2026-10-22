@@ -575,7 +575,6 @@
       "description": "Notes",
       "publicDescription": "Web description",
       "isPublished": "Publish online",
-      "contactForPrice": "Contact for price",
       "createFailed": "Failed to create product",
       "updateFailed": "Failed to update product",
       "ramPlaceholder": "8GB",

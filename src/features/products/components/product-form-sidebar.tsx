@@ -33,7 +33,6 @@ export function ProductFormSidebar({
       <section className='space-y-3 border-t border-border/60 pt-6'>
         <h2 className='text-base font-semibold'>{labels.onlineStoreSettings}</h2>
         {fields.isPublished}
-        {fields.contactForPrice}
         {fields.publicDescription}
       </section>
 

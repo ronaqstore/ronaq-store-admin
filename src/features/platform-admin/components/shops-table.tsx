@@ -99,7 +99,7 @@ const columns: ColumnDef<PlatformShop>[] = [
     ),
     cell: ({ row }) => <ShopStatusBadge status={row.original.accessStatus} />,
     meta: {
-      label: 'platform.allStatuses',
+      label: 'table.col.status',
       variant: 'multiSelect',
       icon: Icons.building,
       options: platformAccessStatusOptions,

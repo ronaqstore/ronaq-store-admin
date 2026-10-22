@@ -509,7 +509,6 @@ export interface ProductDTO {
   isActive: boolean;
   isPublished: boolean;
   publicDescription?: string | null;
-  contactForPrice: boolean;
   ptaStatus?: PtaStatus | null;
   authenticity?: ProductAuthenticity | null;
   quantityOnHand: number;
@@ -532,7 +531,6 @@ export interface ProductAttributes {
   isActive?: boolean;
   isPublished?: boolean;
   publicDescription?: string | null;
-  contactForPrice?: boolean;
   ptaStatus?: PtaStatus | null;
   authenticity?: ProductAuthenticity | null;
 }
