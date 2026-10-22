@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
 import { toast } from 'sonner';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import {
@@ -25,6 +26,7 @@ import { TruncateText } from '@/components/common/truncate-text';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { formatIsoDate } from '@/lib/dates';
 import { formatPkMobileLocal } from '@/lib/auth/phone';
+import { parseFacetDateRange } from '@/lib/dukaan/money-range-filter';
 import type {
   PlatformShop,
   PlatformShopAccessStatus,
@@ -116,10 +118,12 @@ const columns: ColumnDef<PlatformShop>[] = [
     cell: ({ row }) => formatIsoDate(row.original.subscriptionEndsAt),
     meta: {
       label: 'platform.subscriptionEnds',
+      variant: 'dateRange',
       type: 'date',
       highlight: true,
       priority: 1
     },
+    enableColumnFilter: true,
     enableSorting: true
   },
   {
@@ -131,9 +135,11 @@ const columns: ColumnDef<PlatformShop>[] = [
     cell: ({ row }) => formatIsoDate(row.original.createdAt),
     meta: {
       label: 'platform.createdAt',
+      variant: 'dateRange',
       type: 'date',
       priority: 3
     },
+    enableColumnFilter: true,
     enableSorting: true
   },
   {
@@ -311,7 +317,23 @@ export function PlatformShopsTable() {
 
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     (typeof SORTABLE_COLUMN_IDS)[number]
-  >([...SORTABLE_COLUMN_IDS], 'name', ['accessStatus'], 'createdAt', 'desc');
+  >(
+    [...SORTABLE_COLUMN_IDS],
+    'name',
+    ['accessStatus', 'subscriptionEndsAt', 'createdAt'],
+    'createdAt',
+    'desc'
+  );
+
+  const [nameParam] = useQueryState('name', parseAsString);
+  const [searchParam] = useQueryState('search', parseAsString);
+  const [subscriptionEndsParam] = useQueryState(
+    'subscriptionEndsAt',
+    parseAsArrayOf(parseAsString, ',')
+  );
+  const [createdAtParam] = useQueryState('createdAt', parseAsArrayOf(parseAsString, ','));
+
+  const search = searchParam || nameParam || filters.search || undefined;
 
   const accessStatusRaw = (filters as Record<string, string | undefined>).accessStatus;
   const accessStatusFilter =
@@ -319,12 +341,23 @@ export function PlatformShopsTable() {
       ? accessStatusRaw
       : undefined;
 
+  const subscriptionRange = parseFacetDateRange(
+    (filters as Record<string, unknown>).subscriptionEndsAt ?? subscriptionEndsParam
+  );
+  const createdRange = parseFacetDateRange(
+    (filters as Record<string, unknown>).createdAt ?? createdAtParam
+  );
+
   const { data, isFetching } = useQuery(
     platformShopsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
-      search: filters.search,
+      search,
       accessStatus: accessStatusFilter,
+      subscriptionFrom: subscriptionRange.from,
+      subscriptionTo: subscriptionRange.to,
+      createdFrom: createdRange.from,
+      createdTo: createdRange.to,
       sortBy,
       sortOrder
     })
