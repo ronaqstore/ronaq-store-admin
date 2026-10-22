@@ -106,9 +106,9 @@ export function MobileList<TData>({
             : 'overflow-hidden rounded-[var(--radius)] border border-border'
         )}
       >
-        {rows.map((row) => (
+        {rows.map((row, index) => (
           <li
-            key={row.id}
+            key={`${row.id}-${index}`}
             className={cn(
               isCards
                 ? 'overflow-hidden rounded-[var(--radius)] border border-border bg-card'

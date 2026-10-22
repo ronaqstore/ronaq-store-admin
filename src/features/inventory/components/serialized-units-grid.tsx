@@ -31,7 +31,7 @@ export function SerializedUnitsGrid({
 
         return (
           <Card
-            key={unit.id}
+            key={`${unit.id}-${idx}`}
             className='border-border/80 shadow-none hover:border-primary/40 transition-colors flex flex-col justify-between overflow-hidden'
           >
             <div className='p-4 space-y-3'>

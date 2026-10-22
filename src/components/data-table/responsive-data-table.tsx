@@ -342,9 +342,9 @@ function CompactOrFullTable<TData>({
               </TableRow>
             ))
           ) : table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
+            table.getRowModel().rows.map((row, rowIndex) => (
               <TableRow
-                key={row.id}
+                key={`${row.id}-${rowIndex}`}
                 className={onRowClick ? 'cursor-pointer' : undefined}
                 onClick={
                   onRowClick

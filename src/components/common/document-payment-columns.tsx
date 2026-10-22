@@ -31,9 +31,13 @@ export function documentOutstandingMeta(
 }
 
 export function createDocumentTotalColumn<T extends HasDocumentPayments>(
-  opts?: Pick<DocumentMoneyColumnOptions, 'totalPriority'>
+  opts?: Pick<
+    DocumentMoneyColumnOptions,
+    'totalPriority' | 'enableRangeFilter' | 'range' | 'unit'
+  >
 ): ColumnDef<T> {
   const priority: DocumentColumnPriority = opts?.totalPriority ?? 3;
+  const enableRange = opts?.enableRangeFilter === true;
   return {
     id: 'totalAmount',
     accessorKey: 'totalAmount',
@@ -47,20 +51,27 @@ export function createDocumentTotalColumn<T extends HasDocumentPayments>(
     ),
     meta: {
       label: 'table.col.total',
-      variant: 'number',
+      variant: enableRange ? 'range' : 'number',
+      range: opts?.range,
+      unit: opts?.unit,
+      icon: enableRange ? Icons.cash : undefined,
       priority,
       mobile: 'value'
     },
-    enableColumnFilter: false,
+    enableColumnFilter: enableRange,
     enableSorting: true
   };
 }
 
 export function createDocumentPaidColumn<T extends HasDocumentPayments>(
-  opts?: Pick<DocumentMoneyColumnOptions, 'paidPriority' | 'hidePaidForOpeningStock'>
+  opts?: Pick<
+    DocumentMoneyColumnOptions,
+    'paidPriority' | 'hidePaidForOpeningStock' | 'enableRangeFilter' | 'range' | 'unit'
+  >
 ): ColumnDef<T> {
   const hideOpening = opts?.hidePaidForOpeningStock ?? false;
   const priority: DocumentColumnPriority = opts?.paidPriority ?? 3;
+  const enableRange = opts?.enableRangeFilter === true;
   return {
     id: 'paid',
     accessorFn: (row) =>
@@ -80,18 +91,30 @@ export function createDocumentPaidColumn<T extends HasDocumentPayments>(
     },
     meta: {
       label: 'table.col.paid',
-      variant: 'number',
+      variant: enableRange ? 'range' : 'number',
+      range: opts?.range,
+      unit: opts?.unit,
+      icon: enableRange ? Icons.cash : undefined,
       priority
     },
+    enableColumnFilter: enableRange,
     enableSorting: true
   };
 }
 
 export function createDocumentOutstandingColumn<T extends HasDocumentPayments>(
-  opts?: Pick<DocumentMoneyColumnOptions, 'outstandingPriority' | 'hidePaidForOpeningStock'>
+  opts?: Pick<
+    DocumentMoneyColumnOptions,
+    | 'outstandingPriority'
+    | 'hidePaidForOpeningStock'
+    | 'enableRangeFilter'
+    | 'range'
+    | 'unit'
+  >
 ): ColumnDef<T> {
   const hideOpening = opts?.hidePaidForOpeningStock ?? false;
   const priority: DocumentColumnPriority = opts?.outstandingPriority ?? 2;
+  const enableRange = opts?.enableRangeFilter === true;
   return {
     id: 'outstanding',
     accessorFn: (row) => {
@@ -126,9 +149,13 @@ export function createDocumentOutstandingColumn<T extends HasDocumentPayments>(
     },
     meta: {
       label: 'table.col.outstanding',
-      variant: 'number',
+      variant: enableRange ? 'range' : 'number',
+      range: opts?.range,
+      unit: opts?.unit,
+      icon: enableRange ? Icons.cash : undefined,
       priority
     },
+    enableColumnFilter: enableRange,
     enableSorting: true
   };
 }

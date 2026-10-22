@@ -86,8 +86,8 @@ export function PurchaseDetailClient({ id }: PurchaseDetailClientProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.items?.map((item) => (
-            <TableRow key={item.id}>
+          {data.items?.map((item, index) => (
+            <TableRow key={`${item.id}-${index}`}>
               <TableCell>
                 <div className='font-medium'>{item.productName || item.productId}</div>
                 {item.phoneUnits && item.phoneUnits.length > 0 ? (

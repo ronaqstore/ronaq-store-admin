@@ -27,6 +27,11 @@ import type {
 } from '@/types/inventory';
 import { inventoryAdjustmentsQueryOptions } from '../api/queries';
 import { StockAdjustDialog } from './stock-adjust-dialog';
+import {
+  firstAdjustmentFilterValue,
+  parseExactQuantityChange,
+  productAsyncFilter
+} from './adjustments-table-filters';
 
 const MANUAL_TYPE_OPTIONS = [
   { label: 'Adjustment', value: 'ADJUSTMENT' },
@@ -77,11 +82,12 @@ export function AdjustmentsTable({
   const sortableColumnIds = ['createdAt', 'quantityChange'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     'createdAt' | 'quantityChange'
-  >(sortableColumnIds, 'createdAt', ['type'], 'createdAt', 'desc');
+  >(sortableColumnIds, 'createdAt', ['type', 'productId'], 'createdAt', 'desc');
 
-  const [searchParam] = useQueryState('search', parseAsString);
-  const [productNameParam] = useQueryState('productName', parseAsString);
   const [typeParam] = useQueryState('type', parseAsString);
+  const [productIdParam] = useQueryState('productId', parseAsString);
+  const [quantityChangeParam] = useQueryState('quantityChange', parseAsString);
+  const [reasonParam] = useQueryState('reason', parseAsString);
 
   const rawType = (filters as Record<string, unknown>).type ?? typeParam;
   let typeFilter: InventoryMovementTypeFilter | undefined;
@@ -97,12 +103,22 @@ export function AdjustmentsTable({
     }
   }
 
+  const productIdFilter =
+    firstAdjustmentFilterValue((filters as Record<string, unknown>).productId) ??
+    firstAdjustmentFilterValue(productIdParam);
+  const quantityChangeFilter = parseExactQuantityChange(
+    (filters as Record<string, unknown>).quantityChange ?? quantityChangeParam
+  );
+  const reasonFilter = reasonParam?.trim() || undefined;
+
   const { data, isFetching } = useQuery(
     inventoryAdjustmentsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
-      search: searchParam || productNameParam || undefined,
+      productId: productIdFilter,
       type: typeFilter,
+      quantityChange: quantityChangeFilter,
+      reason: reasonFilter,
       scope: isMovements ? 'all' : 'manual',
       sortBy,
       sortOrder
@@ -131,8 +147,8 @@ export function AdjustmentsTable({
       enableSorting: true
     },
     {
-      id: 'productName',
-      accessorKey: 'productName',
+      id: 'productId',
+      accessorKey: 'productId',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.product')} />
       ),
@@ -148,10 +164,9 @@ export function AdjustmentsTable({
       ),
       meta: {
         label: 'table.col.product',
-        placeholderKey: 'search.adjustments',
-        variant: 'text',
-        icon: Icons.search,
-        type: 'text',
+        variant: 'select',
+        icon: Icons.box,
+        asyncOptions: productAsyncFilter,
         primary: true,
         priority: 1,
         mobile: 'title'
@@ -203,10 +218,12 @@ export function AdjustmentsTable({
       meta: {
         label: 'table.col.qty',
         variant: 'number',
+        placeholderKey: 'table.col.qty',
+        icon: Icons.box,
         priority: 1,
         mobile: 'value'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
     {
@@ -222,11 +239,14 @@ export function AdjustmentsTable({
       ),
       meta: {
         label: 'table.col.reason',
+        placeholderKey: 'table.col.reason',
         variant: 'text',
+        icon: Icons.search,
+        type: 'text',
         priority: 3,
         mobile: 'subtitle'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: false
     }
   ];

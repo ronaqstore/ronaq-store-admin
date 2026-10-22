@@ -10,7 +10,10 @@ export async function GET(request: NextRequest) {
       'sortBy',
       'sortOrder',
       'trackingType',
-      'lowStock'
+      'lowStock',
+      'minStockValue',
+      'maxStockValue',
+      'inStock'
     ]
   });
 }

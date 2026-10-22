@@ -182,7 +182,7 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
           </TableHeader>
           <TableBody>
             {(data.items ?? []).map((item) => (
-              <TableRow key={item.id}>
+              <TableRow key={`${item.id}-${item.productId ?? ''}`}>
                 <TableCell className='font-medium'>
                   <TruncateText>{item.productName}</TruncateText>
                 </TableCell>
@@ -214,9 +214,9 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
             </p>
           ) : (
             <div className='space-y-2'>
-              {data.payments.map((p) => (
+              {data.payments.map((p, index) => (
                 <div
-                  key={p.id}
+                  key={`${p.id}-${index}`}
                   className='flex items-center justify-between text-xs border-b pb-1.5 last:border-0'
                 >
                   <div>
@@ -266,8 +266,8 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
         <div className='rounded-lg border p-4 space-y-3'>
           <h4 className='font-semibold text-sm'>{t('dukaan.sale.returnsHistory')}</h4>
           <div className='space-y-2'>
-            {data.returns.map((ret) => (
-              <div key={ret.id} className='rounded-md border bg-muted/30 p-3 text-xs space-y-1.5'>
+            {data.returns.map((ret, index) => (
+              <div key={`${ret.id}-${index}`} className='rounded-md border bg-muted/30 p-3 text-xs space-y-1.5'>
                 <div className='flex items-center justify-between'>
                   <span className='font-semibold'>{ret.reason}</span>
                   <span className='font-medium text-destructive'>
@@ -342,8 +342,8 @@ export function SaleReceiptClient({ id }: SaleReceiptClientProps) {
           </tr>
         </thead>
         <tbody>
-          {(data.items ?? []).map((item) => (
-            <tr key={item.id} className='border-b'>
+          {(data.items ?? []).map((item, index) => (
+            <tr key={`${item.id}-${index}`} className='border-b'>
               <td className='py-1'>{item.productName}</td>
               <td>{item.imei ?? '—'}</td>
               <td>{item.quantity}</td>

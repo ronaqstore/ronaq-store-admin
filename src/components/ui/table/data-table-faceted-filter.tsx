@@ -101,12 +101,12 @@ export function DataTableFacetedFilter<TData, TValue>({
             !isSheet && 'max-h-[18.75rem]'
           )}
         >
-          {options.map((option) => {
+          {options.map((option, index) => {
             const isSelected = selectedValues.has(option.value);
 
             return (
               <CommandItem
-                key={option.value}
+                key={`${option.value}-${index}`}
                 value={option.value}
                 onSelect={() => onItemSelect(option, isSelected)}
                 className='my-0.5 flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2.5 text-sm transition-colors'
@@ -206,10 +206,10 @@ export function DataTableFacetedFilter<TData, TValue>({
                   {selectedValues.size} {t('common.selected')}
                 </Badge>
               ) : (
-                selectedLabels.map((option) => (
+                selectedLabels.map((option, index) => (
                   <Badge
                     variant='secondary'
-                    key={option.value}
+                    key={`${option.value}-${index}`}
                     className='rounded-sm px-1 font-normal'
                   >
                     {option.label}

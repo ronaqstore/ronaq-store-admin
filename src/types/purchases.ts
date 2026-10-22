@@ -26,6 +26,11 @@ export interface SuggestVariantNameParts {
   trackingType: string;
 }
 
+export interface PurchaseMoneyRangeFilter {
+  minAmount?: number;
+  maxAmount?: number;
+}
+
 export interface PurchasesListFilters {
   page?: number;
   pageSize?: number;
@@ -33,9 +38,16 @@ export interface PurchasesListFilters {
   search?: string;
   supplierId?: string;
   status?: 'ACTIVE' | 'CANCELLED';
+  payStatus?: 'PAID' | 'PARTIAL' | 'PAYABLE' | 'CANCELLED';
   isOpeningStock?: boolean;
   from?: string;
   to?: string;
+  minTotalAmount?: number;
+  maxTotalAmount?: number;
+  minPaidAmount?: number;
+  maxPaidAmount?: number;
+  minOutstandingAmount?: number;
+  maxOutstandingAmount?: number;
   sortBy?: 'purchaseDate' | 'purchaseNo' | 'totalAmount' | 'status' | 'createdAt' | 'updatedAt';
   sortOrder?: 'asc' | 'desc';
 }

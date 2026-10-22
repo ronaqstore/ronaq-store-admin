@@ -46,7 +46,7 @@ export function SerializedUnitsTable({
               unit.status === 'IN_STOCK' ? 'success' : unit.status === 'SOLD' ? 'neutral' : 'danger';
 
             return (
-              <TableRow key={unit.id}>
+              <TableRow key={`${unit.id}-${idx}`}>
                 <TableCell className='text-center font-mono text-xs text-muted-foreground'>
                   {idx + 1}
                 </TableCell>

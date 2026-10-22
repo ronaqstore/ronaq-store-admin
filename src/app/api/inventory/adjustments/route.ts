@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
       'search',
       'productId',
       'type',
+      'quantityChange',
+      'reason',
       'scope',
       'from',
       'to',

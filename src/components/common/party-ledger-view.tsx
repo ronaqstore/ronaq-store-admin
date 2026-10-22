@@ -70,8 +70,8 @@ function LedgerRows({
   return (
     <>
       <div className='divide-border divide-y md:hidden'>
-        {rows.map((row) => (
-          <div key={row.id} className='py-3'>
+        {rows.map((row, index) => (
+          <div key={`${row.id}-${index}`} className='py-3'>
             <div className='flex items-start justify-between gap-3'>
               <div className='min-w-0 space-y-0.5'>
                 <p className='text-sm font-medium leading-snug'>{row.entryLabel}</p>
@@ -107,8 +107,8 @@ function LedgerRows({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rows.map((row) => (
-              <TableRow key={row.id}>
+            {rows.map((row, index) => (
+              <TableRow key={`${row.id}-${index}`}>
                 <TableCell className='text-muted-foreground whitespace-nowrap'>
                   {row.dateLabel}
                 </TableCell>

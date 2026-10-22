@@ -41,10 +41,19 @@ import type { PurchaseRowActionsProps, PurchasesTableProps } from '@/types/purch
 import { purchasesQueryOptions } from '../api/queries';
 import type { PurchasesListFilters } from '@/types';
 import { CancelPurchaseDialog } from './cancel-purchase-dialog';
+import {
+  PURCHASE_MONEY_RANGE_RUPEES,
+  firstPurchaseFilterValue,
+  parsePurchasePayStatus,
+  parseRupeeMoneyRange,
+  supplierAsyncFilter
+} from './purchases-table-filters';
 
 const STATUS_FILTER_OPTIONS: DocumentStatusFilterOption[] = [
-  { label: 'Active', value: 'ACTIVE' },
-  { label: 'Cancelled', value: 'CANCELLED' }
+  { label: staticT('status.payable'), value: 'PAYABLE' },
+  { label: staticT('status.partial'), value: 'PARTIAL' },
+  { label: staticT('status.paid'), value: 'PAID' },
+  { label: staticT('status.cancelled'), value: 'CANCELLED' }
 ];
 
 function PurchaseRowActions({ purchase }: PurchaseRowActionsProps) {
@@ -117,15 +126,34 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
   ];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     PurchasesListFilters['sortBy']
-  >(sortableColumnIds, 'purchaseDate', ['status'], 'purchaseDate');
+  >(sortableColumnIds, 'purchaseDate', [
+    'status',
+    'supplierId',
+    'totalAmount',
+    'paid',
+    'outstanding'
+  ], 'purchaseDate');
 
   const [purchaseNoParam] = useQueryState('purchaseNo', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
 
   const search = searchParam || purchaseNoParam || undefined;
-  const statusFilter = parseActiveCancelledStatus(
+  const documentStatusFilter = parseActiveCancelledStatus(
     (filters as Record<string, unknown>).status ?? statusParam
+  );
+  const payStatusFilter = parsePurchasePayStatus(
+    (filters as Record<string, unknown>).status ?? statusParam
+  );
+  const supplierId = firstPurchaseFilterValue(
+    (filters as Record<string, unknown>).supplierId
+  );
+  const totalRange = parseRupeeMoneyRange(
+    (filters as Record<string, unknown>).totalAmount
+  );
+  const paidRange = parseRupeeMoneyRange((filters as Record<string, unknown>).paid);
+  const outstandingRange = parseRupeeMoneyRange(
+    (filters as Record<string, unknown>).outstanding
   );
 
   const backendSortBy =
@@ -143,7 +171,15 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
       page: params.page,
       pageSize: params.perPage,
       search: search || undefined,
-      status: statusFilter,
+      supplierId,
+      status: documentStatusFilter,
+      payStatus: payStatusFilter,
+      minTotalAmount: totalRange.minAmount,
+      maxTotalAmount: totalRange.maxAmount,
+      minPaidAmount: paidRange.minAmount,
+      maxPaidAmount: paidRange.maxAmount,
+      minOutstandingAmount: outstandingRange.minAmount,
+      maxOutstandingAmount: outstandingRange.maxAmount,
       sortBy: backendSortBy,
       sortOrder
     })
@@ -205,8 +241,8 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
       enableSorting: true
     },
     {
-      id: 'supplierName',
-      accessorKey: 'supplierName',
+      id: 'supplierId',
+      accessorKey: 'supplierId',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.supplier')} />
       ),
@@ -215,11 +251,13 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
       ),
       meta: {
         label: 'table.col.supplier',
-        variant: 'text',
+        variant: 'select',
+        icon: Icons.truck,
+        asyncOptions: supplierAsyncFilter,
         priority: 2,
         mobile: 'subtitle'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: false
     },
     {
@@ -242,14 +280,25 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
       enableColumnFilter: false,
       enableSorting: false
     },
-    createDocumentTotalColumn<PurchaseDTO>({ totalPriority: 1 }),
+    createDocumentTotalColumn<PurchaseDTO>({
+      totalPriority: 1,
+      enableRangeFilter: true,
+      range: PURCHASE_MONEY_RANGE_RUPEES,
+      unit: 'Rs'
+    }),
     createDocumentPaidColumn<PurchaseDTO>({
       paidPriority: 2,
-      hidePaidForOpeningStock: true
+      hidePaidForOpeningStock: true,
+      enableRangeFilter: true,
+      range: PURCHASE_MONEY_RANGE_RUPEES,
+      unit: 'Rs'
     }),
     createDocumentOutstandingColumn<PurchaseDTO>({
       outstandingPriority: 2,
-      hidePaidForOpeningStock: true
+      hidePaidForOpeningStock: true,
+      enableRangeFilter: true,
+      range: PURCHASE_MONEY_RANGE_RUPEES,
+      unit: 'Rs'
     }),
     createDocumentPayStatusColumn<PurchaseDTO>(purchasePayBadge, STATUS_FILTER_OPTIONS, 1),
     {
@@ -277,10 +326,22 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
   const purchaseQuickFilters: QuickFilterChip[] = [
     { id: 'all', label: t('table.all') },
     {
-      id: 'active',
-      label: t('status.active'),
+      id: 'payable',
+      label: t('status.payable'),
       columnId: 'status',
-      value: ['ACTIVE']
+      value: ['PAYABLE']
+    },
+    {
+      id: 'partial',
+      label: t('status.partial'),
+      columnId: 'status',
+      value: ['PARTIAL']
+    },
+    {
+      id: 'paid',
+      label: t('status.paid'),
+      columnId: 'status',
+      value: ['PAID']
     },
     {
       id: 'cancelled',

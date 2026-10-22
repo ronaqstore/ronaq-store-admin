@@ -271,10 +271,10 @@ export function StockAdjustDialog({
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {products.map((p) => {
+                  {products.map((p, index) => {
                     const fullLabel = `${p.name} · ${p.inStock} ${t('inventory.inStockDot')} · ${p.trackingType}`;
                     return (
-                      <SelectItem key={p.id} value={p.id} title={fullLabel}>
+                      <SelectItem key={`${p.id}-${index}`} value={p.id} title={fullLabel}>
                         {fullLabel}
                       </SelectItem>
                     );

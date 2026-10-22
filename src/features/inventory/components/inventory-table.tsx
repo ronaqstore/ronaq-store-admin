@@ -32,6 +32,11 @@ import type { InventoryRowActionsProps, InventoryTableProps } from '@/types/inve
 import { inventoryStockQueryOptions } from '../api/queries';
 import { TruncateText } from '@/components/common/truncate-text';
 import { StockAdjustDialog } from './stock-adjust-dialog';
+import {
+  INVENTORY_COST_RANGE_RUPEES,
+  parseExactQuantity,
+  parseInventoryCostRange
+} from './inventory-table-filters';
 
 function InventoryRowActions({ item, onAdjust, onViewUnits }: InventoryRowActionsProps) {
   const t = useT();
@@ -79,12 +84,13 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
   const sortableColumnIds = ['name', 'trackingType', 'inStock', 'stockValue', 'lowStock'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     'name' | 'inStock' | 'stockValue' | 'trackingType' | 'lowStock'
-  >(sortableColumnIds, 'name', ['trackingType', 'lowStock'], 'name', 'asc');
+  >(sortableColumnIds, 'name', ['trackingType', 'lowStock', 'stockValue'], 'name', 'asc');
 
   const [nameParam] = useQueryState('name', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
   const [trackingTypeParam] = useQueryState('trackingType', parseAsString);
   const [lowStockParam] = useQueryState('lowStock', parseAsString);
+  const [inStockParam] = useQueryState('inStock', parseAsString);
 
   const search = searchParam || nameParam || undefined;
 
@@ -97,6 +103,8 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
 
   const rawLowStock = (filters as Record<string, unknown>).lowStock ?? lowStockParam;
   const lowStockFilter = parseBooleanFacet(rawLowStock);
+  const costRange = parseInventoryCostRange((filters as Record<string, unknown>).stockValue);
+  const quantityFilter = parseExactQuantity(inStockParam);
 
   const { data, isFetching } = useQuery(
     inventoryStockQueryOptions({
@@ -106,7 +114,10 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       sortBy,
       sortOrder,
       trackingType: trackingFilter,
-      lowStock: lowStockFilter
+      lowStock: lowStockFilter,
+      minStockValue: costRange.minStockValue,
+      maxStockValue: costRange.maxStockValue,
+      inStock: quantityFilter
     })
   );
 
@@ -205,10 +216,12 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       meta: {
         label: 'table.col.qty',
         variant: 'number',
+        placeholderKey: 'table.col.qty',
+        icon: Icons.box,
         priority: 1,
         mobile: 'value'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
     {
@@ -220,11 +233,14 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       ),
       meta: {
         label: 'table.col.cost',
-        variant: 'number',
+        variant: 'range',
+        range: INVENTORY_COST_RANGE_RUPEES,
+        unit: 'Rs',
+        icon: Icons.cash,
         priority: 2,
         mobile: 'meta'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
     {

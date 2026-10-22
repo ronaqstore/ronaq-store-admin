@@ -91,10 +91,14 @@ export function DataTableAsyncFacetedFilter<TData, TValue>({
 
   const options = React.useMemo(() => {
     const loaded = query.data?.pages.flatMap((page) => page.items) ?? [];
-    return loaded.map((item) => ({
-      label: item.name,
-      value: item.id
-    }));
+    const seen = new Set<string>();
+    const unique: { label: string; value: string }[] = [];
+    for (const item of loaded) {
+      if (!item?.id || seen.has(item.id)) continue;
+      seen.add(item.id);
+      unique.push({ label: item.name, value: item.id });
+    }
+    return unique;
   }, [query.data]);
 
   const columnFilterValue = column?.getFilterValue();
@@ -178,11 +182,11 @@ export function DataTableAsyncFacetedFilter<TData, TValue>({
           <>
             <CommandEmpty>{t('table.noResults')}</CommandEmpty>
             <CommandGroup className='p-0.5 [&_[cmdk-group-items]]:space-y-1'>
-              {options.map((option) => {
+              {options.map((option, index) => {
                 const isSelected = selectedValues.has(option.value);
                 return (
                   <CommandItem
-                    key={option.value}
+                    key={`${option.value}-${index}`}
                     value={option.value}
                     keywords={[option.label]}
                     onSelect={() => onItemSelect(option.value, option.label, isSelected)}
@@ -287,10 +291,10 @@ export function DataTableAsyncFacetedFilter<TData, TValue>({
                   {selectedValues.size} {t('common.selected')}
                 </Badge>
               ) : (
-                selectedLabels.map((item) => (
+                selectedLabels.map((item, index) => (
                   <Badge
                     variant='secondary'
-                    key={item.value}
+                    key={`${item.value}-${index}`}
                     className='rounded-sm px-1 font-normal'
                   >
                     {item.label}

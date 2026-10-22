@@ -145,11 +145,11 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
               {emptyText}
             </div>
           ) : (
-            items.map((item) => {
+            items.map((item, index) => {
               const isSelected = (currentItem?.id ?? value) === item.id;
               return (
                 <div
-                  key={item.id}
+                  key={`${item.id}-${index}`}
                   onClick={() => handleSelect(item)}
                   className={cn(
                     'flex min-w-0 cursor-pointer items-center justify-between gap-2 overflow-hidden rounded-md px-2.5 py-2 text-sm transition-colors',

@@ -10,6 +10,14 @@ export interface InventoryStockFilters {
   sortOrder?: 'asc' | 'desc';
   trackingType?: 'QUANTITY' | 'SERIALIZED';
   lowStock?: boolean | string;
+  minStockValue?: number;
+  maxStockValue?: number;
+  inStock?: number;
+}
+
+export interface InventoryStockValueRangeFilter {
+  minStockValue?: number;
+  maxStockValue?: number;
 }
 
 export interface ListInventoryUnitsExtraOptions {
@@ -41,6 +49,8 @@ export interface InventoryAdjustmentsFilters {
   search?: string;
   productId?: string;
   type?: InventoryMovementTypeFilter;
+  quantityChange?: number;
+  reason?: string;
   scope?: InventoryLedgerScope;
   from?: string;
   to?: string;

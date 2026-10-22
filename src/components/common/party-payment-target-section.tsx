@@ -73,9 +73,9 @@ export function PartyPaymentTargetSection({
           {unpaidBills.length === 0 ? (
             <p className='px-1 py-2 text-xs text-muted-foreground'>{labels.noUnpaidBills}</p>
           ) : (
-            unpaidBills.map((bill) => (
+            unpaidBills.map((bill, index) => (
               <button
-                key={bill.id}
+                key={`${bill.id}-${index}`}
                 type='button'
                 onClick={() => onSelectBill(bill.id)}
                 className={`flex w-full flex-col gap-0.5 rounded-md border px-2.5 py-2 text-start text-xs transition-colors ${

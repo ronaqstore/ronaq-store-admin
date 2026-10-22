@@ -34,12 +34,13 @@ export function DataTableToolbar<TData>({
     const rank = (variant: string | undefined) => {
       if (variant === 'text') return 0;
       if (variant === 'date' || variant === 'dateRange') return 1;
+      if (variant === 'number') return 3;
       return 2;
     };
     return [...filterable].sort(
       (a, b) => rank(a.columnDef.meta?.variant) - rank(b.columnDef.meta?.variant)
     );
-  }, [table]);
+  }, [table]); 
 
   const textColumn = columns.find((column) => column.columnDef.meta?.variant === 'text');
   const phoneMode = mode === 'list' || mode === 'cards';

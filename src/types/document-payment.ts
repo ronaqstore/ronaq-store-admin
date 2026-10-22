@@ -26,7 +26,13 @@ export interface HasDocumentPayments {
   isOpeningStock?: boolean;
 }
 
-export interface DocumentMoneyColumnOptions {
+export interface DocumentMoneyRangeFilterOptions {
+  enableRangeFilter?: boolean;
+  range?: [number, number];
+  unit?: string;
+}
+
+export interface DocumentMoneyColumnOptions extends DocumentMoneyRangeFilterOptions {
   totalPriority?: DocumentColumnPriority;
   paidPriority?: DocumentColumnPriority;
   outstandingPriority?: DocumentColumnPriority;
