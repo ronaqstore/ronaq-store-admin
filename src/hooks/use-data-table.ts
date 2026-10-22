@@ -150,7 +150,8 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
           !!column.meta?.options ||
           !!column.meta?.asyncOptions ||
           variant === 'date' ||
-          variant === 'dateRange';
+          variant === 'dateRange' ||
+          variant === 'range';
 
         if (usesArray) {
           acc[column.id ?? ''] = parseAsArrayOf(parseAsString, ARRAY_SEPARATOR).withOptions(
@@ -182,8 +183,16 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
       const variant = column?.meta?.variant;
       const isFaceted = !!(column?.meta?.options || column?.meta?.asyncOptions);
       const isDate = variant === 'date' || variant === 'dateRange';
+      const isRange = variant === 'range';
 
-      if (isFaceted || isDate) {
+      if (isRange) {
+        const parts = (Array.isArray(value) ? value : String(value).split(ARRAY_SEPARATOR)).map(
+          Number
+        );
+        if (parts.length >= 2 && parts.every(Number.isFinite)) {
+          filters.push({ id: key, value: [parts[0], parts[1]] });
+        }
+      } else if (isFaceted || isDate) {
         const processedValue = Array.isArray(value)
           ? value
           : typeof value === 'string' && /[^a-zA-Z0-9]/.test(value)

@@ -547,6 +547,7 @@
       "stock": "Stock",
       "published": "Published",
       "unpublished": "Unpublished",
+      "publishStatus": "Publish",
       "name": "Name",
       "selectCategory": "Category",
       "selectBrand": "Brand",

@@ -23,8 +23,6 @@ import { AlertModal } from '@/components/modal/alert-modal';
 import { useRouter } from '@/i18n/navigation';
 import { productsQueryOptions, productsQueryKeys } from '../api/queries';
 import { deactivateProduct, reactivateProduct } from '../api/service';
-import { listCategories } from '@/features/categories/api/service';
-import { listBrands } from '@/features/brands/api/service';
 import type { ProductDTO } from '@/lib/api/types';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { formatEmpty } from '@/lib/format-empty';
@@ -37,59 +35,15 @@ import {
 import { getActiveStatusQuickFilters } from '@/components/common/party-table-helpers';
 import type { ProductsTableProps } from '@/types/products';
 import type { EntityStatusConfirm } from '@/types/common';
-import type { AsyncFacetedFilterConfig } from '@/types/data-table';
 import { TruncateText } from '@/components/common/truncate-text';
 import { ProductCellAction, ProductImagesField } from './products-table-cells';
-
-const categoryAsyncFilter: AsyncFacetedFilterConfig = {
-  queryKey: ['categories', 'product-filter'],
-  searchPlaceholderKey: 'dukaan.product.searchCategories',
-  activeOnly: true,
-  fetchPage: async ({ page, pageSize, search }) => {
-    const res = await listCategories({
-      page,
-      pageSize,
-      search,
-      isActive: true,
-      sortBy: 'name',
-      sortOrder: 'asc'
-    });
-    return {
-      items: res.items,
-      total: res.total,
-      page: res.page,
-      pageSize: res.pageSize
-    };
-  }
-};
-
-const brandAsyncFilter: AsyncFacetedFilterConfig = {
-  queryKey: ['brands', 'product-filter'],
-  searchPlaceholderKey: 'dukaan.product.searchBrands',
-  activeOnly: true,
-  fetchPage: async ({ page, pageSize, search }) => {
-    const res = await listBrands({
-      page,
-      pageSize,
-      search,
-      isActive: true,
-      sortBy: 'name',
-      sortOrder: 'asc'
-    });
-    return {
-      items: res.items,
-      total: res.total,
-      page: res.page,
-      pageSize: res.pageSize
-    };
-  }
-};
-
-function firstFilterValue(value: unknown): string | undefined {
-  if (Array.isArray(value)) return typeof value[0] === 'string' ? value[0] : undefined;
-  if (typeof value === 'string' && value.trim()) return value.split(',')[0]?.trim() || undefined;
-  return undefined;
-}
+import {
+  SELLING_PRICE_RANGE_RUPEES,
+  brandAsyncFilter,
+  categoryAsyncFilter,
+  firstFilterValue,
+  parseRupeePriceRange
+} from './products-table-filters';
 
 function productCoverUrl(row: ProductDTO): string | null {
   return row.imageUrl || row.imageUrls?.[0] || null;
@@ -105,12 +59,18 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
   const { params, filters, sortBy, sortOrder } = useDukaanListParams(sortableColumnIds, 'name', [
     'categoryId',
     'brandId',
-    'isActive'
+    'isActive',
+    'isPublished',
+    'defaultSellingPrice'
   ]);
 
   const categoryId = firstFilterValue((filters as Record<string, unknown>).categoryId);
   const brandId = firstFilterValue((filters as Record<string, unknown>).brandId);
   const isActiveFilter = parseBooleanFacet((filters as Record<string, unknown>).isActive);
+  const isPublishedFilter = parseBooleanFacet((filters as Record<string, unknown>).isPublished);
+  const priceRange = parseRupeePriceRange(
+    (filters as Record<string, unknown>).defaultSellingPrice
+  );
 
   const { data, isFetching } = useQuery(
     productsQueryOptions({
@@ -120,6 +80,9 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       categoryId,
       brandId,
       isActive: isActiveFilter,
+      isPublished: isPublishedFilter,
+      minSellingPrice: priceRange.minSellingPrice,
+      maxSellingPrice: priceRange.maxSellingPrice,
       sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | 'defaultSellingPrice' | undefined,
       sortOrder
     })
@@ -246,7 +209,16 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={staticT('dukaan.product.sellingPrice')} />
         ),
-        meta: { label: 'dukaan.product.sellingPrice', type: 'money', priority: 2 },
+        meta: {
+          label: 'dukaan.product.sellingPrice',
+          type: 'money',
+          priority: 2,
+          variant: 'range',
+          range: SELLING_PRICE_RANGE_RUPEES,
+          unit: 'Rs',
+          icon: Icons.cash
+        },
+        enableColumnFilter: true,
         cell: ({ row }) => formatPkr(row.original.defaultSellingPrice)
       },
       {
@@ -264,10 +236,10 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
         accessorKey: 'isActive',
         size: 110,
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={staticT('table.col.status')} />
+          <DataTableColumnHeader column={column} title={staticT('dukaan.product.status')} />
         ),
         meta: {
-          label: 'table.col.status',
+          label: 'dukaan.product.status',
           type: 'boolean',
           priority: 2,
           variant: 'select',
@@ -290,6 +262,27 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
             </span>
           </div>
         )
+      },
+      {
+        id: 'isPublished',
+        accessorKey: 'isPublished',
+        size: 0,
+        enableHiding: true,
+        enableSorting: false,
+        header: () => null,
+        meta: {
+          label: 'dukaan.product.publishStatus',
+          type: 'boolean',
+          variant: 'select',
+          icon: Icons.share,
+          options: [
+            { label: staticT('dukaan.product.published'), value: 'true' },
+            { label: staticT('dukaan.product.unpublished'), value: 'false' }
+          ],
+          mobile: 'hidden'
+        },
+        enableColumnFilter: true,
+        cell: () => null
       },
       {
         id: 'actions',
@@ -388,7 +381,8 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
     shallow: true,
     debounceMs: 400,
     initialState: {
-      pagination: { pageIndex: 0, pageSize: DUKAAN_DEFAULT_PAGE_SIZE }
+      pagination: { pageIndex: 0, pageSize: DUKAAN_DEFAULT_PAGE_SIZE },
+      columnVisibility: { isPublished: false }
     }
   });
 

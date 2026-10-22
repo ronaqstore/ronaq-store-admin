@@ -98,6 +98,11 @@ export interface ProductsTableProps {
   toolbarAction?: ReactNode;
 }
 
+export interface ProductSellingPriceRangeFilter {
+  minSellingPrice?: number;
+  maxSellingPrice?: number;
+}
+
 export interface PtaOptionsArgs {
   apple?: boolean;
 }

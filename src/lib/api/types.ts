@@ -559,7 +559,10 @@ export interface ProductListFilters {
   brandId?: string;
   trackingType?: TrackingType | string;
   isActive?: 'true' | 'false' | boolean | string;
+  isPublished?: 'true' | 'false' | boolean | string;
   inStockOnly?: 'true' | 'false' | boolean | string;
+  minSellingPrice?: number;
+  maxSellingPrice?: number;
   sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'defaultSellingPrice';
   sortOrder?: 'asc' | 'desc';
 }

@@ -11,7 +11,10 @@ export async function GET(request: NextRequest) {
       'brandId',
       'trackingType',
       'isActive',
+      'isPublished',
       'inStockOnly',
+      'minSellingPrice',
+      'maxSellingPrice',
       'sortBy',
       'sortOrder'
     ]

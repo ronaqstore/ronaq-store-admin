@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import { DataTableAsyncFacetedFilter } from '@/components/ui/table/data-table-async-faceted-filter';
 import { DataTableFacetedFilter } from '@/components/ui/table/data-table-faceted-filter';
+import { DataTableSliderFilter } from '@/components/ui/table/data-table-slider-filter';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { translateMaybe } from '@/i18n/translate-maybe';
@@ -180,17 +181,27 @@ function FilterBlock<TData>({ column }: FilterBlockProps<TData>) {
   const meta = column.columnDef.meta;
   if (!meta?.variant) return null;
 
+  const translate = (key: string) => {
+    try {
+      return (t as (k: string) => string)(key);
+    } catch {
+      return key;
+    }
+  };
+  const label = meta.label ? translateMaybe(meta.label, t) : column.id;
+
+  if (meta.variant === 'range') {
+    return (
+      <div className='grid gap-2'>
+        <Label>{label}</Label>
+        <DataTableSliderFilter column={column} title={label} />
+      </div>
+    );
+  }
+
   if (meta.variant === 'select' || meta.variant === 'multiSelect') {
-    const translate = (key: string) => {
-      try {
-        return (t as (k: string) => string)(key);
-      } catch {
-        return key;
-      }
-    };
     const options =
       typeof meta.options === 'function' ? meta.options(translate) : (meta.options ?? []);
-    const label = meta.label ? translateMaybe(meta.label, t) : column.id;
     return (
       <div className='grid gap-2'>
         <Label>{label}</Label>
