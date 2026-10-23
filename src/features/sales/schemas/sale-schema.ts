@@ -9,8 +9,14 @@ export const createSaleFormSchema = (t: Translator) =>
   z
     .object({
       customer_id: z.string(),
-      discount: z.number().min(0, t('validation.valueNonNegative')),
-      paid_now: z.number().min(0, t('validation.valueNonNegative')),
+      discount: z.union([
+        z.number().min(0, t('validation.valueNonNegative')),
+        z.literal('')
+      ]),
+      paid_now: z.union([
+        z.number().min(0, t('validation.valueNonNegative')),
+        z.literal('')
+      ]),
       notes: z.string(),
       lines: z
         .array(
@@ -18,9 +24,14 @@ export const createSaleFormSchema = (t: Translator) =>
             .object({
               product_id: z.string().min(1, t('validation.productRequired')),
               quantity: z.number().int().positive(t('validation.quantityPositive')),
-              unit_price: z.number().min(0, t('validation.valueNonNegative')),
+              unit_price: z.union([
+                z.number().min(0, t('validation.valueNonNegative')),
+                z.literal('')
+              ]),
               inventory_unit_id: z.string().optional(),
-              tracking_type: z.enum(['QUANTITY', 'SERIALIZED']).optional()
+              tracking_type: z.enum(['QUANTITY', 'SERIALIZED']).optional(),
+              unit_condition: z.enum(['NEW', 'USED']).optional(),
+              warranty_days: z.string().optional()
             })
             .superRefine((line, ctx) => {
               if (line.tracking_type !== 'SERIALIZED') return;
@@ -38,6 +49,23 @@ export const createSaleFormSchema = (t: Translator) =>
                   code: 'custom',
                   path: ['inventory_unit_id'],
                   message: t('validation.inventoryUnitRequired')
+                });
+              }
+
+              const days = line.warranty_days?.trim();
+              if (line.unit_condition === 'USED') {
+                if (days !== '1' && days !== '2' && days !== '3') {
+                  ctx.addIssue({
+                    code: 'custom',
+                    path: ['warranty_days'],
+                    message: t('validation.warrantyDaysRequired')
+                  });
+                }
+              } else if (days) {
+                ctx.addIssue({
+                  code: 'custom',
+                  path: ['warranty_days'],
+                  message: t('validation.warrantyDaysNotAllowed')
                 });
               }
             })

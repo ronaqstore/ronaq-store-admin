@@ -3,7 +3,18 @@ import { proxyToBackend } from '@/lib/api/proxy';
 
 export async function GET(request: NextRequest) {
   return proxyToBackend(request, '/customers', {
-    allowedParams: ['page', 'pageSize', 'search', 'isActive', 'sortBy', 'sortOrder']
+    allowedParams: [
+      'page',
+      'pageSize',
+      'search',
+      'minOpeningBalance',
+      'maxOpeningBalance',
+      'minCurrentBalance',
+      'maxCurrentBalance',
+      'isActive',
+      'sortBy',
+      'sortOrder'
+    ]
   });
 }
 

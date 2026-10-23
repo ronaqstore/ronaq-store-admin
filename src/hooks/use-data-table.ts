@@ -145,7 +145,15 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
 
     return filterableColumns.reduce<Record<string, Parser<string> | Parser<string[]>>>(
       (acc, column) => {
-        if (column.meta?.options || column.meta?.asyncOptions) {
+        const variant = column.meta?.variant;
+        const usesArray =
+          !!column.meta?.options ||
+          !!column.meta?.asyncOptions ||
+          variant === 'date' ||
+          variant === 'dateRange' ||
+          variant === 'range';
+
+        if (usesArray) {
           acc[column.id ?? ''] = parseAsArrayOf(parseAsString, ARRAY_SEPARATOR).withOptions(
             queryStateOptions
           );
@@ -161,7 +169,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   const [filterValues, setFilterValues] = useQueryStates(filterParsers);
 
   const debouncedSetFilterValues = useDebouncedCallback((values: typeof filterValues) => {
-    void setPage(1);
+    if (page !== 1) void setPage(1);
     void setFilterValues(values);
   }, debounceMs);
 
@@ -169,21 +177,37 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     if (enableAdvancedFilter) return [];
 
     return Object.entries(filterValues).reduce<ColumnFiltersState>((filters, [key, value]) => {
-      if (value !== null) {
+      if (value === null) return filters;
+
+      const column = filterableColumns.find((col) => col.id === key);
+      const variant = column?.meta?.variant;
+      const isFaceted = !!(column?.meta?.options || column?.meta?.asyncOptions);
+      const isDate = variant === 'date' || variant === 'dateRange';
+      const isRange = variant === 'range';
+
+      if (isRange) {
+        const parts = (Array.isArray(value) ? value : String(value).split(ARRAY_SEPARATOR)).map(
+          Number
+        );
+        if (parts.length >= 2 && parts.every(Number.isFinite)) {
+          filters.push({ id: key, value: [parts[0], parts[1]] });
+        }
+      } else if (isFaceted || isDate) {
         const processedValue = Array.isArray(value)
           ? value
           : typeof value === 'string' && /[^a-zA-Z0-9]/.test(value)
             ? value.split(/[^a-zA-Z0-9]+/).filter(Boolean)
             : [value];
-
+        filters.push({ id: key, value: processedValue });
+      } else {
         filters.push({
           id: key,
-          value: processedValue
+          value: Array.isArray(value) ? value.join(' ') : value
         });
       }
       return filters;
     }, []);
-  }, [filterValues, enableAdvancedFilter]);
+  }, [filterValues, enableAdvancedFilter, filterableColumns]);
 
   const [columnFilters, setColumnFilters] =
     React.useState<ColumnFiltersState>(initialColumnFilters);
@@ -197,8 +221,16 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
 
         const filterUpdates = next.reduce<Record<string, string | string[] | null>>(
           (acc, filter) => {
-            if (filterableColumns.find((column) => column.id === filter.id)) {
-              acc[filter.id] = filter.value as string | string[];
+            if (!filterableColumns.find((column) => column.id === filter.id)) {
+              return acc;
+            }
+            const raw = filter.value;
+            if (Array.isArray(raw)) {
+              acc[filter.id] = raw.map(String);
+            } else if (raw == null || raw === '') {
+              acc[filter.id] = null;
+            } else {
+              acc[filter.id] = String(raw);
             }
             return acc;
           },

@@ -67,24 +67,24 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
             aria-expanded={open}
             disabled={disabled}
             className={cn(
-              'w-full justify-between font-normal h-10 text-sm bg-background text-foreground',
+              'h-10 w-full min-w-0 justify-between bg-background text-sm font-normal text-foreground',
               !currentItem && 'text-muted-foreground',
               className
             )}
           />
         }
       >
-        <span className='truncate text-start flex-1 text-sm font-normal text-foreground flex items-center gap-2'>
+        <span className='flex min-w-0 flex-1 items-center gap-2 truncate text-start text-sm font-normal text-foreground'>
           {renderTriggerLeading}
           {currentItem ? (
-            <span className='flex items-center gap-2 truncate'>
-              <span className='font-normal text-foreground truncate'>{currentItem.label}</span>
+            <span className='flex min-w-0 items-center gap-2 truncate' title={currentItem.label}>
+              <span className='truncate font-normal text-foreground'>{currentItem.label}</span>
               {currentItem.subLabel ? (
-                <span className='text-xs text-muted-foreground'>({currentItem.subLabel})</span>
+                <span className='shrink-0 text-xs text-muted-foreground'>({currentItem.subLabel})</span>
               ) : null}
             </span>
           ) : (
-            <span>{placeholder}</span>
+            <span className='truncate'>{placeholder}</span>
           )}
         </span>
 
@@ -113,11 +113,11 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
 
       <PopoverContent
         align='start'
-        className='z-50 w-[var(--radix-popover-trigger-width)] min-w-[320px] p-0 shadow-lg'
+        className='z-50 w-[var(--radix-popover-trigger-width)] min-w-0 max-w-[min(100vw-2rem,24rem)] p-0 shadow-lg sm:min-w-[320px]'
       >
         <div className='p-2 pb-1.5'>
           <div className='relative flex items-center overflow-hidden rounded-md border border-border bg-muted/40'>
-            <Icons.search className='pointer-events-none absolute start-2.5 size-4 text-muted-foreground' />
+            <Icons.search className='pointer-events-none absolute inset-s-2.5 size-4 text-muted-foreground' />
             <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
@@ -129,7 +129,7 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
               <button
                 type='button'
                 onClick={() => onSearchChange('')}
-                className='absolute end-2.5 text-muted-foreground hover:text-foreground'
+                className='absolute inset-e-2.5 text-muted-foreground hover:text-foreground'
               >
                 <Icons.close className='size-3.5' />
               </button>
@@ -145,26 +145,30 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
               {emptyText}
             </div>
           ) : (
-            items.map((item) => {
+            items.map((item, index) => {
               const isSelected = (currentItem?.id ?? value) === item.id;
               return (
                 <div
-                  key={item.id}
+                  key={`${item.id}-${index}`}
                   onClick={() => handleSelect(item)}
                   className={cn(
-                    'flex cursor-pointer items-center justify-between rounded-md px-2.5 py-2 text-sm transition-colors',
+                    'flex min-w-0 cursor-pointer items-center justify-between gap-2 overflow-hidden rounded-md px-2.5 py-2 text-sm transition-colors',
                     isSelected
                       ? 'bg-primary/10 font-semibold text-primary'
                       : 'hover:bg-muted text-foreground'
                   )}
                 >
-                  <div className='flex flex-col'>
-                    <span className='font-normal text-foreground'>{item.label}</span>
+                  <div className='min-w-0 flex-1 space-y-0.5'>
+                    <span className='block truncate font-normal text-foreground' title={item.label}>
+                      {item.label}
+                    </span>
                     {item.subLabel ? (
-                      <span className='text-xs text-muted-foreground'>{item.subLabel}</span>
+                      <span className='block truncate text-xs text-muted-foreground' title={item.subLabel}>
+                        {item.subLabel}
+                      </span>
                     ) : null}
                   </div>
-                  {isSelected && <Icons.check className='size-4 text-primary' />}
+                  {isSelected && <Icons.check className='size-4 shrink-0 text-primary' />}
                 </div>
               );
             })

@@ -18,19 +18,24 @@ export const createProductFormSchema = (t: Translator) =>
     description: z.string().optional().nullable(),
     imageUrl: z.string().optional().nullable(),
     defaultPurchasePrice: z.coerce
-      .number({ error: t('validation.purchasePriceRequired') })
-      .min(0, t('validation.valueNonNegative')),
+      .number()
+      .min(0, t('validation.valueNonNegative'))
+      .optional()
+      .nullable(),
     defaultSellingPrice: z.coerce
-      .number({ error: t('validation.sellingPriceRequired') })
-      .min(0, t('validation.valueNonNegative')),
+      .number()
+      .min(0, t('validation.valueNonNegative'))
+      .optional()
+      .nullable(),
     lowStockThreshold: z.coerce
       .number({ error: t('validation.lowStockThresholdRequired') })
       .min(0, t('validation.valueNonNegative')),
     isActive: z.boolean().optional(),
     isPublished: z.boolean().optional(),
     publicDescription: z.string().optional().nullable(),
-    contactForPrice: z.boolean().optional(),
-    ptaStatus: z.enum(['PTA_APPROVED', 'NON_PTA']).optional().nullable()
+    ptaStatus: z
+      .enum(['PTA_APPROVED', 'NON_PTA', 'JV', 'BYPASS', 'MDM_BYPASS'])
+      .optional()
+      .nullable(),
+    authenticity: z.enum(['ORIGINAL', 'COPY', '']).optional().nullable()
   });
-
-export type ProductFormValues = z.infer<ReturnType<typeof createProductFormSchema>>;

@@ -30,13 +30,31 @@ const PATH_TITLE_KEYS: Record<string, string> = {
   notifications: 'pages.notifications.title'
 };
 
+function isDynamicPathSegment(seg: string): boolean {
+  return (
+    /^\d+$/.test(seg) ||
+    seg === 'new' ||
+    seg === 'receipt' ||
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(seg) ||
+    /^[0-9a-f-]{20,}$/i.test(seg)
+  );
+}
+
 export function pageTitleKeyFromPath(pathname: string): string | null {
   const clean = delocalize(pathname);
   const parts = clean.split('/').filter(Boolean);
   if (parts[0] !== 'dashboard') return null;
+
+  if (parts[1] === 'customers' && parts.length >= 3 && isDynamicPathSegment(parts[2])) {
+    return 'pages.customerLedger.title';
+  }
+  if (parts[1] === 'suppliers' && parts.length >= 3 && isDynamicPathSegment(parts[2])) {
+    return 'pages.supplierLedger.title';
+  }
+
   for (let i = parts.length - 1; i >= 1; i--) {
     const seg = parts[i];
-    if (/^\d+$/.test(seg) || seg === 'new' || seg === 'receipt') continue;
+    if (isDynamicPathSegment(seg)) continue;
     if (seg in PATH_TITLE_KEYS) return PATH_TITLE_KEYS[seg];
   }
   return 'pages.dashboard.title';

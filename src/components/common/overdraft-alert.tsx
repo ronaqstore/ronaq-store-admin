@@ -2,6 +2,7 @@
 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import type { OverdraftAlertProps } from '@/types';
@@ -26,26 +27,17 @@ export function OverdraftAlert({
 
   if (variant === 'banner') {
     return (
-      <div
-        className={cn(
-          'rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs space-y-2 text-amber-900 dark:text-amber-200',
-          className
-        )}
-      >
-        <div className='flex items-start gap-2'>
-          <Icons.warning className='h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5' />
-          <div className='flex-1'>
-            {title && <p className='font-semibold'>{title}</p>}
-            {description && <p className='mt-0.5 text-muted-foreground'>{description}</p>}
-          </div>
-        </div>
-        {confirmLabel && (
-          <label className='flex cursor-pointer items-center gap-2 pt-1 font-medium'>
+      <Alert className={cn('text-xs', className)}>
+        <Icons.warning />
+        {title ? <AlertTitle>{title}</AlertTitle> : null}
+        {description ? <AlertDescription>{description}</AlertDescription> : null}
+        {confirmLabel ? (
+          <label className='col-start-2 mt-2 flex cursor-pointer items-center gap-2 font-medium text-foreground'>
             <Checkbox checked={checked} onCheckedChange={handleCheckboxChange} />
             <span>{confirmLabel}</span>
           </label>
-        )}
-      </div>
+        ) : null}
+      </Alert>
     );
   }
 
@@ -53,7 +45,7 @@ export function OverdraftAlert({
     <div
       onClick={handleToggle}
       className={cn(
-        'flex items-start gap-2.5 rounded-lg border border-destructive/40 bg-destructive/10 p-3 cursor-pointer select-none transition-colors hover:bg-destructive/15',
+        'flex cursor-pointer items-start gap-2.5 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-destructive select-none transition-colors hover:bg-destructive/15',
         className
       )}
     >
@@ -62,14 +54,14 @@ export function OverdraftAlert({
         checked={checked}
         onCheckedChange={handleCheckboxChange}
         onClick={(e) => e.stopPropagation()}
-        className='size-4.5 rounded border-2 border-destructive/70 bg-background shadow-xs mt-0.5 shrink-0 data-checked:bg-destructive data-checked:border-destructive data-checked:text-destructive-foreground'
+        className='mt-0.5 size-4.5 shrink-0 rounded border-2 border-destructive/70 bg-background shadow-xs data-checked:border-destructive data-checked:bg-destructive data-checked:text-destructive-foreground'
       />
       <Label
         htmlFor={id}
         onClick={(e) => e.stopPropagation()}
-        className='text-xs cursor-pointer leading-normal text-foreground font-normal'
+        className='cursor-pointer text-xs leading-normal font-normal text-foreground'
       >
-        {title && <span className='font-medium text-destructive block'>{title}</span>}
+        {title ? <span className='mb-0.5 block font-medium text-destructive'>{title}</span> : null}
         {description}
       </Label>
     </div>

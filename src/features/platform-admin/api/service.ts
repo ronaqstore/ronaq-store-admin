@@ -18,6 +18,10 @@ function shopsQuery(filters: PlatformShopFilters = {}): string {
     pageSize: filters.pageSize ?? filters.limit ?? 10,
     search: filters.search,
     accessStatus: filters.accessStatus,
+    subscriptionFrom: filters.subscriptionFrom,
+    subscriptionTo: filters.subscriptionTo,
+    createdFrom: filters.createdFrom,
+    createdTo: filters.createdTo,
     sortBy: filters.sortBy,
     sortOrder: filters.sortOrder
   } as Record<string, unknown>);

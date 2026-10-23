@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
 import { toast } from 'sonner';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import {
   ResponsiveDataTable,
   type DetailConfig,
@@ -20,15 +22,20 @@ import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { t as staticT } from '@/i18n/static-t';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
+import { TruncateText } from '@/components/common/truncate-text';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { formatIsoDate } from '@/lib/dates';
+import { formatPkMobileLocal } from '@/lib/auth/phone';
+import { parseFacetDateRange } from '@/lib/dukaan/money-range-filter';
 import type {
   PlatformShop,
   PlatformShopAccessStatus,
   ShopRowActionsProps
 } from '../api/types';
-import { platformKeys, platformShopsQueryOptions } from '../api/queries';
+import { platformShopsQueryOptions } from '../api/queries';
 import { updateShopSubscription } from '../api/service';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { PLATFORM_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import {
   PLATFORM_ACCESS_STATUS_LABEL_KEY,
   PLATFORM_ACCESS_STATUS_VALUES,
@@ -46,14 +53,15 @@ const columns: ColumnDef<PlatformShop>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title={staticT('table.shopName')} />
     ),
-    cell: ({ row }) => (
-      <div className='min-w-40'>
-        <p className='font-medium'>{row.original.name}</p>
-        <p className='text-muted-foreground text-xs'>
-          {row.original.address || row.original.storeSlug || '—'}
-        </p>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const subtitle = row.original.address || row.original.storeSlug || '—';
+      return (
+        <div className='min-w-0 space-y-0.5'>
+          <TruncateText className='font-medium'>{row.original.name}</TruncateText>
+          <TruncateText className='text-muted-foreground text-xs'>{subtitle}</TruncateText>
+        </div>
+      );
+    },
     meta: {
       label: 'table.shopName',
       placeholderKey: 'nav.searchShops',
@@ -75,7 +83,9 @@ const columns: ColumnDef<PlatformShop>[] = [
     cell: ({ row }) => (
       <div>
         <p className='font-medium'>{row.original.ownerName ?? '—'}</p>
-        <p className='text-muted-foreground text-xs'>{row.original.ownerPhone ?? '—'}</p>
+        <p className='text-muted-foreground text-xs'>
+          {row.original.ownerPhone ? formatPkMobileLocal(row.original.ownerPhone) : '—'}
+        </p>
       </div>
     ),
     meta: { label: 'table.ownerName', type: 'text', priority: 2 },
@@ -89,7 +99,7 @@ const columns: ColumnDef<PlatformShop>[] = [
     ),
     cell: ({ row }) => <ShopStatusBadge status={row.original.accessStatus} />,
     meta: {
-      label: 'platform.allStatuses',
+      label: 'table.col.status',
       variant: 'multiSelect',
       icon: Icons.building,
       options: platformAccessStatusOptions,
@@ -108,10 +118,12 @@ const columns: ColumnDef<PlatformShop>[] = [
     cell: ({ row }) => formatIsoDate(row.original.subscriptionEndsAt),
     meta: {
       label: 'platform.subscriptionEnds',
+      variant: 'dateRange',
       type: 'date',
       highlight: true,
       priority: 1
     },
+    enableColumnFilter: true,
     enableSorting: true
   },
   {
@@ -123,9 +135,11 @@ const columns: ColumnDef<PlatformShop>[] = [
     cell: ({ row }) => formatIsoDate(row.original.createdAt),
     meta: {
       label: 'platform.createdAt',
+      variant: 'dateRange',
       type: 'date',
       priority: 3
     },
+    enableColumnFilter: true,
     enableSorting: true
   },
   {
@@ -149,20 +163,20 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
 
   const suspend = useMutation({
     mutationFn: () => updateShopSubscription(shop.id, { isActive: false }),
-    onSuccess: async () => {
-      toast.success(t('platform.suspendSuccess', { name: shop.name }));
+    onSuccess: () => {
       setSuspendOpen(false);
-      await qc.invalidateQueries({ queryKey: platformKeys.all });
+      invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
+      toastSuccessAfterClose(t('platform.suspendSuccess', { name: shop.name }));
     },
     onError: (err: Error) => toast.error(err.message || t('platform.suspendFailed'))
   });
 
   const reactivate = useMutation({
     mutationFn: () => updateShopSubscription(shop.id, { isActive: true }),
-    onSuccess: async () => {
-      toast.success(t('platform.reactivateSuccess', { name: shop.name }));
+    onSuccess: () => {
       setReactivateOpen(false);
-      await qc.invalidateQueries({ queryKey: platformKeys.all });
+      invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
+      toastSuccessAfterClose(t('platform.reactivateSuccess', { name: shop.name }));
     },
     onError: (err: Error) => toast.error(err.message || t('platform.reactivateFailed'))
   });
@@ -224,7 +238,8 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
 const shopMobileItem: MobileItemConfig<PlatformShop> = {
   leading: 'avatar',
   title: (row) => row.name,
-  subtitle: (row) => `${row.ownerName ?? '—'} · ${row.ownerPhone ?? '—'}`,
+  subtitle: (row) =>
+    `${row.ownerName ?? '—'} · ${row.ownerPhone ? formatPkMobileLocal(row.ownerPhone) : '—'}`,
   badge: (row) => ({
     label: statusLabel(row.accessStatus),
     status: row.accessStatus
@@ -265,9 +280,9 @@ const shopDetail: DetailConfig<PlatformShop> = {
           value: row.ownerPhone ? (
             <a
               className='text-primary underline-offset-2 hover:underline'
-              href={`tel:${row.ownerPhone}`}
+              href={`tel:${formatPkMobileLocal(row.ownerPhone)}`}
             >
-              {row.ownerPhone}
+              {formatPkMobileLocal(row.ownerPhone)}
             </a>
           ) : (
             '—'
@@ -302,7 +317,23 @@ export function PlatformShopsTable() {
 
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     (typeof SORTABLE_COLUMN_IDS)[number]
-  >([...SORTABLE_COLUMN_IDS], 'name', ['accessStatus'], 'createdAt', 'desc');
+  >(
+    [...SORTABLE_COLUMN_IDS],
+    'name',
+    ['accessStatus', 'subscriptionEndsAt', 'createdAt'],
+    'createdAt',
+    'desc'
+  );
+
+  const [nameParam] = useQueryState('name', parseAsString);
+  const [searchParam] = useQueryState('search', parseAsString);
+  const [subscriptionEndsParam] = useQueryState(
+    'subscriptionEndsAt',
+    parseAsArrayOf(parseAsString, ',')
+  );
+  const [createdAtParam] = useQueryState('createdAt', parseAsArrayOf(parseAsString, ','));
+
+  const search = searchParam || nameParam || filters.search || undefined;
 
   const accessStatusRaw = (filters as Record<string, string | undefined>).accessStatus;
   const accessStatusFilter =
@@ -310,12 +341,23 @@ export function PlatformShopsTable() {
       ? accessStatusRaw
       : undefined;
 
+  const subscriptionRange = parseFacetDateRange(
+    (filters as Record<string, unknown>).subscriptionEndsAt ?? subscriptionEndsParam
+  );
+  const createdRange = parseFacetDateRange(
+    (filters as Record<string, unknown>).createdAt ?? createdAtParam
+  );
+
   const { data, isFetching } = useQuery(
     platformShopsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
-      search: filters.search,
+      search,
       accessStatus: accessStatusFilter,
+      subscriptionFrom: subscriptionRange.from,
+      subscriptionTo: subscriptionRange.to,
+      createdFrom: createdRange.from,
+      createdTo: createdRange.to,
       sortBy,
       sortOrder
     })

@@ -1,7 +1,8 @@
 import { mutationOptions } from '@tanstack/react-query';
 import { getQueryClient } from '@/lib/query-client';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { SALE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { CreateSaleInput } from '@/lib/api/types';
-import { saleKeys } from './queries';
 import { cancelSale, createReturn, createSale, previewReturn } from './service';
 
 import type {
@@ -13,14 +14,14 @@ import type {
 export const createSaleMutation = mutationOptions({
   mutationFn: (input: CreateSaleInput) => createSale(input),
   onSuccess: () => {
-    getQueryClient().invalidateQueries({ queryKey: saleKeys.all });
+    invalidateDomains({ queryClient: getQueryClient(), domains: SALE_SYNC_DOMAINS });
   }
 });
 
 export const cancelSaleMutation = mutationOptions({
   mutationFn: ({ id, input }: CancelSaleMutationVariables) => cancelSale(id, input),
   onSuccess: () => {
-    getQueryClient().invalidateQueries({ queryKey: saleKeys.all });
+    invalidateDomains({ queryClient: getQueryClient(), domains: SALE_SYNC_DOMAINS });
   }
 });
 
@@ -31,6 +32,6 @@ export const previewReturnMutation = mutationOptions({
 export const createReturnMutation = mutationOptions({
   mutationFn: ({ id, input }: CreateReturnMutationVariables) => createReturn(id, input),
   onSuccess: () => {
-    getQueryClient().invalidateQueries({ queryKey: saleKeys.all });
+    invalidateDomains({ queryClient: getQueryClient(), domains: SALE_SYNC_DOMAINS });
   }
 });

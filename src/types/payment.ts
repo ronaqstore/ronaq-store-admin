@@ -15,6 +15,13 @@ export type PaymentMethodOption =
   | 'CHEQUE'
   | 'OTHER';
 
+export type StoredPaymentMethod = 'CASH' | 'JAZZCASH' | 'EASYPAISA' | 'BANK';
+
+export interface PaymentMethodSelectOption {
+  value: StoredPaymentMethod;
+  label: string;
+}
+
 export interface PaymentRowActionsProps {
   payment: PaymentDTO;
   onCancel: (payment: PaymentDTO) => void;
@@ -55,10 +62,13 @@ export interface PaymentsListFilters {
   customerId?: string;
   saleId?: string;
   receiptGroupId?: string;
+  method?: 'CASH' | 'JAZZCASH' | 'EASYPAISA' | 'BANK';
+  minAmount?: number;
+  maxAmount?: number;
   status?: 'ACTIVE' | 'CANCELLED';
   from?: string;
   to?: string;
-  sortBy?: 'paymentDate' | 'amount' | 'createdAt' | 'updatedAt' | 'customerName' | 'method';
+  sortBy?: 'paymentDate' | 'amount' | 'customerName';
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -83,4 +93,49 @@ export interface PaymentCreateBody {
 export interface RecordPaymentFormErrors {
   customerId?: string;
   amount?: string;
+  saleId?: string;
+}
+
+export interface UnpaidSaleDTO {
+  id: string;
+  saleNo: string;
+  saleDate: string;
+  totalAmount: number;
+  paidAmount: number;
+  remaining: number;
+}
+
+export interface CustomerReceivableDTO {
+  customerId: string;
+  customerName: string;
+  openingBalance: number;
+  openingRemaining: number;
+  totalSales: number;
+  totalPaid: number;
+  receivable: number;
+  unpaidSales: UnpaidSaleDTO[];
+}
+
+export interface PaymentTargetLabels {
+  paymentTarget: string;
+  openingBalance: string;
+  specificBill: string;
+  billsCount: string;
+  noUnpaidBills: string;
+  saleNo: (saleNo: string) => string;
+  date: string;
+  total: string;
+  remaining: string;
+}
+
+export interface PaymentTargetSectionProps {
+  targetType: 'opening' | 'sale';
+  openingRemaining: number;
+  unpaidSales: UnpaidSaleDTO[];
+  selectedSaleId: string;
+  saleIdError?: string;
+  onTargetTypeChange: (val: string) => void;
+  onSelectSale: (saleId: string) => void;
+  onChooseSaleTarget: () => void;
+  labels: PaymentTargetLabels;
 }

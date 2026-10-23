@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { formatPkr, toPaisa, fromPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
 import type {
   SupplierDTO,
@@ -26,7 +27,7 @@ import type {
 } from '@/types/supplier-payment';
 import type { OverdraftPrompt } from '@/types';
 import { createSupplierPaymentMutation } from '../api/mutations';
-import { supplierPaymentKeys, supplierPayableQueryOptions } from '../api/queries';
+import { supplierPayableQueryOptions } from '../api/queries';
 import { SupplierSelectCombobox } from './supplier-select';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
@@ -35,6 +36,8 @@ import { SupplierPaymentTargetSection } from './supplier-payment-target-section'
 import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { cn } from '@/lib/utils';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { SUPPLIER_PAYMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 export function RecordSupplierPaymentDialog({
   open,
@@ -63,6 +66,8 @@ export function RecordSupplierPaymentDialog({
   const unpaidPurchases = payableData?.unpaidPurchases ?? [];
   const openingRemaining = payableData?.openingRemaining ?? 0;
   const totalPayable = payableData?.payable ?? 0;
+  const hasDebt = !!payableData && totalPayable > 0;
+  const noDebt = !!supplierId && !!payableData && !payableLoading && !hasDebt;
 
   const activePurchase: UnpaidPurchaseDTO | undefined = unpaidPurchases.find(
     (p) => p.id === selectedPurchaseId
@@ -72,6 +77,18 @@ export function RecordSupplierPaymentDialog({
     targetType === 'opening' ? openingRemaining : (activePurchase?.remaining ?? 0);
 
   const maxRemainingRupees = fromPaisa(maxRemainingPaisa);
+  const canSubmitPayment = hasDebt && maxRemainingPaisa > 0;
+
+  useEffect(() => {
+    if (!payableData || payableData.payable <= 0) return;
+    if (payableData.openingRemaining > 0) return;
+    const firstUnpaid = payableData.unpaidPurchases[0];
+    if (!firstUnpaid) return;
+    if (targetType === 'purchase' && selectedPurchaseId) return;
+
+    setTargetType('purchase');
+    setSelectedPurchaseId((current) => current || firstUnpaid.id);
+  }, [payableData, targetType, selectedPurchaseId]);
 
   const resetForm = () => {
     setSupplierId('');
@@ -98,17 +115,16 @@ export function RecordSupplierPaymentDialog({
         return;
       }
 
-      toast.success(
-        t('supplierPayments.recordSuccess', {
-          amount: amountStr,
-          supplier:
-            selectedSupplier?.name || payableData?.supplierName || t('supplierPayments.supplier')
-        })
-      );
-      void qc.invalidateQueries({ queryKey: supplierPaymentKeys.all });
+      const message = t('supplierPayments.recordSuccess', {
+        amount: amountStr,
+        supplier:
+          selectedSupplier?.name || payableData?.supplierName || t('supplierPayments.supplier')
+      });
       onOpenChange(false);
       resetForm();
+      invalidateDomains({ queryClient: qc, domains: SUPPLIER_PAYMENT_SYNC_DOMAINS });
       onSuccess?.();
+      toastSuccessAfterClose(message);
     },
     onError: (err: Error) => {
       toast.error(err.message || t('supplierPayments.recordFailed'));
@@ -139,11 +155,17 @@ export function RecordSupplierPaymentDialog({
       nextErrors.supplierId = t('supplierPayments.supplierRequired');
     }
 
+    if (!hasDebt || maxRemainingPaisa <= 0) {
+      nextErrors.amount = t('supplierPayments.noDebtToPay');
+      setErrors(nextErrors);
+      return;
+    }
+
     const num = parseFloat(amountStr);
     const paisaAmount = toPaisa(num);
     if (!num || num <= 0) {
       nextErrors.amount = t('common.invalidAmount');
-    } else if (maxRemainingPaisa > 0 && paisaAmount > maxRemainingPaisa) {
+    } else if (paisaAmount > maxRemainingPaisa) {
       nextErrors.amount = t('supplierPayments.amountExceedsDebt');
     }
 
@@ -265,7 +287,14 @@ export function RecordSupplierPaymentDialog({
             </div>
           )}
 
-          {supplierId && payableData && (
+          {noDebt ? (
+            <div className='rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-3.5 py-3 text-sm text-foreground'>
+              <p className='font-medium'>{t('supplierPayments.noDebtTitle')}</p>
+              <p className='mt-1 text-muted-foreground'>{t('supplierPayments.noDebtToPay')}</p>
+            </div>
+          ) : null}
+
+          {supplierId && payableData && hasDebt ? (
             <SupplierPaymentTargetSection
               targetType={targetType}
               openingRemaining={openingRemaining}
@@ -288,110 +317,124 @@ export function RecordSupplierPaymentDialog({
                 remaining: t('supplierPayments.remaining')
               }}
             />
-          )}
+          ) : null}
 
-          <div className='space-y-1.5'>
-            <div className='flex items-center justify-between'>
-              <Label
-                htmlFor='supplier-payment-amount'
-                className='text-sm font-normal text-foreground'
-              >
-                {t('supplierPayments.amountPkr')} <span className='text-destructive'>*</span>
-              </Label>
-              {maxRemainingRupees > 0 && (
-                <button
-                  type='button'
-                  onClick={handlePayFull}
-                  className='text-xs font-medium text-primary hover:underline'
+          {hasDebt ? (
+            <>
+              <div className='space-y-1.5'>
+                <div className='flex items-center justify-between'>
+                  <Label
+                    htmlFor='supplier-payment-amount'
+                    className='text-sm font-normal text-foreground'
+                  >
+                    {t('supplierPayments.amountPkr')} <span className='text-destructive'>*</span>
+                  </Label>
+                  {maxRemainingRupees > 0 && (
+                    <button
+                      type='button'
+                      onClick={handlePayFull}
+                      className='text-xs font-medium text-primary hover:underline'
+                    >
+                      {t('supplierPayments.payFull', { amount: formatPkr(maxRemainingPaisa) })}
+                    </button>
+                  )}
+                </div>
+                <div className='relative'>
+                  <span className='absolute inset-s-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>
+                    {t('common.currency')}
+                  </span>
+                  <Input
+                    id='supplier-payment-amount'
+                    type='number'
+                    min={1}
+                    max={INPUT_LIMITS.amountRupeesMax}
+                    step='any'
+                    placeholder={t('common.amountPlaceholder')}
+                    value={amountStr}
+                    onChange={handleAmountChange}
+                    onKeyDown={(e) => blockInvalidNumberKeys(e)}
+                    disabled={recordMutation.isPending || !canSubmitPayment}
+                    className={cn(
+                      'h-10 ps-9 text-sm font-normal text-foreground',
+                      errors.amount && 'border-destructive'
+                    )}
+                    aria-invalid={!!errors.amount}
+                    required
+                  />
+                </div>
+                <DialogFieldError id='supplier-payment-amount-error' message={errors.amount} />
+              </div>
+
+              <div className='space-y-1.5'>
+                <Label
+                  htmlFor='supplier-payment-date'
+                  className='text-sm font-normal text-foreground'
                 >
-                  {t('supplierPayments.payFull', { amount: formatPkr(maxRemainingPaisa) })}
-                </button>
+                  {t('supplierPayments.paymentDateLabel')}{' '}
+                  <span className='text-destructive'>*</span>
+                </Label>
+                <Input
+                  id='supplier-payment-date'
+                  type='date'
+                  value={paymentDate}
+                  onChange={(e) => setPaymentDate(e.target.value)}
+                  disabled={recordMutation.isPending}
+                  className='h-10 text-sm font-normal text-foreground cursor-pointer'
+                  required
+                />
+              </div>
+
+              <div className='space-y-1.5'>
+                <Label
+                  htmlFor='supplier-payment-notes'
+                  className='text-sm font-normal text-foreground'
+                >
+                  {t('supplierPayments.notes')}{' '}
+                  <span className='text-xs text-muted-foreground'>({t('common.optional')})</span>
+                </Label>
+                <Textarea
+                  id='supplier-payment-notes'
+                  rows={2}
+                  placeholder={t('supplierPayments.notesPlaceholder')}
+                  value={notes}
+                  onChange={handleNotesChange}
+                  maxLength={INPUT_LIMITS.notes}
+                  disabled={recordMutation.isPending}
+                  className='resize-none text-sm font-normal text-foreground'
+                />
+              </div>
+
+              {overdraftPrompt && (
+                <OverdraftAlert
+                  variant='banner'
+                  checked={confirmOverdraft}
+                  onCheckedChange={handleConfirmOverdraftChange}
+                  title={t('supplierPayments.shortfallWarningTitle')}
+                  description={
+                    overdraftPrompt.message ||
+                    t('supplierPayments.shortfallWarningDesc', {
+                      shortfall: formatPkr(overdraftPrompt.shortfall ?? 0)
+                    })
+                  }
+                  confirmLabel={t('supplierPayments.confirmOverdraft')}
+                />
               )}
-            </div>
-            <div className='relative'>
-              <span className='absolute start-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>
-                {t('common.currency')}
-              </span>
-              <Input
-                id='supplier-payment-amount'
-                type='number'
-                min={1}
-                max={INPUT_LIMITS.amountRupeesMax}
-                step='any'
-                placeholder='0.00'
-                value={amountStr}
-                onChange={handleAmountChange}
-                onKeyDown={(e) => blockInvalidNumberKeys(e)}
-                disabled={recordMutation.isPending}
-                className={cn(
-                  'h-10 ps-9 text-sm font-normal text-foreground',
-                  errors.amount && 'border-destructive'
-                )}
-                aria-invalid={!!errors.amount}
-                required
-              />
-            </div>
-            <DialogFieldError id='supplier-payment-amount-error' message={errors.amount} />
-          </div>
+              {errors.confirmOverdraft && <DialogFieldError message={errors.confirmOverdraft} />}
+            </>
+          ) : null}
 
-          <div className='space-y-1.5'>
-            <Label htmlFor='supplier-payment-date' className='text-sm font-normal text-foreground'>
-              {t('supplierPayments.paymentDateLabel')} <span className='text-destructive'>*</span>
-            </Label>
-            <Input
-              id='supplier-payment-date'
-              type='date'
-              value={paymentDate}
-              onChange={(e) => setPaymentDate(e.target.value)}
-              disabled={recordMutation.isPending}
-              className='h-10 text-sm font-normal text-foreground cursor-pointer'
-              required
-            />
-          </div>
-
-          <div className='space-y-1.5'>
-            <Label htmlFor='supplier-payment-notes' className='text-sm font-normal text-foreground'>
-              {t('supplierPayments.notes')}{' '}
-              <span className='text-xs text-muted-foreground'>({t('common.optional')})</span>
-            </Label>
-            <Textarea
-              id='supplier-payment-notes'
-              rows={2}
-              placeholder={t('supplierPayments.notesPlaceholder')}
-              value={notes}
-              onChange={handleNotesChange}
-              maxLength={INPUT_LIMITS.notes}
-              disabled={recordMutation.isPending}
-              className='resize-none text-sm font-normal text-foreground'
-            />
-          </div>
-
-          {overdraftPrompt && (
-            <OverdraftAlert
-              variant='banner'
-              checked={confirmOverdraft}
-              onCheckedChange={handleConfirmOverdraftChange}
-              title={t('supplierPayments.shortfallWarningTitle')}
-              description={
-                overdraftPrompt.message ||
-                t('supplierPayments.shortfallWarningDesc', {
-                  shortfall: formatPkr(overdraftPrompt.shortfall ?? 0)
-                })
-              }
-              confirmLabel={t('supplierPayments.confirmOverdraft')}
-            />
-          )}
-          {errors.confirmOverdraft && <DialogFieldError message={errors.confirmOverdraft} />}
           <DialogFooter className='gap-2 sm:gap-2.5 pt-2'>
             <DialogCancelButton
               onClick={() => onOpenChange(false)}
               disabled={recordMutation.isPending}
             />
-            <DialogPrimaryButton
-              mode='add'
-              loading={recordMutation.isPending}
-              disabled={recordMutation.isPending}
-            />
+            {hasDebt ? (
+              <DialogPrimaryButton
+                mode='add'
+                loading={recordMutation.isPending}
+                disabled={recordMutation.isPending || !canSubmitPayment}
+              />
+            ) : null}
           </DialogFooter>
         </form>
       </DialogContent>

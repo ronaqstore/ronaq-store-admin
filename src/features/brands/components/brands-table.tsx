@@ -2,7 +2,6 @@
 
 import type { ColumnDef } from '@tanstack/react-table';
 import { ResponsiveDataTable } from '@/components/data-table';
-import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
 import { useQuery } from '@tanstack/react-query';
 import { Icons } from '@/components/icons';
@@ -14,10 +13,13 @@ import { deactivateBrand, reactivateBrand } from '../api/service';
 import type { BrandDTO } from '@/lib/api/types';
 import type { BrandCellActionProps, BrandsTableProps } from '@/types';
 import {
-  createPartyIsActiveColumn,
+  createPartyNameColumn,
+  createPartyIsActiveColumn
+} from '@/components/common/party-table-helpers';
+import {
   buildSimpleEntityMobileItem,
   buildSimpleEntityDetail
-} from '@/components/common/party-table-helpers';
+} from '@/components/common/entity-builders';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
   parseBooleanFacet,
@@ -50,21 +52,7 @@ function BrandCellAction({ data }: BrandCellActionProps) {
 }
 
 const brandColumns: ColumnDef<BrandDTO>[] = [
-  {
-    id: 'name',
-    accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.name')} />,
-    meta: {
-      label: 'table.col.name',
-      placeholderKey: 'search.brands' as const,
-      variant: 'text',
-      icon: Icons.search,
-      type: 'text',
-      primary: true,
-      priority: 1
-    },
-    enableColumnFilter: true
-  },
+  createPartyNameColumn<BrandDTO>({ placeholderKey: 'search.brands' }),
   createPartyIsActiveColumn<BrandDTO>(),
   {
     id: 'actions',
@@ -84,8 +72,8 @@ const brandMobileItem = buildSimpleEntityMobileItem<BrandDTO>(Icons.tag);
 const brandDetail = buildSimpleEntityDetail<BrandDTO>(t('table.col.brand'));
 
 export function BrandsTable({ toolbarAction }: BrandsTableProps) {
-  const sortableColumnIds = ['name', 'createdAt', 'updatedAt'];
-  const { params, filters, sortBy, sortOrder } = useDukaanListParams(
+  const sortableColumnIds = ['name'];
+  const { params, filters, sortOrder } = useDukaanListParams(
     sortableColumnIds,
     'name',
     ['isActive'],
@@ -102,7 +90,7 @@ export function BrandsTable({ toolbarAction }: BrandsTableProps) {
       pageSize: params.perPage,
       search: filters.search,
       isActive: isActiveFilter,
-      sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | undefined,
+      sortBy: 'name',
       sortOrder
     })
   );

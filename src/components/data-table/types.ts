@@ -65,6 +65,7 @@ export interface MobileBadge {
 export interface MobileItemConfig<TData> {
   leading?: 'avatar' | 'icon' | 'thumbnail';
   leadingIcon?: Icon;
+  imageUrl?: (row: TData) => string | null | undefined;
   title: (row: TData) => React.ReactNode;
   subtitle?: (row: TData) => React.ReactNode;
   badge?: (row: TData) => MobileBadge | null | undefined;
@@ -88,7 +89,7 @@ export interface DetailSection {
 export interface DetailAction {
   label: string;
   onClick: () => void;
-  variant?: 'default' | 'destructive' | 'outline';
+  variant?: 'default' | 'secondary' | 'destructive' | 'outline';
 }
 
 export interface DetailConfig<TData> {
@@ -122,6 +123,7 @@ export interface ResponsiveDataTableProps<TData> {
   className?: string;
   isLoading?: boolean;
   rowCount?: number;
+  onRowClick?: (row: Row<TData>) => boolean | void;
 }
 
 export interface CompactOrFullTableProps<TData> {
@@ -156,6 +158,10 @@ export interface DataTableToolbarProps<TData> extends React.ComponentProps<'div'
   children?: React.ReactNode;
 }
 
+export interface PrimaryTextColumn {
+  columnDef: { meta?: { variant?: string; primary?: boolean } };
+}
+
 export interface DataTableToolbarFilterProps<TData> {
   column: Column<TData, unknown>;
 }
@@ -178,16 +184,19 @@ export interface MobileListItemProps<TData> {
   config: MobileItemConfig<TData>;
   onOpen: () => void;
   actionsSlot?: React.ReactNode;
+  density?: 'list' | 'card';
 }
 
 export interface MobileListProps<TData> {
   table: Table<TData>;
   mobileItem: MobileItemConfig<TData>;
   detail: DetailConfig<TData>;
+  layout?: 'list' | 'cards';
   preferNavigate?: boolean;
   isLoading?: boolean;
   skeletonRowCount?: number;
   onNavigate?: (href: string) => void;
+  onRowClick?: (row: Row<TData>) => void;
 }
 
 export interface QuickFilterChipsProps<TData> {

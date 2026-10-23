@@ -84,8 +84,14 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
     const extras = (
       q ? extraItems.filter((item) => item.name.toLowerCase().includes(q)) : extraItems
     ) as T[];
-    const seen = new Set(extras.map((item) => item.id));
-    return [...extras, ...loaded.filter((item) => !seen.has(item.id))];
+    const seen = new Set<string>();
+    const unique: T[] = [];
+    for (const item of [...extras, ...loaded]) {
+      if (!item?.id || seen.has(item.id)) continue;
+      seen.add(item.id);
+      unique.push(item);
+    }
+    return unique;
   }, [query.data, extraItems, debouncedSearch]);
 
   const displayLabel = value
@@ -155,9 +161,9 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
               <>
                 <CommandEmpty>{effEmptyMessage}</CommandEmpty>
                 <CommandGroup className='[&_[cmdk-group-items]]:space-y-1.5'>
-                  {items.map((item) => (
+                  {items.map((item, index) => (
                     <CommandItem
-                      key={item.id}
+                      key={`${item.id}-${index}`}
                       value={item.id}
                       keywords={[item.name]}
                       data-checked={value === item.id || undefined}

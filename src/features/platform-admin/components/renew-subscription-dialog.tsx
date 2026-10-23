@@ -14,11 +14,13 @@ import {
 import { FieldGroup } from '@/components/ui/field';
 import { useAppForm } from '@/lib/form';
 import { useT } from '@/i18n/use-t';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
-import { platformKeys } from '../api/queries';
 import { updateShopSubscription } from '../api/service';
 import type { RenewSubscriptionDialogProps } from '@/types';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { PLATFORM_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 function parseEndsAt(iso: string): Date {
   const d = new Date(iso);
@@ -69,9 +71,9 @@ function RenewSubscriptionDialogBody({
     mutationFn: (subscriptionEndsAt: string) =>
       updateShopSubscription(shopId, { subscriptionEndsAt }),
     onSuccess: async (res) => {
-      toast.success(t('platform.renewSuccess', { name: res.shopName }));
-      await qc.invalidateQueries({ queryKey: platformKeys.all });
       onOpenChange(false);
+      invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
+      toastSuccessAfterClose(t('platform.renewSuccess', { name: res.shopName }));
     },
     onError: (err: Error) => {
       toast.error(err.message || t('platform.renewFailed'));

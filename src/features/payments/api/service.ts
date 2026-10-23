@@ -6,7 +6,11 @@ import type {
   CancelPaymentInput,
   CancelImpactDTO
 } from '@/lib/api/types';
-import type { PaymentsListFilters, CancelPaymentResult } from '@/types';
+import type {
+  PaymentsListFilters,
+  CancelPaymentResult,
+  CustomerReceivableDTO
+} from '@/types';
 import { appFetch } from '@/lib/api/app-fetch';
 
 import { buildQueryString } from '@/lib/api/query-params';
@@ -33,6 +37,20 @@ export async function createPayment(input: CreatePaymentInput): Promise<PaymentD
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input)
   });
+}
+
+export async function getCustomerReceivable(
+  customerId: string,
+  token?: string
+): Promise<CustomerReceivableDTO> {
+  if (token) {
+    return apiRequest<CustomerReceivableDTO>(
+      `/payments/receivable/${customerId}`,
+      undefined,
+      token
+    );
+  }
+  return appFetch<CustomerReceivableDTO>(`/api/payments/receivable/${customerId}`);
 }
 
 export async function getPaymentCancelImpact(id: string, token?: string): Promise<CancelImpactDTO> {

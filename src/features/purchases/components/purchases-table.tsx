@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { parseAsString, useQueryState } from 'nuqs';
 import { Badge } from '@/components/ui/badge';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
@@ -14,30 +14,53 @@ import {
   type QuickFilterChip
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
+import {
+  createDocumentOutstandingColumn,
+  createDocumentPaidColumn,
+  createDocumentPayStatusColumn,
+  createDocumentTotalColumn,
+  documentOutstandingMeta
+} from '@/components/common/document-payment-columns';
 import { useDataTable } from '@/hooks/use-data-table';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
+import { t as staticT } from '@/i18n';
+import { useRouter } from '@/i18n/navigation';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
   parseActiveCancelledStatus,
   useDukaanListParams
 } from '@/components/data-table/list-params';
 import { formatIsoDate } from '@/lib/dates';
-import { formatLabel, formatPkr } from '@/lib/dukaan/numbers';
+import { formatPkr } from '@/lib/dukaan/numbers';
+import { purchasePayBadge } from '@/lib/dukaan/document-payment-badges';
+import { outstandingAmount, sumActivePaid } from '@/lib/dukaan/document-payment-state';
 import type { PurchaseDTO } from '@/lib/api/types';
+import type { DocumentStatusFilterOption } from '@/types/document-payment';
 import type { PurchaseRowActionsProps, PurchasesTableProps } from '@/types/purchases';
 import { purchasesQueryOptions } from '../api/queries';
 import type { PurchasesListFilters } from '@/types';
 import { CancelPurchaseDialog } from './cancel-purchase-dialog';
+import {
+  PURCHASE_MONEY_RANGE_RUPEES,
+  firstPurchaseFilterValue,
+  parsePurchasePayStatus,
+  parseRupeeMoneyRange,
+  supplierAsyncFilter
+} from './purchases-table-filters';
+
+const STATUS_FILTER_OPTIONS: DocumentStatusFilterOption[] = [
+  { label: staticT('status.payable'), value: 'PAYABLE' },
+  { label: staticT('status.partial'), value: 'PARTIAL' },
+  { label: staticT('status.paid'), value: 'PAID' },
+  { label: staticT('status.cancelled'), value: 'CANCELLED' }
+];
 
 function PurchaseRowActions({ purchase }: PurchaseRowActionsProps) {
   const t = useT();
+  const router = useRouter();
   const [cancelOpen, setCancelOpen] = useState(false);
   const isCancelled = purchase.status === 'CANCELLED';
-
-  if (isCancelled) {
-    return null;
-  }
 
   return (
     <div
@@ -53,91 +76,89 @@ function PurchaseRowActions({ purchase }: PurchaseRowActionsProps) {
       <RowActionsMenu
         actions={[
           {
-            label: t('common.cancel'),
-            icon: Icons.close,
-            variant: 'destructive',
-            onClick: () => setCancelOpen(true)
-          }
+            label: t('common.view'),
+            icon: Icons.page,
+            onClick: () => router.push(`/dashboard/purchases/${purchase.id}`)
+          },
+          ...(!isCancelled
+            ? [
+                {
+                  label: t('common.cancel'),
+                  icon: Icons.close,
+                  variant: 'destructive' as const,
+                  onClick: () => setCancelOpen(true)
+                }
+              ]
+            : [])
         ]}
       />
     </div>
   );
 }
 
-const STATUS_OPTIONS = [
-  { label: 'Active', value: 'ACTIVE' },
-  { label: 'Cancelled', value: 'CANCELLED' }
-];
-
 const purchaseMobileItem: MobileItemConfig<PurchaseDTO> = {
   leading: 'icon',
   leadingIcon: Icons.receipt,
   title: (row) => row.purchaseNo,
   subtitle: (row) => row.supplierInvoiceRef || row.supplierName || '—',
-  badge: (row) => ({ label: formatLabel(row.status), status: row.status }),
+  badge: (row) => purchasePayBadge(row, staticT),
   value: (row) => formatPkr(row.totalAmount),
-  meta: [(row) => formatIsoDate(row.purchaseDate)],
+  meta: [
+    (row) => formatIsoDate(row.purchaseDate),
+    (row) => documentOutstandingMeta(row, staticT)
+  ],
   ariaLabel: (row) => `${row.purchaseNo}, ${row.supplierName ?? ''}, ${formatPkr(row.totalAmount)}`
-};
-
-const purchaseDetail: DetailConfig<PurchaseDTO> = {
-  mode: 'sheet',
-  title: (row) => row.purchaseNo,
-  badge: (row) => ({ label: formatLabel(row.status), status: row.status }),
-  value: (row) => formatPkr(row.totalAmount),
-  sections: (row) => [
-    {
-      title: 'Purchase Information',
-      fields: [
-        { label: 'Purchase #', value: row.purchaseNo },
-        { label: 'Date', value: formatIsoDate(row.purchaseDate) },
-        { label: 'Supplier', value: row.supplierName ?? '—' },
-        { label: 'Supplier Invoice', value: row.supplierInvoiceRef ?? '—' },
-        { label: 'Total Amount', value: formatPkr(row.totalAmount) },
-        { label: 'Status', value: <StatusBadge status={row.status} /> },
-        ...(row.isOpeningStock
-          ? [
-              {
-                label: 'Type',
-                value: 'Opening Stock'
-              }
-            ]
-          : [])
-      ]
-    }
-  ]
 };
 
 export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
   const t = useT();
+  const router = useRouter();
+  const [peekCancelPurchase, setPeekCancelPurchase] = useState<PurchaseDTO | null>(null);
   const sortableColumnIds = [
     'purchaseDate',
     'purchaseNo',
     'totalAmount',
-    'status',
-    'createdAt',
-    'updatedAt'
+    'paid',
+    'outstanding'
   ];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     PurchasesListFilters['sortBy']
-  >(sortableColumnIds, 'purchaseDate', ['status'], 'purchaseDate');
+  >(sortableColumnIds, 'purchaseDate', [
+    'status',
+    'supplierId',
+    'totalAmount',
+    'paid',
+    'outstanding'
+  ], 'purchaseDate');
 
   const [purchaseNoParam] = useQueryState('purchaseNo', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
 
   const search = searchParam || purchaseNoParam || undefined;
-  const statusFilter = parseActiveCancelledStatus(
+  const documentStatusFilter = parseActiveCancelledStatus(
     (filters as Record<string, unknown>).status ?? statusParam
+  );
+  const payStatusFilter = parsePurchasePayStatus(
+    (filters as Record<string, unknown>).status ?? statusParam
+  );
+  const supplierId = firstPurchaseFilterValue(
+    (filters as Record<string, unknown>).supplierId
+  );
+  const totalRange = parseRupeeMoneyRange(
+    (filters as Record<string, unknown>).totalAmount
+  );
+  const paidRange = parseRupeeMoneyRange((filters as Record<string, unknown>).paid);
+  const outstandingRange = parseRupeeMoneyRange(
+    (filters as Record<string, unknown>).outstanding
   );
 
   const backendSortBy =
     sortBy === 'purchaseDate' ||
     sortBy === 'purchaseNo' ||
     sortBy === 'totalAmount' ||
-    sortBy === 'createdAt' ||
-    sortBy === 'updatedAt' ||
-    sortBy === 'status'
+    sortBy === 'paid' ||
+    sortBy === 'outstanding'
       ? sortBy
       : 'purchaseDate';
 
@@ -146,7 +167,15 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
       page: params.page,
       pageSize: params.perPage,
       search: search || undefined,
-      status: statusFilter,
+      supplierId,
+      status: documentStatusFilter,
+      payStatus: payStatusFilter,
+      minTotalAmount: totalRange.minAmount,
+      maxTotalAmount: totalRange.maxAmount,
+      minPaidAmount: paidRange.minAmount,
+      maxPaidAmount: paidRange.maxAmount,
+      minOutstandingAmount: outstandingRange.minAmount,
+      maxOutstandingAmount: outstandingRange.maxAmount,
       sortBy: backendSortBy,
       sortOrder
     })
@@ -208,8 +237,8 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
       enableSorting: true
     },
     {
-      id: 'supplierName',
-      accessorKey: 'supplierName',
+      id: 'supplierId',
+      accessorKey: 'supplierId',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.supplier')} />
       ),
@@ -218,11 +247,13 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
       ),
       meta: {
         label: 'table.col.supplier',
-        variant: 'text',
+        variant: 'select',
+        icon: Icons.truck,
+        asyncOptions: supplierAsyncFilter,
         priority: 2,
         mobile: 'subtitle'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: false
     },
     {
@@ -245,42 +276,27 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
       enableColumnFilter: false,
       enableSorting: false
     },
-    {
-      id: 'totalAmount',
-      accessorKey: 'totalAmount',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('table.col.total')} />
-      ),
-      cell: ({ row }) => (
-        <span className='font-normal text-foreground'>{formatPkr(row.original.totalAmount)}</span>
-      ),
-      meta: {
-        label: 'table.col.total',
-        variant: 'number',
-        priority: 1,
-        mobile: 'value'
-      },
-      enableColumnFilter: false,
-      enableSorting: true
-    },
-    {
-      id: 'status',
-      accessorKey: 'status',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('table.col.status')} />
-      ),
-      cell: ({ row }) => <StatusBadge status={row.original.status} />,
-      meta: {
-        label: 'table.col.status',
-        variant: 'select',
-        icon: Icons.circle,
-        options: STATUS_OPTIONS,
-        priority: 1,
-        mobile: 'badge'
-      },
-      enableColumnFilter: true,
-      enableSorting: true
-    },
+    createDocumentTotalColumn<PurchaseDTO>({
+      totalPriority: 1,
+      enableRangeFilter: true,
+      range: PURCHASE_MONEY_RANGE_RUPEES,
+      unit: 'Rs'
+    }),
+    createDocumentPaidColumn<PurchaseDTO>({
+      paidPriority: 2,
+      hidePaidForOpeningStock: true,
+      enableRangeFilter: true,
+      range: PURCHASE_MONEY_RANGE_RUPEES,
+      unit: 'Rs'
+    }),
+    createDocumentOutstandingColumn<PurchaseDTO>({
+      outstandingPriority: 2,
+      hidePaidForOpeningStock: true,
+      enableRangeFilter: true,
+      range: PURCHASE_MONEY_RANGE_RUPEES,
+      unit: 'Rs'
+    }),
+    createDocumentPayStatusColumn<PurchaseDTO>(purchasePayBadge, STATUS_FILTER_OPTIONS, 1),
     {
       id: 'actions',
       size: 48,
@@ -306,10 +322,22 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
   const purchaseQuickFilters: QuickFilterChip[] = [
     { id: 'all', label: t('table.all') },
     {
-      id: 'active',
-      label: t('status.active'),
+      id: 'payable',
+      label: t('status.payable'),
       columnId: 'status',
-      value: ['ACTIVE']
+      value: ['PAYABLE']
+    },
+    {
+      id: 'partial',
+      label: t('status.partial'),
+      columnId: 'status',
+      value: ['PARTIAL']
+    },
+    {
+      id: 'paid',
+      label: t('status.paid'),
+      columnId: 'status',
+      value: ['PAID']
     },
     {
       id: 'cancelled',
@@ -319,14 +347,92 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
     }
   ];
 
+  const purchaseDetail: DetailConfig<PurchaseDTO> = useMemo(
+    () => ({
+      mode: 'sheet',
+      title: (row) => row.purchaseNo,
+      badge: (row) => purchasePayBadge(row, t),
+      value: (row) => formatPkr(row.totalAmount),
+      sections: (row) => {
+        const paid = sumActivePaid(row.payments);
+        const outstanding =
+          row.status === 'CANCELLED' || row.isOpeningStock
+            ? 0
+            : outstandingAmount(row.totalAmount, paid);
+        const badge = purchasePayBadge(row, t);
+        return [
+          {
+            title: t('pages.purchases.title'),
+            fields: [
+              { label: t('purchases.purchaseNoCol'), value: row.purchaseNo },
+              { label: t('table.col.date'), value: formatIsoDate(row.purchaseDate) },
+              { label: t('table.col.supplier'), value: row.supplierName ?? '—' },
+              { label: t('table.col.supplierInvoice'), value: row.supplierInvoiceRef ?? '—' },
+              { label: t('table.col.total'), value: formatPkr(row.totalAmount) },
+              ...(row.isOpeningStock
+                ? []
+                : [
+                    { label: t('table.col.paid'), value: formatPkr(paid) },
+                    {
+                      label: t('table.col.outstanding'),
+                      value:
+                        row.status === 'CANCELLED' ? '—' : formatPkr(outstanding)
+                    }
+                  ]),
+              {
+                label: t('table.col.status'),
+                value: <StatusBadge status={badge.status} label={badge.label} />
+              },
+              ...(row.isOpeningStock
+                ? [
+                    {
+                      label: t('purchases.openingBadge'),
+                      value: t('purchases.openingBadge')
+                    }
+                  ]
+                : [])
+            ]
+          }
+        ];
+      },
+      actions: (row) => [
+        {
+          label: t('common.view'),
+          onClick: () => router.push(`/dashboard/purchases/${row.id}`)
+        },
+        ...(row.status !== 'CANCELLED'
+          ? [
+              {
+                label: t('common.cancel'),
+                variant: 'destructive' as const,
+                onClick: () => setPeekCancelPurchase(row)
+              }
+            ]
+          : [])
+      ]
+    }),
+    [router, t]
+  );
+
   return (
-    <ResponsiveDataTable
-      table={table}
-      toolbarAction={toolbarAction}
-      mobileItem={purchaseMobileItem}
-      detail={purchaseDetail}
-      quickFilters={purchaseQuickFilters}
-      isLoading={isFetching}
-    />
+    <>
+      {peekCancelPurchase ? (
+        <CancelPurchaseDialog
+          purchase={peekCancelPurchase}
+          open
+          onOpenChange={(open) => {
+            if (!open) setPeekCancelPurchase(null);
+          }}
+        />
+      ) : null}
+      <ResponsiveDataTable
+        table={table}
+        toolbarAction={toolbarAction}
+        mobileItem={purchaseMobileItem}
+        detail={purchaseDetail}
+        quickFilters={purchaseQuickFilters}
+        isLoading={isFetching}
+      />
+    </>
   );
 }

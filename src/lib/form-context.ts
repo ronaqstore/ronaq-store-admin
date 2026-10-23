@@ -11,6 +11,14 @@ export function isFieldMetaInvalid(meta: FieldMetaInvalidInput): boolean {
   return meta.errors.length > 0 && (meta.isTouched || hasSubmitError);
 }
 
+export function joinFieldErrors(errors: unknown[]): string | undefined {
+  const message = errors
+    .map((err) => (typeof err === 'string' ? err : String(err)))
+    .filter(Boolean)
+    .join(' ');
+  return message || undefined;
+}
+
 export function useFieldInvalid() {
   const field = useFieldContext();
   return isFieldMetaInvalid(field.state.meta);

@@ -36,6 +36,10 @@ export interface PlatformShopFilters {
   limit?: number;
   search?: string;
   accessStatus?: PlatformShopAccessStatus | string;
+  subscriptionFrom?: string;
+  subscriptionTo?: string;
+  createdFrom?: string;
+  createdTo?: string;
   sortBy?: 'name' | 'createdAt' | 'subscriptionEndsAt';
   sortOrder?: 'asc' | 'desc';
 }

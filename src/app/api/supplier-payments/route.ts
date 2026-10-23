@@ -7,6 +7,8 @@ const SUPPLIER_PAYMENT_FILTER_PARAMS = [
   'search',
   'supplierId',
   'purchaseId',
+  'minAmount',
+  'maxAmount',
   'status',
   'from',
   'to',

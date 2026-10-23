@@ -3,13 +3,16 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { BaseCancelDialog } from '@/components/common/base-cancel-dialog';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { useT } from '@/i18n/use-t';
 import type { CancelImpactItem } from '@/types';
 import type { CancelSupplierPaymentDialogProps } from '@/types/supplier-payment';
-import { supplierPaymentCancelImpactQueryOptions, supplierPaymentKeys } from '../api/queries';
+import { supplierPaymentCancelImpactQueryOptions } from '../api/queries';
 import { cancelSupplierPaymentMutation } from '../api/mutations';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { SUPPLIER_PAYMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 const PRESET_REASONS = [
   'Duplicate payment entry',
@@ -37,9 +40,9 @@ export function CancelSupplierPaymentDialog({
   const cancel = useMutation({
     ...cancelSupplierPaymentMutation,
     onSuccess: () => {
-      toast.success(t('supplierPayments.cancelSuccess'));
-      void qc.invalidateQueries({ queryKey: supplierPaymentKeys.all });
       onOpenChange(false);
+      invalidateDomains({ queryClient: qc, domains: SUPPLIER_PAYMENT_SYNC_DOMAINS });
+      toastSuccessAfterClose(t('supplierPayments.cancelSuccess'));
       onSuccess?.();
     },
     onError: (err: Error) => {

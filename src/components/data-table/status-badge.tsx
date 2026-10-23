@@ -26,7 +26,18 @@ export function statusTone(status: string): StatusTone {
     return 'success';
   }
   if (
-    ['PENDING', 'PARTIAL', 'TRIAL', 'PROCESSING', 'DUE', 'LOW', 'LOW_STOCK', 'CREDIT'].includes(key)
+    [
+      'PENDING',
+      'PARTIAL',
+      'TRIAL',
+      'PROCESSING',
+      'DUE',
+      'LOW',
+      'LOW_STOCK',
+      'CREDIT',
+      'UDHAR',
+      'PAYABLE'
+    ].includes(key)
   ) {
     return 'warning';
   }

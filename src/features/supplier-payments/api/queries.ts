@@ -1,5 +1,6 @@
-import { queryOptions } from '@tanstack/react-query';
+import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import type { SupplierPaymentQueryFilter } from '@/types/supplier-payment';
+import { compactFilters } from '@/lib/api/compact-filters';
 import {
   getSupplierPayable,
   getSupplierPaymentCancelImpact,
@@ -20,11 +21,14 @@ export const supplierPaymentKeys = {
 export const supplierPaymentsQueryOptions = (
   filters: SupplierPaymentQueryFilter = {},
   token?: string
-) =>
-  queryOptions({
-    queryKey: supplierPaymentKeys.list(filters),
-    queryFn: () => listSupplierPayments(filters, token)
+) => {
+  const compact = compactFilters(filters as Record<string, unknown>) as SupplierPaymentQueryFilter;
+  return queryOptions({
+    queryKey: supplierPaymentKeys.list(compact),
+    queryFn: () => listSupplierPayments(compact, token),
+    placeholderData: keepPreviousData
   });
+};
 
 export const supplierPayableQueryOptions = (supplierId: string, token?: string) =>
   queryOptions({

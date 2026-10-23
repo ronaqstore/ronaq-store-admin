@@ -1,3 +1,9 @@
 export { ResponsiveDataTable } from './responsive-data-table';
 export { StatusBadge } from './status-badge';
-export type { DetailConfig, MobileItemConfig, QuickFilterChip } from './types';
+export type {
+  DetailAction,
+  DetailConfig,
+  MobileItemConfig,
+  QuickFilterChip,
+  StatusTone
+} from './types';

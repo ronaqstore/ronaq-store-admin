@@ -12,7 +12,13 @@ import { Button } from '@/components/ui/button';
 import { StatusBadge } from './status-badge';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-import type { RecordDetailProps } from './types';
+import type { DetailAction, RecordDetailProps } from './types';
+
+function actionSortWeight(variant: DetailAction['variant']): number {
+  if (variant === 'destructive') return 2;
+  if (variant === 'outline' || variant === 'secondary') return 1;
+  return 0;
+}
 
 export function RecordDetail<TData>({
   open,
@@ -34,22 +40,35 @@ export function RecordDetail<TData>({
   const badge = detail.badge?.(data);
   const value = detail.value?.(data);
   const sections = detail.sections(data);
-  const actions = detail.actions?.(data) ?? [];
+  const actions = [...(detail.actions?.(data) ?? [])].sort(
+    (a, b) => actionSortWeight(a.variant) - actionSortWeight(b.variant)
+  );
   const side = presentation === 'side' ? 'right' : 'bottom';
 
-  const handleActionClick = (action: (typeof actions)[number]) => {
+  const handleActionClick = (action: DetailAction) => {
     action.onClick();
     onOpenChange(false);
   };
 
+  const handleSheetOpenChange = (nextOpen: boolean) => {
+    if (
+      !nextOpen &&
+      typeof document !== 'undefined' &&
+      document.querySelector('[data-image-lightbox]')
+    ) {
+      return;
+    }
+    onOpenChange(nextOpen);
+  };
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleSheetOpenChange}>
       <SheetContent
         side={side}
         className={cn(
           'flex flex-col gap-0',
           presentation === 'sheet' &&
-            'max-h-[85dvh] rounded-t-[var(--radius)] pb-[max(1rem,env(safe-area-inset-bottom))]',
+            'max-h-[85dvh] rounded-t-[var(--radius)] pb-[max(0.5rem,env(safe-area-inset-bottom))]',
           presentation === 'side' && 'w-full sm:max-w-md'
         )}
       >
@@ -99,7 +118,12 @@ export function RecordDetail<TData>({
         </div>
 
         {actions.length > 0 ? (
-          <SheetFooter className='gap-2 border-t border-border px-4 py-3'>
+          <SheetFooter
+            className={cn(
+              'sticky bottom-0 z-10 gap-2 border-t border-border bg-background px-4 py-3',
+              'pb-[max(0.75rem,env(safe-area-inset-bottom))]'
+            )}
+          >
             {actions.map((action) => (
               <Button
                 key={action.label}

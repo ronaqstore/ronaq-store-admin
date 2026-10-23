@@ -55,14 +55,14 @@ export interface AccountMenuItemsProps {
   showShopSettings: boolean;
 }
 
-export interface ShellProps {
-  children: React.ReactNode;
-}
-
 export type AppearanceDensity = 'comfortable' | 'compact';
 export type AppearanceRadius = 'sharp' | 'medium' | 'round';
 export type AppearanceAccent = 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'teal';
 export type AppearanceDigits = 'western' | 'eastern';
+
+export interface LivePreviewProps {
+  mounted: boolean;
+}
 
 export interface AppearanceState {
   density: AppearanceDensity;

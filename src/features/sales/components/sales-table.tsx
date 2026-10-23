@@ -2,11 +2,10 @@
 
 import type { ColumnDef } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
-import { parseAsString, useQueryState } from 'nuqs';
+import { useMemo, useState } from 'react';
+import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
 import { Badge } from '@/components/ui/badge';
-import { RowActionsMenu } from '@/components/common/row-actions-menu';
-import type { RowAction } from '@/types/dukaan';
+import { TruncateText } from '@/components/common/truncate-text';
 import {
   ResponsiveDataTable,
   StatusBadge,
@@ -15,9 +14,18 @@ import {
   type QuickFilterChip
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
+import {
+  createDocumentOutstandingColumn,
+  createDocumentPaidColumn,
+  createDocumentPayStatusColumn,
+  createDocumentTotalColumn,
+  documentOutstandingMeta
+} from '@/components/common/document-payment-columns';
 import { useDataTable } from '@/hooks/use-data-table';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
+import { t as staticT } from '@/i18n';
+import { useRouter } from '@/i18n/navigation';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
   parseActiveCancelledStatus,
@@ -25,11 +33,30 @@ import {
 } from '@/components/data-table/list-params';
 import { formatIsoDate } from '@/lib/dates';
 import { formatPkr } from '@/lib/dukaan/numbers';
+import { salePayBadge } from '@/lib/dukaan/document-payment-badges';
+import { outstandingAmount, sumActivePaid } from '@/lib/dukaan/document-payment-state';
 import type { SaleDTO } from '@/lib/api/types';
-import type { SaleRowActionsProps, SalesTableProps } from '@/types/sales';
+import type { DocumentStatusFilterOption } from '@/types/document-payment';
+import type { SalesTableProps } from '@/types/sales';
 import { salesQueryOptions } from '../api/queries';
 import type { SalesListFilters } from '@/types';
 import dynamic from 'next/dynamic';
+import { SaleRowActions } from './sale-row-actions';
+import {
+  SALE_MONEY_RANGE_RUPEES,
+  customerAsyncFilter,
+  firstSaleFilterValue,
+  parseRupeeMoneyRange,
+  parseSalePayStatus,
+  timestampToYmd
+} from './sales-table-filters';
+
+const STATUS_FILTER_OPTIONS: DocumentStatusFilterOption[] = [
+  { label: staticT('status.paid'), value: 'PAID' },
+  { label: staticT('status.partial'), value: 'PARTIAL' },
+  { label: staticT('status.udhar'), value: 'UDHAR' },
+  { label: staticT('status.cancelled'), value: 'CANCELLED' }
+];
 
 const CancelSaleDialog = dynamic(
   () => import('./cancel-sale-dialog').then((mod) => mod.CancelSaleDialog),
@@ -40,153 +67,103 @@ const ReturnSaleDialog = dynamic(
   { ssr: false }
 );
 
-function SaleRowActions({ sale }: SaleRowActionsProps) {
-  const t = useT();
-  const [cancelOpen, setCancelOpen] = useState(false);
-  const [returnOpen, setReturnOpen] = useState(false);
-
-  const hasReturns = (sale.returns?.length ?? 0) > 0;
-  const isCancelled = sale.status === 'CANCELLED';
-
-  const actions: RowAction[] = [
-    {
-      label: t('common.view'),
-      icon: Icons.page,
-      href: `/dashboard/sales/${sale.id}`
-    },
-    ...(!isCancelled
-      ? [
-          {
-            label: t('sales.returnBadge'),
-            icon: Icons.history,
-            className: 'text-blue-500',
-            onClick: () => setReturnOpen(true)
-          }
-        ]
-      : []),
-    ...(!isCancelled && !hasReturns
-      ? [
-          {
-            label: t('common.cancel'),
-            icon: Icons.trash,
-            variant: 'destructive' as const,
-            onClick: () => setCancelOpen(true)
-          }
-        ]
-      : [])
-  ];
-
-  return (
-    <div onClick={(e) => e.stopPropagation()} data-slot='action-cell'>
-      {cancelOpen && (
-        <CancelSaleDialog sale={sale} open={cancelOpen} onOpenChange={setCancelOpen} />
-      )}
-      {returnOpen && (
-        <ReturnSaleDialog sale={sale} open={returnOpen} onOpenChange={setReturnOpen} />
-      )}
-
-      <RowActionsMenu actions={actions} />
-    </div>
-  );
-}
-
 const saleMobileItem: MobileItemConfig<SaleDTO> = {
   leading: 'icon',
   leadingIcon: Icons.receipt,
   title: (row) => row.saleNo,
   subtitle: (row) => row.customerName ?? 'Walk-in',
-  badge: (row) => ({
-    label: row.status === 'CANCELLED' ? 'Cancelled' : 'Active',
-    status: row.status
-  }),
+  badge: (row) => salePayBadge(row, staticT),
   value: (row) => formatPkr(row.totalAmount),
-  meta: [(row: SaleDTO) => formatIsoDate(row.saleDate)],
+  meta: [
+    (row: SaleDTO) => formatIsoDate(row.saleDate),
+    (row: SaleDTO) => documentOutstandingMeta(row, staticT)
+  ],
   ariaLabel: (row: SaleDTO) =>
     `${row.saleNo}, ${row.customerName ?? 'Walk-in'}, ${formatPkr(row.totalAmount)}`
 };
 
-const saleDetail: DetailConfig<SaleDTO> = {
-  mode: 'sheet',
-  title: (row) => row.saleNo,
-  badge: (row) => ({
-    label: row.status === 'CANCELLED' ? 'Cancelled' : 'Active',
-    status: row.status
-  }),
-  value: (row) => formatPkr(row.totalAmount),
-  sections: (row) => [
-    {
-      title: 'Sale Information',
-      fields: [
-        { label: 'Sale #', value: row.saleNo },
-        { label: 'Sale Date', value: formatIsoDate(row.saleDate) },
-        { label: 'Customer', value: row.customerName ?? 'Walk-in' },
-        { label: 'Total Amount', value: formatPkr(row.totalAmount) },
-        {
-          label: 'Paid',
-          value: formatPkr(
-            (row.payments ?? [])
-              .filter((p) => p.status === 'ACTIVE')
-              .reduce((acc, p) => acc + p.amount, 0)
-          )
-        },
-        {
-          label: 'Status',
-          value: (
-            <StatusBadge
-              status={row.status}
-              label={row.status === 'CANCELLED' ? 'Cancelled' : 'Active'}
-            />
-          )
-        }
-      ]
-    },
-    ...(row.status === 'CANCELLED' && row.cancelledAt
-      ? [
-          {
-            title: 'Cancellation Details',
-            fields: [
-              { label: 'Reason', value: row.cancelReason || '—' },
-              {
-                label: 'Cancelled At',
-                value: formatIsoDate(row.cancelledAt)
-              }
-            ]
-          }
-        ]
-      : [])
-  ]
-};
-
 export function SalesTable({ toolbarAction }: SalesTableProps) {
   const t = useT();
+  const router = useRouter();
+  const [peekCancelSale, setPeekCancelSale] = useState<SaleDTO | null>(null);
+  const [peekReturnSale, setPeekReturnSale] = useState<SaleDTO | null>(null);
 
   const sortableColumnIds = [
     'saleDate',
     'saleNo',
     'totalAmount',
     'paid',
-    'status',
-    'createdAt',
-    'updatedAt'
+    'outstanding'
   ];
-  const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<
+  const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     SalesListFilters['sortBy']
-  >(sortableColumnIds, 'saleDate', ['status'], 'createdAt');
+  >(sortableColumnIds, 'saleDate', [
+    'status',
+    'customerId',
+    'saleDate',
+    'totalAmount',
+    'paid',
+    'outstanding'
+  ], 'saleDate');
 
   const [saleNoParam] = useQueryState('saleNo', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
+  const [saleDateParam] = useQueryState('saleDate', parseAsArrayOf(parseAsString, ','));
 
   const search = searchParam || saleNoParam || undefined;
-  const statusFilter = parseActiveCancelledStatus(statusParam);
+  const documentStatusFilter = parseActiveCancelledStatus(
+    (filters as Record<string, unknown>).status ?? statusParam
+  );
+  const payStatusFilter = parseSalePayStatus(
+    (filters as Record<string, unknown>).status ?? statusParam
+  );
+  const customerId = firstSaleFilterValue(
+    (filters as Record<string, unknown>).customerId
+  );
+  const totalRange = parseRupeeMoneyRange(
+    (filters as Record<string, unknown>).totalAmount
+  );
+  const paidRange = parseRupeeMoneyRange((filters as Record<string, unknown>).paid);
+  const outstandingRange = parseRupeeMoneyRange(
+    (filters as Record<string, unknown>).outstanding
+  );
+  const dateRaw =
+    (filters as Record<string, unknown>).saleDate ?? saleDateParam;
+  const dateParts = Array.isArray(dateRaw)
+    ? (dateRaw as string[])
+    : typeof dateRaw === 'string'
+      ? dateRaw.split(',')
+      : [];
+  const from = timestampToYmd(dateParts[0]);
+  const to = timestampToYmd(dateParts[1]);
+
+  const backendSortBy =
+    sortBy === 'saleDate' ||
+    sortBy === 'saleNo' ||
+    sortBy === 'totalAmount' ||
+    sortBy === 'paid' ||
+    sortBy === 'outstanding'
+      ? sortBy
+      : 'saleDate';
 
   const { data, isFetching } = useQuery(
     salesQueryOptions({
       page: params.page,
       pageSize: params.perPage,
       search: search || undefined,
-      status: statusFilter,
-      sortBy,
+      customerId,
+      status: documentStatusFilter,
+      payStatus: payStatusFilter,
+      from,
+      to,
+      minTotalAmount: totalRange.minAmount,
+      maxTotalAmount: totalRange.maxAmount,
+      minPaidAmount: paidRange.minAmount,
+      maxPaidAmount: paidRange.maxAmount,
+      minOutstandingAmount: outstandingRange.minAmount,
+      maxOutstandingAmount: outstandingRange.maxAmount,
+      sortBy: backendSortBy,
       sortOrder
     })
   );
@@ -232,110 +209,67 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
       enableSorting: true
     },
     {
-      id: 'customerName',
-      accessorKey: 'customerName',
+      id: 'customerId',
+      accessorKey: 'customerId',
+      accessorFn: (row) => row.customerId ?? '',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.customer')} />
       ),
-      cell: ({ row }) => (
-        <span className='font-normal text-foreground'>
-          {row.original.customerName || (
-            <span className='text-muted-foreground italic'>{t('sales.walkInBadge')}</span>
-          )}
-        </span>
-      ),
+      cell: ({ row }) =>
+        row.original.customerName ? (
+          <TruncateText className='font-normal text-foreground'>
+            {row.original.customerName}
+          </TruncateText>
+        ) : (
+          <span className='text-muted-foreground italic'>{t('sales.walkInBadge')}</span>
+        ),
       meta: {
         label: 'table.col.customer',
-        variant: 'text',
+        variant: 'select',
+        icon: Icons.user,
+        asyncOptions: customerAsyncFilter,
         priority: 2,
         mobile: 'subtitle'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: false
     },
     {
       id: 'saleDate',
       accessorKey: 'saleDate',
+      accessorFn: (row) => row.saleDate,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.date')} />,
       cell: ({ row }) => (
         <span className='font-normal text-foreground'>{formatIsoDate(row.original.saleDate)}</span>
       ),
       meta: {
         label: 'table.col.date',
-        variant: 'date',
-        priority: 4,
+        variant: 'dateRange',
+        priority: 2,
         mobile: 'meta'
-      },
-      enableColumnFilter: false,
-      enableSorting: true
-    },
-    {
-      id: 'totalAmount',
-      accessorKey: 'totalAmount',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('table.col.total')} />
-      ),
-      cell: ({ row }) => (
-        <span className='font-normal text-foreground'>{formatPkr(row.original.totalAmount)}</span>
-      ),
-      meta: {
-        label: 'table.col.total',
-        variant: 'number',
-        priority: 3,
-        mobile: 'value'
-      },
-      enableColumnFilter: false,
-      enableSorting: true
-    },
-    {
-      id: 'paid',
-      accessorFn: (row) => {
-        const activePayments = (row.payments ?? []).filter((p) => p.status === 'ACTIVE');
-        return activePayments.reduce((acc, p) => acc + p.amount, 0);
-      },
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.paid')} />,
-      cell: ({ row }) => {
-        const activePayments = (row.original.payments ?? []).filter((p) => p.status === 'ACTIVE');
-        const paid = activePayments.reduce((acc, p) => acc + p.amount, 0);
-
-        return <span className='font-normal text-foreground'>{formatPkr(paid)}</span>;
-      },
-      meta: {
-        label: 'table.col.paid',
-        variant: 'number',
-        priority: 3
-      },
-      enableSorting: true
-    },
-    {
-      id: 'status',
-      accessorKey: 'status',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('table.col.status')} />
-      ),
-      cell: ({ row }) => {
-        const isCancelled = row.original.status === 'CANCELLED';
-        return (
-          <StatusBadge
-            status={row.original.status}
-            label={isCancelled ? t('status.cancelled') : t('status.active')}
-          />
-        );
-      },
-      meta: {
-        label: 'table.col.status',
-        variant: 'select',
-        icon: Icons.circle,
-        options: [
-          { label: 'Active', value: 'ACTIVE' },
-          { label: 'Cancelled', value: 'CANCELLED' }
-        ],
-        priority: 3,
-        mobile: 'badge'
       },
       enableColumnFilter: true,
       enableSorting: true
     },
+    createDocumentTotalColumn<SaleDTO>({
+      totalPriority: 1,
+      enableRangeFilter: true,
+      range: SALE_MONEY_RANGE_RUPEES,
+      unit: 'Rs'
+    }),
+    createDocumentPaidColumn<SaleDTO>({
+      paidPriority: 2,
+      enableRangeFilter: true,
+      range: SALE_MONEY_RANGE_RUPEES,
+      unit: 'Rs'
+    }),
+    createDocumentOutstandingColumn<SaleDTO>({
+      outstandingPriority: 2,
+      enableRangeFilter: true,
+      range: SALE_MONEY_RANGE_RUPEES,
+      unit: 'Rs'
+    }),
+    createDocumentPayStatusColumn<SaleDTO>(salePayBadge, STATUS_FILTER_OPTIONS, 1),
     {
       id: 'actions',
       size: 48,
@@ -361,10 +295,22 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
   const salesQuickFilters: QuickFilterChip[] = [
     { id: 'all', label: t('table.all') },
     {
-      id: 'active',
-      label: t('status.active'),
+      id: 'udhar',
+      label: t('status.udhar'),
       columnId: 'status',
-      value: ['ACTIVE']
+      value: ['UDHAR']
+    },
+    {
+      id: 'partial',
+      label: t('status.partial'),
+      columnId: 'status',
+      value: ['PARTIAL']
+    },
+    {
+      id: 'paid',
+      label: t('status.paid'),
+      columnId: 'status',
+      value: ['PAID']
     },
     {
       id: 'cancelled',
@@ -374,14 +320,119 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
     }
   ];
 
+  const saleDetail: DetailConfig<SaleDTO> = useMemo(
+    () => ({
+      mode: 'sheet',
+      title: (row) => row.saleNo,
+      badge: (row) => salePayBadge(row, t),
+      value: (row) => formatPkr(row.totalAmount),
+      sections: (row) => {
+        const paid = sumActivePaid(row.payments);
+        const outstanding =
+          row.status === 'CANCELLED' ? 0 : outstandingAmount(row.totalAmount, paid);
+        const badge = salePayBadge(row, t);
+        return [
+        {
+          title: t('pages.sales.title'),
+          fields: [
+            { label: t('sales.saleNoCol'), value: row.saleNo },
+            { label: t('table.col.date'), value: formatIsoDate(row.saleDate) },
+            {
+              label: t('table.col.customer'),
+              value: row.customerName ?? t('sales.walkInBadge')
+            },
+            { label: t('table.col.total'), value: formatPkr(row.totalAmount) },
+            {
+              label: t('table.col.paid'),
+              value: formatPkr(paid)
+            },
+            {
+              label: t('table.col.outstanding'),
+              value:
+                row.status === 'CANCELLED' ? '—' : formatPkr(outstanding)
+            },
+            {
+              label: t('table.col.status'),
+              value: <StatusBadge status={badge.status} label={badge.label} />
+            }
+          ]
+        },
+        ...(row.status === 'CANCELLED' && row.cancelledAt
+          ? [
+              {
+                title: t('status.cancelled'),
+                fields: [
+                  { label: t('table.col.note'), value: row.cancelReason || '—' },
+                  {
+                    label: t('table.col.date'),
+                    value: formatIsoDate(row.cancelledAt)
+                  }
+                ]
+              }
+            ]
+          : [])
+        ];
+      },
+      actions: (row) => {
+        const isCancelled = row.status === 'CANCELLED';
+        const hasReturns = (row.returns?.length ?? 0) > 0;
+        return [
+          {
+            label: t('common.view'),
+            onClick: () => router.push(`/dashboard/sales/${row.id}`)
+          },
+          ...(!isCancelled
+            ? [
+                {
+                  label: t('sales.returnBadge'),
+                  variant: 'secondary' as const,
+                  onClick: () => setPeekReturnSale(row)
+                }
+              ]
+            : []),
+          ...(!isCancelled && !hasReturns
+            ? [
+                {
+                  label: t('common.cancel'),
+                  variant: 'destructive' as const,
+                  onClick: () => setPeekCancelSale(row)
+                }
+              ]
+            : [])
+        ];
+      }
+    }),
+    [router, t]
+  );
+
   return (
-    <ResponsiveDataTable
-      table={table}
-      toolbarAction={toolbarAction}
-      mobileItem={saleMobileItem}
-      detail={saleDetail}
-      quickFilters={salesQuickFilters}
-      isLoading={isFetching}
-    />
+    <>
+      {peekCancelSale ? (
+        <CancelSaleDialog
+          sale={peekCancelSale}
+          open
+          onOpenChange={(open: boolean) => {
+            if (!open) setPeekCancelSale(null);
+          }}
+        />
+      ) : null}
+      {peekReturnSale ? (
+        <ReturnSaleDialog
+          sale={peekReturnSale}
+          open
+          onOpenChange={(open: boolean) => {
+            if (!open) setPeekReturnSale(null);
+          }}
+        />
+      ) : null}
+      <ResponsiveDataTable
+        table={table}
+        toolbarAction={toolbarAction}
+        mobileItem={saleMobileItem}
+        detail={saleDetail}
+        quickFilters={salesQuickFilters}
+        isLoading={isFetching}
+      />
+    </>
   );
 }

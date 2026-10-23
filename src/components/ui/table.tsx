@@ -16,7 +16,7 @@ function Table({ className, containerClassName, ...props }: TableProps) {
     >
       <table
         data-slot='table'
-        className={cn('w-full caption-bottom text-sm', className)}
+        className={cn('w-full caption-bottom text-sm table-fixed', className)}
         {...props}
       />
     </div>
@@ -77,7 +77,11 @@ function TableCell({ className, ...props }: React.ComponentProps<'td'>) {
   return (
     <td
       data-slot='table-cell'
-      className={cn('p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0', className)}
+      className={cn(
+        // max-w-0 + overflow lets TruncateText ellipsis work inside auto/fixed tables
+        'max-w-0 overflow-hidden p-2 align-middle [&:has([role=checkbox])]:pe-0',
+        className
+      )}
       {...props}
     />
   );

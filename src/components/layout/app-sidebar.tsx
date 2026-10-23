@@ -90,7 +90,7 @@ export default function AppSidebar({ role }: AppSidebarProps) {
     <Sidebar side={isRtl ? 'right' : 'left'} dir={isRtl ? 'rtl' : 'ltr'} collapsible='icon'>
       <SidebarHeader className='border-b border-sidebar-border group-data-[collapsible=icon]:hidden'>
         <div className='relative'>
-          <Icons.search className='text-muted-foreground pointer-events-none absolute top-1/2 start-2 size-4 -translate-y-1/2' />
+          <Icons.search className='text-muted-foreground pointer-events-none absolute top-1/2 inset-s-2 size-4 -translate-y-1/2' />
           <SidebarInput
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -102,7 +102,7 @@ export default function AppSidebar({ role }: AppSidebarProps) {
             <button
               type='button'
               aria-label={t('table.clear')}
-              className='text-muted-foreground hover:text-foreground absolute top-1/2 end-2 -translate-y-1/2 cursor-pointer'
+              className='text-muted-foreground hover:text-foreground absolute top-1/2 inset-e-2 -translate-y-1/2 cursor-pointer'
               onClick={() => setSearch('')}
             >
               <Icons.close className='size-4' />

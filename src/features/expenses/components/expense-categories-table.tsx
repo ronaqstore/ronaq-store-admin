@@ -22,6 +22,7 @@ import { useDataTable } from '@/hooks/use-data-table';
 import { parseBooleanFacet, useDukaanListParams } from '@/components/data-table/list-params';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { formatDate } from '@/lib/format';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import type {
   ExpenseCategoryDTO,
   ExpenseCategorySortField,
@@ -30,6 +31,7 @@ import type {
 } from '@/types/expense';
 import { expenseCategoriesQueryOptions, expenseKeys } from '../api/queries';
 import { deleteExpenseCategoryMutation, updateExpenseCategoryMutation } from '../api/mutations';
+import { TruncateText } from '@/components/common/truncate-text';
 import { ExpenseCategoryDialog } from './expense-category-dialog';
 
 function ExpenseCategoryCellAction({
@@ -115,7 +117,7 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
   const [deactivateTarget, setDeactivateTarget] = useState<ExpenseCategoryDTO | null>(null);
   const [activateTarget, setActivateTarget] = useState<ExpenseCategoryDTO | null>(null);
 
-  const sortableColumnIds = ['name', 'createdAt', 'updatedAt'];
+  const sortableColumnIds = ['name', 'createdAt'];
   const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<ExpenseCategorySortField>(
     sortableColumnIds,
     'name',
@@ -145,8 +147,8 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
   const activateMutation = useMutation({
     ...updateExpenseCategoryMutation,
     onSuccess: () => {
-      toast.success(t('expenses.categoryActivated'));
       void qc.invalidateQueries({ queryKey: expenseKeys.all });
+      toastSuccessAfterClose(t('expenses.categoryActivated'));
     },
     onError: (e: Error) => {
       toast.error(e.message || t('expenses.categoryActivateFailed'));
@@ -156,9 +158,9 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
   const deactivateMutation = useMutation({
     ...deleteExpenseCategoryMutation,
     onSuccess: () => {
-      toast.success(t('expenses.categoryDeactivated'));
       setDeactivateTarget(null);
       void qc.invalidateQueries({ queryKey: expenseKeys.all });
+      toastSuccessAfterClose(t('expenses.categoryDeactivated'));
     },
     onError: (e: Error) => {
       toast.error(e.message || t('expenses.categoryDeactivateFailed'));
@@ -176,7 +178,9 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('expenses.nameCol')} />
       ),
-      cell: ({ row }) => <span className='font-medium text-foreground'>{row.original.name}</span>,
+      cell: ({ row }) => (
+        <TruncateText className='font-medium text-foreground'>{row.original.name}</TruncateText>
+      ),
       meta: {
         label: 'table.col.name',
         placeholderKey: 'search.categories',
@@ -205,7 +209,7 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
       meta: {
         label: 'table.col.status',
         variant: 'select',
-        icon: Icons.circle,
+        icon: Icons.status,
         options: [
           { label: 'Active', value: 'true' },
           { label: 'Inactive', value: 'false' }

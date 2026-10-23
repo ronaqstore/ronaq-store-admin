@@ -1,38 +1,44 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
-import { parseAsString, useQueryState } from 'nuqs';
-import { useT } from '@/i18n/use-t';
-import { Icons } from '@/components/icons';
+import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
 import { Button } from '@/components/ui/button';
+import { Icons } from '@/components/icons';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
+import { createActiveCancelledStatusColumn } from '@/components/common/party-table-helpers';
 import {
   ResponsiveDataTable,
   type DetailConfig,
   type MobileItemConfig
 } from '@/components/data-table';
-
-import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
-import { useDataTable } from '@/hooks/use-data-table';
 import {
   parseActiveCancelledStatus,
   useDukaanListParams
 } from '@/components/data-table/list-params';
+import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
+import { useDataTable } from '@/hooks/use-data-table';
+import { useT } from '@/i18n/use-t';
 import { formatIsoDate } from '@/lib/dates';
 import { formatPkr } from '@/lib/dukaan/numbers';
-import { createActiveCancelledStatusColumn } from '@/components/common/party-table-helpers';
+import {
+  MONEY_RANGE_RUPEES,
+  firstFilterValue,
+  parseFacetDateRange,
+  parseRupeeMoneyRange
+} from '@/lib/dukaan/money-range-filter';
 import type {
   ExpenseDTO,
   ExpenseQueryFilter,
   ExpenseRowActionsProps,
   ExpensesTableProps
 } from '@/types/expense';
-import { useState } from 'react';
 import { expensesQueryOptions } from '../api/queries';
 import { CancelExpenseDialog } from './cancel-expense-dialog';
 import { RecordExpenseDialog } from './record-expense-dialog';
 import { ExpenseDetailSheet } from './expense-detail-sheet';
+import { expenseCategoryAsyncFilter } from './expenses-table-filters';
 
 function ExpenseRowActions({ expense, onCancel }: ExpenseRowActionsProps) {
   const t = useT();
@@ -96,31 +102,45 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
   const [cancelExpenseTarget, setCancelExpenseTarget] = useState<ExpenseDTO | null>(null);
   const [detailExpense, setDetailExpense] = useState<ExpenseDTO | null>(null);
 
-  const sortableColumnIds = [
-    'expenseDate',
-    'categoryName',
-    'amount',
-    'description',
-    'status',
-    'createdAt'
-  ];
-  const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<
+  const sortableColumnIds = ['expenseDate', 'categoryName', 'amount'];
+  const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     ExpenseQueryFilter['sortBy']
-  >(sortableColumnIds, 'expenseDate', ['status'], 'expenseDate');
+  >(sortableColumnIds, 'categoryName', [
+    'status',
+    'categoryId',
+    'expenseDate',
+    'amount'
+  ], 'expenseDate');
 
   const [searchParam] = useQueryState('search', parseAsString);
   const [categoryNameParam] = useQueryState('categoryName', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
+  const [expenseDateParam] = useQueryState(
+    'expenseDate',
+    parseAsArrayOf(parseAsString, ',')
+  );
 
-  const statusFilter = parseActiveCancelledStatus(statusParam);
   const search = searchParam || categoryNameParam || undefined;
+  const statusFilter = parseActiveCancelledStatus(
+    (filters as Record<string, unknown>).status ?? statusParam
+  );
+  const categoryId = firstFilterValue((filters as Record<string, unknown>).categoryId);
+  const amountRange = parseRupeeMoneyRange((filters as Record<string, unknown>).amount);
+  const { from, to } = parseFacetDateRange(
+    (filters as Record<string, unknown>).expenseDate ?? expenseDateParam
+  );
 
   const { data, isFetching } = useQuery(
     expensesQueryOptions({
       page: params.page,
       pageSize: params.perPage,
       search,
+      categoryId,
+      minAmount: amountRange.minAmount,
+      maxAmount: amountRange.maxAmount,
       status: statusFilter,
+      from,
+      to,
       sortBy,
       sortOrder
     })
@@ -134,6 +154,7 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
     {
       id: 'expenseDate',
       accessorKey: 'expenseDate',
+      accessorFn: (row) => row.expenseDate,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.date')} />,
       cell: ({ row }) => (
         <span className='font-normal text-foreground'>
@@ -142,11 +163,11 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
       ),
       meta: {
         label: 'table.col.date',
-        variant: 'date',
+        variant: 'dateRange',
         priority: 1,
         mobile: 'meta'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
     {
@@ -172,6 +193,24 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
       enableSorting: true
     },
     {
+      id: 'categoryId',
+      accessorKey: 'categoryId',
+      accessorFn: (row) => row.categoryId ?? '',
+      header: () => null,
+      cell: () => null,
+      meta: {
+        label: 'table.col.category',
+        variant: 'select',
+        icon: Icons.box,
+        asyncOptions: expenseCategoryAsyncFilter,
+        priority: 2,
+        mobile: 'hidden'
+      },
+      enableColumnFilter: true,
+      enableSorting: false,
+      enableHiding: true
+    },
+    {
       id: 'amount',
       accessorKey: 'amount',
       header: ({ column }) => (
@@ -182,16 +221,20 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
       ),
       meta: {
         label: 'table.col.amount',
-        variant: 'number',
+        variant: 'range',
+        range: MONEY_RANGE_RUPEES,
+        unit: 'Rs',
+        icon: Icons.cash,
         priority: 1,
         mobile: 'value'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
     {
       id: 'description',
       accessorKey: 'description',
+      accessorFn: (row) => row.description ?? '',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.description')} />
       ),
@@ -202,12 +245,11 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
       ),
       meta: {
         label: 'table.col.description',
-        variant: 'text',
         priority: 3,
         mobile: 'subtitle'
       },
       enableColumnFilter: false,
-      enableSorting: true
+      enableSorting: false
     },
     createActiveCancelledStatusColumn<ExpenseDTO>(t('table.col.status')),
     {

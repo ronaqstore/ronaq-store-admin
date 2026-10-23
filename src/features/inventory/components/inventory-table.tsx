@@ -1,9 +1,10 @@
 'use client';
 
-import type { ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef, Row } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { parseAsString, useQueryState } from 'nuqs';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
@@ -29,10 +30,31 @@ import { formatLabel, formatPkr } from '@/lib/dukaan/numbers';
 import type { InventoryItemDTO } from '@/lib/api/types';
 import type { InventoryRowActionsProps, InventoryTableProps } from '@/types/inventory';
 import { inventoryStockQueryOptions } from '../api/queries';
+import { TruncateText } from '@/components/common/truncate-text';
 import { StockAdjustDialog } from './stock-adjust-dialog';
+import {
+  INVENTORY_COST_RANGE_RUPEES,
+  firstInventoryFilterValue,
+  inventoryProductAsyncFilter,
+  parseExactQuantity,
+  parseInventoryCostRange
+} from './inventory-table-filters';
 
-function InventoryRowActions({ item, onAdjust }: InventoryRowActionsProps) {
+function InventoryRowActions({ item, onAdjust, onViewUnits }: InventoryRowActionsProps) {
   const t = useT();
+  const actions = [];
+  if (item.trackingType === 'SERIALIZED' && onViewUnits) {
+    actions.push({
+      label: t('inventory.viewSerializedUnits'),
+      icon: Icons.box,
+      onClick: () => onViewUnits(item)
+    });
+  }
+  actions.push({
+    label: t('common.adjustStock'),
+    icon: Icons.adjustments,
+    onClick: () => onAdjust(item)
+  });
   return (
     <div
       onClick={(e) => e.stopPropagation()}
@@ -40,15 +62,7 @@ function InventoryRowActions({ item, onAdjust }: InventoryRowActionsProps) {
       role='presentation'
       data-slot='action-cell'
     >
-      <RowActionsMenu
-        actions={[
-          {
-            label: t('common.adjustStock'),
-            icon: Icons.adjustments,
-            onClick: () => onAdjust(item)
-          }
-        ]}
-      />
+      <RowActionsMenu actions={actions} />
     </div>
   );
 }
@@ -65,20 +79,33 @@ const LOW_STOCK_OPTIONS = [
 
 export function InventoryTable({ toolbarAction }: InventoryTableProps) {
   const t = useT();
+  const router = useRouter();
   const [adjustOpen, setAdjustOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<InventoryItemDTO | null>(null);
 
-  const sortableColumnIds = ['name', 'trackingType', 'inStock', 'stockValue', 'lowStock'];
+  const sortableColumnIds = ['name', 'inStock', 'stockValue'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
-    'name' | 'inStock' | 'stockValue' | 'trackingType' | 'lowStock'
-  >(sortableColumnIds, 'name', ['trackingType', 'lowStock'], 'name', 'asc');
+    'name' | 'inStock' | 'stockValue'
+  >(
+    sortableColumnIds,
+    'name',
+    ['productId', 'trackingType', 'lowStock', 'stockValue'],
+    'name',
+    'asc'
+  );
 
   const [nameParam] = useQueryState('name', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
+  const [productIdParam] = useQueryState('productId', parseAsString);
   const [trackingTypeParam] = useQueryState('trackingType', parseAsString);
   const [lowStockParam] = useQueryState('lowStock', parseAsString);
+  const [inStockParam] = useQueryState('inStock', parseAsString);
 
   const search = searchParam || nameParam || undefined;
+
+  const productIdFilter =
+    firstInventoryFilterValue((filters as Record<string, unknown>).productId) ??
+    firstInventoryFilterValue(productIdParam);
 
   const rawTracking = (filters as Record<string, unknown>).trackingType ?? trackingTypeParam;
   const trackingFilter = parseBinaryFacet<'QUANTITY' | 'SERIALIZED'>(
@@ -89,16 +116,22 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
 
   const rawLowStock = (filters as Record<string, unknown>).lowStock ?? lowStockParam;
   const lowStockFilter = parseBooleanFacet(rawLowStock);
+  const costRange = parseInventoryCostRange((filters as Record<string, unknown>).stockValue);
+  const quantityFilter = parseExactQuantity(inStockParam);
 
   const { data, isFetching } = useQuery(
     inventoryStockQueryOptions({
       page: params.page,
       pageSize: params.perPage,
       search: search || undefined,
+      productId: productIdFilter,
       sortBy,
       sortOrder,
       trackingType: trackingFilter,
-      lowStock: lowStockFilter
+      lowStock: lowStockFilter,
+      minStockValue: costRange.minStockValue,
+      maxStockValue: costRange.maxStockValue,
+      inStock: quantityFilter
     })
   );
 
@@ -115,24 +148,37 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
     {
       id: 'name',
       accessorKey: 'name',
+      accessorFn: (row) => row.name,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.product')} />
       ),
-      cell: ({ row }) => (
-        <div className='flex flex-col gap-0.5'>
-          <span className='font-normal text-foreground'>{row.original.name}</span>
-          <div className='flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground'>
-            {row.original.brandName && <span>{row.original.brandName}</span>}
-            {row.original.brandName && row.original.categoryName && <span>·</span>}
-            {row.original.categoryName && <span>{row.original.categoryName}</span>}
-            {row.original.sku && (
-              <Badge variant='outline' className='text-[10px] px-1 py-0 h-4 font-mono'>
-                {row.original.sku}
-              </Badge>
+      cell: ({ row }) => {
+        const meta = [row.original.brandName, row.original.categoryName].filter(Boolean).join(' · ');
+        return (
+          <div className='min-w-0 space-y-0.5'>
+            {row.original.trackingType === 'SERIALIZED' ? (
+              <Link
+                href={`/dashboard/inventory/${row.original.id}`}
+                className='block min-w-0 truncate font-normal text-foreground hover:underline hover:text-primary transition-colors'
+                title={row.original.name}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {row.original.name}
+              </Link>
+            ) : (
+              <TruncateText className='font-normal text-foreground'>{row.original.name}</TruncateText>
             )}
+            <div className='flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground'>
+              {meta ? <TruncateText>{meta}</TruncateText> : null}
+              {row.original.sku && (
+                <Badge variant='outline' className='shrink-0 text-[10px] px-1 py-0 h-4 font-mono'>
+                  {row.original.sku}
+                </Badge>
+              )}
+            </div>
           </div>
-        </div>
-      ),
+        );
+      },
       meta: {
         label: 'table.col.product',
         placeholderKey: 'search.inventory',
@@ -145,6 +191,24 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       },
       enableColumnFilter: true,
       enableSorting: true
+    },
+    {
+      id: 'productId',
+      accessorKey: 'id',
+      accessorFn: (row) => row.id,
+      header: () => null,
+      cell: () => null,
+      meta: {
+        label: 'table.col.product',
+        variant: 'select',
+        icon: Icons.box,
+        asyncOptions: inventoryProductAsyncFilter,
+        priority: 2,
+        mobile: 'hidden'
+      },
+      enableColumnFilter: true,
+      enableSorting: false,
+      enableHiding: true
     },
     {
       id: 'trackingType',
@@ -173,7 +237,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
         mobile: 'subtitle'
       },
       enableColumnFilter: true,
-      enableSorting: true
+      enableSorting: false
     },
     {
       id: 'inStock',
@@ -185,10 +249,12 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       meta: {
         label: 'table.col.qty',
         variant: 'number',
+        placeholderKey: 'table.col.qty',
+        icon: Icons.box,
         priority: 1,
         mobile: 'value'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
     {
@@ -200,11 +266,14 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       ),
       meta: {
         label: 'table.col.cost',
-        variant: 'number',
+        variant: 'range',
+        range: INVENTORY_COST_RANGE_RUPEES,
+        unit: 'Rs',
+        icon: Icons.cash,
         priority: 2,
         mobile: 'meta'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
     {
@@ -228,7 +297,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
         mobile: 'badge'
       },
       enableColumnFilter: true,
-      enableSorting: true
+      enableSorting: false
     },
     {
       id: 'actions',
@@ -236,7 +305,13 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
       enableSorting: false,
       enableHiding: false,
       meta: { mobile: 'hidden' },
-      cell: ({ row }) => <InventoryRowActions item={row.original} onAdjust={handleAdjust} />
+      cell: ({ row }) => (
+        <InventoryRowActions
+          item={row.original}
+          onAdjust={handleAdjust}
+          onViewUnits={(item) => router.push(`/dashboard/inventory/${item.id}`)}
+        />
+      )
     }
   ];
 
@@ -303,6 +378,21 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
             }
           ]
         : [])
+    ],
+    actions: (row) => [
+      ...(row.trackingType === 'SERIALIZED'
+        ? [
+            {
+              label: t('inventory.viewSerializedUnits'),
+              onClick: () => router.push(`/dashboard/inventory/${row.id}`)
+            }
+          ]
+        : []),
+      {
+        label: t('common.adjustStock'),
+        variant: 'secondary' as const,
+        onClick: () => handleAdjust(row)
+      }
     ]
   };
 
@@ -336,7 +426,8 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
     shallow: true,
     debounceMs: 400,
     initialState: {
-      pagination: { pageIndex: 0, pageSize: DUKAAN_DEFAULT_PAGE_SIZE }
+      pagination: { pageIndex: 0, pageSize: DUKAAN_DEFAULT_PAGE_SIZE },
+      columnVisibility: { productId: false }
     }
   });
 
@@ -345,10 +436,19 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
     setAdjustOpen(true);
   };
 
+  const handleRowClick = (row: Row<InventoryItemDTO>) => {
+    if (row.original.trackingType === 'SERIALIZED') {
+      router.push(`/dashboard/inventory/${row.original.id}`);
+      return true;
+    }
+    return false;
+  };
+
   return (
     <>
       <ResponsiveDataTable
         table={table}
+        onRowClick={handleRowClick}
         toolbarAction={
           toolbarAction ?? (
             <Button type='button' size='sm' onClick={handleOpenAdjustStock}>

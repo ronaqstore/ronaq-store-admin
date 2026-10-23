@@ -1,5 +1,6 @@
-import { queryOptions } from '@tanstack/react-query';
+import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import type { SalesListFilters } from '@/types';
+import { compactFilters } from '@/lib/api/compact-filters';
 import { getCancelImpact, getSale, listSales } from './service';
 
 export const saleKeys = {
@@ -12,11 +13,14 @@ export const saleKeys = {
   cancelImpact: (id: string) => [...saleKeys.cancelImpacts(), id] as const
 };
 
-export const salesQueryOptions = (filters: SalesListFilters = {}, token?: string) =>
-  queryOptions({
-    queryKey: saleKeys.list(filters),
-    queryFn: () => listSales(filters, token)
+export const salesQueryOptions = (filters: SalesListFilters = {}, token?: string) => {
+  const compact = compactFilters(filters as Record<string, unknown>) as SalesListFilters;
+  return queryOptions({
+    queryKey: saleKeys.list(compact),
+    queryFn: () => listSales(compact, token),
+    placeholderData: keepPreviousData
   });
+};
 
 export const saleQueryOptions = (id: string, token?: string) =>
   queryOptions({

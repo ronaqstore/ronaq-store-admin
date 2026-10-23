@@ -2,9 +2,11 @@ import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { API_BASE_URL } from '@/constants/api';
 
+import { safeJoinMessages } from '@/lib/safe-string';
 import type {
   RouteIdContext,
   RouteSupplierIdContext,
+  RouteCustomerIdContext,
   RouteProductImageContext,
   UpstreamErrorBody,
   ProxyOptions
@@ -13,6 +15,7 @@ import type {
 export type {
   RouteIdContext,
   RouteSupplierIdContext,
+  RouteCustomerIdContext,
   RouteProductImageContext,
   ProxyOptions
 };
@@ -20,9 +23,10 @@ export type {
 export function isCancelledStatusError(errorBody: unknown, status: number): boolean {
   if (status !== 400) return false;
   const body = errorBody as UpstreamErrorBody | null;
-  const rawMsg = Array.isArray(body?.message)
-    ? body.message.join(' ')
-    : body?.message || body?.error || '';
+  const rawMsg =
+    safeJoinMessages(body?.message) ||
+    (typeof body?.error === 'string' ? body.error : '') ||
+    '';
   return rawMsg.includes('CANCELLED status') || rawMsg.includes('Cannot modify a cancelled');
 }
 

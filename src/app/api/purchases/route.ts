@@ -9,9 +9,16 @@ export async function GET(request: NextRequest) {
       'search',
       'supplierId',
       'status',
+      'payStatus',
       'isOpeningStock',
       'from',
       'to',
+      'minTotalAmount',
+      'maxTotalAmount',
+      'minPaidAmount',
+      'maxPaidAmount',
+      'minOutstandingAmount',
+      'maxOutstandingAmount',
       'sortBy',
       'sortOrder'
     ]

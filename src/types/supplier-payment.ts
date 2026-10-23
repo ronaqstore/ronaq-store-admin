@@ -92,10 +92,12 @@ export interface SupplierPaymentQueryFilter {
   search?: string;
   supplierId?: string;
   purchaseId?: string;
+  minAmount?: number;
+  maxAmount?: number;
   status?: 'ACTIVE' | 'CANCELLED';
   from?: string;
   to?: string;
-  sortBy?: 'paymentDate' | 'amount' | 'createdAt' | 'updatedAt' | 'supplierName' | 'purchaseNo';
+  sortBy?: 'paymentDate' | 'amount' | 'supplierName';
   sortOrder?: 'asc' | 'desc';
 }
 

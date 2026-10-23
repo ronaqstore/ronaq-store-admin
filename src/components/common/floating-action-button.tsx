@@ -14,9 +14,9 @@ export function FloatingActionButton({ label, onClick, className }: FloatingActi
       aria-label={label}
       onClick={onClick}
       className={cn(
-        'fixed end-4 z-30 size-14 rounded-full shadow-lg',
+        'fixed inset-e-4 z-30 size-14 rounded-full shadow-lg',
         'bottom-[calc(3.75rem+env(safe-area-inset-bottom))]',
-        'sm:hidden',
+        'lg:hidden',
         className
       )}
     >

@@ -4,26 +4,45 @@ import * as React from 'react';
 
 import type { ContainerMode, ContainerModeState } from './types';
 
-const LIST_MAX = 639;
-const COMPACT_MAX = 1023;
+export const LIST_MAX = 639;
+export const CARDS_MAX = 1023;
 const WIDE_COMPACT_MIN = 900;
+const SSR_VIEWPORT_FALLBACK = CARDS_MAX + 1;
 
 function modeFromWidth(width: number): ContainerMode {
   if (width <= LIST_MAX) return 'list';
-  if (width <= COMPACT_MAX) return 'compact';
+  if (width <= CARDS_MAX) return 'cards';
   return 'full';
+}
+
+function subscribeViewport(onChange: () => void) {
+  window.addEventListener('resize', onChange);
+  return () => window.removeEventListener('resize', onChange);
+}
+
+function getViewportWidth() {
+  return window.innerWidth;
+}
+
+function getServerViewportWidth() {
+  return SSR_VIEWPORT_FALLBACK;
 }
 
 export function useContainerMode(): ContainerModeState {
   const ref = React.useRef<HTMLDivElement | null>(null);
-  const [width, setWidth] = React.useState<number | null>(null);
+  const viewportWidth = React.useSyncExternalStore(
+    subscribeViewport,
+    getViewportWidth,
+    getServerViewportWidth
+  );
+  const [containerWidth, setContainerWidth] = React.useState<number | null>(null);
 
   React.useEffect(() => {
     const el = ref.current;
     if (!el) return;
 
     const update = (next: number) => {
-      setWidth((prev) => (prev === next ? prev : next));
+      setContainerWidth((prev) => (prev === next ? prev : next));
     };
 
     update(el.getBoundingClientRect().width);
@@ -37,14 +56,15 @@ export function useContainerMode(): ContainerModeState {
     return () => ro.disconnect();
   }, []);
 
-  const mode: ContainerMode = width == null ? 'full' : modeFromWidth(width);
-  const wideCompact = width != null && width >= WIDE_COMPACT_MIN && width <= COMPACT_MAX;
+  const width = containerWidth ?? viewportWidth;
+  const mode = modeFromWidth(width);
+  const wideCompact = width >= WIDE_COMPACT_MIN && width <= CARDS_MAX;
 
   return {
     width,
-    mode: width == null ? 'full' : mode,
+    mode,
     wideCompact,
-    measured: width != null,
+    measured: containerWidth != null,
     ref
   };
 }

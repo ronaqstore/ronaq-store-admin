@@ -15,11 +15,13 @@ import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
 import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
+import { sanitizePkMobileInput } from '@/lib/validation/pk';
 import { useT } from '@/i18n/use-t';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
-import { platformKeys } from '../api/queries';
 import { createPlatformShop } from '../api/service';
 import { createShopFormSchema } from '../schemas/create-shop-schema';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { PLATFORM_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { CreateShopDialogBodyProps, CreateShopDialogProps } from '@/types';
 
 function defaultSubscriptionEndsAt(): Date {
@@ -51,7 +53,7 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
     onSuccess: async (res) => {
       toast.success(t('platform.createShopSuccess', { name: res.shopName }));
       setSetupUrl(res.setupUrl);
-      await qc.invalidateQueries({ queryKey: platformKeys.all });
+      invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
     },
     onError: (err: Error) => {
       toast.error(err.message || t('platform.createShopFailed'));
@@ -134,7 +136,10 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
               {(field) => (
                 <field.TextField
                   label={t('platform.fields.shopPhone')}
-                  maxLength={INPUT_LIMITS.phone}
+                  type='tel'
+                  inputMode='numeric'
+                  maxLength={INPUT_LIMITS.phonePk}
+                  sanitize={sanitizePkMobileInput}
                   placeholder={t('platform.fields.phonePlaceholder')}
                 />
               )}
@@ -162,7 +167,10 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
               {(field) => (
                 <field.TextField
                   label={t('platform.fields.ownerPhone')}
-                  maxLength={INPUT_LIMITS.phone}
+                  type='tel'
+                  inputMode='numeric'
+                  maxLength={INPUT_LIMITS.phonePk}
+                  sanitize={sanitizePkMobileInput}
                   placeholder={t('platform.fields.phonePlaceholder')}
                   required
                 />

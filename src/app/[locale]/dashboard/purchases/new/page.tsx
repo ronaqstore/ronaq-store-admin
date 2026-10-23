@@ -1,4 +1,5 @@
-import { PurchasesListRoute } from '@/features/purchases';
+import PageContainer from '@/components/layout/page-container';
+import { PurchaseCreatePageClient } from '@/features/purchases/components/purchase-create-page';
 import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata() {
@@ -9,5 +10,11 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-  return <PurchasesListRoute defaultOpenAdd />;
+  return (
+    <PageContainer
+      pageTitle='dukaan.purchase.newTitle'
+    >
+      <PurchaseCreatePageClient />
+    </PageContainer>
+  );
 }

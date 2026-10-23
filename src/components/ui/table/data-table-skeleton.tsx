@@ -40,8 +40,9 @@ export function DataTableSkeleton({
     (_, index) => cellWidths[index % cellWidths.length] ?? 'auto'
   );
 
-  const showList = mode === 'list' || mode === 'cards' || mode === 'auto';
-  const showCompact = mode === 'compact' || mode === 'auto';
+  const showList = mode === 'list' || mode === 'auto';
+  const showCards = mode === 'cards' || mode === 'auto';
+  const showCompact = mode === 'compact';
   const showFull = mode === 'full' || mode === 'auto';
 
   return (
@@ -52,37 +53,25 @@ export function DataTableSkeleton({
       aria-label='Loading table data'
       {...props}
     >
-      {/* =========================================================================
-          1. MOBILE VIEW SKELETON (Phone screens < 640px)
-          Card list layout matching MobileListItem
-         ========================================================================= */}
       {showList ? (
         <div
-          data-slot='mobile-skeleton'
+          data-slot='list-skeleton'
           className={cn(
-            'flex min-h-0 flex-1 flex-col gap-3',
-            mode === 'auto' ? 'block sm:hidden' : 'block'
+            'min-h-0 flex-1 flex-col gap-3',
+            mode === 'auto' ? 'flex min-[640px]:hidden' : 'flex'
           )}
         >
-          {/* Mobile Toolbar */}
           <div className='flex items-center gap-2'>
             <Skeleton className='h-10 flex-1 rounded-md' />
             <Skeleton className='size-10 shrink-0 rounded-md' />
           </div>
-
-          {/* Mobile List Items */}
-          <div className='divide-border overflow-hidden rounded-lg border border-border bg-card divide-y'>
+          <div className='divide-border divide-y overflow-hidden rounded-lg border border-border bg-card'>
             {Array.from({ length: rowCount }).map((_, i) => (
-              <div key={i} className='flex min-h-16 items-center justify-between gap-3 px-3 py-3'>
-                <div className='flex min-w-0 flex-1 items-center gap-3'>
-                  <Skeleton className='size-10 shrink-0 rounded-md bg-muted/70' />
-                  <div className='flex min-w-0 flex-1 flex-col gap-2'>
-                    <Skeleton
-                      className='h-4 rounded bg-muted/80'
-                      style={{ width: `${Math.min(180, 100 + ((i * 17) % 80))}px` }}
-                    />
-                    <Skeleton className='h-3 w-16 rounded bg-muted/50' />
-                  </div>
+              <div key={i} className='flex min-h-16 items-center gap-3 px-3 py-2.5'>
+                <Skeleton className='size-10 shrink-0 rounded-lg bg-muted/70' />
+                <div className='flex min-w-0 flex-1 flex-col gap-2'>
+                  <Skeleton className={cn('h-4 rounded bg-muted/80', i % 2 === 0 ? 'w-40' : 'w-28')} />
+                  <Skeleton className='h-3 w-16 rounded bg-muted/50' />
                 </div>
                 <Skeleton className='h-5 w-14 shrink-0 rounded-full bg-muted/60' />
               </div>
@@ -91,19 +80,35 @@ export function DataTableSkeleton({
         </div>
       ) : null}
 
-      {/* =========================================================================
-          2. TABLET / IPAD VIEW SKELETON (Small iPad / Tablet 640px - 1023px)
-          Compact table layout with fewer columns and compact pagination
-         ========================================================================= */}
-      {showCompact ? (
+      {showCards ? (
         <div
-          data-slot='tablet-skeleton'
+          data-slot='cards-skeleton'
           className={cn(
             'min-h-0 flex-1 flex-col gap-3',
-            mode === 'auto' ? 'hidden sm:flex lg:hidden' : 'flex'
+            mode === 'auto' ? 'hidden min-[640px]:max-[1023px]:flex' : 'flex'
           )}
         >
-          {/* Tablet Toolbar */}
+          <div className='flex items-center gap-2'>
+            <Skeleton className='h-10 flex-1 rounded-md' />
+            <Skeleton className='h-10 w-24 shrink-0 rounded-md' />
+          </div>
+          <div className='grid grid-cols-2 gap-3'>
+            {Array.from({ length: Math.max(rowCount, 4) }).map((_, i) => (
+              <div
+                key={i}
+                className='overflow-hidden rounded-[var(--radius)] border border-border bg-card p-3'
+              >
+                <Skeleton className='mb-3 aspect-square w-full rounded-lg' />
+                <Skeleton className='h-4 w-3/4' />
+                <Skeleton className='mt-2 h-3 w-1/2' />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {showCompact ? (
+        <div data-slot='compact-skeleton' className='flex min-h-0 flex-1 flex-col gap-3'>
           <div className='flex items-center justify-between gap-2'>
             <Skeleton className='h-10 w-64 rounded-md' />
             <div className='flex items-center gap-2'>
@@ -111,11 +116,9 @@ export function DataTableSkeleton({
               <Skeleton className='h-9 w-28 rounded-md' />
             </div>
           </div>
-
-          {/* Compact Table */}
           <div className='relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card'>
             <Table containerClassName='min-h-0 flex-1 overflow-hidden'>
-              <TableHeader className='sticky top-0 z-10 bg-background shadow-[0_1px_0_0_var(--border)]'>
+              <TableHeader className='bg-background sticky top-0 z-10 shadow-[0_1px_0_0_var(--border)]'>
                 <TableRow className='hover:bg-transparent'>
                   <TableHead className='w-[45%]'>
                     <Skeleton className='h-4 w-24' />
@@ -132,10 +135,7 @@ export function DataTableSkeleton({
                 {Array.from({ length: rowCount }).map((_, i) => (
                   <TableRow key={i} className='hover:bg-transparent'>
                     <TableCell>
-                      <Skeleton
-                        className='h-4 rounded'
-                        style={{ width: `${Math.min(200, 120 + ((i * 23) % 80))}px` }}
-                      />
+                      <Skeleton className={cn('h-4 rounded', i % 2 === 0 ? 'w-44' : 'w-32')} />
                     </TableCell>
                     <TableCell>
                       <Skeleton className='h-5 w-16 rounded-full bg-muted/60' />
@@ -148,8 +148,6 @@ export function DataTableSkeleton({
               </TableBody>
             </Table>
           </div>
-
-          {/* Tablet Pagination */}
           {withPagination ? (
             <div className='flex items-center justify-between px-1 py-1'>
               <Skeleton className='h-4 w-28' />
@@ -162,19 +160,14 @@ export function DataTableSkeleton({
         </div>
       ) : null}
 
-      {/* =========================================================================
-          3. LARGE SCREEN / DESKTOP VIEW SKELETON (>= 1024px)
-          Full multi-column table with full toolbar and pagination controls
-         ========================================================================= */}
       {showFull ? (
         <div
           data-slot='desktop-skeleton'
           className={cn(
             'min-h-0 flex-1 flex-col gap-3',
-            mode === 'auto' ? 'hidden lg:flex' : 'flex'
+            mode === 'auto' ? 'hidden min-[1024px]:flex' : 'flex'
           )}
         >
-          {/* Desktop Toolbar */}
           <div className='flex items-center justify-between gap-4'>
             <div className='flex flex-1 items-center gap-2'>
               <Skeleton className='h-10 w-72 rounded-md' />
@@ -189,19 +182,19 @@ export function DataTableSkeleton({
               <Skeleton className='h-9 w-28 rounded-md' />
             </div>
           </div>
-
-          {/* Full Desktop Table */}
           <div className='relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card'>
             <Table containerClassName='min-h-0 flex-1 overflow-hidden'>
-              <TableHeader className='sticky top-0 z-10 bg-background shadow-[0_1px_0_0_var(--border)]'>
+              <TableHeader className='bg-background sticky top-0 z-10 shadow-[0_1px_0_0_var(--border)]'>
                 <TableRow className='hover:bg-transparent'>
                   {Array.from({ length: columnCount }).map((_, j) => (
                     <TableHead
                       key={j}
-                      style={{
-                        width: cozyCellWidths[j],
-                        minWidth: shrinkZero ? cozyCellWidths[j] : 'auto'
-                      }}
+                      className={shrinkZero ? 'shrink-0' : undefined}
+                      style={
+                        cozyCellWidths[j] !== 'auto'
+                          ? { width: cozyCellWidths[j], minWidth: cozyCellWidths[j] }
+                          : undefined
+                      }
                     >
                       <Skeleton className='h-4 w-24' />
                     </TableHead>
@@ -217,19 +210,18 @@ export function DataTableSkeleton({
                     {Array.from({ length: columnCount }).map((_, j) => (
                       <TableCell
                         key={j}
-                        style={{
-                          width: cozyCellWidths[j],
-                          minWidth: shrinkZero ? cozyCellWidths[j] : 'auto'
-                        }}
+                        className={shrinkZero ? 'shrink-0' : undefined}
+                        style={
+                          cozyCellWidths[j] !== 'auto'
+                            ? { width: cozyCellWidths[j], minWidth: cozyCellWidths[j] }
+                            : undefined
+                        }
                       >
                         {j === 1 ? (
                           <Skeleton className='h-5 w-16 rounded-full bg-muted/60' />
                         ) : (
                           <Skeleton
-                            className='h-4'
-                            style={{
-                              width: j === 0 ? `${Math.min(180, 110 + ((i * 19) % 70))}px` : '60%'
-                            }}
+                            className={cn('h-4', j === 0 ? (i % 2 === 0 ? 'w-40' : 'w-28') : 'w-3/5')}
                           />
                         )}
                       </TableCell>
@@ -242,8 +234,6 @@ export function DataTableSkeleton({
               </TableBody>
             </Table>
           </div>
-
-          {/* Full Desktop Pagination */}
           {withPagination ? (
             <div className='flex items-center justify-between px-1 py-1'>
               <Skeleton className='h-4 w-40' />

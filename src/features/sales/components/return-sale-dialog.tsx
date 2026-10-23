@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import {
   Dialog,
   DialogContent,
@@ -35,8 +36,9 @@ import type { ReturnPreviewDTO, ReturnItemInput } from '@/lib/api/types';
 import { todayIsoDate } from '@/lib/dates';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
 import type { ReturnSaleDialogProps, ItemReturnState } from '@/types/sales';
-import { saleKeys } from '../api/queries';
 import { createReturnMutation, previewReturnMutation } from '../api/mutations';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { SALE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: ReturnSaleDialogProps) {
   const qc = useQueryClient();
@@ -82,9 +84,9 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
         return;
       }
 
-      toast.success(t('sales.returnDialog.success'));
-      void qc.invalidateQueries({ queryKey: saleKeys.all });
       onOpenChange(false);
+      invalidateDomains({ queryClient: qc, domains: SALE_SYNC_DOMAINS });
+      toastSuccessAfterClose(t('sales.returnDialog.success'));
       onSuccess?.();
     },
     onError: (err: Error) => {
@@ -320,7 +322,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
                 value={refundPkr}
                 onChange={handleRefundChange}
                 onKeyDown={(e) => blockInvalidNumberKeys(e)}
-                placeholder='0'
+                placeholder={t('common.amountPlaceholder')}
                 aria-invalid={!!refundError}
                 className={cn(refundError && 'border-destructive')}
               />
@@ -390,7 +392,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
                   onCheckedChange={setConfirmOverdraft}
                   description={t('sales.returnDialog.overdraftNotice')}
                   id='return-overdraft'
-                  className='mt-2 border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200 hover:bg-amber-500/15'
+                  className='mt-2'
                 />
               )}
             </div>
@@ -425,7 +427,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
             />
           </div>
 
-          <DialogFooter className='gap-2 sm:gap-0'>
+          <DialogFooter>
             <DialogCancelButton
               onClick={() => onOpenChange(false)}
               disabled={recordReturn.isPending}

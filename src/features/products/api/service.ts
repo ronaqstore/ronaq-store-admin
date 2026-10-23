@@ -11,7 +11,8 @@ import type {
   ProductImageListResponse,
   ProductImageReorderItem,
   CreateProductResult,
-  CreateProductApiResponse
+  CreateProductApiResponse,
+  PendingProductImageFile
 } from '@/types';
 import { appFetch } from '@/lib/api/app-fetch';
 
@@ -28,6 +29,13 @@ export async function listProducts(
   }
 
   return appFetch<PaginatedResponse<ProductDTO>>(`/api/products${qs}`);
+}
+
+export async function getProduct(id: string, token?: string): Promise<ProductDTO> {
+  if (token) {
+    return apiRequest<ProductDTO>(`/products/${id}`, undefined, token);
+  }
+  return appFetch<ProductDTO>(`/api/products/${id}`);
 }
 
 export async function createProduct(input: CreateProductInput): Promise<CreateProductResult> {
@@ -92,4 +100,18 @@ export async function deleteProductImage(productId: string, imageId: string): Pr
   return appFetch<unknown>(`/api/products/${productId}/images/${imageId}`, {
     method: 'DELETE'
   });
+}
+
+export async function uploadPendingProductImages(
+  productId: string,
+  images: ProductImageDTO[],
+  pendingFiles: PendingProductImageFile[]
+): Promise<void> {
+  if (pendingFiles.length === 0) return;
+  for (const img of images) {
+    const pending = pendingFiles.find((p) => p.id === img.id);
+    if (pending) {
+      await uploadProductImage(productId, pending.file);
+    }
+  }
 }

@@ -28,6 +28,7 @@ export function TextField({
   min,
   max,
   maxLength,
+  sanitize,
   onKeyDown,
   ...inputProps
 }: TextFieldProps) {
@@ -66,10 +67,11 @@ export function TextField({
     },
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!isNumber) {
+        const sanitized = sanitize ? sanitize(e.target.value) : e.target.value;
         const next =
           resolvedMaxLength !== undefined
-            ? clampText(e.target.value, resolvedMaxLength)
-            : e.target.value;
+            ? clampText(sanitized, resolvedMaxLength)
+            : sanitized;
         field.handleChange(next);
         return;
       }
@@ -131,7 +133,7 @@ export function TextField({
       ) : (
         <div className='relative'>
           <Input className={className} {...sharedInputProps} />
-          {isValidating && <Spinner className='absolute top-1/2 end-3 h-4 w-4 -translate-y-1/2' />}
+          {isValidating && <Spinner className='absolute top-1/2 inset-e-3 h-4 w-4 -translate-y-1/2' />}
         </div>
       )}
       {description && <FieldDescription>{description}</FieldDescription>}

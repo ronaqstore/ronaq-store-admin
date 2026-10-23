@@ -70,7 +70,8 @@ export function ResponsiveDataTable<TData>({
   ledger,
   className,
   isLoading: isLoadingProp,
-  rowCount
+  rowCount,
+  onRowClick
 }: ResponsiveDataTableProps<TData>) {
   const isLoading =
     isLoadingProp ??
@@ -81,6 +82,17 @@ export function ResponsiveDataTable<TData>({
   const { ref, mode, wideCompact } = useContainerMode();
   const [sideRow, setSideRow] = React.useState<Row<TData> | null>(null);
   const isList = mode === 'list' || mode === 'cards';
+
+  const handleRowClick = React.useCallback(
+    (row: Row<TData>) => {
+      if (onRowClick) {
+        const handled = onRowClick(row);
+        if (handled !== false) return;
+      }
+      setSideRow(row);
+    },
+    [onRowClick]
+  );
 
   const mobileItem = React.useMemo(
     () =>
@@ -162,12 +174,14 @@ export function ResponsiveDataTable<TData>({
                 table={table}
                 mobileItem={mobileItem}
                 detail={detail}
+                layout={mode === 'cards' ? 'cards' : 'list'}
                 isLoading={isLoading}
                 skeletonRowCount={skeletonRowCount}
                 onNavigate={(href) => router.push(href)}
+                onRowClick={handleRowClick}
               />
             )}
-            <LoadMore table={table} />
+            {!isLoading ? <LoadMore table={table} /> : null}
           </div>
         </div>
       ) : (
@@ -178,7 +192,7 @@ export function ResponsiveDataTable<TData>({
             wideCompact={wideCompact}
             isLoading={isLoading}
             skeletonRowCount={skeletonRowCount}
-            onRowClick={(row) => setSideRow(row)}
+            onRowClick={handleRowClick}
           />
           <div className='shrink-0'>
             <DataTablePagination table={table} variant='full' />
@@ -245,6 +259,16 @@ function CompactOrFullTable<TData>({
                 }
                 const isActions = header.column.id === 'actions';
                 const isSticky = stickyFirst && index === 0 && !isActions;
+                const metaType = header.column.columnDef.meta?.type;
+                const relaxOverflow =
+                  isActions ||
+                  metaType === 'image' ||
+                  metaType === 'boolean' ||
+                  metaType === 'money' ||
+                  metaType === 'number' ||
+                  metaType === 'phone' ||
+                  metaType === 'status' ||
+                  metaType === 'date';
                 const colSize = isActions
                   ? Math.max(header.column.columnDef.size ?? 0, 72)
                   : header.column.columnDef.size;
@@ -255,7 +279,8 @@ function CompactOrFullTable<TData>({
                     className={cn(
                       'bg-background sticky top-0 z-20 shadow-[0_1px_0_0_var(--border)]',
                       isActions && 'w-20 text-end pe-3',
-                      isSticky && 'sticky start-0 z-30 shadow-[1px_1px_0_0_var(--border)]'
+                      relaxOverflow && 'max-w-none',
+                      isSticky && 'sticky inset-s-0 z-30 shadow-[1px_1px_0_0_var(--border)]'
                     )}
                   >
                     {header.isPlaceholder
@@ -282,6 +307,16 @@ function CompactOrFullTable<TData>({
                   }
                   const isActions = header.column.id === 'actions';
                   const isSticky = stickyFirst && index === 0 && !isActions;
+                  const metaType = header.column.columnDef.meta?.type;
+                  const relaxOverflow =
+                    isActions ||
+                    metaType === 'image' ||
+                    metaType === 'boolean' ||
+                    metaType === 'money' ||
+                    metaType === 'number' ||
+                    metaType === 'phone' ||
+                    metaType === 'status' ||
+                    metaType === 'date';
                   const colSize = isActions
                     ? Math.max(header.column.columnDef.size ?? 0, 72)
                     : header.column.columnDef.size;
@@ -290,9 +325,10 @@ function CompactOrFullTable<TData>({
                       key={header.id}
                       style={{ width: colSize ? `${colSize}px` : undefined }}
                       className={cn(
-                        isActions && 'w-20 text-end pe-3',
+                        isActions && 'w-20 max-w-none text-end pe-3',
+                        relaxOverflow && 'max-w-none',
                         isSticky &&
-                          'bg-background sticky start-0 z-10 shadow-[1px_0_0_0_var(--border)]'
+                          'bg-background sticky inset-s-0 z-10 shadow-[1px_0_0_0_var(--border)]'
                       )}
                     >
                       {isActions ? (
@@ -306,9 +342,9 @@ function CompactOrFullTable<TData>({
               </TableRow>
             ))
           ) : table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
+            table.getRowModel().rows.map((row, rowIndex) => (
               <TableRow
-                key={row.id}
+                key={`${row.id}-${rowIndex}`}
                 className={onRowClick ? 'cursor-pointer' : undefined}
                 onClick={
                   onRowClick
@@ -316,7 +352,7 @@ function CompactOrFullTable<TData>({
                         const target = e.target as HTMLElement;
                         if (
                           target.closest(
-                            '[data-slot="dropdown-menu-trigger"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-item"], [data-slot="action-cell"], [role="menuitem"], [role="menu"], button, a'
+                            '[data-slot="dropdown-menu-trigger"], [data-slot="dropdown-menu-content"], [data-slot="dropdown-menu-item"], [data-slot="action-cell"], [data-slot="previewable-image"], [role="menuitem"], [role="menu"], button, a'
                           )
                         ) {
                           return;
@@ -332,6 +368,16 @@ function CompactOrFullTable<TData>({
                   }
                   const isActions = cell.column.id === 'actions';
                   const isSticky = stickyFirst && index === 0 && !isActions;
+                  const metaType = cell.column.columnDef.meta?.type;
+                  const relaxOverflow =
+                    isActions ||
+                    metaType === 'image' ||
+                    metaType === 'boolean' ||
+                    metaType === 'money' ||
+                    metaType === 'number' ||
+                    metaType === 'phone' ||
+                    metaType === 'status' ||
+                    metaType === 'date';
                   const colSize = isActions
                     ? Math.max(cell.column.columnDef.size ?? 0, 72)
                     : cell.column.columnDef.size;
@@ -342,9 +388,10 @@ function CompactOrFullTable<TData>({
                       data-slot={isActions ? 'action-cell' : undefined}
                       onClick={isActions ? (e) => e.stopPropagation() : undefined}
                       className={cn(
-                        isActions && 'w-20 text-end pe-3',
+                        isActions && 'w-20 max-w-none text-end pe-3',
+                        relaxOverflow && 'max-w-none',
                         isSticky &&
-                          'bg-background sticky start-0 z-10 shadow-[1px_0_0_0_var(--border)]'
+                          'bg-background sticky inset-s-0 z-10 shadow-[1px_0_0_0_var(--border)]'
                       )}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

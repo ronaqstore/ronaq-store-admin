@@ -12,6 +12,12 @@ export function normalizePhone(phone: string): string {
   return digits;
 }
 
+export function formatPkMobileLocal(phone?: string | null): string {
+  if (!phone) return '';
+  const local = normalizePhone(phone);
+  return /^03\d{9}$/.test(local) ? local : phone.trim();
+}
+
 export function isValidPkMobile(phone: string): boolean {
   const trimmed = phone.trim().toLowerCase();
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {

@@ -2,6 +2,7 @@ import { queryOptions } from '@tanstack/react-query';
 import type { ListFilters } from '@/lib/dukaan';
 import { getDashboardKpis } from './service';
 import { getCustomerLedgerView } from '@/features/customers/api/service';
+import { getSupplierLedgerView } from '@/features/suppliers/api/service';
 
 export const dukaanKeys = {
   all: ['dukaan'] as const,
@@ -12,6 +13,7 @@ export const dukaanKeys = {
   products: (f?: ListFilters) => [...dukaanKeys.all, 'products', f] as const,
   product: (id: string) => [...dukaanKeys.all, 'product', id] as const,
   suppliers: (f?: ListFilters) => [...dukaanKeys.all, 'suppliers', f] as const,
+  supplier: (id: string) => [...dukaanKeys.all, 'supplier', id] as const,
   customers: (f?: ListFilters) => [...dukaanKeys.all, 'customers', f] as const,
   customer: (id: string) => [...dukaanKeys.all, 'customer', id] as const,
   purchases: (f?: ListFilters) => [...dukaanKeys.all, 'purchases', f] as const,
@@ -37,4 +39,10 @@ export const customerQueryOptions = (id: string, token?: string) =>
   queryOptions({
     queryKey: dukaanKeys.customer(id),
     queryFn: () => getCustomerLedgerView(id, token)
+  });
+
+export const supplierQueryOptions = (id: string, token?: string) =>
+  queryOptions({
+    queryKey: dukaanKeys.supplier(id),
+    queryFn: () => getSupplierLedgerView(id, token)
   });

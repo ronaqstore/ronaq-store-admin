@@ -52,7 +52,7 @@ export function NotificationCenter() {
       >
         <Icons.notification className='h-4 w-4' />
         {count > 0 && (
-          <span className='bg-primary text-primary-foreground absolute -top-0.5 -end-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-medium'>
+          <span className='bg-primary text-primary-foreground absolute -top-0.5 -inset-e-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-medium'>
             {count > 9 ? '9+' : count}
           </span>
         )}

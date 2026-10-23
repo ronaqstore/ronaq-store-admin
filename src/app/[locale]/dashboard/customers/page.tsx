@@ -21,7 +21,7 @@ export default async function Page() {
   if (session?.accessToken) {
     await qc.prefetchQuery(
       customersQueryOptions(
-        { page: 1, pageSize: 20, sortBy: 'createdAt', sortOrder: 'desc' },
+        { page: 1, pageSize: 20, sortBy: 'name', sortOrder: 'asc' },
         session.accessToken
       )
     );

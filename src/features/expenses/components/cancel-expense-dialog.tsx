@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import {
   Dialog,
   DialogContent,
@@ -24,7 +25,8 @@ import { cn } from '@/lib/utils';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import type { CancelExpenseDialogProps } from '@/types/expense';
 import { cancelExpenseMutation } from '../api/mutations';
-import { expenseKeys } from '../api/queries';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { EXPENSE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 const PRESET_REASONS = [
   'Duplicate entry',
@@ -47,9 +49,9 @@ export function CancelExpenseDialog({
   const cancel = useMutation({
     ...cancelExpenseMutation,
     onSuccess: () => {
-      toast.success(t('expenses.cancelSuccess'));
-      void qc.invalidateQueries({ queryKey: expenseKeys.all });
       onOpenChange(false);
+      invalidateDomains({ queryClient: qc, domains: EXPENSE_SYNC_DOMAINS });
+      toastSuccessAfterClose(t('expenses.cancelSuccess'));
       onSuccess?.();
     },
     onError: (err: Error) => {

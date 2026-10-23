@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 import { useTranslations } from 'next-intl';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export function OfflineBanner() {
   const t = useTranslations();
@@ -24,7 +26,10 @@ export function OfflineBanner() {
     <div
       role='status'
       aria-live='polite'
-      className='bg-[var(--status-warning-bg)] text-[var(--status-warning)] border-b border-border px-4 py-1.5 text-center text-xs font-medium'
+      className={cn(
+        buttonVariants({ variant: 'default' }),
+        'h-auto w-full rounded-none border-0 px-4 py-1.5 text-center text-xs font-medium shadow-none hover:bg-primary'
+      )}
     >
       {t('pwa.offlineBanner')}
     </div>

@@ -6,8 +6,12 @@ export interface CustomerListFilters {
   pageSize?: number;
   limit?: number;
   search?: string;
+  minOpeningBalance?: number;
+  maxOpeningBalance?: number;
+  minCurrentBalance?: number;
+  maxCurrentBalance?: number;
   isActive?: boolean;
-  sortBy?: 'name' | 'phone' | 'isActive' | 'openingBalance' | 'createdAt' | 'updatedAt';
+  sortBy?: 'name' | 'openingBalance';
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -85,10 +89,14 @@ export interface CustomerLedgerView {
   phone: string | null;
   address: string | null;
   notes: string | null;
+  openingBalance: number;
   udhar: number;
   ledger: Array<{
     id: string;
     date: string;
+    type: string;
+    reference?: string | null;
+    status?: string;
     label: string;
     amount: number;
     running_balance: number;

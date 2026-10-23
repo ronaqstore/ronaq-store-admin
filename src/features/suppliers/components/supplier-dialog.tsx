@@ -24,6 +24,7 @@ export function SupplierDialog({ open, onOpenChange, supplier }: SupplierDialogP
       successCreated={t('dukaan.supplier.created')}
       successUpdated={t('dukaan.supplier.updated')}
       primaryButtonMode={supplier ? 'edit' : 'add'}
+      showCnic
       onSave={(payload, id) => (id ? updateSupplier(id, payload) : createSupplier(payload))}
       invalidateQueryKey={supplierKeys.all}
       schema={createSupplierFormSchema(t)}

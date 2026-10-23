@@ -42,3 +42,27 @@ export async function removeShopLogo(): Promise<unknown> {
     method: 'DELETE'
   });
 }
+
+export async function uploadShopBanner(file: File, token?: string): Promise<unknown> {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  if (token) {
+    return apiRequest<unknown>(
+      '/store/settings/banner',
+      { method: 'POST', body: formData },
+      token
+    );
+  }
+
+  return appFetch<unknown>('/api/store/settings/banner', {
+    method: 'POST',
+    body: formData
+  });
+}
+
+export async function removeShopBanner(): Promise<unknown> {
+  return appFetch<unknown>('/api/store/settings/banner', {
+    method: 'DELETE'
+  });
+}

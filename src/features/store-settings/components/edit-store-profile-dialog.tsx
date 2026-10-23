@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,16 +12,37 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { cn } from '@/lib/utils';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
+import {
+  OPENING_HOUR_TIME_OPTIONS,
+  composeOpeningHours,
+  formatTimeOptionLabel,
+  isClosingAfterOpening,
+  parseOpeningHours
+} from '@/lib/opening-hours';
 import { useT } from '@/i18n/use-t';
+import { formatPkMobileLocal, isValidPkMobile } from '@/lib/auth/phone';
+import { ApiError } from '@/lib/api/types';
 import type {
   EditStoreProfileDialogBodyProps,
-  EditStoreProfileDialogProps
+  EditStoreProfileDialogProps,
+  StoreLocationValue,
+  StoreSettingsDTO
 } from '@/types/store-settings';
+import { googleMapsSearchUrl } from '@/constants/api';
 import { useUpdateStoreSettings } from '../api/mutations';
+import { StoreLocationSearch } from './store-location-search';
 
 export function EditStoreProfileDialog({
   open,
@@ -37,6 +58,18 @@ export function EditStoreProfileDialog({
   );
 }
 
+function locationFromSettings(settings: StoreSettingsDTO): StoreLocationValue {
+  const lat = settings.latitude ?? null;
+  const lng = settings.longitude ?? null;
+  const hasPin =
+    lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng);
+  return {
+    placeLabel: hasPin ? settings.mapPlaceName?.trim() || null : null,
+    latitude: hasPin ? lat : null,
+    longitude: hasPin ? lng : null
+  };
+}
+
 function EditStoreProfileDialogBody({
   settings,
   onOpenChange
@@ -44,26 +77,62 @@ function EditStoreProfileDialogBody({
   const t = useT();
   const updateMutation = useUpdateStoreSettings();
 
+  const initialHours = parseOpeningHours(settings.openingHours);
+
   const [displayName, setDisplayName] = useState(settings.displayName ?? '');
   const [about, setAbout] = useState(settings.about ?? '');
-  const [whatsappNumber, setWhatsappNumber] = useState(settings.whatsappNumber ?? '');
-  const [phoneNumber, setPhoneNumber] = useState(settings.phoneNumber ?? '');
-  const [address, setAddress] = useState(settings.address ?? '');
+  const [whatsappNumber, setWhatsappNumber] = useState(
+    formatPkMobileLocal(settings.whatsappNumber)
+  );
+  const [phoneNumber, setPhoneNumber] = useState(formatPkMobileLocal(settings.phoneNumber));
   const [city, setCity] = useState(settings.city ?? '');
-  const [openingHours, setOpeningHours] = useState(settings.openingHours ?? '');
-  const [googleMapsUrl, setGoogleMapsUrl] = useState(settings.googleMapsUrl ?? '');
+  const [address, setAddress] = useState(settings.address ?? '');
+  const [location, setLocation] = useState<StoreLocationValue>(() =>
+    locationFromSettings(settings)
+  );
+  const [opensAt, setOpensAt] = useState(initialHours?.opens ?? '');
+  const [closesAt, setClosesAt] = useState(initialHours?.closes ?? '');
   const [displayNameError, setDisplayNameError] = useState('');
+  const [hoursError, setHoursError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [whatsappError, setWhatsappError] = useState('');
+  const [locationError, setLocationError] = useState('');
+
+  const timeItems = useMemo(
+    () =>
+      OPENING_HOUR_TIME_OPTIONS.map((value) => ({
+        value,
+        label: formatTimeOptionLabel(value)
+      })),
+    []
+  );
 
   useEffect(() => {
+    const parsed = parseOpeningHours(settings.openingHours);
     setDisplayName(settings.displayName ?? '');
     setAbout(settings.about ?? '');
-    setWhatsappNumber(settings.whatsappNumber ?? '');
-    setPhoneNumber(settings.phoneNumber ?? '');
-    setAddress(settings.address ?? '');
+    setWhatsappNumber(formatPkMobileLocal(settings.whatsappNumber));
+    setPhoneNumber(formatPkMobileLocal(settings.phoneNumber));
     setCity(settings.city ?? '');
-    setOpeningHours(settings.openingHours ?? '');
-    setGoogleMapsUrl(settings.googleMapsUrl ?? '');
+    setAddress(settings.address ?? '');
+    setLocation(locationFromSettings(settings));
+    setOpensAt(parsed?.opens ?? '');
+    setClosesAt(parsed?.closes ?? '');
+    setHoursError('');
+    setPhoneError('');
+    setWhatsappError('');
+    setLocationError('');
   }, [settings]);
+
+  const handleOpensAtChange = (val: string | null) => {
+    setOpensAt(val ?? '');
+    setHoursError('');
+  };
+
+  const handleClosesAtChange = (val: string | null) => {
+    setClosesAt(val ?? '');
+    setHoursError('');
+  };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -73,19 +142,100 @@ function EditStoreProfileDialogBody({
     }
     setDisplayNameError('');
 
+    if ((opensAt && !closesAt) || (!opensAt && closesAt)) {
+      setHoursError(t('storeSettings.openingHoursBothRequired'));
+      return;
+    }
+    if (opensAt && closesAt && !isClosingAfterOpening(opensAt, closesAt)) {
+      setHoursError(t('storeSettings.openingHoursInvalidRange'));
+      return;
+    }
+    setHoursError('');
+
+    const phoneTrimmed = phoneNumber.trim();
+    const whatsappTrimmed = whatsappNumber.trim();
+    if (phoneTrimmed && !isValidPkMobile(phoneTrimmed)) {
+      setPhoneError(t('validation.phoneInvalidPk'));
+      return;
+    }
+    if (whatsappTrimmed && !isValidPkMobile(whatsappTrimmed)) {
+      setWhatsappError(t('validation.phoneInvalidPk'));
+      return;
+    }
+    setPhoneError('');
+    setWhatsappError('');
+
+    const hasCoords =
+      location.latitude != null &&
+      location.longitude != null &&
+      Number.isFinite(location.latitude) &&
+      Number.isFinite(location.longitude);
+
+    if (location.typedWithoutPin) {
+      setLocationError(t('storeSettings.locationPickRequired'));
+      return;
+    }
+    setLocationError('');
+
     updateMutation.mutate(
       {
         displayName: displayName.trim(),
         about: about.trim() || null,
-        whatsappNumber: whatsappNumber.trim() || null,
-        phoneNumber: phoneNumber.trim() || null,
+        whatsappNumber: whatsappTrimmed || null,
+        phoneNumber: phoneTrimmed || null,
         address: address.trim() || null,
         city: city.trim() || null,
-        openingHours: openingHours.trim() || null,
-        googleMapsUrl: googleMapsUrl.trim() || null
+        latitude: hasCoords ? location.latitude : null,
+        longitude: hasCoords ? location.longitude : null,
+        mapPlaceName: hasCoords ? location.placeLabel?.trim() || null : null,
+        googleMapsUrl:
+          hasCoords && location.latitude != null && location.longitude != null
+            ? googleMapsSearchUrl(location.latitude, location.longitude)
+            : null,
+        openingHours: composeOpeningHours(opensAt, closesAt)
       },
       {
-        onSuccess: () => onOpenChange(false)
+        onSuccess: () => onOpenChange(false),
+        onError: (error) => {
+          if (!(error instanceof ApiError)) return;
+          const code = error.details?.code;
+          const raw =
+            (Array.isArray(error.details?.message)
+              ? error.details.message.map(String).join(' ')
+              : typeof error.details?.message === 'string'
+                ? error.details.message
+                : '') || error.message;
+          const lower = raw.toLowerCase();
+          const taken =
+            code === 'PHONE_ALREADY_TAKEN' ||
+            lower.includes('already in use') ||
+            lower.includes('already used');
+          const invalid =
+            lower.includes('pakistani mobile') || lower.includes('not a valid phone');
+          const msg = taken
+            ? t('validation.phoneAlreadyTaken')
+            : invalid
+              ? t('validation.phoneInvalidPk')
+              : null;
+          if (!msg) return;
+          const digits = raw.replace(/\D/g, '');
+          const phoneDigits = phoneTrimmed.replace(/\D/g, '');
+          const waDigits = whatsappTrimmed.replace(/\D/g, '');
+          const hitPhone =
+            !!phoneDigits &&
+            (digits.includes(phoneDigits) || digits.includes(phoneDigits.replace(/^0/, '92')));
+          const hitWa =
+            !!waDigits &&
+            (digits.includes(waDigits) || digits.includes(waDigits.replace(/^0/, '92')));
+          if (hitPhone && !hitWa) setPhoneError(msg);
+          else if (hitWa && !hitPhone) setWhatsappError(msg);
+          else if (hitPhone && hitWa) {
+            setPhoneError(msg);
+            setWhatsappError(msg);
+          } else {
+            setPhoneError(msg);
+          }
+        }
       }
     );
   };
@@ -99,34 +249,37 @@ function EditStoreProfileDialogBody({
     setCity(clampText(e.target.value, INPUT_LIMITS.city));
   };
 
-  const handleOpeningHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOpeningHours(clampText(e.target.value, INPUT_LIMITS.openingHours));
-  };
-
   const handleAboutChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAbout(clampText(e.target.value, INPUT_LIMITS.about));
-  };
-
-  const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setWhatsappNumber(clampText(e.target.value, INPUT_LIMITS.phone));
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPhoneNumber(clampText(e.target.value, INPUT_LIMITS.phoneLoose));
   };
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAddress(clampText(e.target.value, INPUT_LIMITS.address));
   };
 
-  const handleGoogleMapsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGoogleMapsUrl(clampText(e.target.value, INPUT_LIMITS.imageUrl));
+  const handleLocationChange = (next: StoreLocationValue) => {
+    setLocation(next);
+    setLocationError('');
+  };
+
+  const handleLocationCitySuggest = (suggested: string) => {
+    if (!city.trim()) setCity(suggested);
+  };
+
+  const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setWhatsappNumber(clampText(e.target.value, INPUT_LIMITS.phone));
+    setWhatsappError('');
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhoneNumber(clampText(e.target.value, INPUT_LIMITS.phoneLoose));
+    setPhoneError('');
   };
 
   const busy = updateMutation.isPending;
 
   return (
-    <DialogContent className='max-h-[92vh] w-full overflow-y-auto sm:max-w-lg'>
+    <DialogContent className='max-h-[92vh] w-full overflow-y-auto sm:max-w-2xl'>
       <DialogHeader>
         <DialogTitle>{t('storeSettings.editProfileTitle')}</DialogTitle>
         <DialogDescription>{t('storeSettings.editProfileDescription')}</DialogDescription>
@@ -147,7 +300,7 @@ function EditStoreProfileDialogBody({
             />
             <DialogFieldError id='edit-displayName-error' message={displayNameError} />
           </div>
-          <div className='space-y-2'>
+          <div className='space-y-2 sm:col-span-2'>
             <Label htmlFor='edit-city'>{t('storeSettings.city')}</Label>
             <Input
               id='edit-city'
@@ -156,16 +309,126 @@ function EditStoreProfileDialogBody({
               maxLength={INPUT_LIMITS.city}
             />
           </div>
-          <div className='space-y-2'>
-            <Label htmlFor='edit-hours'>{t('storeSettings.openingHours')}</Label>
-            <Input
-              id='edit-hours'
-              value={openingHours}
-              onChange={handleOpeningHoursChange}
-              maxLength={INPUT_LIMITS.openingHours}
-            />
+          <div className='space-y-2 sm:col-span-2'>
+            <Label>{t('storeSettings.openingHours')}</Label>
+            <div className='grid gap-3 sm:grid-cols-2'>
+              <div className='space-y-1.5'>
+                <Label
+                  htmlFor='edit-opens-at'
+                  className='text-xs font-normal text-muted-foreground'
+                >
+                  {t('storeSettings.opensAt')}
+                </Label>
+                <Select
+                  value={opensAt || null}
+                  onValueChange={handleOpensAtChange}
+                  items={timeItems}
+                >
+                  <SelectTrigger
+                    id='edit-opens-at'
+                    className={cn(
+                      'h-9 w-full justify-between text-sm font-normal',
+                      hoursError && 'border-destructive'
+                    )}
+                  >
+                    <SelectValue placeholder={t('storeSettings.selectTime')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {OPENING_HOUR_TIME_OPTIONS.map((value) => (
+                        <SelectItem key={value} value={value} className='text-sm'>
+                          {formatTimeOptionLabel(value)}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className='space-y-1.5'>
+                <Label
+                  htmlFor='edit-closes-at'
+                  className='text-xs font-normal text-muted-foreground'
+                >
+                  {t('storeSettings.closesAt')}
+                </Label>
+                <Select
+                  value={closesAt || null}
+                  onValueChange={handleClosesAtChange}
+                  items={timeItems}
+                >
+                  <SelectTrigger
+                    id='edit-closes-at'
+                    className={cn(
+                      'h-9 w-full justify-between text-sm font-normal',
+                      hoursError && 'border-destructive'
+                    )}
+                  >
+                    <SelectValue placeholder={t('storeSettings.selectTime')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {OPENING_HOUR_TIME_OPTIONS.map((value) => (
+                        <SelectItem key={value} value={value} className='text-sm'>
+                          {formatTimeOptionLabel(value)}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFieldError id='edit-hours-error' message={hoursError} />
           </div>
         </div>
+
+        <div className='grid gap-4 sm:grid-cols-2'>
+          <div className='space-y-2'>
+            <Label htmlFor='edit-whatsapp'>{t('storeSettings.whatsapp')}</Label>
+            <Input
+              id='edit-whatsapp'
+              value={whatsappNumber}
+              onChange={handleWhatsappChange}
+              maxLength={INPUT_LIMITS.phone}
+              placeholder='03001234567'
+              className={cn(whatsappError && 'border-destructive')}
+              aria-invalid={!!whatsappError}
+            />
+            <DialogFieldError id='edit-whatsapp-error' message={whatsappError} />
+          </div>
+          <div className='space-y-2'>
+            <Label htmlFor='edit-phone'>{t('storeSettings.phone')}</Label>
+            <Input
+              id='edit-phone'
+              value={phoneNumber}
+              onChange={handlePhoneChange}
+              maxLength={INPUT_LIMITS.phoneLoose}
+              placeholder='03001234567'
+              className={cn(phoneError && 'border-destructive')}
+              aria-invalid={!!phoneError}
+            />
+            <DialogFieldError id='edit-phone-error' message={phoneError} />
+          </div>
+        </div>
+
+        <div className='space-y-2'>
+          <Label htmlFor='edit-address'>{t('storeSettings.address')}</Label>
+          <Input
+            id='edit-address'
+            value={address}
+            onChange={handleAddressChange}
+            maxLength={INPUT_LIMITS.address}
+            placeholder={t('storeSettings.addressPlaceholder')}
+          />
+          <p className='text-xs text-muted-foreground'>{t('storeSettings.addressHint')}</p>
+        </div>
+
+        <StoreLocationSearch
+          value={location}
+          disabled={busy}
+          error={locationError}
+          onChange={handleLocationChange}
+          onCitySuggest={handleLocationCitySuggest}
+        />
 
         <div className='space-y-2'>
           <Label htmlFor='edit-about'>{t('storeSettings.about')}</Label>
@@ -178,57 +441,9 @@ function EditStoreProfileDialogBody({
           />
         </div>
 
-        <div className='grid gap-4 sm:grid-cols-2'>
-          <div className='space-y-2'>
-            <Label htmlFor='edit-whatsapp'>{t('storeSettings.whatsapp')}</Label>
-            <Input
-              id='edit-whatsapp'
-              value={whatsappNumber}
-              onChange={handleWhatsappChange}
-              maxLength={INPUT_LIMITS.phone}
-              placeholder='923001234567'
-            />
-          </div>
-          <div className='space-y-2'>
-            <Label htmlFor='edit-phone'>{t('storeSettings.phone')}</Label>
-            <Input
-              id='edit-phone'
-              value={phoneNumber}
-              onChange={handlePhoneChange}
-              maxLength={INPUT_LIMITS.phoneLoose}
-              placeholder='0300-1234567'
-            />
-          </div>
-        </div>
-
-        <div className='space-y-2'>
-          <Label htmlFor='edit-address'>{t('storeSettings.address')}</Label>
-          <Input
-            id='edit-address'
-            value={address}
-            onChange={handleAddressChange}
-            maxLength={INPUT_LIMITS.address}
-          />
-        </div>
-
-        <div className='space-y-2'>
-          <Label htmlFor='edit-maps'>{t('storeSettings.googleMaps')}</Label>
-          <Input
-            id='edit-maps'
-            value={googleMapsUrl}
-            onChange={handleGoogleMapsChange}
-            maxLength={INPUT_LIMITS.imageUrl}
-            placeholder={t('storeSettings.googleMapsPlaceholder')}
-          />
-        </div>
-
         <DialogFooter>
           <DialogCancelButton onClick={() => onOpenChange(false)} disabled={busy} />
-          <DialogPrimaryButton
-            mode='save'
-            loading={busy}
-            disabled={busy}
-          />
+          <DialogPrimaryButton mode='save' loading={busy} disabled={busy} />
         </DialogFooter>
       </form>
     </DialogContent>

@@ -14,6 +14,7 @@ import {
 import { FieldGroup } from '@/components/ui/field';
 import { useAppForm } from '@/lib/form';
 import { useT } from '@/i18n/use-t';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import type { SimpleEntityDialogProps, SimpleEntityDialogBodyProps } from '@/types';
 
@@ -80,9 +81,9 @@ function SimpleEntityDialogBody({
   const save = useMutation({
     mutationFn: async (name: string) => onSave(entity?.id, name),
     onSuccess: () => {
-      toast.success(isEdit ? successUpdated : successCreated);
-      void qc.invalidateQueries({ queryKey: invalidateQueryKey });
       onOpenChange(false);
+      void qc.invalidateQueries({ queryKey: invalidateQueryKey });
+      toastSuccessAfterClose(isEdit ? successUpdated : successCreated);
     },
     onError: (e: Error) => toast.error(e.message)
   });

@@ -32,6 +32,7 @@ export * from './expense';
 export * from './cash';
 export * from './purchases';
 export * from './payment';
+export * from './party-payment-target';
 export * from './inventory';
 export * from './sales';
 export * from './products';
@@ -52,4 +53,5 @@ export * from './pages';
 export * from './party';
 export * from './picker';
 export * from './media';
+export * from './query-sync';
 

@@ -275,7 +275,7 @@ export function InstallPrompt({ variant = 'both', className }: InstallPromptProp
         <div
           role='region'
           aria-label={menuLabel}
-          className='border-border bg-card fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-40 rounded-xl border p-3 shadow-lg sm:inset-x-auto sm:end-4 sm:bottom-4 sm:max-w-sm'
+          className='border-border bg-card fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-40 rounded-xl border p-3 shadow-lg sm:inset-x-auto sm:inset-e-4 sm:bottom-4 sm:max-w-sm'
         >
           <p className='text-sm font-medium'>
             {alreadyInstalled ? t('pwa.removeAndNewIcon') : t('pwa.installApp')}

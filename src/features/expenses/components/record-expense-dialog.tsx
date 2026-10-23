@@ -14,9 +14,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Icons } from '@/components/icons';
 import { formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
@@ -25,7 +25,6 @@ import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { cn } from '@/lib/utils';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
 import { createExpenseMutation } from '../api/mutations';
-import { expenseKeys } from '../api/queries';
 import { CategorySelectCombobox } from './category-select';
 import { AddCategoryDialog } from './add-category-dialog';
 import type {
@@ -34,6 +33,8 @@ import type {
   RecordExpenseFormErrors
 } from '@/types/expense';
 import type { OverdraftPrompt } from '@/types';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { EXPENSE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 export function RecordExpenseDialog({
   open,
@@ -76,11 +77,11 @@ export function RecordExpenseDialog({
         return;
       }
 
-      toast.success(t('expenses.recordSuccess', { amount: amountStr }));
-      void qc.invalidateQueries({ queryKey: expenseKeys.all });
       onOpenChange(false);
       resetForm();
+      invalidateDomains({ queryClient: qc, domains: EXPENSE_SYNC_DOMAINS });
       onSuccess?.();
+      toastSuccessAfterClose(t('expenses.recordSuccess', { amount: amountStr }));
     },
     onError: (err: Error) => {
       toast.error(err.message || t('expenses.recordFailed'));
@@ -181,19 +182,9 @@ export function RecordExpenseDialog({
 
           <form onSubmit={handleSubmit} className='space-y-4 pt-2'>
             <div className='space-y-1.5 w-full'>
-              <div className='flex items-center justify-between'>
-                <Label className='text-sm font-normal text-foreground'>
-                  {t('expenses.category')} <span className='text-destructive'>*</span>
-                </Label>
-                <button
-                  type='button'
-                  onClick={() => setAddCategoryOpen(true)}
-                  className='text-xs font-medium text-primary hover:underline flex items-center gap-1'
-                >
-                  <Icons.add className='size-3' />
-                  <span>{t('expenses.newCategory')}</span>
-                </button>
-              </div>
+              <Label className='text-sm font-normal text-foreground'>
+                {t('expenses.category')} <span className='text-destructive'>*</span>
+              </Label>
 
               <CategorySelectCombobox
                 value={categoryId}
@@ -211,7 +202,7 @@ export function RecordExpenseDialog({
                 {t('expenses.amountPkr')} <span className='text-destructive'>*</span>
               </Label>
               <div className='relative w-full'>
-                <span className='absolute start-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>
+                <span className='absolute inset-s-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>
                   {t('common.currency')}
                 </span>
                 <Input
@@ -220,7 +211,7 @@ export function RecordExpenseDialog({
                   min={1}
                   max={INPUT_LIMITS.amountRupeesMax}
                   step='any'
-                  placeholder='0.00'
+                  placeholder={t('common.amountPlaceholder')}
                   value={amountStr}
                   onChange={handleAmountChange}
                   onKeyDown={(e) => blockInvalidNumberKeys(e)}

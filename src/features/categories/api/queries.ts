@@ -1,5 +1,6 @@
-import { queryOptions } from '@tanstack/react-query';
+import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import type { CategoryListFilters } from '@/types';
+import { compactFilters } from '@/lib/api/compact-filters';
 import { listCategories } from './service';
 
 export const categoryKeys = {
@@ -8,8 +9,11 @@ export const categoryKeys = {
   list: (filters?: CategoryListFilters) => [...categoryKeys.lists(), filters] as const
 };
 
-export const categoriesQueryOptions = (filters: CategoryListFilters = {}, token?: string) =>
-  queryOptions({
-    queryKey: categoryKeys.list(filters),
-    queryFn: () => listCategories(filters, token)
+export const categoriesQueryOptions = (filters: CategoryListFilters = {}, token?: string) => {
+  const compact = compactFilters(filters as Record<string, unknown>) as CategoryListFilters;
+  return queryOptions({
+    queryKey: categoryKeys.list(compact),
+    queryFn: () => listCategories(compact, token),
+    placeholderData: keepPreviousData
   });
+};

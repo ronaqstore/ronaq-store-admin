@@ -3,14 +3,17 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { BaseCancelDialog } from '@/components/common/base-cancel-dialog';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { useT } from '@/i18n/use-t';
 import type { CancelImpactItem, OverdraftPrompt } from '@/types';
 import type { CancelSaleDialogProps } from '@/types/sales';
-import { cancelImpactQueryOptions, saleKeys } from '../api/queries';
+import { cancelImpactQueryOptions } from '../api/queries';
 import { cancelSaleMutation } from '../api/mutations';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { SALE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
 export function CancelSaleDialog({ sale, open, onOpenChange, onSuccess }: CancelSaleDialogProps) {
   const qc = useQueryClient();
@@ -38,10 +41,10 @@ export function CancelSaleDialog({ sale, open, onOpenChange, onSuccess }: Cancel
         return;
       }
 
-      toast.success(t('sales.cancelDialog.success', { saleNo: sale.saleNo }));
-      void qc.invalidateQueries({ queryKey: saleKeys.all });
       onOpenChange(false);
+      invalidateDomains({ queryClient: qc, domains: SALE_SYNC_DOMAINS });
       onSuccess?.();
+      toastSuccessAfterClose(t('sales.cancelDialog.success', { saleNo: sale.saleNo }));
     },
     onError: (err: Error) => {
       toast.error(err.message || t('sales.cancelDialog.failed'));

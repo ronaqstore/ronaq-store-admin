@@ -14,6 +14,7 @@ import { FieldGroup } from '@/components/ui/field';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { useAppForm } from '@/lib/form';
 import { useT } from '@/i18n/use-t';
+import { toastSuccessAfterClose } from '@/lib/toast-success';
 import type { ChangePasswordDialogBodyProps, ChangePasswordDialogProps } from '@/types';
 import { changePassword } from '../api/service';
 import { createChangePasswordSchema } from '../schemas/change-password-schema';
@@ -46,8 +47,8 @@ function ChangePasswordDialogBody({ onOpenChange }: ChangePasswordDialogBodyProp
           currentPassword: value.currentPassword,
           newPassword: value.newPassword
         });
-        toast.success(t('account.passwordChanged'));
         onOpenChange(false);
+        toastSuccessAfterClose(t('account.passwordChanged'));
       } catch (err) {
         toast.error(err instanceof Error ? err.message : t('account.passwordChangeFailed'));
       } finally {

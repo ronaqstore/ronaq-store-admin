@@ -11,7 +11,7 @@ export async function SalesListRoute({ defaultOpenAdd = false }: ListRouteOpenAd
         prefetch={(token, qc) =>
           qc.prefetchQuery(
             salesQueryOptions(
-              { page: 1, pageSize: 20, sortBy: 'createdAt', sortOrder: 'desc' },
+              { page: 1, pageSize: 20, sortBy: 'saleDate', sortOrder: 'desc' },
               token
             )
           )

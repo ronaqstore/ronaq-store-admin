@@ -21,51 +21,105 @@ import { DUKAAN_DEFAULT_PAGE_SIZE, useDukaanListParams } from '@/components/data
 import { formatIsoDate } from '@/lib/dates';
 import { formatLabel } from '@/lib/dukaan/numbers';
 import type { InventoryAdjustmentDTO } from '@/lib/api/types';
-import type { AdjustmentsTableProps } from '@/types/inventory';
+import type {
+  AdjustmentsTableProps,
+  InventoryMovementTypeFilter
+} from '@/types/inventory';
 import { inventoryAdjustmentsQueryOptions } from '../api/queries';
 import { StockAdjustDialog } from './stock-adjust-dialog';
+import {
+  firstAdjustmentFilterValue,
+  parseExactQuantityChange,
+  productAsyncFilter
+} from './adjustments-table-filters';
 
-const TYPE_OPTIONS = [
+const MANUAL_TYPE_OPTIONS = [
   { label: 'Adjustment', value: 'ADJUSTMENT' },
   { label: 'Damaged', value: 'DAMAGED' },
   { label: 'Lost', value: 'LOST' }
 ];
 
-export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
+const ALL_TYPE_OPTIONS = [
+  ...MANUAL_TYPE_OPTIONS,
+  { label: 'Purchase', value: 'PURCHASE' },
+  { label: 'Sale', value: 'SALE' },
+  { label: 'Sale cancel', value: 'SALE_CANCEL' },
+  { label: 'Purchase cancel', value: 'PURCHASE_CANCEL' },
+  { label: 'Customer return', value: 'CUSTOMER_RETURN' }
+];
+
+const ALL_TYPE_VALUES = new Set(ALL_TYPE_OPTIONS.map((o) => o.value));
+
+function movementTypeBadgeClass(type: string): string {
+  switch (type) {
+    case 'ADJUSTMENT':
+      return 'border-blue-500/40 text-blue-600 dark:text-blue-400 bg-blue-500/10';
+    case 'DAMAGED':
+      return 'border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10';
+    case 'LOST':
+      return 'border-red-500/40 text-red-600 dark:text-red-400 bg-red-500/10';
+    case 'PURCHASE':
+    case 'CUSTOMER_RETURN':
+    case 'SALE_CANCEL':
+      return 'border-emerald-500/40 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10';
+    case 'SALE':
+    case 'PURCHASE_CANCEL':
+      return 'border-violet-500/40 text-violet-600 dark:text-violet-400 bg-violet-500/10';
+    default:
+      return 'border-border text-foreground bg-muted/40';
+  }
+}
+
+export function AdjustmentsTable({
+  toolbarAction,
+  mode = 'adjustments'
+}: AdjustmentsTableProps) {
   const t = useT();
   const [adjustOpen, setAdjustOpen] = useState(false);
+  const isMovements = mode === 'movements';
+  const typeOptions = isMovements ? ALL_TYPE_OPTIONS : MANUAL_TYPE_OPTIONS;
 
   const sortableColumnIds = ['createdAt', 'quantityChange'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     'createdAt' | 'quantityChange'
-  >(sortableColumnIds, 'createdAt', ['type'], 'createdAt', 'desc');
+  >(sortableColumnIds, 'createdAt', ['type', 'productId'], 'createdAt', 'desc');
 
-  const [searchParam] = useQueryState('search', parseAsString);
-  const [productNameParam] = useQueryState('productName', parseAsString);
   const [typeParam] = useQueryState('type', parseAsString);
+  const [productIdParam] = useQueryState('productId', parseAsString);
+  const [quantityChangeParam] = useQueryState('quantityChange', parseAsString);
+  const [reasonParam] = useQueryState('reason', parseAsString);
 
   const rawType = (filters as Record<string, unknown>).type ?? typeParam;
-  let typeFilter: 'ADJUSTMENT' | 'DAMAGED' | 'LOST' | undefined;
+  let typeFilter: InventoryMovementTypeFilter | undefined;
   if (rawType) {
     const arr = Array.isArray(rawType)
       ? (rawType as string[])
       : typeof rawType === 'string'
         ? rawType.split(',')
         : [];
-    if (
-      arr.length === 1 &&
-      (arr[0] === 'ADJUSTMENT' || arr[0] === 'DAMAGED' || arr[0] === 'LOST')
-    ) {
-      typeFilter = arr[0];
+    const candidate = arr.length === 1 ? arr[0] : undefined;
+    if (candidate && ALL_TYPE_VALUES.has(candidate)) {
+      typeFilter = candidate as InventoryMovementTypeFilter;
     }
   }
+
+  const productIdFilter =
+    firstAdjustmentFilterValue((filters as Record<string, unknown>).productId) ??
+    firstAdjustmentFilterValue(productIdParam);
+  const quantityChangeFilter = parseExactQuantityChange(
+    (filters as Record<string, unknown>).quantityChange ?? quantityChangeParam
+  );
+  const reasonFilter = reasonParam?.trim() || undefined;
 
   const { data, isFetching } = useQuery(
     inventoryAdjustmentsQueryOptions({
       page: params.page,
       pageSize: params.perPage,
-      search: searchParam || productNameParam || undefined,
+      productId: productIdFilter,
       type: typeFilter,
+      quantityChange: quantityChangeFilter,
+      reason: reasonFilter,
+      scope: isMovements ? 'all' : 'manual',
       sortBy,
       sortOrder
     })
@@ -93,8 +147,8 @@ export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
       enableSorting: true
     },
     {
-      id: 'productName',
-      accessorKey: 'productName',
+      id: 'productId',
+      accessorKey: 'productId',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.product')} />
       ),
@@ -110,10 +164,9 @@ export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
       ),
       meta: {
         label: 'table.col.product',
-        placeholderKey: 'search.adjustments',
-        variant: 'text',
-        icon: Icons.search,
-        type: 'text',
+        variant: 'select',
+        icon: Icons.box,
+        asyncOptions: productAsyncFilter,
         primary: true,
         priority: 1,
         mobile: 'title'
@@ -125,25 +178,16 @@ export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
       id: 'type',
       accessorKey: 'type',
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.type')} />,
-      cell: ({ row }) => {
-        const type = row.original.type;
-        const colorClass =
-          type === 'ADJUSTMENT'
-            ? 'border-blue-500/40 text-blue-600 dark:text-blue-400 bg-blue-500/10'
-            : type === 'DAMAGED'
-              ? 'border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10'
-              : 'border-red-500/40 text-red-600 dark:text-red-400 bg-red-500/10';
-        return (
-          <Badge variant='outline' className={colorClass}>
-            {formatLabel(type)}
-          </Badge>
-        );
-      },
+      cell: ({ row }) => (
+        <Badge variant='outline' className={movementTypeBadgeClass(row.original.type)}>
+          {formatLabel(row.original.type)}
+        </Badge>
+      ),
       meta: {
         label: 'table.col.type',
         variant: 'select',
         icon: Icons.adjustments,
-        options: TYPE_OPTIONS,
+        options: typeOptions,
         priority: 2,
         mobile: 'badge'
       },
@@ -174,15 +218,18 @@ export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
       meta: {
         label: 'table.col.qty',
         variant: 'number',
+        placeholderKey: 'table.col.qty',
+        icon: Icons.box,
         priority: 1,
         mobile: 'value'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: true
     },
     {
       id: 'reason',
       accessorKey: 'reason',
+      accessorFn: (row) => row.reason ?? '',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title={t('table.col.reason')} />
       ),
@@ -193,11 +240,15 @@ export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
       ),
       meta: {
         label: 'table.col.reason',
+        placeholder: 'Reason',
+        placeholderKey: 'table.col.reason',
         variant: 'text',
-        priority: 3,
+        icon: Icons.search,
+        type: 'text',
+        priority: 1,
         mobile: 'subtitle'
       },
-      enableColumnFilter: false,
+      enableColumnFilter: true,
       enableSorting: false
     }
   ];
@@ -243,27 +294,61 @@ export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
     ]
   };
 
-  const quickFilters: QuickFilterChip[] = [
-    { id: 'all', label: t('table.all') },
-    {
-      id: 'adjustment',
-      label: 'Adjustment',
-      columnId: 'type',
-      value: ['ADJUSTMENT']
-    },
-    {
-      id: 'damaged',
-      label: 'Damaged',
-      columnId: 'type',
-      value: ['DAMAGED']
-    },
-    {
-      id: 'lost',
-      label: 'Lost',
-      columnId: 'type',
-      value: ['LOST']
-    }
-  ];
+  const quickFilters: QuickFilterChip[] = isMovements
+    ? [
+        { id: 'all', label: t('table.all') },
+        {
+          id: 'purchase',
+          label: 'Purchase',
+          columnId: 'type',
+          value: ['PURCHASE']
+        },
+        {
+          id: 'sale',
+          label: 'Sale',
+          columnId: 'type',
+          value: ['SALE']
+        },
+        {
+          id: 'adjustment',
+          label: 'Adjustment',
+          columnId: 'type',
+          value: ['ADJUSTMENT']
+        },
+        {
+          id: 'damaged',
+          label: 'Damaged',
+          columnId: 'type',
+          value: ['DAMAGED']
+        },
+        {
+          id: 'lost',
+          label: 'Lost',
+          columnId: 'type',
+          value: ['LOST']
+        }
+      ]
+    : [
+        { id: 'all', label: t('table.all') },
+        {
+          id: 'adjustment',
+          label: 'Adjustment',
+          columnId: 'type',
+          value: ['ADJUSTMENT']
+        },
+        {
+          id: 'damaged',
+          label: 'Damaged',
+          columnId: 'type',
+          value: ['DAMAGED']
+        },
+        {
+          id: 'lost',
+          label: 'Lost',
+          columnId: 'type',
+          value: ['LOST']
+        }
+      ];
 
   const { table } = useDataTable({
     data: items,
@@ -277,25 +362,32 @@ export function AdjustmentsTable({ toolbarAction }: AdjustmentsTableProps) {
     }
   });
 
-  return (
-    <>
-      <ResponsiveDataTable
-        table={table}
-        toolbarAction={
-          toolbarAction ?? (
+  const resolvedToolbar =
+    toolbarAction !== undefined
+      ? toolbarAction
+      : isMovements
+        ? null
+        : (
             <Button type='button' size='sm' onClick={() => setAdjustOpen(true)}>
               <IconPlus className='me-1.5 h-4 w-4' />
               {t('common.adjustStock')}
             </Button>
-          )
-        }
+          );
+
+  return (
+    <>
+      <ResponsiveDataTable
+        table={table}
+        toolbarAction={resolvedToolbar}
         mobileItem={mobileItem}
         detail={detail}
         quickFilters={quickFilters}
         isLoading={isFetching}
       />
 
-      {adjustOpen && <StockAdjustDialog open={adjustOpen} onOpenChange={setAdjustOpen} />}
+      {!isMovements && adjustOpen ? (
+        <StockAdjustDialog open={adjustOpen} onOpenChange={setAdjustOpen} />
+      ) : null}
     </>
   );
 }

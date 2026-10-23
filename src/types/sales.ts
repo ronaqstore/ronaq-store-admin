@@ -6,7 +6,9 @@ import type {
   ReturnPreviewInput,
   CreateReturnInput
 } from '@/lib/api/types';
-import type { TrackingType } from '@/lib/api/types';
+import type { ProductAuthenticity, TrackingType } from '@/lib/api/types';
+import type { FormNumber } from './common';
+import type { NamedEntity } from './forms';
 
 export interface SaleOverdraftPrompt {
   confirmOverdraft?: boolean;
@@ -24,9 +26,16 @@ export interface SalesListFilters {
   search?: string;
   customerId?: string;
   status?: 'ACTIVE' | 'CANCELLED';
+  payStatus?: 'PAID' | 'PARTIAL' | 'UDHAR' | 'CANCELLED';
   from?: string;
   to?: string;
-  sortBy?: 'saleDate' | 'saleNo' | 'totalAmount' | 'paid' | 'status' | 'createdAt' | 'updatedAt';
+  minTotalAmount?: number;
+  maxTotalAmount?: number;
+  minPaidAmount?: number;
+  maxPaidAmount?: number;
+  minOutstandingAmount?: number;
+  maxOutstandingAmount?: number;
+  sortBy?: 'saleDate' | 'saleNo' | 'totalAmount' | 'paid' | 'outstanding';
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -91,9 +100,28 @@ export interface SalesListClientProps {
 export interface SaleLineItem {
   product_id: string;
   quantity: number;
-  unit_price: number;
+  unit_price: FormNumber;
   inventory_unit_id?: string;
   tracking_type?: TrackingType;
+  unit_condition?: 'NEW' | 'USED';
+  warranty_days?: string;
+  authenticity?: ProductAuthenticity | null;
+}
+
+export interface SaleLineImeiUnitPick {
+  condition?: 'NEW' | 'USED';
+  effectivePrice?: number | null;
+  batteryHealth?: number | null;
+  defectNotes?: string | null;
+}
+
+export type SaleLineImeiPickerItem = NamedEntity & SaleLineImeiUnitPick;
+
+export interface SaleUnitOptionSource {
+  imei1: string;
+  imei2?: string | null;
+  condition?: string | null;
+  batteryHealth?: number | null;
 }
 
 export interface SaleLineImeiFieldProps {
@@ -101,7 +129,11 @@ export interface SaleLineImeiFieldProps {
   name: string;
   value: string;
   onBlur: () => void;
-  onValueChange: (unitId: string) => void;
+  onValueChange: (
+    unitId: string,
+    condition?: 'NEW' | 'USED',
+    unit?: SaleLineImeiUnitPick
+  ) => void;
   isInvalid: boolean;
   errors: Array<{ message?: string } | undefined>;
   excludedUnitIds: string[];
@@ -109,10 +141,14 @@ export interface SaleLineImeiFieldProps {
 
 export interface SaleFormValues {
   customer_id: string;
-  discount: number;
-  paid_now: number;
+  discount: FormNumber;
+  paid_now: FormNumber;
   lines: SaleLineItem[];
   notes?: string;
+}
+
+export interface SaleTotalsSelectorState {
+  values: SaleFormValues;
 }
 
 export interface SaleFormSubmitContext {
@@ -129,4 +165,15 @@ export interface SaleDetailClientProps {
 
 export interface SaleReceiptClientProps {
   id: string;
+}
+
+export interface SaleUnitPriceHint {
+  effectivePrice?: number | null;
+  defectNotes?: string | null;
+}
+
+export interface SaleTotalsSummaryProps {
+  subtotalRs: number;
+  totalRs: number;
+  udharRs: number;
 }

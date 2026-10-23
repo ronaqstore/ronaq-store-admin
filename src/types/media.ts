@@ -1,3 +1,7 @@
+export interface ImageLightboxOpenChangeDetails {
+  reason?: string;
+}
+
 export interface ImageLightboxProps {
   src: string | null;
   alt: string;

@@ -19,7 +19,12 @@ export default async function Page() {
   const qc = getQueryClient();
 
   if (session?.accessToken) {
-    await qc.prefetchQuery(productsQueryOptions({ page: 1, pageSize: 20 }, session.accessToken));
+    await qc.prefetchQuery(
+      productsQueryOptions(
+        { page: 1, pageSize: 20, sortBy: 'name', sortOrder: 'desc' },
+        session.accessToken
+      )
+    );
   }
 
   return (

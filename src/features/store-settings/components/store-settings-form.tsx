@@ -1,68 +1,54 @@
 'use client';
 
-import { useRef, useState, type ChangeEvent } from 'react';
+import { useState } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Icons } from '@/components/icons';
-import { PreviewableImage } from '@/components/media/previewable-image';
 import { AlertModal } from '@/components/modal/alert-modal';
-import { PLACEHOLDER_SHOP_LOGO } from '@/constants/placeholders';
 import { formatEmpty } from '@/lib/format-empty';
+import { formatPkMobileLocal } from '@/lib/auth/phone';
+import { formatOpeningHoursDisplay } from '@/lib/opening-hours';
 import { useT } from '@/i18n/use-t';
 import type { StoreProfileDetailRow } from '@/types/store-settings';
 import { storeSettingsQueryOptions } from '../api/queries';
-import {
-  useRemoveShopLogo,
-  useUpdateStoreSettings,
-  useUploadShopLogo
-} from '../api/mutations';
+import { useUpdateStoreSettings } from '../api/mutations';
 import { EditStoreProfileDialog } from './edit-store-profile-dialog';
+import { StoreBrandingCard } from './store-branding-card';
 
 export function StoreSettingsForm() {
   const t = useT();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { data } = useSuspenseQuery(storeSettingsQueryOptions());
   const updateMutation = useUpdateStoreSettings();
-  const uploadMutation = useUploadShopLogo();
-  const removeMutation = useRemoveShopLogo();
   const [profileOpen, setProfileOpen] = useState(false);
   const [enabledConfirm, setEnabledConfirm] = useState<boolean | null>(null);
 
   const profileRows: StoreProfileDetailRow[] = [
     { label: t('storeSettings.displayName'), value: formatEmpty(data.displayName) },
     { label: t('storeSettings.city'), value: formatEmpty(data.city) },
-    { label: t('storeSettings.phone'), value: formatEmpty(data.phoneNumber) },
-    { label: t('storeSettings.whatsapp'), value: formatEmpty(data.whatsappNumber) },
+    {
+      label: t('storeSettings.phone'),
+      value: formatEmpty(formatPkMobileLocal(data.phoneNumber) || null)
+    },
+    {
+      label: t('storeSettings.whatsapp'),
+      value: formatEmpty(formatPkMobileLocal(data.whatsappNumber) || null)
+    },
     { label: t('storeSettings.address'), value: formatEmpty(data.address) },
-    { label: t('storeSettings.openingHours'), value: formatEmpty(data.openingHours) },
-    { label: t('storeSettings.about'), value: formatEmpty(data.about) },
-    { label: t('storeSettings.googleMaps'), value: formatEmpty(data.googleMapsUrl) }
+    {
+      label: t('storeSettings.googleMaps'),
+      value:
+        data.latitude != null && data.longitude != null
+          ? `${Number(data.latitude).toFixed(5)}, ${Number(data.longitude).toFixed(5)}`
+          : formatEmpty(null)
+    },
+    {
+      label: t('storeSettings.openingHours'),
+      value: formatEmpty(formatOpeningHoursDisplay(data.openingHours))
+    },
+    { label: t('storeSettings.about'), value: formatEmpty(data.about) }
   ];
-
-  const handleLogoSelect = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    uploadMutation.mutate(file, {
-      onSettled: () => {
-        if (fileInputRef.current) fileInputRef.current.value = '';
-      }
-    });
-  };
-
-  const handlePickLogo = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleRemoveLogo = () => {
-    removeMutation.mutate();
-  };
-
-  const handleEnabledChange = (checked: boolean) => {
-    setEnabledConfirm(checked);
-  };
 
   const confirmEnabledChange = () => {
     if (enabledConfirm == null) return;
@@ -70,14 +56,6 @@ export function StoreSettingsForm() {
       { isEnabled: enabledConfirm },
       { onSettled: () => setEnabledConfirm(null) }
     );
-  };
-
-  const handleExactStockChange = (checked: boolean) => {
-    updateMutation.mutate({ showExactStock: checked });
-  };
-
-  const openProfileDialog = () => {
-    setProfileOpen(true);
   };
 
   return (
@@ -98,71 +76,21 @@ export function StoreSettingsForm() {
             : t('storeSettings.disableConfirmDescription')
         }
         confirmLabel={
-          enabledConfirm ? t('storeSettings.enableConfirmLabel') : t('storeSettings.disableConfirmLabel')
+          enabledConfirm
+            ? t('storeSettings.enableConfirmLabel')
+            : t('storeSettings.disableConfirmLabel')
         }
         confirmVariant={enabledConfirm ? 'default' : 'destructive'}
       />
       <div className='grid gap-4 lg:grid-cols-2'>
-        <Card className='min-w-0'>
-          <CardHeader className='flex flex-row items-start gap-4 space-y-0'>
-            <PreviewableImage
-              src={data.logoUrl}
-              alt={formatEmpty(data.displayName)}
-              className='relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border bg-muted shadow-sm'
-              imageClassName='object-cover'
-              sizes='80px'
-              fallbackSrc={PLACEHOLDER_SHOP_LOGO}
-            />
-            <div className='min-w-0 flex-1 space-y-1'>
-              <div className='flex flex-wrap items-center gap-2'>
-                <CardTitle className='text-base'>{t('storeSettings.logoTitle')}</CardTitle>
-                <Badge variant={data.isEnabled ? 'default' : 'secondary'}>
-                  {data.isEnabled ? t('status.active') : t('status.inactive')}
-                </Badge>
-              </div>
-              <CardDescription>{t('storeSettings.logoHint')}</CardDescription>
-              <p className='text-muted-foreground pt-1 text-xs'>
-                {t('storeSettings.slugLabel')}:{' '}
-                <span className='text-foreground font-medium'>{formatEmpty(data.slug)}</span>
-              </p>
-            </div>
-          </CardHeader>
-          <CardContent className='flex flex-wrap gap-2'>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={handlePickLogo}
-              isLoading={uploadMutation.isPending}
-            >
-              <Icons.upload className='me-2 h-4 w-4' />
-              {data.logoUrl ? t('storeSettings.changeLogo') : t('storeSettings.uploadLogo')}
-            </Button>
-            {data.logoUrl ? (
-              <Button
-                type='button'
-                variant='ghost'
-                onClick={handleRemoveLogo}
-                isLoading={removeMutation.isPending}
-              >
-                {t('storeSettings.removeLogo')}
-              </Button>
-            ) : null}
-            <input
-              ref={fileInputRef}
-              type='file'
-              accept='image/jpeg,image/png,image/webp'
-              className='hidden'
-              onChange={handleLogoSelect}
-            />
-          </CardContent>
-        </Card>
+        <StoreBrandingCard settings={data} />
 
-        <Card className='min-w-0'>
+        <Card className='min-w-0 lg:col-span-2'>
           <CardHeader className='pb-3'>
             <CardTitle className='text-base'>{t('storeSettings.visibilityTitle')}</CardTitle>
             <CardDescription>{t('storeSettings.visibilityDescription')}</CardDescription>
           </CardHeader>
-          <CardContent className='space-y-3'>
+          <CardContent className='space-y-3 sm:grid sm:grid-cols-2 sm:gap-3 sm:space-y-0'>
             <div className='flex items-center justify-between gap-4 rounded-lg border p-3.5'>
               <div className='min-w-0'>
                 <p className='text-sm font-medium'>{t('storeSettings.enableStore')}</p>
@@ -170,7 +98,7 @@ export function StoreSettingsForm() {
               </div>
               <Switch
                 checked={Boolean(data.isEnabled)}
-                onCheckedChange={handleEnabledChange}
+                onCheckedChange={(checked) => setEnabledConfirm(checked)}
                 disabled={updateMutation.isPending}
               />
             </div>
@@ -183,7 +111,9 @@ export function StoreSettingsForm() {
               </div>
               <Switch
                 checked={Boolean(data.showExactStock)}
-                onCheckedChange={handleExactStockChange}
+                onCheckedChange={(checked) =>
+                  updateMutation.mutate({ showExactStock: checked })
+                }
                 disabled={updateMutation.isPending}
               />
             </div>
@@ -199,7 +129,7 @@ export function StoreSettingsForm() {
               </CardTitle>
               <CardDescription>{t('storeSettings.profileCardDescription')}</CardDescription>
             </div>
-            <Button type='button' variant='outline' size='sm' onClick={openProfileDialog}>
+            <Button type='button' variant='outline' size='sm' onClick={() => setProfileOpen(true)}>
               <Icons.edit className='me-2 h-4 w-4' />
               {t('storeSettings.editProfile')}
             </Button>
