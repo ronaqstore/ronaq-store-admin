@@ -9,6 +9,7 @@ import { useRouter } from '@/i18n/navigation';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FieldGroup } from '@/components/ui/field';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
 import { isFieldMetaInvalid } from '@/lib/form-context';
@@ -45,7 +46,6 @@ import type {
 export function ProductFormPageClient({ productId }: ProductFormPageProps) {
   const isEdit = Boolean(productId);
   const t = useTranslations('dukaan.product');
-  const tRoot = useT();
 
   const productQuery = useQuery({
     ...productQueryOptions(productId ?? ''),
@@ -54,9 +54,26 @@ export function ProductFormPageClient({ productId }: ProductFormPageProps) {
 
   if (isEdit && productQuery.isLoading) {
     return (
-      <div className='text-muted-foreground flex items-center gap-2 py-12 text-sm'>
-        <Icons.spinner className='size-4 animate-spin' />
-        {tRoot('common.loading')}
+      <div className='grid gap-6 py-2 lg:grid-cols-[1fr_280px]' aria-busy='true'>
+        <div className='space-y-5'>
+          <Skeleton className='h-8 w-48' />
+          <Skeleton className='h-10 w-full rounded-md' />
+          <Skeleton className='h-10 w-full rounded-md' />
+          <div className='grid gap-4 sm:grid-cols-2'>
+            <Skeleton className='h-10 w-full rounded-md' />
+            <Skeleton className='h-10 w-full rounded-md' />
+          </div>
+          <Skeleton className='h-28 w-full rounded-md' />
+          <div className='grid gap-4 sm:grid-cols-2'>
+            <Skeleton className='h-10 w-full rounded-md' />
+            <Skeleton className='h-10 w-full rounded-md' />
+          </div>
+        </div>
+        <div className='space-y-4'>
+          <Skeleton className='aspect-square w-full rounded-xl' />
+          <Skeleton className='h-10 w-full rounded-md' />
+          <Skeleton className='h-10 w-full rounded-md' />
+        </div>
       </div>
     );
   }

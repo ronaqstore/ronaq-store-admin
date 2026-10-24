@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import { Icons } from '@/components/icons';
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
@@ -307,9 +308,10 @@ export function StoreLocationSearch({
               className='absolute inset-x-0 top-[calc(100%+0.25rem)] z-[10001] max-h-56 overflow-auto rounded-lg border border-border bg-popover p-1 shadow-md'
             >
               {searching && predictions.length === 0 ? (
-                <div className='flex items-center gap-2 px-2.5 py-2 text-xs text-muted-foreground'>
-                  <Spinner className='size-3.5' />
-                  {t('storeSettings.locationSearching')}
+                <div className='space-y-1.5 px-2.5 py-2' aria-busy='true'>
+                  <Skeleton className='h-8 w-full rounded-md' />
+                  <Skeleton className='h-8 w-[92%] rounded-md' />
+                  <Skeleton className='h-8 w-[85%] rounded-md' />
                 </div>
               ) : null}
               {predictions.map((item) => (
