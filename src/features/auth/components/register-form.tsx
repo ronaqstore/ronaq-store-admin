@@ -7,7 +7,7 @@ import { signIn } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { useAppForm } from '@/lib/form';
-import { FieldGroup } from '@/components/ui/field';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Label } from '@/components/ui/label';
@@ -18,6 +18,7 @@ import { INPUT_LIMITS } from '@/lib/input-limits';
 import { sanitizePkMobileInput } from '@/lib/validation/pk';
 import { SHOP_HOME } from '@/lib/auth/routes';
 import { registerOwnerAccountWithOptionalLogo } from '@/features/auth/api/service';
+import { MarketplaceCityCombobox } from '@/components/marketplace/marketplace-city-combobox';
 import { shopLogoSrc } from '@/constants/placeholders';
 import { prepareShopLogo } from '@/lib/prepare-image';
 import type { RegisterFormValues, RegisterFormProps } from '@/types/auth';
@@ -41,7 +42,7 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
       password: z.string().min(6, t('auth.passwordRequired')),
       confirmPassword: z.string().min(1, t('auth.confirmPasswordRequired')),
       shopName: z.string().min(2, t('auth.shopNameRequired')),
-      city: z.string().min(2, t('auth.cityRequired')),
+      city: z.string().min(1, t('auth.cityRequired')),
       address: z.string().optional()
     })
     .refine((data) => data.password === data.confirmPassword, {
@@ -237,15 +238,29 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
               />
               <form.AppField
                 name='city'
-                children={(field) => (
-                  <field.TextField
-                    label={t('auth.city')}
-                    maxLength={INPUT_LIMITS.city}
-                    placeholder={t('auth.cityPlaceholder')}
-                    startIcon={Icons.building}
-                    required
-                  />
-                )}
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>
+                        {t('auth.city')} *
+                      </FieldLabel>
+                      <MarketplaceCityCombobox
+                        id={field.name}
+                        value={field.state.value}
+                        onChange={field.handleChange}
+                        required
+                      />
+                      {isInvalid ? (
+                        <FieldError
+                          id={`${field.name}-error`}
+                          errors={field.state.meta.errors}
+                        />
+                      ) : null}
+                    </Field>
+                  );
+                }}
               />
             </div>
 
