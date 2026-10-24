@@ -12,7 +12,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { FieldGroup } from '@/components/ui/field';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
 import { sanitizePkMobileInput } from '@/lib/validation/pk';
@@ -22,6 +22,7 @@ import { createPlatformShop } from '../api/service';
 import { createShopFormSchema } from '../schemas/create-shop-schema';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { PLATFORM_SYNC_DOMAINS } from '@/lib/query/sync-domains';
+import { MarketplaceCityCombobox } from '@/components/marketplace/marketplace-city-combobox';
 import type { CreateShopDialogBodyProps, CreateShopDialogProps } from '@/types';
 
 function defaultSubscriptionEndsAt(): Date {
@@ -65,6 +66,7 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
       shopName: '',
       shopPhone: '',
       shopAddress: '',
+      city: '',
       ownerName: '',
       ownerPhone: '',
       subscriptionEndsAt: defaultSubscriptionEndsAt()
@@ -77,6 +79,7 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
         shopName: value.shopName.trim(),
         shopPhone: value.shopPhone.trim() || undefined,
         shopAddress: value.shopAddress.trim() || undefined,
+        city: value.city.trim(),
         ownerName: value.ownerName.trim(),
         ownerPhone: value.ownerPhone.trim(),
         subscriptionEndsAt: toIsoDate(value.subscriptionEndsAt)
@@ -152,6 +155,31 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
                   placeholder={t('platform.fields.shopAddressPlaceholder')}
                 />
               )}
+            </form.AppField>
+            <form.AppField name='city'>
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      {t('platform.fields.city')} *
+                    </FieldLabel>
+                    <MarketplaceCityCombobox
+                      id={field.name}
+                      value={field.state.value}
+                      onChange={field.handleChange}
+                      required
+                    />
+                    {isInvalid ? (
+                      <FieldError
+                        id={`${field.name}-error`}
+                        errors={field.state.meta.errors}
+                      />
+                    ) : null}
+                  </Field>
+                );
+              }}
             </form.AppField>
             <form.AppField name='ownerName'>
               {(field) => (

@@ -48,6 +48,7 @@ export interface CreatePlatformShopInput {
   shopName: string;
   shopPhone?: string;
   shopAddress?: string;
+  city: string;
   subscriptionEndsAt: string;
   ownerName: string;
   ownerPhone: string;

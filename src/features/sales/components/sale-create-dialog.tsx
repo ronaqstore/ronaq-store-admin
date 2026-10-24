@@ -9,9 +9,29 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useT } from '@/i18n/use-t';
 import { SaleCreateForm } from './sale-create-form';
 import type { SaleCreateDialogProps } from '@/types/sales';
+
+function SaleCreateFormSkeleton() {
+  return (
+    <div className='space-y-4' aria-busy='true'>
+      <Skeleton className='h-10 w-full rounded-md' />
+      <Skeleton className='h-10 w-full rounded-md' />
+      <div className='space-y-2 rounded-xl border border-border/70 p-3'>
+        <Skeleton className='h-12 w-full rounded-md' />
+        <Skeleton className='h-12 w-full rounded-md' />
+        <Skeleton className='h-12 w-full rounded-md' />
+      </div>
+      <div className='grid gap-3 sm:grid-cols-2'>
+        <Skeleton className='h-10 w-full rounded-md' />
+        <Skeleton className='h-10 w-full rounded-md' />
+      </div>
+      <Skeleton className='h-10 w-full rounded-md' />
+    </div>
+  );
+}
 
 export function SaleCreateDialog({ open, onOpenChange, clearDefaultQuery }: SaleCreateDialogProps) {
   const router = useRouter();
@@ -32,9 +52,7 @@ export function SaleCreateDialog({ open, onOpenChange, clearDefaultQuery }: Sale
           </DialogDescription>
         </DialogHeader>
         <div className='no-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-4'>
-          <Suspense
-            fallback={<p className='text-muted-foreground text-sm'>{t('dukaan.sale.loading')}</p>}
-          >
+          <Suspense fallback={<SaleCreateFormSkeleton />}>
             <SaleCreateForm onDone={() => onOpenChange(false)} />
           </Suspense>
         </div>

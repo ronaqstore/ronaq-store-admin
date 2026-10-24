@@ -43,6 +43,8 @@ import type {
 import { googleMapsSearchUrl } from '@/constants/api';
 import { useUpdateStoreSettings } from '../api/mutations';
 import { StoreLocationSearch } from './store-location-search';
+import { MarketplaceCityCombobox } from '@/components/marketplace/marketplace-city-combobox';
+import { resolveMarketplaceCitySuggestion } from '@/features/marketplace/lib/resolve-city-suggestion';
 
 export function EditStoreProfileDialog({
   open,
@@ -245,8 +247,8 @@ function EditStoreProfileDialogBody({
     setDisplayNameError('');
   };
 
-  const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCity(clampText(e.target.value, INPUT_LIMITS.city));
+  const handleCityChange = (next: string) => {
+    setCity(clampText(next, INPUT_LIMITS.city));
   };
 
   const handleAboutChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -263,7 +265,10 @@ function EditStoreProfileDialogBody({
   };
 
   const handleLocationCitySuggest = (suggested: string) => {
-    if (!city.trim()) setCity(suggested);
+    if (city.trim()) return;
+    void resolveMarketplaceCitySuggestion(suggested).then((matched) => {
+      if (matched) setCity(matched);
+    });
   };
 
   const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -302,11 +307,11 @@ function EditStoreProfileDialogBody({
           </div>
           <div className='space-y-2 sm:col-span-2'>
             <Label htmlFor='edit-city'>{t('storeSettings.city')}</Label>
-            <Input
+            <MarketplaceCityCombobox
               id='edit-city'
               value={city}
               onChange={handleCityChange}
-              maxLength={INPUT_LIMITS.city}
+              required
             />
           </div>
           <div className='space-y-2 sm:col-span-2'>
