@@ -12,6 +12,7 @@ export const createShopFormSchema = (t: Translator) =>
       .max(150, t('platform.validation.shopNameMax')),
     shopPhone: z.string().trim().max(20),
     shopAddress: z.string().trim().max(250),
+    city: z.string().trim().min(1, t('platform.validation.cityRequired')),
     ownerName: z
       .string()
       .trim()

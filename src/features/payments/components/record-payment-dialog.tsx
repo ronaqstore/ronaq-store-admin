@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
+import { Skeleton } from '@/components/ui/skeleton';
 import { formatPkr, fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
@@ -234,9 +234,19 @@ export function RecordPaymentDialog({
           {customerId ? (
             <div className='rounded-xl border border-border/70 bg-muted/40 p-3.5 text-sm'>
               {receivableLoading ? (
-                <div className='flex items-center gap-2 text-muted-foreground'>
-                  <Spinner className='text-primary' />
-                  <span>{t('payments.loadingReceivable')}</span>
+                <div className='space-y-2' aria-busy='true'>
+                  <div className='flex items-center justify-between gap-3'>
+                    <Skeleton className='h-4 w-28' />
+                    <Skeleton className='h-4 w-20' />
+                  </div>
+                  <div className='flex items-center justify-between gap-3'>
+                    <Skeleton className='h-3 w-36' />
+                    <Skeleton className='h-3 w-16' />
+                  </div>
+                  <div className='flex items-center justify-between gap-3'>
+                    <Skeleton className='h-3 w-24' />
+                    <Skeleton className='h-3 w-14' />
+                  </div>
                 </div>
               ) : receivableData ? (
                 <div className='space-y-2'>
