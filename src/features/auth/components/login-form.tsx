@@ -14,14 +14,20 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard';
+  const reason = searchParams.get('reason');
   const suspendedBanner =
-    searchParams.get('reason') === 'suspended' ? t('auth.shopSuspendedLogout') : null;
+    reason === 'suspended'
+      ? t('auth.shopSuspendedLogout')
+      : reason === 'session'
+        ? t('auth.sessionExpiredLogout')
+        : null;
 
   const handleLogin = async (values: LoginValues): Promise<string | null> => {
     const result = await signIn('credentials', {
       phone: normalizePhone(values.phone),
       password: values.password,
       isPlatformAdmin: 'false',
+      rememberMe: values.rememberMe ? 'true' : 'false',
       redirect: false
     });
 

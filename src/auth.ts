@@ -3,19 +3,21 @@ import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
 import { authConfig } from '@/auth.config';
 import { isValidPkMobile, normalizePhone } from '@/lib/auth/phone';
+import { sessionTtlSeconds } from '@/lib/auth/session-ttl';
 import type { LoginResult, AuthResponseData, AuthResponseBody } from '@/types/auth';
 import { API_BASE_URL } from '@/constants/api';
 
 async function executeAuthPost(
   endpoint: string,
   phone: string,
-  password: string
+  password: string,
+  rememberMe: boolean
 ): Promise<AuthResponseData | null> {
   try {
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, password })
+      body: JSON.stringify({ phone, password, rememberMe })
     });
 
     if (!res.ok) return null;
@@ -29,8 +31,12 @@ async function executeAuthPost(
   }
 }
 
-async function tryOwnerLogin(phone: string, password: string): Promise<LoginResult | null> {
-  const data = await executeAuthPost('/auth/login', phone, password);
+async function tryOwnerLogin(
+  phone: string,
+  password: string,
+  rememberMe: boolean
+): Promise<LoginResult | null> {
+  const data = await executeAuthPost('/auth/login', phone, password, rememberMe);
   if (!data?.accessToken || !data.user) return null;
 
   return {
@@ -41,12 +47,23 @@ async function tryOwnerLogin(phone: string, password: string): Promise<LoginResu
     shopId: data.shopId ?? null,
     shopName: data.shop?.name ?? null,
     accessToken: data.accessToken,
-    subscriptionEndsAt: data.shop?.subscriptionEndsAt ?? null
+    subscriptionEndsAt: data.shop?.subscriptionEndsAt ?? null,
+    rememberMe,
+    sessionExpiresAt: Math.floor(Date.now() / 1000) + sessionTtlSeconds(rememberMe)
   };
 }
 
-async function tryPlatformAdminLogin(phone: string, password: string): Promise<LoginResult | null> {
-  const data = await executeAuthPost('/auth/platform-admin/login', phone, password);
+async function tryPlatformAdminLogin(
+  phone: string,
+  password: string,
+  rememberMe: boolean
+): Promise<LoginResult | null> {
+  const data = await executeAuthPost(
+    '/auth/platform-admin/login',
+    phone,
+    password,
+    rememberMe
+  );
   if (!data?.accessToken || !data.admin) return null;
 
   return {
@@ -57,14 +74,17 @@ async function tryPlatformAdminLogin(phone: string, password: string): Promise<L
     shopId: null,
     shopName: null,
     accessToken: data.accessToken,
-    subscriptionEndsAt: null
+    subscriptionEndsAt: null,
+    rememberMe,
+    sessionExpiresAt: Math.floor(Date.now() / 1000) + sessionTtlSeconds(rememberMe)
   };
 }
 
 const credentialsSchema = z.object({
   phone: z.string().refine(isValidPkMobile, 'Enter a valid mobile number'),
   password: z.string().min(1),
-  isPlatformAdmin: z.enum(['true', 'false']).optional()
+  isPlatformAdmin: z.enum(['true', 'false']).optional(),
+  rememberMe: z.enum(['true', 'false']).optional()
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -75,20 +95,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       credentials: {
         phone: { label: 'Phone', type: 'tel' },
         password: { label: 'Password', type: 'password' },
-        isPlatformAdmin: { label: 'Is Platform Admin', type: 'hidden' }
+        isPlatformAdmin: { label: 'Is Platform Admin', type: 'hidden' },
+        rememberMe: { label: 'Remember Me', type: 'hidden' }
       },
       async authorize(raw) {
         const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
 
         const phone = normalizePhone(parsed.data.phone);
-        const { password, isPlatformAdmin } = parsed.data;
+        const { password, isPlatformAdmin, rememberMe: rememberRaw } = parsed.data;
+        const rememberMe = rememberRaw === 'true';
 
         if (isPlatformAdmin === 'true') {
-          return await tryPlatformAdminLogin(phone, password);
+          return await tryPlatformAdminLogin(phone, password, rememberMe);
         }
 
-        return await tryOwnerLogin(phone, password);
+        return await tryOwnerLogin(phone, password, rememberMe);
       }
     })
   ]

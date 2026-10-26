@@ -1,7 +1,28 @@
-import { QueryClient, defaultShouldDehydrateQuery, isServer } from '@tanstack/react-query';
+import {
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  defaultShouldDehydrateQuery,
+  isServer
+} from '@tanstack/react-query';
+import { ApiError } from '@/lib/api/types';
+import { signOutForUnauthorized } from '@/lib/auth/force-sign-out';
+
+function handleAuthError(error: unknown) {
+  if (typeof window === 'undefined') return;
+  if (error instanceof ApiError && error.statusCode === 401) {
+    void signOutForUnauthorized();
+  }
+}
 
 function makeQueryClient() {
   return new QueryClient({
+    queryCache: new QueryCache({
+      onError: handleAuthError
+    }),
+    mutationCache: new MutationCache({
+      onError: handleAuthError
+    }),
     defaultOptions: {
       queries: {
         staleTime: 30 * 1000,

@@ -28,13 +28,15 @@ export function BaseLoginForm({
       .string()
       .min(1, t('auth.phoneRequired'))
       .refine(isValidPkMobile, t('auth.phoneInvalid')),
-    password: z.string().min(minPasswordLength, t('auth.passwordRequired'))
+    password: z.string().min(minPasswordLength, t('auth.passwordRequired')),
+    rememberMe: z.boolean()
   });
 
   const form = useAppForm({
     defaultValues: {
       phone: '',
-      password: ''
+      password: '',
+      rememberMe: false
     } as LoginValues,
     validators: {
       onSubmit: loginSchema
@@ -102,6 +104,10 @@ export function BaseLoginForm({
                   required
                 />
               )}
+            />
+            <form.AppField
+              name='rememberMe'
+              children={(field) => <field.CheckboxField label={t('auth.rememberMe')} />}
             />
           </FieldGroup>
 
