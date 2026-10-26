@@ -1433,6 +1433,7 @@
   },
   "platform": {
     "totalShops": "Total Shops",
+    "trialShops": "Trial Shops",
     "active": "Active",
     "onTrial": "On Trial",
     "expired": "Expired",

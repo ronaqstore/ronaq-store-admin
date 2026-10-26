@@ -18,6 +18,11 @@ const KPI_LINKS = [
     href: '/dashboard/platform/shops?accessStatus=ACTIVE'
   },
   {
+    key: 'trialShops',
+    labelKey: 'platform.trialShops',
+    href: '/dashboard/platform/shops?accessStatus=ACTIVE'
+  },
+  {
     key: 'expiredShops',
     labelKey: 'status.expired',
     href: '/dashboard/platform/shops?accessStatus=EXPIRED'
@@ -40,7 +45,7 @@ export function PlatformDashboard() {
         <p className='text-muted-foreground text-sm'>{t('platform.platformOverviewDescription')}</p>
       </div>
 
-      <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
+      <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'>
         {KPI_LINKS.map((item) => (
           <Link key={item.key} href={item.href} className='block'>
             <Card className='hover:bg-muted/40 transition-colors'>

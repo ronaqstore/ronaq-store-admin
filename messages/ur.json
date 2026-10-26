@@ -1433,6 +1433,7 @@
   },
   "platform": {
     "totalShops": "کل دکانیں",
+    "trialShops": "ٹرائل دکانیں",
     "active": "فعال",
     "onTrial": "ٹرائل پر",
     "expired": "ختم ہو چکی",

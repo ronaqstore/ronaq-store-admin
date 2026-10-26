@@ -22,6 +22,7 @@ export interface PlatformShop {
 export interface PlatformOverview {
   totalShops: number;
   activeShops: number;
+  trialShops: number;
   expiredShops: number;
   suspendedShops: number;
 }

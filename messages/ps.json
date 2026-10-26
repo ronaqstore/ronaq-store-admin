@@ -1433,6 +1433,7 @@
   },
   "platform": {
     "totalShops": "ټول دوکانونه",
+    "trialShops": "د ازمېیله دوکانونه",
     "active": "فعال",
     "onTrial": "ازمېیله",
     "expired": "ختم شوی",
