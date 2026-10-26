@@ -1023,6 +1023,7 @@
     "confirmPasswordRequired": "پاس ورڈ کی تصدیق درکار ہے",
     "passwordMismatch": "پاس ورڈ مماثل نہیں ہیں",
     "rememberMe": "۳۰ دن تک مجھے یاد رکھیں",
+    "turnstileRequired": "براہ کرم انسانی تصدیق مکمل کریں۔",
     "invalidCredentials": "موبائل نمبر یا پاس ورڈ درست نہیں ہے۔",
     "demoLabel": "ڈیمو کریڈینشلز",
     "orConjunction": "یا",

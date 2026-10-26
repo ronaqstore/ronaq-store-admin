@@ -1023,6 +1023,7 @@
     "confirmPasswordRequired": "Confirm password is required",
     "passwordMismatch": "Passwords do not match",
     "rememberMe": "Remember me for 30 days",
+    "turnstileRequired": "Please complete the human verification check.",
     "invalidCredentials": "The phone number or password is incorrect.",
     "demoLabel": "Demo credentials",
     "orConjunction": "or",

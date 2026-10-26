@@ -22,6 +22,7 @@ export function PlatformAdminLoginForm() {
       password: values.password,
       isPlatformAdmin: 'true',
       rememberMe: values.rememberMe ? 'true' : 'false',
+      turnstileToken: values.turnstileToken || '',
       redirect: false
     });
 

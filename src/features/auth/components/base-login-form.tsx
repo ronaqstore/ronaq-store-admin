@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { z } from 'zod';
 import { useTranslations } from 'next-intl';
 import { useAppForm } from '@/lib/form';
@@ -10,6 +10,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Icons } from '@/components/icons';
 import { isValidPkMobile } from '@/lib/auth/phone';
 import { INPUT_LIMITS } from '@/lib/input-limits';
+import {
+  isTurnstileEnabled,
+  TurnstileWidget
+} from '@/components/auth/turnstile-widget';
 import type { BaseLoginFormProps, LoginValues } from '@/types/auth';
 
 export function BaseLoginForm({
@@ -22,6 +26,12 @@ export function BaseLoginForm({
 }: BaseLoginFormProps) {
   const t = useTranslations();
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileOn = isTurnstileEnabled();
+
+  const handleTokenChange = useCallback((token: string | null) => {
+    setTurnstileToken(token);
+  }, []);
 
   const loginSchema = z.object({
     phone: z
@@ -43,7 +53,14 @@ export function BaseLoginForm({
     },
     onSubmit: async ({ value }) => {
       setError(null);
-      const errorMessage = await onSubmit(value);
+      if (turnstileOn && !turnstileToken) {
+        setError(t('auth.turnstileRequired'));
+        return;
+      }
+      const errorMessage = await onSubmit({
+        ...value,
+        turnstileToken: turnstileToken ?? ''
+      });
       if (errorMessage) {
         setError(errorMessage);
       }
@@ -109,10 +126,11 @@ export function BaseLoginForm({
               name='rememberMe'
               children={(field) => <field.CheckboxField label={t('auth.rememberMe')} />}
             />
+            {turnstileOn ? <TurnstileWidget onTokenChange={handleTokenChange} /> : null}
           </FieldGroup>
 
           <form.AppForm>
-            <form.SubmitButton className='w-full'>
+            <form.SubmitButton className='w-full' disabled={turnstileOn && !turnstileToken}>
               <Icons.login className='size-4' />
               {t('auth.signIn')}
             </form.SubmitButton>

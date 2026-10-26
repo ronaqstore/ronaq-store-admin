@@ -45,11 +45,12 @@ const baseConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self' data:",
               "connect-src 'self' https: http://localhost:* http://127.0.0.1:* ws: wss:",
+              "frame-src https://challenges.cloudflare.com",
               "frame-ancestors 'self'",
               "base-uri 'self'",
               "form-action 'self'",

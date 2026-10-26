@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import Image from 'next/image';
 import { z } from 'zod';
 import { signIn } from 'next-auth/react';
@@ -19,6 +19,10 @@ import { sanitizePkMobileInput } from '@/lib/validation/pk';
 import { SHOP_HOME } from '@/lib/auth/routes';
 import { registerOwnerAccountWithOptionalLogo } from '@/features/auth/api/service';
 import { MarketplaceCityCombobox } from '@/components/marketplace/marketplace-city-combobox';
+import {
+  isTurnstileEnabled,
+  TurnstileWidget
+} from '@/components/auth/turnstile-widget';
 import { shopLogoSrc } from '@/constants/placeholders';
 import { prepareShopLogo } from '@/lib/prepare-image';
 import type { RegisterFormValues, RegisterFormProps } from '@/types/auth';
@@ -31,6 +35,11 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
   const [success, setSuccess] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileOn = isTurnstileEnabled();
+  const handleTokenChange = useCallback((token: string | null) => {
+    setTurnstileToken(token);
+  }, []);
 
   const registerSchema = z
     .object({
@@ -67,6 +76,11 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
       setError(null);
       setSuccess(null);
 
+      if (turnstileOn && !turnstileToken) {
+        setError(t('auth.turnstileRequired'));
+        return;
+      }
+
       const normalizedPhone = normalizePhone(value.phone);
 
       try {
@@ -77,7 +91,8 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
             password: value.password,
             shopName: value.shopName.trim(),
             city: value.city.trim(),
-            address: value.address?.trim() || undefined
+            address: value.address?.trim() || undefined,
+            turnstileToken: turnstileToken ?? undefined
           },
           logoFile
         );
@@ -87,6 +102,7 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
         const signInResult = await signIn('credentials', {
           phone: normalizedPhone,
           password: value.password,
+          turnstileToken: turnstileToken || '',
           redirect: false
         });
 
@@ -317,10 +333,14 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
                 />
               </div>
             </div>
+
+            {turnstileOn ? <TurnstileWidget onTokenChange={handleTokenChange} /> : null}
           </FieldGroup>
 
           <form.AppForm>
-            <form.SubmitButton className='w-full'>{t('auth.registerButton')}</form.SubmitButton>
+            <form.SubmitButton className='w-full' disabled={turnstileOn && !turnstileToken}>
+              {t('auth.registerButton')}
+            </form.SubmitButton>
           </form.AppForm>
 
           {footer}

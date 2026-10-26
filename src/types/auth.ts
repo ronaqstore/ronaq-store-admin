@@ -19,6 +19,7 @@ export interface LoginValues {
   phone: string;
   password: string;
   rememberMe: boolean;
+  turnstileToken?: string;
 }
 
 export interface BaseLoginFormProps {
@@ -37,6 +38,7 @@ export interface RegisterValues {
   shopName: string;
   city: string;
   address?: string;
+  turnstileToken?: string;
 }
 
 export interface RegisterFormValues extends RegisterValues {

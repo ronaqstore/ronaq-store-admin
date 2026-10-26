@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { authConfig } from '@/auth.config';
 import { isValidPkMobile, normalizePhone } from '@/lib/auth/phone';
 import { sessionTtlSeconds } from '@/lib/auth/session-ttl';
+import { verifyTurnstileToken } from '@/lib/auth/verify-turnstile';
 import type { LoginResult, AuthResponseData, AuthResponseBody } from '@/types/auth';
 import { API_BASE_URL } from '@/constants/api';
 
@@ -11,13 +12,19 @@ async function executeAuthPost(
   endpoint: string,
   phone: string,
   password: string,
-  rememberMe: boolean
+  rememberMe: boolean,
+  turnstileToken: string
 ): Promise<AuthResponseData | null> {
   try {
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, password, rememberMe })
+      body: JSON.stringify({
+        phone,
+        password,
+        rememberMe,
+        ...(turnstileToken ? { turnstileToken } : {})
+      })
     });
 
     if (!res.ok) return null;
@@ -34,9 +41,16 @@ async function executeAuthPost(
 async function tryOwnerLogin(
   phone: string,
   password: string,
-  rememberMe: boolean
+  rememberMe: boolean,
+  turnstileToken: string
 ): Promise<LoginResult | null> {
-  const data = await executeAuthPost('/auth/login', phone, password, rememberMe);
+  const data = await executeAuthPost(
+    '/auth/login',
+    phone,
+    password,
+    rememberMe,
+    turnstileToken
+  );
   if (!data?.accessToken || !data.user) return null;
 
   return {
@@ -56,13 +70,15 @@ async function tryOwnerLogin(
 async function tryPlatformAdminLogin(
   phone: string,
   password: string,
-  rememberMe: boolean
+  rememberMe: boolean,
+  turnstileToken: string
 ): Promise<LoginResult | null> {
   const data = await executeAuthPost(
     '/auth/platform-admin/login',
     phone,
     password,
-    rememberMe
+    rememberMe,
+    turnstileToken
   );
   if (!data?.accessToken || !data.admin) return null;
 
@@ -84,7 +100,8 @@ const credentialsSchema = z.object({
   phone: z.string().refine(isValidPkMobile, 'Enter a valid mobile number'),
   password: z.string().min(1),
   isPlatformAdmin: z.enum(['true', 'false']).optional(),
-  rememberMe: z.enum(['true', 'false']).optional()
+  rememberMe: z.enum(['true', 'false']).optional(),
+  turnstileToken: z.string().optional()
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -96,21 +113,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         phone: { label: 'Phone', type: 'tel' },
         password: { label: 'Password', type: 'password' },
         isPlatformAdmin: { label: 'Is Platform Admin', type: 'hidden' },
-        rememberMe: { label: 'Remember Me', type: 'hidden' }
+        rememberMe: { label: 'Remember Me', type: 'hidden' },
+        turnstileToken: { label: 'Turnstile', type: 'hidden' }
       },
       async authorize(raw) {
         const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
 
         const phone = normalizePhone(parsed.data.phone);
-        const { password, isPlatformAdmin, rememberMe: rememberRaw } = parsed.data;
+        const {
+          password,
+          isPlatformAdmin,
+          rememberMe: rememberRaw,
+          turnstileToken = ''
+        } = parsed.data;
         const rememberMe = rememberRaw === 'true';
 
+        const turnstileOk = await verifyTurnstileToken(turnstileToken);
+        if (!turnstileOk) return null;
+
         if (isPlatformAdmin === 'true') {
-          return await tryPlatformAdminLogin(phone, password, rememberMe);
+          return await tryPlatformAdminLogin(phone, password, rememberMe, turnstileToken);
         }
 
-        return await tryOwnerLogin(phone, password, rememberMe);
+        return await tryOwnerLogin(phone, password, rememberMe, turnstileToken);
       }
     })
   ]

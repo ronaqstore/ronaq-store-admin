@@ -28,6 +28,7 @@ export function LoginForm() {
       password: values.password,
       isPlatformAdmin: 'false',
       rememberMe: values.rememberMe ? 'true' : 'false',
+      turnstileToken: values.turnstileToken || '',
       redirect: false
     });
 

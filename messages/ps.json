@@ -1023,6 +1023,7 @@
     "confirmPasswordRequired": "د پټنوم تایید اړین دی",
     "passwordMismatch": "پټنومونه سره سمون نه خوري",
     "rememberMe": "۳۰ ورځې زه په یاد وساتئ",
+    "turnstileRequired": "مهرباني وکړئ د انساني تایید چک بشپړ کړئ.",
     "invalidCredentials": "د موبایل شمېره یا پټنوم ناسم دی.",
     "demoLabel": "د ډیمو کریډیښنالیک",
     "orConjunction": "یا",
