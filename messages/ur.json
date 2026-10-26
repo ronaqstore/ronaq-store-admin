@@ -1008,7 +1008,14 @@
     "supplierPayable": "دین",
     "todayExpenses": "آج کے اخراجات",
     "lowStock": "کم اسٹاک پروڈکٹس",
-    "cashPosition": "کیش پوزیشن"
+    "cashPosition": "کیش پوزیشن",
+    "alerts": {
+      "visibilityTitle": "آپ کی دکان گاہکوں سے پوشیدہ ہے",
+      "visibilityBody": "روناق اسٹور پر Explore Shops میں نظر آنے کے لیے کم از کم ایک پروڈکٹ شائع کریں۔ اس سے پہلے گاہک آپ کی دکان آن لائن نہیں دیکھ سکیں گے۔",
+      "visibilityCta": "پروڈکٹ شامل کریں",
+      "trialTitle": "آپ کا مفت ٹرائل فعال ہے",
+      "trialBody": "{days, plural, one {# دن باقی} other {# دن باقی}} — {date} تک مکمل رسائی۔ ٹرائل کے دوران پروڈکٹس شامل کریں اور اپنی آن لائن دکان کھولیں۔"
+    }
   },
   "auth": {
     "welcomeBack": "واپس خوش آمدید",

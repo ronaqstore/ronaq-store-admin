@@ -1008,7 +1008,14 @@
     "supplierPayable": "Due",
     "todayExpenses": "Today's Expenses",
     "lowStock": "Low-stock Products",
-    "cashPosition": "Cash Position"
+    "cashPosition": "Cash Position",
+    "alerts": {
+      "visibilityTitle": "Your shop is hidden from customers",
+      "visibilityBody": "Publish at least one product to appear in Explore Shops on Ronaq Store. Until then, customers will not see your shop online.",
+      "visibilityCta": "Add product",
+      "trialTitle": "Your free trial is active",
+      "trialBody": "{days, plural, one {# day remaining} other {# days remaining}} — full access until {date}. List products and open your storefront while your trial is running."
+    }
   },
   "auth": {
     "welcomeBack": "Welcome back",

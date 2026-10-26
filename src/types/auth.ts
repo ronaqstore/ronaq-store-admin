@@ -70,6 +70,22 @@ export interface AuthShopSummary {
   subscriptionEndsAt?: string | null;
 }
 
+export interface AuthMeShop {
+  id: string;
+  name: string;
+  shopStatus: string;
+  subscriptionEndsAt: string;
+}
+
+export interface AuthMeResponse {
+  id: string;
+  name: string;
+  phone: string;
+  role: string;
+  status: string;
+  shop: AuthMeShop;
+}
+
 export interface AuthResponseData {
   accessToken?: string;
   user?: AuthUserSummary;

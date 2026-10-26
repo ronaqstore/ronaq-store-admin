@@ -16,6 +16,11 @@ export interface DashboardKpiLink {
   href: string;
 }
 
+export interface ShopVisibilityAlertsProps {
+  publishedProductTotal: number;
+  subscriptionEndsAt: string | null;
+}
+
 export interface RowAction {
   label: string;
   href?: string;

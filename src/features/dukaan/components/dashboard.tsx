@@ -1,11 +1,14 @@
 'use client';
 
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Link } from '@/i18n/navigation';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { dashboardQueryOptions } from '../api/queries';
+import { productsQueryOptions } from '@/features/products/api/queries';
+import { authMeQueryOptions } from '@/features/auth/api/queries';
+import { ShopVisibilityAlerts } from './shop-visibility-alerts';
 import { useT } from '@/i18n/use-t';
 import type { DashboardKpiLink } from '@/types/dukaan';
 
@@ -23,10 +26,24 @@ export function DukaanDashboard() {
   const t = useT();
   const { data: session } = useSession();
   const { data: kpis } = useSuspenseQuery(dashboardQueryOptions());
+  const { data: publishedProducts } = useSuspenseQuery(
+    productsQueryOptions({
+      page: 1,
+      pageSize: 1,
+      isPublished: true,
+      isActive: true
+    })
+  );
+  const { data: me } = useQuery({
+    ...authMeQueryOptions(),
+    enabled: Boolean(session?.user?.role) && session?.user?.role !== 'SUPER_ADMIN',
+    staleTime: 60_000
+  });
   const userName = session?.user?.name ?? '';
   const shopName = session?.user?.shopName ?? '';
   const firstName = userName.split(' ')[0] || userName || t('user.user');
-
+  const subscriptionEndsAt =
+    me?.shop?.subscriptionEndsAt ?? session?.user?.subscriptionEndsAt ?? null;
 
   return (
     <div className='flex flex-1 flex-col gap-4'>
@@ -38,6 +55,11 @@ export function DukaanDashboard() {
           {t('dashboard.snapshot', { shop: shopName })}
         </p>
       </div>
+
+      <ShopVisibilityAlerts
+        publishedProductTotal={publishedProducts.total ?? 0}
+        subscriptionEndsAt={subscriptionEndsAt}
+      />
 
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
         {KPI_LINKS.map((item) => {

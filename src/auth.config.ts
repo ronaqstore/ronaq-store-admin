@@ -31,6 +31,8 @@ export const authConfig = {
       }
       session.user.shopId = (token.shopId as string | null | undefined) ?? null;
       session.user.shopName = (token.shopName as string | null | undefined) ?? null;
+      session.user.subscriptionEndsAt =
+        (token.subscriptionEndsAt as string | null | undefined) ?? null;
       session.accessToken = token.accessToken as string;
       return session;
     },

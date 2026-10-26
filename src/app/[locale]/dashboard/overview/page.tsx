@@ -1,6 +1,7 @@
 import PageContainer from '@/components/layout/page-container';
 import { DukaanDashboard } from '@/features/dukaan/components/dashboard';
 import { dashboardQueryOptions } from '@/features/dukaan/api/queries';
+import { productsQueryOptions } from '@/features/products/api/queries';
 import { getQueryClient } from '@/lib/query-client';
 import { auth } from '@/auth';
 import { PLATFORM_HOME } from '@/lib/auth/routes';
@@ -37,7 +38,15 @@ export default async function OverviewPage() {
   const token = session?.accessToken;
 
   if (token) {
-    await queryClient.prefetchQuery(dashboardQueryOptions(token));
+    await Promise.all([
+      queryClient.prefetchQuery(dashboardQueryOptions(token)),
+      queryClient.prefetchQuery(
+        productsQueryOptions(
+          { page: 1, pageSize: 1, isPublished: true, isActive: true },
+          token
+        )
+      )
+    ]);
   }
 
   return (

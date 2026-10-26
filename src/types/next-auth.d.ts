@@ -17,6 +17,7 @@ declare module 'next-auth' {
       role: AuthAccountRole;
       shopId: string | null;
       shopName: string | null;
+      subscriptionEndsAt: string | null;
     } & DefaultSession['user'];
   }
 }
