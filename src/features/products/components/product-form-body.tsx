@@ -14,7 +14,10 @@ import { INPUT_LIMITS } from '@/lib/input-limits';
 import { isFieldMetaInvalid } from '@/lib/form-context';
 import { isValidationApiError } from '@/lib/api/is-validation-error';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
-import type { ProductImageDTO } from '@/lib/api/types';
+import { isAppleBrandName } from '@/lib/device-family';
+import { CategoryDialog } from '@/features/categories';
+import { BrandDialog } from '@/features/brands';
+import type { CategoryDTO, BrandDTO, ProductImageDTO } from '@/lib/api/types';
 import { FormEntitySelect } from '@/components/forms/form-entity-select';
 import { Icons } from '@/components/icons';
 
@@ -34,7 +37,6 @@ import {
   fetchCategorySelectPage,
   fetchBrandSelectPage
 } from '../api/entity-picker-fetchers';
-import { isAppleBrandName } from '@/lib/device-family';
 import type { NamedEntity } from '@/types';
 import type {
   PendingProductImageFile,
@@ -58,6 +60,20 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
   const [pendingFiles, setPendingFiles] = useState<PendingProductImageFile[]>([]);
   const [formApiError, setFormApiError] = useState<string | null>(null);
   const [brandLabel, setBrandLabel] = useState(product?.brandName ?? '');
+
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [brandDialogOpen, setBrandDialogOpen] = useState(false);
+  const [quickAddName, setQuickAddName] = useState('');
+
+  const handleQuickAddCategory = (name: string) => {
+    setQuickAddName(name);
+    setCategoryDialogOpen(true);
+  };
+
+  const handleQuickAddBrand = (name: string) => {
+    setQuickAddName(name);
+    setBrandDialogOpen(true);
+  };
 
   useEffect(() => {
     if (imagesData?.items) setImages(imagesData.items);
@@ -143,6 +159,7 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
   const saving = createProduct.isPending || updateProduct.isPending;
 
   return (
+    <>
     <form className='w-full' onSubmit={handleSubmit}>
       {formApiError ? (
         <Alert variant='destructive' className='mb-6'>
@@ -189,6 +206,8 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
                       }
                       placeholder={t('selectCategory')}
                       searchPlaceholder={t('searchCategories')}
+                      onQuickAdd={handleQuickAddCategory}
+                      addNewLabel={tRoot('common.addCategory')}
                     />
                   );
                 }}
@@ -217,6 +236,8 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
                       }
                       placeholder={t('selectBrand')}
                       searchPlaceholder={t('searchBrands')}
+                      onQuickAdd={handleQuickAddBrand}
+                      addNewLabel={tRoot('common.addBrand')}
                     />
                   );
                 }}
@@ -427,5 +448,16 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
         />
       </div>
     </form>
+    <CategoryDialog
+      open={categoryDialogOpen}
+      onOpenChange={setCategoryDialogOpen}
+      category={quickAddName ? ({ id: '', name: quickAddName } as CategoryDTO) : undefined}
+    />
+    <BrandDialog
+      open={brandDialogOpen}
+      onOpenChange={setBrandDialogOpen}
+      brand={quickAddName ? ({ id: '', name: quickAddName } as BrandDTO) : undefined}
+    />
+    </>
   );
 }

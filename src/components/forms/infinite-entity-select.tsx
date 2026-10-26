@@ -36,7 +36,9 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
   activeOnly = true,
   disabled,
   className,
-  extraItems = EMPTY_EXTRA_ITEMS
+  extraItems = EMPTY_EXTRA_ITEMS,
+  onQuickAdd,
+  addNewLabel
 }: InfiniteEntitySelectProps<T>) {
   const t = useT();
   const [open, setOpen] = React.useState(false);
@@ -125,6 +127,11 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
     setOpen(false);
   };
 
+  const handleQuickAdd = () => {
+    onQuickAdd?.(debouncedSearch);
+    setOpen(false);
+  };
+
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger
@@ -189,6 +196,20 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
               </>
             )}
           </CommandList>
+          {onQuickAdd ? (
+            <div className='border-border/60 border-t p-1'>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={handleQuickAdd}
+                className='text-primary hover:bg-primary/10 w-full justify-start text-xs font-normal'
+              >
+                <Icons.add className='me-1.5 size-3.5' />
+                <span>{addNewLabel ?? t('common.add')}</span>
+              </Button>
+            </div>
+          ) : null}
         </Command>
       </PopoverContent>
     </Popover>

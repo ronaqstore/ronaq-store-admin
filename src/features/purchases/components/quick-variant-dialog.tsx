@@ -37,6 +37,9 @@ import {
   fetchBrandSelectPage,
   fetchCategorySelectPage
 } from '@/features/products/api/entity-picker-fetchers';
+import { CategoryDialog } from '@/features/categories';
+import { BrandDialog } from '@/features/brands';
+import type { BrandDTO, CategoryDTO } from '@/lib/api/types';
 import type { NamedEntity } from '@/types/forms';
 import type {
   QuickVariantDialogBodyProps,
@@ -78,6 +81,19 @@ function QuickVariantDialogBody({
   const [formApiError, setFormApiError] = useState<string | null>(null);
   const [brandLabel, setBrandLabel] = useState('');
   const [nameTouched, setNameTouched] = useState(false);
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [brandDialogOpen, setBrandDialogOpen] = useState(false);
+  const [quickAddName, setQuickAddName] = useState('');
+
+  const handleQuickAddCategory = (name: string) => {
+    setQuickAddName(name);
+    setCategoryDialogOpen(true);
+  };
+
+  const handleQuickAddBrand = (name: string) => {
+    setQuickAddName(name);
+    setBrandDialogOpen(true);
+  };
 
   const create = useMutation({
     mutationFn: createProduct
@@ -164,6 +180,7 @@ function QuickVariantDialogBody({
   };
 
   return (
+    <>
     <DialogContent className='flex max-h-[90vh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-lg'>
       <DialogHeader className='shrink-0 px-4 pt-4 pe-12'>
         <DialogTitle>{tRoot('dukaan.purchase.quickVariantTitle')}</DialogTitle>
@@ -220,6 +237,8 @@ function QuickVariantDialogBody({
                     fetchPage={fetchCategorySelectPage}
                     placeholder={t('selectCategory')}
                     searchPlaceholder={t('searchCategories')}
+                    onQuickAdd={handleQuickAddCategory}
+                    addNewLabel={tRoot('common.addCategory')}
                   />
                 );
               }}
@@ -242,6 +261,8 @@ function QuickVariantDialogBody({
                     fetchPage={fetchBrandSelectPage}
                     placeholder={t('selectBrand')}
                     searchPlaceholder={t('searchBrands')}
+                    onQuickAdd={handleQuickAddBrand}
+                    addNewLabel={tRoot('common.addBrand')}
                   />
                 );
               }}
@@ -361,5 +382,16 @@ function QuickVariantDialogBody({
         </DialogFooter>
       </form>
     </DialogContent>
+    <CategoryDialog
+      open={categoryDialogOpen}
+      onOpenChange={setCategoryDialogOpen}
+      category={quickAddName ? ({ id: '', name: quickAddName } as CategoryDTO) : undefined}
+    />
+    <BrandDialog
+      open={brandDialogOpen}
+      onOpenChange={setBrandDialogOpen}
+      brand={quickAddName ? ({ id: '', name: quickAddName } as BrandDTO) : undefined}
+    />
+    </>
   );
 }

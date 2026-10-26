@@ -577,6 +577,8 @@
       "isPublished": "Publish online",
       "createFailed": "Failed to create product",
       "updateFailed": "Failed to update product",
+      "quickAddCategory": "Add \"{name}\"",
+      "quickAddBrand": "Add \"{name}\"",
       "ramPlaceholder": "8GB",
       "storagePlaceholder": "256GB",
       "onlineStoreSettings": "Online store",

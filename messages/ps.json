@@ -577,6 +577,8 @@
       "isPublished": "په آنلاین پلورنځي کې خپرول",
       "createFailed": "د محصول په جوړولو کې تېروتنه",
       "updateFailed": "د محصول په تازه کولو کې تېروتنه",
+      "quickAddCategory": "\"{name}\" شامل کړئ",
+      "quickAddBrand": "\"{name}\" شامل کړئ",
       "ramPlaceholder": "8GB",
       "storagePlaceholder": "256GB",
       "onlineStoreSettings": "د آنلاین پلورنځي ترتیبات",

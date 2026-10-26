@@ -577,6 +577,8 @@
       "isPublished": "آن لائن اسٹور پر شائع کریں",
       "createFailed": "پروڈکٹ بنانے میں ناکامی",
       "updateFailed": "پروڈکٹ اپ ڈیٹ کرنے میں ناکامی",
+      "quickAddCategory": "\"{name}\" شامل کریں",
+      "quickAddBrand": "\"{name}\" شامل کریں",
       "ramPlaceholder": "8GB",
       "storagePlaceholder": "256GB",
       "onlineStoreSettings": "آن لائن اسٹور کی ترتیبات",
