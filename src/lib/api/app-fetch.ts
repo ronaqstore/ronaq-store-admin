@@ -4,6 +4,7 @@ import {
   isAccessRevokedError,
   signOutForAccessRevoked
 } from '@/lib/auth/access-revoked';
+import { signOutForUnauthorized } from '@/lib/auth/force-sign-out';
 
 export async function appFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const url = path.startsWith('http') ? path : `${APP_BASE_URL}${path}`;
@@ -37,7 +38,9 @@ export async function appFetch<T>(path: string, init?: RequestInit): Promise<T> 
     const rawMessage =
       body?.message ?? body?.error ?? (text || `Request failed with status ${res.status}`);
     const message = Array.isArray(rawMessage) ? rawMessage.join(', ') : String(rawMessage);
-    if (isAccessRevokedError(res.status, body, message)) {
+    if (res.status === 401 && typeof window !== 'undefined') {
+      void signOutForUnauthorized();
+    } else if (isAccessRevokedError(res.status, body, message)) {
       void signOutForAccessRevoked();
     }
     throw new ApiError(res.status, message, body ?? undefined);

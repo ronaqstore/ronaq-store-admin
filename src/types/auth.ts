@@ -18,6 +18,8 @@ export interface ChangePasswordDialogBodyProps {
 export interface LoginValues {
   phone: string;
   password: string;
+  rememberMe: boolean;
+  turnstileToken?: string;
 }
 
 export interface BaseLoginFormProps {
@@ -36,6 +38,7 @@ export interface RegisterValues {
   shopName: string;
   city: string;
   address?: string;
+  turnstileToken?: string;
 }
 
 export interface RegisterFormValues extends RegisterValues {
@@ -57,6 +60,8 @@ export interface LoginResult {
   shopName: string | null;
   accessToken: string;
   subscriptionEndsAt: string | null;
+  rememberMe: boolean;
+  sessionExpiresAt: number;
 }
 
 export interface AuthUserSummary {

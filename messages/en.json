@@ -1022,6 +1022,8 @@
     "confirmPassword": "Confirm password",
     "confirmPasswordRequired": "Confirm password is required",
     "passwordMismatch": "Passwords do not match",
+    "rememberMe": "Remember me for 30 days",
+    "turnstileRequired": "Please complete the human verification check.",
     "invalidCredentials": "The phone number or password is incorrect.",
     "demoLabel": "Demo credentials",
     "orConjunction": "or",
@@ -1061,7 +1063,8 @@
     "addressPlaceholder": "Shop address",
     "shopLogoOptional": "Shop logo (optional)",
     "shopLogoHint": "Shown as a circle. JPEG, PNG or WebP.",
-    "shopSuspendedLogout": "Your shop has been suspended or your subscription ended. Contact Ronaq Store support to renew."
+    "shopSuspendedLogout": "Your shop has been suspended or your subscription ended. Contact Ronaq Store support to renew.",
+    "sessionExpiredLogout": "Your session expired or was invalid. Please sign in again."
   },
   "storeSettings": {
     "title": "Online Store",

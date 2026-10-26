@@ -3,30 +3,34 @@ import type { AuthAccountRole } from '@/lib/auth/accounts';
 
 declare module 'next-auth' {
   interface User {
-    role: AuthAccountRole;
+    role?: AuthAccountRole;
     shopId: string | null;
     shopName: string | null;
     accessToken: string;
     subscriptionEndsAt: string | null;
+    rememberMe?: boolean;
+    sessionExpiresAt?: number;
   }
 
   interface Session {
     accessToken: string;
     user: {
       id: string;
-      role: AuthAccountRole;
+      role?: AuthAccountRole;
       shopId: string | null;
       shopName: string | null;
+      subscriptionEndsAt?: string | null;
     } & DefaultSession['user'];
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    role: AuthAccountRole;
-    shopId: string | null;
-    shopName: string | null;
-    accessToken: string;
-    subscriptionEndsAt: string | null;
+    role?: AuthAccountRole;
+    shopId?: string | null;
+    shopName?: string | null;
+    accessToken?: string;
+    subscriptionEndsAt?: string | null;
+    sessionExpiresAt?: number;
   }
 }

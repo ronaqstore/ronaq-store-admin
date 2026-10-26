@@ -1022,6 +1022,8 @@
     "confirmPassword": "د پټنوم تایید",
     "confirmPasswordRequired": "د پټنوم تایید اړین دی",
     "passwordMismatch": "پټنومونه سره سمون نه خوري",
+    "rememberMe": "۳۰ ورځې زه په یاد وساتئ",
+    "turnstileRequired": "مهرباني وکړئ د انساني تایید چک بشپړ کړئ.",
     "invalidCredentials": "د موبایل شمېره یا پټنوم ناسم دی.",
     "demoLabel": "د ډیمو کریډیښنالیک",
     "orConjunction": "یا",
@@ -1061,7 +1063,8 @@
     "addressPlaceholder": "د هټۍ پته",
     "shopLogoOptional": "د دوکان لوگو (اختیاري)",
     "shopLogoHint": "تل په دایره کې ښکاري. JPEG، PNG یا WebP.",
-    "shopSuspendedLogout": "ستاسو دوکان معطل شوی یا ګډون پای ته رسېدلی. د نوي کولو لپاره د رَونق سټور ملاتړ سره اړیکه ونیسئ."
+    "shopSuspendedLogout": "ستاسو دوکان معطل شوی یا ګډون پای ته رسېدلی. د نوي کولو لپاره د رَونق سټور ملاتړ سره اړیکه ونیسئ.",
+    "sessionExpiredLogout": "ستاسو ناسته پای ته رسېدلې یا ناسمه وه. مهرباني وکړئ بیا ننوځئ."
   },
   "storeSettings": {
     "title": "آنلاین دوکان",

@@ -1,9 +1,7 @@
 import type { ApiErrorBody } from '@/lib/api/types';
+import { forceSignOut } from '@/lib/auth/force-sign-out';
 
-const ACCESS_REVOKED_ERRORS = new Set([
-  'Shop is suspended',
-  'User account is disabled'
-]);
+const ACCESS_REVOKED_ERRORS = new Set(['Shop is suspended', 'User account is disabled']);
 
 function collectText(body?: ApiErrorBody | null, fallbackMessage?: string): string {
   const parts: string[] = [];
@@ -33,15 +31,6 @@ export function isAccessRevokedError(
   );
 }
 
-let signingOutForAccessRevoked = false;
-
 export async function signOutForAccessRevoked(): Promise<void> {
-  if (typeof window === 'undefined' || signingOutForAccessRevoked) return;
-  signingOutForAccessRevoked = true;
-  try {
-    const { signOut } = await import('next-auth/react');
-    await signOut({ callbackUrl: '/login?reason=suspended' });
-  } finally {
-    signingOutForAccessRevoked = false;
-  }
+  await forceSignOut('/login?reason=suspended');
 }
