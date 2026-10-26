@@ -71,6 +71,27 @@ export interface UpdateSubscriptionInput {
   isActive?: boolean;
 }
 
+export interface PasswordSetupLinkResult {
+  shopId: string;
+  ownerId: string;
+  ownerName: string;
+  ownerPhone: string;
+  setupUrl: string;
+  setupLinkExpiresAt: string;
+}
+
+export interface SetupLinkCopyRowProps {
+  setupUrl: string;
+}
+
+export interface IssueSetupLinkDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  shopId: string;
+  shopName: string;
+  hasPassword: boolean;
+}
+
 export interface UpdateSubscriptionResult {
   shopId: string;
   shopName: string;

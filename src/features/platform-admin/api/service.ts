@@ -5,6 +5,7 @@ import type { PaginatedResponse } from '@/lib/api/types';
 import type {
   CreatePlatformShopInput,
   CreatePlatformShopResult,
+  PasswordSetupLinkResult,
   PlatformOverview,
   PlatformShop,
   PlatformShopFilters,
@@ -68,4 +69,13 @@ export async function updateShopSubscription(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input)
   });
+}
+
+export async function issuePasswordSetupLink(
+  shopId: string
+): Promise<PasswordSetupLinkResult> {
+  return appFetch<PasswordSetupLinkResult>(
+    `/api/platform-admin/shops/${shopId}/password-setup-link`,
+    { method: 'POST' }
+  );
 }

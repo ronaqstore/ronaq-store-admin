@@ -20,6 +20,8 @@ import { useT } from '@/i18n/use-t';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { createPlatformShop } from '../api/service';
 import { createShopFormSchema } from '../schemas/create-shop-schema';
+import { resolveSetupPasswordUrl } from '../utils/setup-password-url';
+import { SetupLinkCopyRow } from './setup-link-copy-row';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { PLATFORM_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import { MarketplaceCityCombobox } from '@/components/marketplace/marketplace-city-combobox';
@@ -53,7 +55,7 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
     mutationFn: createPlatformShop,
     onSuccess: async (res) => {
       toast.success(t('platform.createShopSuccess', { name: res.shopName }));
-      setSetupUrl(res.setupUrl);
+      setSetupUrl(resolveSetupPasswordUrl(res.setupUrl));
       invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
     },
     onError: (err: Error) => {
@@ -92,16 +94,6 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
     void form.handleSubmit();
   };
 
-  const copySetupUrl = async () => {
-    if (!setupUrl) return;
-    try {
-      await navigator.clipboard.writeText(setupUrl);
-      toast.success(t('platform.setupLinkCopied'));
-    } catch {
-      toast.error(t('platform.setupLinkCopyFailed'));
-    }
-  };
-
   return (
     <DialogContent className='max-h-[92vh] overflow-y-auto w-full sm:max-w-lg'>
       <DialogHeader>
@@ -112,13 +104,10 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
       {setupUrl ? (
         <div className='space-y-3 pt-2'>
           <p className='text-muted-foreground text-sm'>{t('platform.setupLinkOnce')}</p>
-          <code className='bg-muted block break-all rounded-md p-3 text-xs'>{setupUrl}</code>
+          <SetupLinkCopyRow setupUrl={setupUrl} />
           <DialogFooter>
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
               {t('common.close')}
-            </Button>
-            <Button type='button' onClick={() => void copySetupUrl()}>
-              {t('platform.copySetupLink')}
             </Button>
           </DialogFooter>
         </div>

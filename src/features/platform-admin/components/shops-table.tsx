@@ -43,6 +43,7 @@ import {
 } from '../constants/filters';
 import { ShopStatusBadge } from './shop-status-badge';
 import { RenewSubscriptionDialog } from './renew-subscription-dialog';
+import { IssueSetupLinkDialog } from './issue-setup-link-dialog';
 
 const SORTABLE_COLUMN_IDS = ['name', 'createdAt', 'subscriptionEndsAt'] as const;
 
@@ -159,6 +160,7 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
   const qc = useQueryClient();
   const [renewOpen, setRenewOpen] = useState(false);
   const [suspendOpen, setSuspendOpen] = useState(false);
+  const [setupLinkOpen, setSetupLinkOpen] = useState(false);
   const [reactivateOpen, setReactivateOpen] = useState(false);
 
   const suspend = useMutation({
@@ -207,6 +209,13 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
       <RowActionsMenu
         actions={[
           {
+            label: shop.hasPassword
+              ? t('platform.resetPasswordAction')
+              : t('platform.reissueSetupLink'),
+            onClick: () => setSetupLinkOpen(true),
+            disabled: busy || !shop.ownerId
+          },
+          {
             label: t('platform.renewAction'),
             onClick: () => setRenewOpen(true),
             disabled: busy
@@ -230,6 +239,13 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
         shopId={shop.id}
         shopName={shop.name}
         currentEndsAt={shop.subscriptionEndsAt}
+      />
+      <IssueSetupLinkDialog
+        open={setupLinkOpen}
+        onOpenChange={setSetupLinkOpen}
+        shopId={shop.id}
+        shopName={shop.name}
+        hasPassword={shop.hasPassword}
       />
     </>
   );

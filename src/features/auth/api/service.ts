@@ -1,7 +1,12 @@
 import { apiRequest } from '@/lib/api/client';
 import { appFetch } from '@/lib/api/app-fetch';
 import { uploadShopLogo } from '@/features/store-settings/api/service';
-import type { RegisterValues, AuthResponseData, AuthMeResponse } from '@/types/auth';
+import type {
+  RegisterValues,
+  AuthResponseData,
+  AuthMeResponse,
+  SetupPasswordResult
+} from '@/types/auth';
 
 export async function registerOwnerAccount(input: RegisterValues): Promise<AuthResponseData> {
   return apiRequest<AuthResponseData>('/auth/register', {
@@ -23,4 +28,14 @@ export async function registerOwnerAccountWithOptionalLogo(
 
 export async function fetchAuthMe(): Promise<AuthMeResponse> {
   return appFetch<AuthMeResponse>('/api/auth/me');
+}
+
+export async function setupPasswordWithToken(
+  token: string,
+  password: string
+): Promise<SetupPasswordResult> {
+  return apiRequest<SetupPasswordResult>('/auth/setup-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, password })
+  });
 }

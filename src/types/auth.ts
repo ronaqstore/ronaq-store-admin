@@ -29,6 +29,11 @@ export interface BaseLoginFormProps {
   footer?: ReactNode;
 }
 
+export interface SetupPasswordResult {
+  status: boolean;
+  message: string;
+}
+
 export interface RegisterValues {
   fullName: string;
   phone: string;
