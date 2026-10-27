@@ -1,7 +1,7 @@
 import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import type { ProductDTO } from '@/lib/api/types';
 import type { PtaOptionsArgs } from '@/types';
-import type { ProductFormValues } from '@/types/products';
+import type { ProductFormValues, ProductPayloadMode } from '@/types/products';
 import { EMPTY_FORM_NUMBER } from '@/types/common';
 
 export function emptyProductForm(): ProductFormValues {
@@ -54,11 +54,16 @@ export function productToForm(product: ProductDTO): ProductFormValues {
   };
 }
 
-export function buildProductPayload(value: ProductFormValues) {
+export function buildProductPayload(value: ProductFormValues, mode: ProductPayloadMode = 'create') {
+  const isEdit = mode === 'edit';
   const cleanString = (val?: string | null) => {
     const trimmed = val?.trim();
-    return trimmed ? trimmed : undefined;
+    if (trimmed) return trimmed;
+    return isEdit ? null : undefined;
   };
+
+  const emptyValue = isEdit ? null : undefined;
+  const isSerialized = value.trackingType === 'SERIALIZED';
 
   return {
     name: value.name.trim(),
@@ -70,9 +75,8 @@ export function buildProductPayload(value: ProductFormValues) {
     lowStockThreshold: Number(value.lowStockThreshold || 0),
     model: cleanString(value.model),
     color: cleanString(value.color),
-    ram: value.trackingType === 'SERIALIZED' ? cleanString(value.ram) : undefined,
-    storage:
-      value.trackingType === 'SERIALIZED' ? cleanString(value.storage) : undefined,
+    ram: isSerialized ? cleanString(value.ram) : emptyValue,
+    storage: isSerialized ? cleanString(value.storage) : emptyValue,
     sku: cleanString(value.sku),
     barcode: cleanString(value.barcode),
     description: cleanString(value.description),
@@ -80,16 +84,12 @@ export function buildProductPayload(value: ProductFormValues) {
     isActive: value.isActive ?? true,
     isPublished: value.isPublished ?? false,
     publicDescription: cleanString(value.publicDescription),
-    ptaStatus:
-      value.trackingType === 'SERIALIZED' ? (value.ptaStatus || undefined) : undefined,
-    authenticity: value.authenticity ? value.authenticity : undefined
+    ptaStatus: isSerialized ? value.ptaStatus || emptyValue : emptyValue,
+    authenticity: value.authenticity ? value.authenticity : emptyValue
   };
 }
 
-export function getPtaOptions(
-  t: (key: string) => string,
-  opts?: PtaOptionsArgs
-) {
+export function getPtaOptions(t: (key: string) => string, opts?: PtaOptionsArgs) {
   const base = [
     { value: 'PTA_APPROVED', label: t('ptaApproved') },
     { value: 'NON_PTA', label: t('nonPta') }

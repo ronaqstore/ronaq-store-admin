@@ -30,16 +30,10 @@ import {
   getAuthenticityOptions
 } from '@/lib/products/product-form-defaults';
 import { ProductFormSidebar } from './product-form-sidebar';
-import {
-  fetchCategorySelectPage,
-  fetchBrandSelectPage
-} from '../api/entity-picker-fetchers';
+import { fetchCategorySelectPage, fetchBrandSelectPage } from '../api/entity-picker-fetchers';
 import { isAppleBrandName } from '@/lib/device-family';
 import type { NamedEntity } from '@/types';
-import type {
-  PendingProductImageFile,
-  ProductFormBodyProps
-} from '@/types/products';
+import type { PendingProductImageFile, ProductFormBodyProps } from '@/types/products';
 
 export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
   const isEdit = Boolean(product);
@@ -68,9 +62,9 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
     validators: { onSubmit: createProductFormSchema(tRoot) as never },
     onSubmit: ({ value }) => {
       setFormApiError(null);
-      const payload = buildProductPayload(value);
 
       if (product && productId) {
+        const payload = buildProductPayload(value, 'edit');
         updateProduct.mutate(payload, {
           onSuccess: () => {
             void qc.invalidateQueries({ queryKey: productsQueryKeys.all });
@@ -88,6 +82,7 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
         return;
       }
 
+      const payload = buildProductPayload(value, 'create');
       createProduct.mutate(payload, {
         onSuccess: async (data) => {
           const newId = (data as { id?: string })?.id;
@@ -157,11 +152,7 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
             <form.AppField
               name='name'
               children={(field) => (
-                <field.TextField
-                  label={t('name')}
-                  required
-                  placeholder={t('namePlaceholder')}
-                />
+                <field.TextField label={t('name')} required placeholder={t('namePlaceholder')} />
               )}
             />
             <div className='grid min-w-0 gap-4 sm:grid-cols-2'>

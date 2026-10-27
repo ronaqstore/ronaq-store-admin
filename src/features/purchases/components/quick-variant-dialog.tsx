@@ -51,27 +51,15 @@ function suggestVariantName(parts: SuggestVariantNameParts): string {
   return chunks.join(' · ');
 }
 
-export function QuickVariantDialog({
-  open,
-  onOpenChange,
-  onCreated
-}: QuickVariantDialogProps) {
+export function QuickVariantDialog({ open, onOpenChange, onCreated }: QuickVariantDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {open ? (
-        <QuickVariantDialogBody
-          onOpenChange={onOpenChange}
-          onCreated={onCreated}
-        />
-      ) : null}
+      {open ? <QuickVariantDialogBody onOpenChange={onOpenChange} onCreated={onCreated} /> : null}
     </Dialog>
   );
 }
 
-function QuickVariantDialogBody({
-  onOpenChange,
-  onCreated
-}: QuickVariantDialogBodyProps) {
+function QuickVariantDialogBody({ onOpenChange, onCreated }: QuickVariantDialogBodyProps) {
   const t = useTranslations('dukaan.product');
   const tRoot = useT();
   const qc = useQueryClient();
@@ -94,7 +82,7 @@ function QuickVariantDialogBody({
     onSubmit: async ({ value }) => {
       setFormApiError(null);
       try {
-        const payload = buildProductPayload(value);
+        const payload = buildProductPayload(value, 'create');
         const res = await create.mutateAsync(payload);
         const id = res.id;
         if (!id) {
@@ -353,10 +341,7 @@ function QuickVariantDialogBody({
           </FieldGroup>
         </div>
         <DialogFooter className='mx-0 mb-0 shrink-0 gap-2 sm:gap-2.5'>
-          <DialogCancelButton
-            onClick={() => onOpenChange(false)}
-            disabled={create.isPending}
-          />
+          <DialogCancelButton onClick={() => onOpenChange(false)} disabled={create.isPending} />
           <DialogPrimaryButton mode='add' loading={create.isPending} />
         </DialogFooter>
       </form>
