@@ -470,12 +470,7 @@ export interface UpdateSupplierInput {
 
 export type TrackingType = 'QUANTITY' | 'SERIALIZED';
 
-export type PtaStatus =
-  | 'PTA_APPROVED'
-  | 'NON_PTA'
-  | 'JV'
-  | 'BYPASS'
-  | 'MDM_BYPASS';
+export type PtaStatus = 'PTA_APPROVED' | 'NON_PTA' | 'JV' | 'BYPASS' | 'MDM_BYPASS';
 
 export type ProductAuthenticity = 'ORIGINAL' | 'COPY';
 
@@ -547,6 +542,17 @@ export interface UpdateProductInput extends Partial<ProductAttributes> {
   categoryId?: string;
   brandId?: string;
   trackingType?: TrackingType;
+  model?: string | null;
+  color?: string | null;
+  ram?: string | null;
+  storage?: string | null;
+  sku?: string | null;
+  barcode?: string | null;
+  description?: string | null;
+  imageUrl?: string | null;
+  publicDescription?: string | null;
+  ptaStatus?: PtaStatus | null;
+  authenticity?: ProductAuthenticity | null;
 }
 
 export interface ProductListFilters {

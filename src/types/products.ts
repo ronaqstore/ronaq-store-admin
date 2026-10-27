@@ -106,6 +106,8 @@ export interface PtaOptionsArgs {
   apple?: boolean;
 }
 
+export type ProductPayloadMode = 'create' | 'edit';
+
 export interface ProductFormValues {
   name: string;
   categoryId: string;
