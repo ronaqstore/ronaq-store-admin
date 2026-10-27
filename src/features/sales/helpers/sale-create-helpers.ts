@@ -27,22 +27,20 @@ export function buildCreateSalePayload(
   discount: number,
   paidNow: number,
   notes: string | undefined,
-  clientRequestId: string
+  clientRequestId: string,
+  confirmBelowCost = false
 ): CreateSaleInput {
   const items: CreateSaleItemInput[] = lines
     .filter((l) => l.product_id)
     .map((l) => {
       const days =
-        l.unit_condition === 'USED' && l.warranty_days
-          ? Number(l.warranty_days)
-          : undefined;
+        l.unit_condition === 'USED' && l.warranty_days ? Number(l.warranty_days) : undefined;
       return {
         productId: l.product_id,
         quantity: Number(l.quantity) || 1,
         unitPrice: toPaisa(Number(l.unit_price) || 0),
         inventoryUnitId: l.inventory_unit_id || undefined,
-        warrantyDays:
-          days === 1 || days === 2 || days === 3 ? days : undefined
+        warrantyDays: days === 1 || days === 2 || days === 3 ? days : undefined
       };
     });
 
@@ -53,15 +51,12 @@ export function buildCreateSalePayload(
     items,
     discount: toPaisa(Number(discount) || 0),
     paidNow: toPaisa(Number(paidNow) || 0),
-    notes: notes?.trim() || undefined
+    notes: notes?.trim() || undefined,
+    confirmBelowCost: confirmBelowCost || undefined
   };
 }
 
-export function calcSaleTotals(
-  lines: SaleLineItem[],
-  discount: FormNumber,
-  paidNow: FormNumber
-) {
+export function calcSaleTotals(lines: SaleLineItem[], discount: FormNumber, paidNow: FormNumber) {
   const subtotalRs = lines.reduce(
     (sum, line) => sum + (Number(line.quantity) || 0) * (Number(line.unit_price) || 0),
     0

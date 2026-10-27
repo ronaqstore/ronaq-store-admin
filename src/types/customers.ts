@@ -17,9 +17,9 @@ export interface CustomerListFilters {
 
 export interface CreateCustomerInput {
   name: string;
-  phone?: string;
-  address?: string;
-  notes?: string;
+  phone?: string | null;
+  address?: string | null;
+  notes?: string | null;
   openingBalance?: number;
   isActive?: boolean;
 }
@@ -102,4 +102,3 @@ export interface CustomerLedgerView {
     running_balance: number;
   }>;
 }
-

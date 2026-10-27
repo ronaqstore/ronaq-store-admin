@@ -133,6 +133,7 @@ export interface CreateSaleInput {
   paidNow?: number;
   dueDate?: string;
   notes?: string;
+  confirmBelowCost?: boolean;
 }
 
 export interface CancelSaleInput {
@@ -450,20 +451,20 @@ export interface SupplierDTO {
 
 export interface CreateSupplierInput {
   name: string;
-  phone?: string;
-  cnic?: string;
-  address?: string;
-  notes?: string;
+  phone?: string | null;
+  cnic?: string | null;
+  address?: string | null;
+  notes?: string | null;
   openingBalance?: number;
   isActive?: boolean;
 }
 
 export interface UpdateSupplierInput {
   name?: string;
-  phone?: string;
-  cnic?: string;
-  address?: string;
-  notes?: string;
+  phone?: string | null;
+  cnic?: string | null;
+  address?: string | null;
+  notes?: string | null;
   openingBalance?: number;
   isActive?: boolean;
 }

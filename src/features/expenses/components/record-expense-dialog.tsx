@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { formatPkr, toPaisa } from '@/lib/dukaan/numbers';
+import { createClientRequestId, formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
@@ -45,6 +45,7 @@ export function RecordExpenseDialog({
   const t = useT();
   const qc = useQueryClient();
   const [categoryId, setCategoryId] = useState(defaultCategoryId ?? '');
+  const [clientRequestId, setClientRequestId] = useState(() => createClientRequestId());
   const [selectedCategory, setSelectedCategory] = useState<ExpenseCategoryDTO | null>(null);
   const [amountStr, setAmountStr] = useState('');
   const [expenseDate, setExpenseDate] = useState(todayIsoDate);
@@ -95,6 +96,7 @@ export function RecordExpenseDialog({
   const resetForm = () => {
     setCategoryId('');
     setSelectedCategory(null);
+    setClientRequestId(createClientRequestId());
     setAmountStr('');
     setDescription('');
     setConfirmOverdraft(false);
@@ -135,6 +137,7 @@ export function RecordExpenseDialog({
     setErrors({});
 
     recordMutation.mutate({
+      clientRequestId,
       categoryId,
       amount: toPaisa(num),
       expenseDate,

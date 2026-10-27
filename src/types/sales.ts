@@ -16,6 +16,20 @@ export interface SaleOverdraftPrompt {
   message?: string;
 }
 
+export interface SaleBelowCostPrompt {
+  confirmBelowCost?: boolean;
+  shortfall?: number;
+  items?: Array<{
+    productName: string;
+    imei?: string;
+    unitPrice: number;
+    unitCost: number;
+    shortfall: number;
+  }>;
+  message?: string;
+}
+
+export type CreateSaleResult = SaleBelowCostPrompt | SaleDTO;
 export type CancelSaleResult = SaleOverdraftPrompt | SaleDTO;
 export type CreateReturnResult = SaleOverdraftPrompt | SaleReturnDTO;
 
@@ -129,11 +143,7 @@ export interface SaleLineImeiFieldProps {
   name: string;
   value: string;
   onBlur: () => void;
-  onValueChange: (
-    unitId: string,
-    condition?: 'NEW' | 'USED',
-    unit?: SaleLineImeiUnitPick
-  ) => void;
+  onValueChange: (unitId: string, condition?: 'NEW' | 'USED', unit?: SaleLineImeiUnitPick) => void;
   isInvalid: boolean;
   errors: Array<{ message?: string } | undefined>;
   excludedUnitIds: string[];

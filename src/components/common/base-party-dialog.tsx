@@ -17,12 +17,9 @@ import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
-import {
-  formatPkCnic,
-  sanitizePkCnicInput,
-  sanitizePkMobileInput
-} from '@/lib/validation/pk';
-import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
+import { formatPkCnic, sanitizePkCnicInput, sanitizePkMobileInput } from '@/lib/validation/pk';
+import { fromPaisa } from '@/lib/dukaan/numbers';
+import { buildPartyPayload } from '@/lib/party/party-payload';
 import { isValidationApiError } from '@/lib/api/is-validation-error';
 import { mapPartyApiError } from '@/lib/api/map-party-api-error';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
@@ -100,16 +97,7 @@ function BasePartyDialogBody({
 
   const save = useMutation({
     mutationFn: async (value: BasePartyFormState) => {
-      const payload = {
-        name: value.name.trim(),
-        phone: value.phone?.trim() || undefined,
-        ...(showCnic ? { cnic: value.cnic?.trim() || '' } : {}),
-        address: value.address?.trim() || undefined,
-        notes: value.notes?.trim() || undefined,
-        openingBalance: toPaisa(Number(value.opening_balance || 0)),
-        isActive: true
-      };
-
+      const payload = buildPartyPayload(value, isEdit ? 'edit' : 'create', showCnic);
       return onSave(payload, party?.id);
     },
     onSuccess: () => {

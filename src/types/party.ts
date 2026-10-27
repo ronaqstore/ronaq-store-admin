@@ -68,13 +68,15 @@ export interface BasePartyEntity {
 
 export interface BasePartyPayload {
   name: string;
-  phone?: string;
-  cnic?: string;
-  address?: string;
-  notes?: string;
+  phone?: string | null;
+  cnic?: string | null;
+  address?: string | null;
+  notes?: string | null;
   openingBalance: number;
   isActive: boolean;
 }
+
+export type PartyPayloadMode = 'create' | 'edit';
 
 export interface BasePartyFormState {
   name: string;

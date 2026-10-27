@@ -11,6 +11,7 @@ export interface SupplierPaymentDTO {
   cancelledAt?: string | null;
   cancelReason?: string | null;
   cancelledById?: string | null;
+  clientRequestId: string;
   notes?: string | null;
   createdById: string;
   createdAt: string;
@@ -47,6 +48,7 @@ export interface SupplierPayableDTO {
 }
 
 export interface CreateSupplierPaymentInput {
+  clientRequestId: string;
   supplierId: string;
   purchaseId?: string | null;
   amount: number;

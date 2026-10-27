@@ -12,6 +12,12 @@ const STATUS_CONFIG: Record<PlatformShopAccessStatus, ShopStatusConfig> = {
       'border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
     icon: 'check'
   },
+  TRIALING: {
+    labelKey: PLATFORM_ACCESS_STATUS_LABEL_KEY.TRIALING,
+    className:
+      'border-transparent bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+    icon: 'clock'
+  },
   EXPIRED: {
     labelKey: PLATFORM_ACCESS_STATUS_LABEL_KEY.EXPIRED,
     className: 'border-transparent bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',

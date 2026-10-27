@@ -10,6 +10,7 @@ export interface ExpenseDTO {
   cancelledAt: string | null;
   cancelReason: string | null;
   cancelledById: string | null;
+  clientRequestId: string;
   createdById: string;
   createdAt: string;
   updatedAt: string;
@@ -25,6 +26,7 @@ export interface ExpenseCategoryDTO {
 }
 
 export interface CreateExpenseInput {
+  clientRequestId: string;
   categoryId: string;
   amount: number;
   expenseDate: string;

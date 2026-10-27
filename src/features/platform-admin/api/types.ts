@@ -8,6 +8,8 @@ export interface PlatformShop {
   phone: string | null;
   address: string | null;
   status: 'ACTIVE' | 'SUSPENDED';
+  subscriptionStatus?: 'TRIALING' | 'ACTIVE' | 'EXPIRED';
+  trialEndsAt?: string | null;
   accessStatus: PlatformShopAccessStatus;
   isAccessible: boolean;
   subscriptionEndsAt: string;
@@ -147,6 +149,7 @@ export interface CreatePlatformShopResult {
 
 export interface UpdateSubscriptionInput {
   subscriptionEndsAt?: string;
+  subscriptionStatus?: 'TRIALING' | 'ACTIVE' | 'EXPIRED';
   isActive?: boolean;
 }
 
@@ -154,6 +157,8 @@ export interface UpdateSubscriptionResult {
   shopId: string;
   shopName: string;
   status: 'ACTIVE' | 'SUSPENDED';
+  subscriptionStatus?: 'TRIALING' | 'ACTIVE' | 'EXPIRED';
+  trialEndsAt?: string | null;
   subscriptionEndsAt: string;
   isAccessible: boolean;
 }

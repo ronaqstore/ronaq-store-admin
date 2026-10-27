@@ -356,8 +356,9 @@ User counts physical drawer notes & coins
 
 ## 8. Discrepancies, Constraints & Anti-Patterns
 
-1. **No `TRIAL` Status**:
-   - The backend schema only supports `ACTIVE` and `SUSPENDED` shop statuses. Do not model or display `TRIAL`.
+1. **Subscription Status (`TRIALING`) vs Shop Status**:
+   - The shop account operational status in the DB remains `ACTIVE` and `SUSPENDED` (`ShopStatus`).
+   - Subscription lifecycle is tracked via `subscriptionStatus` (`TRIALING`, `ACTIVE`, `EXPIRED`) and `trialEndsAt`. Do not confuse `ShopStatus` with `SubscriptionStatus`.
 2. **No PDF Exports**:
    - Backend returns `400 pdfExportNotAvailable()` for PDF report requests. **Only CSV export (`?format=csv`) is supported.** Stream the CSV response via browser download.
 3. **No Frontend Password Hashing**:

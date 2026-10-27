@@ -1,6 +1,6 @@
 import type { Icons } from '@/components/icons';
 
-export type PlatformShopAccessStatus = 'ACTIVE' | 'EXPIRED' | 'SUSPENDED';
+export type PlatformShopAccessStatus = 'ACTIVE' | 'TRIALING' | 'EXPIRED' | 'SUSPENDED';
 
 export interface ShopStatusConfig {
   labelKey: string;

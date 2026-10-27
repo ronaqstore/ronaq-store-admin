@@ -31,11 +31,14 @@ import {
 } from '../helpers/sale-create-helpers';
 import { SaleLineCard } from './sale-line-card';
 import { SaleTotalsSummary } from './sale-totals-summary';
+import { OverdraftAlert } from '@/components/common/overdraft-alert';
 import type { SaleDTO } from '@/lib/api/types';
 import type {
   SaleFormSubmitContext,
   SaleFormValues,
-  SaleCreateFormProps
+  SaleCreateFormProps,
+  CreateSaleResult,
+  SaleBelowCostPrompt
 } from '@/types/sales';
 import { EMPTY_FORM_NUMBER } from '@/types/common';
 
@@ -44,15 +47,23 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
   const t = useT();
   const [clientRequestId] = useState(() => createClientRequestId());
   const [formApiError, setFormApiError] = useState<string | null>(null);
+  const [belowCostPrompt, setBelowCostPrompt] = useState<SaleBelowCostPrompt | null>(null);
+  const [confirmBelowCost, setConfirmBelowCost] = useState(false);
 
   const save = useMutation({
     ...createSaleMutation,
-    onSuccess: (res: SaleDTO) => {
+    onSuccess: (res: CreateSaleResult) => {
+      if (res && 'confirmBelowCost' in res && res.confirmBelowCost) {
+        setBelowCostPrompt(res);
+        return;
+      }
+      setBelowCostPrompt(null);
+      setConfirmBelowCost(false);
       invalidateDomains({ queryClient: qc, domains: SALE_SYNC_DOMAINS });
       onDone?.();
       toastSuccessAfterClose(
-        res?.saleNo
-          ? t('dukaan.sale.saved', { saleNo: res.saleNo })
+        (res as SaleDTO)?.saleNo
+          ? t('dukaan.sale.saved', { saleNo: (res as SaleDTO).saleNo })
           : (res as { message?: string })?.message || t('dukaan.sale.saved', { saleNo: '' })
       );
     },
@@ -78,6 +89,13 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
     validators: { onSubmit: createSaleFormSchema(t) as never },
     onSubmit: ({ value }: SaleFormSubmitContext) => {
       setFormApiError(null);
+      if (belowCostPrompt && !confirmBelowCost) {
+        setFormApiError(
+          t('sales.confirmBelowCostRequired') ||
+            'Please check the confirmation box to confirm selling below cost.'
+        );
+        return;
+      }
       save.mutate(
         buildCreateSalePayload(
           value.lines,
@@ -85,7 +103,8 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
           Number(value.discount) || 0,
           Number(value.paid_now) || 0,
           value.notes,
-          clientRequestId
+          clientRequestId,
+          confirmBelowCost
         )
       );
     }
@@ -103,6 +122,16 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
           <Icons.warning />
           <AlertDescription>{formApiError}</AlertDescription>
         </Alert>
+      ) : null}
+      {belowCostPrompt ? (
+        <OverdraftAlert
+          checked={confirmBelowCost}
+          onCheckedChange={setConfirmBelowCost}
+          title={belowCostPrompt.message}
+          confirmLabel={t('sales.confirmBelowCost') || 'I confirm selling below cost'}
+          id='confirm-below-cost'
+          variant='banner'
+        />
       ) : null}
       <form.Subscribe
         selector={(s) => s.values.lines.some((l) => isPhoneSaleLine(l))}

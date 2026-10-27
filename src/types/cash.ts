@@ -23,6 +23,7 @@ export interface CashMovementDTO {
   reversesMovementId: string | null;
   isOverdraft: boolean;
   note: string | null;
+  clientRequestId?: string | null;
   createdById: string;
   createdAt: string;
 }
@@ -46,18 +47,21 @@ export interface CashMovementQueryFilter {
 }
 
 export interface CreateOpeningCashInput {
+  clientRequestId?: string;
   amount: number;
   date?: string;
   notes?: string;
 }
 
 export interface CreateOwnerInvestmentInput {
+  clientRequestId?: string;
   amount: number;
   date?: string;
   notes?: string;
 }
 
 export interface CreateOwnerWithdrawalInput {
+  clientRequestId?: string;
   amount: number;
   date?: string;
   notes?: string;

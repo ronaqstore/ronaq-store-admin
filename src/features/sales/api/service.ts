@@ -10,7 +10,12 @@ import type {
   CreateReturnInput
 } from '@/lib/api/types';
 
-import type { SalesListFilters, CancelSaleResult, CreateReturnResult } from '@/types';
+import type {
+  SalesListFilters,
+  CancelSaleResult,
+  CreateReturnResult,
+  CreateSaleResult
+} from '@/types';
 
 import { appFetch } from '@/lib/api/app-fetch';
 
@@ -39,8 +44,8 @@ export async function getSale(id: string, token?: string): Promise<SaleDTO> {
   return appFetch<SaleDTO>(`/api/sales/${id}`);
 }
 
-export async function createSale(input: CreateSaleInput): Promise<SaleDTO> {
-  return appFetch<SaleDTO>('/api/sales', {
+export async function createSale(input: CreateSaleInput): Promise<CreateSaleResult> {
+  return appFetch<CreateSaleResult>('/api/sales', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input)

@@ -1,7 +1,5 @@
-import type {
-  CreateSupplierPaymentInput,
-  SupplierPayableDTO
-} from '@/types/supplier-payment';
+import { createClientRequestId } from '@/lib/dukaan/numbers';
+import type { CreateSupplierPaymentInput, SupplierPayableDTO } from '@/types/supplier-payment';
 
 export function buildSupplierLedgerPaymentPlan(
   supplierId: string,
@@ -17,6 +15,7 @@ export function buildSupplierLedgerPaymentPlan(
   if (payable.openingRemaining > 0 && left > 0) {
     const take = Math.min(left, payable.openingRemaining);
     plan.push({
+      clientRequestId: createClientRequestId(),
       supplierId,
       amount: take,
       paymentDate
@@ -29,6 +28,7 @@ export function buildSupplierLedgerPaymentPlan(
     if (bill.remaining <= 0) continue;
     const take = Math.min(left, bill.remaining);
     plan.push({
+      clientRequestId: createClientRequestId(),
       supplierId,
       purchaseId: bill.id,
       amount: take,
@@ -43,6 +43,7 @@ export function buildSupplierLedgerPaymentPlan(
       last.amount += left;
     } else {
       plan.push({
+        clientRequestId: createClientRequestId(),
         supplierId,
         amount: amountPaisa,
         paymentDate
