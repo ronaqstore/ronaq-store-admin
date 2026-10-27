@@ -3,14 +3,41 @@ import { appFetch } from '@/lib/api/app-fetch';
 import { buildQueryString } from '@/lib/api/query-params';
 import type { PaginatedResponse } from '@/lib/api/types';
 import type {
+  ActivityResponse,
+  AtRiskResponse,
   CreatePlatformShopInput,
   CreatePlatformShopResult,
-  PlatformOverview,
+  OnboardingFunnelResponse,
+  PlatformDashboardKpis,
   PlatformShop,
   PlatformShopFilters,
+  RenewalsResponse,
+  ShopGrowthResponse,
+  ShopsByCityResponse,
   UpdateSubscriptionInput,
   UpdateSubscriptionResult
 } from './types';
+
+function buildParams(params?: Record<string, string | number | boolean | undefined>): string {
+  if (!params) return '';
+  const sp = new URLSearchParams();
+  for (const [key, val] of Object.entries(params)) {
+    if (val !== undefined && val !== null && val !== '') sp.set(key, String(val));
+  }
+  const s = sp.toString();
+  return s ? `?${s}` : '';
+}
+
+async function fetchPlatformDashboard<T>(
+  endpoint: string,
+  params?: Record<string, string | number | boolean | undefined>,
+  token?: string
+): Promise<T> {
+  const qs = buildParams(params);
+  const path = `/platform/dashboard/${endpoint}${qs}`;
+  if (token) return apiRequest<T>(path, undefined, token);
+  return appFetch<T>(`/api${path}`);
+}
 
 function shopsQuery(filters: PlatformShopFilters = {}): string {
   return buildQueryString({
@@ -27,11 +54,56 @@ function shopsQuery(filters: PlatformShopFilters = {}): string {
   } as Record<string, unknown>);
 }
 
-export async function getPlatformOverview(token?: string): Promise<PlatformOverview> {
-  if (token) {
-    return apiRequest<PlatformOverview>('/platform-admin/shops/overview', undefined, token);
-  }
-  return appFetch<PlatformOverview>('/api/platform-admin/shops/overview');
+export async function getPlatformDashboardKpis(
+  token?: string
+): Promise<PlatformDashboardKpis> {
+  return fetchPlatformDashboard<PlatformDashboardKpis>('kpis', undefined, token);
+}
+
+export async function getPlatformShopGrowth(
+  months = 12,
+  token?: string
+): Promise<ShopGrowthResponse> {
+  return fetchPlatformDashboard<ShopGrowthResponse>('shop-growth', { months }, token);
+}
+
+export async function getPlatformRenewals(
+  weeks = 8,
+  token?: string
+): Promise<RenewalsResponse> {
+  return fetchPlatformDashboard<RenewalsResponse>('renewals', { weeks }, token);
+}
+
+export async function getPlatformOnboardingFunnel(
+  token?: string
+): Promise<OnboardingFunnelResponse> {
+  return fetchPlatformDashboard<OnboardingFunnelResponse>(
+    'onboarding-funnel',
+    undefined,
+    token
+  );
+}
+
+export async function getPlatformShopsByCity(
+  limit = 10,
+  token?: string
+): Promise<ShopsByCityResponse> {
+  return fetchPlatformDashboard<ShopsByCityResponse>('shops-by-city', { limit }, token);
+}
+
+export async function getPlatformActivity(
+  days: 30 | 90 = 30,
+  token?: string
+): Promise<ActivityResponse> {
+  return fetchPlatformDashboard<ActivityResponse>('activity', { days }, token);
+}
+
+export async function getPlatformAtRisk(
+  page = 1,
+  pageSize = 20,
+  token?: string
+): Promise<AtRiskResponse> {
+  return fetchPlatformDashboard<AtRiskResponse>('at-risk', { page, pageSize }, token);
 }
 
 export async function listPlatformShops(

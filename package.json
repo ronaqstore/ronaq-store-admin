@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -p 3006",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test src/components/data-table/resolve-mobile-item.test.ts",
+    "test": "node --experimental-strip-types --test src/components/data-table/resolve-mobile-item.test.ts src/lib/dashboard/formatters.test.ts",
     "check": "node scripts/run-checks.mjs",
     "knip": "node scripts/run-knip.mjs",
     "check:unused": "node scripts/code/check-unused.cjs",
