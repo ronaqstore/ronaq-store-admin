@@ -23,3 +23,10 @@ export function googleMapsJsApiUrl(apiKey: string): string {
 export function googleMapsSearchUrl(lat: number, lng: number): string {
   return `${GOOGLE_MAPS_SEARCH_BASE}?api=1&query=${lat},${lng}`;
 }
+
+export const WHATSAPP_API_BASE = 'https://wa.me';
+
+export function whatsappReminderUrl(phone: string, text: string): string {
+  const cleanPhone = phone.replace(/\D/g, '');
+  return `${WHATSAPP_API_BASE}/${cleanPhone}?text=${encodeURIComponent(text)}`;
+}

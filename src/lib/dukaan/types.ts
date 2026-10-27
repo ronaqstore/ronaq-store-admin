@@ -25,13 +25,3 @@ export interface Paginated<T> {
   page: number;
   limit: number;
 }
-
-export interface DashboardKpis {
-  today_sales: number;
-  today_net_profit: number;
-  customer_udhar: number;
-  supplier_payable: number;
-  today_expenses: number;
-  low_stock_count: number;
-  cash_position: number;
-}

@@ -1,66 +1,95 @@
 'use client';
 
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Link } from '@/i18n/navigation';
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatPkr } from '@/lib/dukaan/numbers';
-import { dashboardQueryOptions } from '../api/queries';
+import { DateRangeFilter } from '@/components/dashboard/date-range-filter';
+import { ChartSkeleton } from '@/components/dashboard/chart-skeleton';
+import { DashboardKpisRow } from './dashboard-kpis';
+import { DashboardRow2SalesProfit } from './dashboard-row2-sales-profit';
+import { DashboardRow3CashUdhar } from './dashboard-row3-cash-udhar';
+import { DashboardRow4ProductsMix } from './dashboard-row4-products-mix';
+import { DashboardRow5ExpensesInventory } from './dashboard-row5-expenses-inventory';
+import { useInView } from '@/hooks/use-in-view';
 import { useT } from '@/i18n/use-t';
-import type { DashboardKpiLink } from '@/types/dukaan';
+import { cn } from '@/lib/utils';
+import type { DashboardPeriod, LazyChartSectionProps } from '@/types/charts';
+import type { DashboardRangeParams } from '@/types/dashboard';
 
-const KPI_LINKS: DashboardKpiLink[] = [
-  { key: 'today_sales', labelKey: 'dashboard.todaySales', href: '/dashboard/sales' },
-  { key: 'today_net_profit', labelKey: 'dashboard.todayNetProfit', href: '/dashboard/overview' },
-  { key: 'customer_udhar', labelKey: 'dashboard.customerUdhar', href: '/dashboard/customers' },
-  { key: 'supplier_payable', labelKey: 'dashboard.supplierPayable', href: '/dashboard/suppliers' },
-  { key: 'today_expenses', labelKey: 'dashboard.todayExpenses', href: '/dashboard/expenses' },
-  { key: 'low_stock_count', labelKey: 'dashboard.lowStock', href: '/dashboard/inventory' },
-  { key: 'cash_position', labelKey: 'dashboard.cashPosition', href: '/dashboard/cash' }
-];
+function LazySection({
+  children,
+  minHeight = 320,
+  skeletonType = 'bar',
+}: LazyChartSectionProps) {
+  const { ref, inView } = useInView<HTMLDivElement>('240px');
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        !inView && 'min-h-[320px]',
+        !inView && minHeight >= 360 && 'min-h-[360px]',
+      )}
+    >
+      {inView ? (
+        children
+      ) : (
+        <ChartSkeleton type={skeletonType} height={minHeight} />
+      )}
+    </div>
+  );
+}
 
 export function DukaanDashboard() {
   const t = useT();
   const { data: session } = useSession();
-  const { data: kpis } = useSuspenseQuery(dashboardQueryOptions());
-  const userName = session?.user?.name ?? '';
-  const shopName = session?.user?.shopName ?? '';
-  const firstName = userName.split(' ')[0] || userName || t('user.user');
+  const searchParams = useSearchParams();
 
+  const shopName = session?.user?.shopName ?? '';
+
+  const period = (searchParams.get('period') as DashboardPeriod) || '7d';
+  const compareParam = searchParams.get('compare');
+  const compare =
+    compareParam !== null
+      ? compareParam === 'true'
+      : period !== 'today' && period !== 'yesterday';
+
+  const params: DashboardRangeParams = useMemo(
+    () => ({
+      period,
+      from: searchParams.get('from') || undefined,
+      to: searchParams.get('to') || undefined,
+      compare
+    }),
+    [period, compare, searchParams]
+  );
 
   return (
-    <div className='flex flex-1 flex-col gap-4'>
-      <div>
-        <h2 className='text-2xl font-bold tracking-tight'>
-          {t('dashboard.hi', { name: firstName })}
-        </h2>
-        <p className='text-muted-foreground text-sm'>
-          {t('dashboard.snapshot', { shop: shopName })}
-        </p>
+    <div className='flex flex-1 flex-col gap-6'>
+      <div className='flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between'>
+        <div>
+          <h1 className='text-2xl font-bold tracking-tight'>
+            {t('pages.dashboard.title')}
+          </h1>
+          <p className='text-muted-foreground text-sm'>
+            {shopName
+              ? t('dashboard.snapshot', { shop: shopName })
+              : t('pages.dashboard.description')}
+          </p>
+        </div>
+        <DateRangeFilter currentPeriod={period} compare={compare} />
       </div>
 
-      <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
-        {KPI_LINKS.map((item) => {
-          const value = kpis[item.key];
-          const label = t(item.labelKey);
-          const display = item.key === 'low_stock_count' ? String(value) : formatPkr(value);
-          return (
-            <Link
-              key={item.key}
-              href={item.href}
-              className='block'
-              aria-label={`${label}: ${display}`}
-            >
-              <Card className='hover:bg-muted/40 cursor-pointer transition-colors'>
-                <CardHeader>
-                  <CardDescription>{label}</CardDescription>
-                  <CardTitle className='text-2xl font-semibold tabular-nums'>{display}</CardTitle>
-                </CardHeader>
-              </Card>
-            </Link>
-          );
-        })}
-      </div>
+      <DashboardKpisRow params={params} />
+      <DashboardRow2SalesProfit params={params} compare={compare} />
+      <LazySection minHeight={320} skeletonType='row-cash-udhar'>
+        <DashboardRow3CashUdhar params={params} />
+      </LazySection>
+      <LazySection minHeight={320} skeletonType='row-products-mix'>
+        <DashboardRow4ProductsMix params={params} />
+      </LazySection>
+      <LazySection minHeight={360} skeletonType='row-expenses-attention'>
+        <DashboardRow5ExpensesInventory params={params} />
+      </LazySection>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import PageContainer from '@/components/layout/page-container';
 import { PlatformDashboard } from '@/features/platform-admin/components/platform-dashboard';
-import { platformOverviewQueryOptions } from '@/features/platform-admin/api/queries';
+import { platformDashboardKpisQueryOptions } from '@/features/platform-admin/api/queries';
 import { getQueryClient } from '@/lib/query-client';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
 import { Suspense } from 'react';
@@ -17,7 +17,7 @@ export async function generateMetadata() {
 function PlatformDashboardSkeleton() {
   return (
     <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
-      {Array.from({ length: 4 }).map((_, i) => (
+      {Array.from({ length: 8 }).map((_, i) => (
         <Skeleton key={i} className='h-28 rounded-xl' />
       ))}
     </div>
@@ -26,13 +26,10 @@ function PlatformDashboardSkeleton() {
 
 export default async function PlatformPage() {
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery(platformOverviewQueryOptions());
+  await queryClient.prefetchQuery(platformDashboardKpisQueryOptions());
 
   return (
-    <PageContainer
-      pageTitle='pages.platform.title'
-      pageDescription='platform.manageShopsDescription'
-    >
+    <PageContainer>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense fallback={<PlatformDashboardSkeleton />}>
           <PlatformDashboard />
