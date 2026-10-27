@@ -50,7 +50,14 @@ export function CancelPaymentDialog({
           message: res.message
         });
         setConfirmOverdraft(true);
-        toast.warning(res.message || t('payments.overdraftConfirmationRequired'));
+        const shortfallPkr = formatPkr(
+          res.shortfall ?? (impact?.cashAfter ? Math.abs(impact.cashAfter) : 0)
+        );
+        toast.warning(
+          t('payments.drawerOverdraftDesc', {
+            shortfall: shortfallPkr
+          })
+        );
         return;
       }
 
@@ -126,26 +133,22 @@ export function CancelPaymentDialog({
     }
   }
 
+  const shortfallAmount = formatPkr(
+    overdraftPrompt?.shortfall ?? (impact?.cashAfter ? Math.abs(impact.cashAfter) : 0)
+  );
+
   const overdraftSection = (
     <>
-      {impact?.willCauseOverdraft && (
+      {(impact?.willCauseOverdraft || overdraftPrompt) && (
         <OverdraftAlert
           checked={confirmOverdraft}
           onCheckedChange={handleConfirmOverdraftChange}
           title={t('payments.drawerOverdraftWarning')}
-          description={t('payments.drawerOverdraftDesc', { amount: formatPkr(impact.cashAfter) })}
+          description={t('payments.drawerOverdraftDesc', {
+            shortfall: shortfallAmount
+          })}
           confirmLabel={t('payments.confirmNegativeCash')}
           id='confirm-overdraft'
-        />
-      )}
-      {overdraftPrompt && !impact?.willCauseOverdraft && (
-        <OverdraftAlert
-          checked={confirmOverdraft}
-          onCheckedChange={handleConfirmOverdraftChange}
-          title={t('payments.drawerOverdraftWarning')}
-          description={overdraftPrompt.message}
-          confirmLabel={t('payments.confirmNegativeCash')}
-          id='confirm-overdraft-prompt'
         />
       )}
       <DialogFieldError message={overdraftError} />

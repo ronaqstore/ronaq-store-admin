@@ -6,10 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useT } from '@/i18n/use-t';
 import { formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import type { PurchaseSummaryCardProps } from '@/types/purchases';
-import {
-  calcPurchaseDueRs,
-  calcPurchaseLineTotalRs
-} from '../helpers/purchase-create-helpers';
+import { calcPurchaseDueRs, calcPurchaseLineTotalRs } from '../helpers/purchase-create-helpers';
 
 export function PurchaseSummaryCard({
   isOpeningStock,
@@ -43,17 +40,13 @@ export function PurchaseSummaryCard({
         </div>
 
         {isOpeningStock ? (
-          <p className='text-muted-foreground text-xs'>
-            {t('dukaan.purchase.noCashMovement')}
-          </p>
+          <p className='text-muted-foreground text-xs'>{t('dukaan.purchase.noCashMovement')}</p>
         ) : (
           <div className='space-y-3'>
             {paidNowField}
             <div className='bg-muted/20 flex items-baseline justify-between gap-3 rounded-lg border px-3 py-2.5'>
               <span className='text-muted-foreground text-xs font-medium'>
-                {dueRs > 0
-                  ? t('dukaan.purchase.supplierPayable')
-                  : t('dukaan.purchase.balanceDue')}
+                {dueRs > 0 ? t('dukaan.purchase.supplierPayable') : t('dukaan.purchase.balanceDue')}
               </span>
               <span
                 className={
@@ -71,13 +64,10 @@ export function PurchaseSummaryCard({
         {warning ? (
           <div className='rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm'>
             <p className='font-medium text-amber-900 dark:text-amber-200'>
-              {warning.message || t('purchases.overdraftWarning')}
+              {t('purchases.overdraftPrompt', {
+                shortfall: formatPkr(warning.shortfall ?? 0)
+              })}
             </p>
-            {warning.shortfall ? (
-              <p className='text-muted-foreground mt-1 text-xs'>
-                {t('purchases.shortfall')} {formatPkr(warning.shortfall)}
-              </p>
-            ) : null}
             <Button
               type='button'
               variant='destructive'

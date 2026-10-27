@@ -73,7 +73,11 @@ export function RecordExpenseDialog({
           message: res.message
         });
         setConfirmOverdraft(true);
-        toast.warning(res.message || t('expenses.overdraftWarning'));
+        toast.warning(
+          t('expenses.shortfallWarningDesc', {
+            shortfall: formatPkr(res.shortfall ?? 0)
+          })
+        );
         return;
       }
 
@@ -270,12 +274,9 @@ export function RecordExpenseDialog({
                 checked={confirmOverdraft}
                 onCheckedChange={handleConfirmOverdraftChange}
                 title={t('expenses.shortfallWarningTitle')}
-                description={
-                  overdraftPrompt.message ||
-                  t('dukaan.cash.shortfallWarningDesc', {
-                    shortfall: formatPkr(overdraftPrompt.shortfall ?? 0)
-                  })
-                }
+                description={t('expenses.shortfallWarningDesc', {
+                  shortfall: formatPkr(overdraftPrompt.shortfall ?? 0)
+                })}
                 confirmLabel={t('expenses.confirmExpenseOverdraft')}
               />
             )}

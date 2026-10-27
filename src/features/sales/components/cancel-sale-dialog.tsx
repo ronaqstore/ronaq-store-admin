@@ -37,7 +37,14 @@ export function CancelSaleDialog({ sale, open, onOpenChange, onSuccess }: Cancel
           message: res.message
         });
         setConfirmOverdraft(true);
-        toast.warning(res.message || t('sales.cancelDialog.overdraftRequired'));
+        const shortfallPkr = formatPkr(
+          res.shortfall ?? (impact?.cashAfter ? Math.abs(impact.cashAfter) : 0)
+        );
+        toast.warning(
+          t('sales.cancelDialog.overdraftDescription', {
+            shortfall: shortfallPkr
+          })
+        );
         return;
       }
 
@@ -95,32 +102,23 @@ export function CancelSaleDialog({ sale, open, onOpenChange, onSuccess }: Cancel
     }
   }
 
-  const overdraftSection = (
-    <>
-      {impact?.willCauseOverdraft && (
-        <OverdraftAlert
-          checked={confirmOverdraft}
-          onCheckedChange={setConfirmOverdraft}
-          title={t('sales.cancelDialog.overdraftWarning')}
-          description={t('sales.cancelDialog.overdraftDescription', {
-            amount: formatPkr(impact.cashAfter ?? 0)
-          })}
-          confirmLabel={t('sales.cancelDialog.confirmOverdraft')}
-          id='sale-confirm-overdraft'
-        />
-      )}
-      {overdraftPrompt && !impact?.willCauseOverdraft && (
-        <OverdraftAlert
-          checked={confirmOverdraft}
-          onCheckedChange={setConfirmOverdraft}
-          title={t('sales.cancelDialog.overdraftWarning')}
-          description={overdraftPrompt.message}
-          confirmLabel={t('sales.cancelDialog.confirmOverdraft')}
-          id='sale-confirm-overdraft-prompt'
-        />
-      )}
-    </>
+  const shortfallAmount = formatPkr(
+    overdraftPrompt?.shortfall ?? (impact?.cashAfter ? Math.abs(impact.cashAfter) : 0)
   );
+
+  const overdraftSection =
+    impact?.willCauseOverdraft || overdraftPrompt ? (
+      <OverdraftAlert
+        checked={confirmOverdraft}
+        onCheckedChange={setConfirmOverdraft}
+        title={t('sales.cancelDialog.overdraftWarning')}
+        description={t('sales.cancelDialog.overdraftDescription', {
+          shortfall: shortfallAmount
+        })}
+        confirmLabel={t('sales.cancelDialog.confirmOverdraft')}
+        id='sale-confirm-overdraft'
+      />
+    ) : null;
 
   return (
     <BaseCancelDialog

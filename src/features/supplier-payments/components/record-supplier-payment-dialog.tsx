@@ -111,7 +111,11 @@ export function RecordSupplierPaymentDialog({
           message: res.message
         });
         setConfirmOverdraft(true);
-        toast.warning(res.message || t('supplierPayments.overdraftWarning'));
+        toast.warning(
+          t('supplierPayments.shortfallWarningDesc', {
+            shortfall: formatPkr(res.shortfall ?? 0)
+          })
+        );
         return;
       }
 
@@ -207,7 +211,9 @@ export function RecordSupplierPaymentDialog({
     setErrors((e) => ({ ...e, purchaseId: undefined }));
   };
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAmountStr(sanitizeNumberInput(e.target.value, { min: 1, max: INPUT_LIMITS.amountRupeesMax }));
+    setAmountStr(
+      sanitizeNumberInput(e.target.value, { min: 1, max: INPUT_LIMITS.amountRupeesMax })
+    );
     setErrors((p) => ({ ...p, amount: undefined }));
   };
 
@@ -420,12 +426,9 @@ export function RecordSupplierPaymentDialog({
                   checked={confirmOverdraft}
                   onCheckedChange={handleConfirmOverdraftChange}
                   title={t('supplierPayments.shortfallWarningTitle')}
-                  description={
-                    overdraftPrompt.message ||
-                    t('supplierPayments.shortfallWarningDesc', {
-                      shortfall: formatPkr(overdraftPrompt.shortfall ?? 0)
-                    })
-                  }
+                  description={t('supplierPayments.shortfallWarningDesc', {
+                    shortfall: formatPkr(overdraftPrompt.shortfall ?? 0)
+                  })}
                   confirmLabel={t('supplierPayments.confirmOverdraft')}
                 />
               )}

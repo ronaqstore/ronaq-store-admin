@@ -79,7 +79,14 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
     ...createReturnMutation,
     onSuccess: (res) => {
       if (res && 'confirmOverdraft' in res && res.confirmOverdraft) {
-        toast.warning(res.message || t('sales.returnDialog.overdraftRequired'));
+        const shortfallPkr = formatPkr(
+          res.shortfall ?? (previewData?.cashAfter ? Math.abs(previewData.cashAfter) : 0)
+        );
+        toast.warning(
+          t('sales.returnDialog.overdraftNotice', {
+            shortfall: shortfallPkr
+          })
+        );
         setConfirmOverdraft(true);
         return;
       }
@@ -220,10 +227,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
               {t('sales.returnDialog.selectItems')}
             </Label>
             <div
-              className={cn(
-                'space-y-2 rounded-lg border p-3',
-                itemsError && 'border-destructive'
-              )}
+              className={cn('space-y-2 rounded-lg border p-3', itemsError && 'border-destructive')}
             >
               {sale.items.map((item) => {
                 const state = itemStates[item.id] || {
@@ -390,7 +394,9 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
                   variant='compact'
                   checked={confirmOverdraft}
                   onCheckedChange={setConfirmOverdraft}
-                  description={t('sales.returnDialog.overdraftNotice')}
+                  description={t('sales.returnDialog.overdraftNotice', {
+                    shortfall: formatPkr(Math.abs(previewData.cashAfter))
+                  })}
                   id='return-overdraft'
                   className='mt-2'
                 />

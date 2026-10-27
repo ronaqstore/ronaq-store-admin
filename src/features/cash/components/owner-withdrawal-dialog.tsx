@@ -49,7 +49,11 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
     onSuccess: async (data: CreateOwnerWithdrawalResult) => {
       if ('confirmOverdraft' in data && data.confirmOverdraft) {
         setOverdraftPrompt(data);
-        toast.warning(data.message || t('dukaan.cash.overdraftWarning'));
+        toast.warning(
+          t('dukaan.cash.shortfallWarningDesc', {
+            shortfall: formatPkr(data.shortfall ?? 0)
+          })
+        );
         return;
       }
 
@@ -184,12 +188,9 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
               checked={confirmOverdraft}
               onCheckedChange={setConfirmOverdraft}
               title={t('dukaan.cash.shortfallWarningTitle')}
-              description={
-                overdraftPrompt.message ||
-                t('dukaan.cash.shortfallWarningDesc', {
-                  shortfall: formatPkr(overdraftPrompt.shortfall)
-                })
-              }
+              description={t('dukaan.cash.shortfallWarningDesc', {
+                shortfall: formatPkr(overdraftPrompt.shortfall ?? 0)
+              })}
               confirmLabel={t('dukaan.cash.confirmOverdraftLabel')}
             />
           )}

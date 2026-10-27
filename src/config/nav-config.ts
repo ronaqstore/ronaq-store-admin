@@ -17,13 +17,87 @@ const shopNavGroups: NavGroup[] = [
     ]
   },
   {
-    label: 'nav.group.catalog',
+    label: 'nav.group.sales',
+    items: [
+      {
+        title: 'nav.sales',
+        url: '/dashboard/sales',
+        icon: 'receipt',
+        shortcut: ['s', 's'],
+        isActive: false,
+        items: []
+      },
+      {
+        title: 'nav.customers',
+        url: '/dashboard/customers',
+        icon: 'teams',
+        isActive: false,
+        items: []
+      },
+      {
+        title: 'nav.customerPayments',
+        url: '/dashboard/payments',
+        icon: 'cash',
+        isActive: false,
+        items: []
+      }
+    ]
+  },
+  {
+    label: 'nav.group.purchases',
+    items: [
+      {
+        title: 'nav.purchases',
+        url: '/dashboard/purchases',
+        icon: 'truck',
+        isActive: false,
+        items: []
+      },
+      {
+        title: 'nav.suppliers',
+        url: '/dashboard/suppliers',
+        icon: 'building',
+        isActive: false,
+        items: []
+      },
+      {
+        title: 'nav.supplierPayments',
+        url: '/dashboard/supplier-payments',
+        icon: 'creditCard',
+        isActive: false,
+        items: []
+      }
+    ]
+  },
+  {
+    label: 'nav.group.inventory',
     items: [
       {
         title: 'nav.products',
         url: '/dashboard/products',
         icon: 'product',
         shortcut: ['p', 'p'],
+        isActive: false,
+        items: []
+      },
+      {
+        title: 'nav.stockLevels',
+        url: '/dashboard/inventory',
+        icon: 'box',
+        isActive: false,
+        items: []
+      },
+      {
+        title: 'nav.stockAdjustments',
+        url: '/dashboard/stock-adjustments',
+        icon: 'adjustments',
+        isActive: false,
+        items: []
+      },
+      {
+        title: 'nav.stockHistory',
+        url: '/dashboard/inventory-movements',
+        icon: 'history',
         isActive: false,
         items: []
       },
@@ -44,72 +118,12 @@ const shopNavGroups: NavGroup[] = [
     ]
   },
   {
-    label: 'nav.group.stock',
+    label: 'nav.group.finance',
     items: [
       {
-        title: 'nav.purchases',
-        url: '/dashboard/purchases',
-        icon: 'truck',
-        isActive: false,
-        items: []
-      },
-      {
-        title: 'nav.inventory',
-        url: '/dashboard/inventory',
-        icon: 'box',
-        isActive: false,
-        items: []
-      },
-      {
-        title: 'nav.adjustments',
-        url: '/dashboard/stock-adjustments',
-        icon: 'adjustments',
-        isActive: false,
-        items: []
-      },
-      {
-        title: 'nav.movements',
-        url: '/dashboard/inventory-movements',
-        icon: 'history',
-        isActive: false,
-        items: []
-      }
-    ]
-  },
-  {
-    label: 'nav.group.sales',
-    items: [
-      {
-        title: 'nav.sales',
-        url: '/dashboard/sales',
-        icon: 'receipt',
-        shortcut: ['s', 's'],
-        isActive: false,
-        items: []
-      },
-      {
-        title: 'nav.customers',
-        url: '/dashboard/customers',
-        icon: 'teams',
-        isActive: false,
-        items: []
-      },
-      {
-        title: 'nav.payments',
-        url: '/dashboard/payments',
+        title: 'nav.cashDrawer',
+        url: '/dashboard/cash',
         icon: 'cash',
-        isActive: false,
-        items: []
-      }
-    ]
-  },
-  {
-    label: 'nav.group.money',
-    items: [
-      {
-        title: 'nav.supplierPayments',
-        url: '/dashboard/supplier-payments',
-        icon: 'creditCard',
         isActive: false,
         items: []
       },
@@ -124,25 +138,6 @@ const shopNavGroups: NavGroup[] = [
         title: 'nav.expenseCategories',
         url: '/dashboard/expense-categories',
         icon: 'folder',
-        isActive: false,
-        items: []
-      },
-      {
-        title: 'nav.cashLedger',
-        url: '/dashboard/cash',
-        icon: 'cash',
-        isActive: false,
-        items: []
-      }
-    ]
-  },
-  {
-    label: 'nav.group.people',
-    items: [
-      {
-        title: 'nav.suppliers',
-        url: '/dashboard/suppliers',
-        icon: 'building',
         isActive: false,
         items: []
       }

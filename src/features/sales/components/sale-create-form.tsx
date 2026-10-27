@@ -1,7 +1,6 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from '@/i18n/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { FormEntitySelect } from '@/components/forms/form-entity-select';
@@ -48,7 +47,6 @@ import { EMPTY_FORM_NUMBER } from '@/types/common';
 
 export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
   const qc = useQueryClient();
-  const router = useRouter();
   const t = useT();
   const [clientRequestId] = useState(() => createClientRequestId());
   const [formApiError, setFormApiError] = useState<string | null>(null);
@@ -58,8 +56,11 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
     onSuccess: (res: SaleDTO) => {
       invalidateDomains({ queryClient: qc, domains: SALE_SYNC_DOMAINS });
       onDone?.();
-      router.push(`/dashboard/sales/${res.id}`);
-      toastSuccessAfterClose(t('dukaan.sale.saved', { saleNo: res.saleNo }));
+      toastSuccessAfterClose(
+        res?.saleNo
+          ? t('dukaan.sale.saved', { saleNo: res.saleNo })
+          : (res as { message?: string })?.message || t('dukaan.sale.saved', { saleNo: '' })
+      );
     },
     onError: (e: Error) => {
       if (isValidationApiError(e)) {
@@ -139,13 +140,10 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
     form.setFieldValue(`lines[${idx}].unit_condition`, condition);
     form.setFieldValue(
       `lines[${idx}].warranty_days`,
-      condition === 'USED' ? (currentWarrantyDays || '') : ''
+      condition === 'USED' ? currentWarrantyDays || '' : ''
     );
     if (unit?.effectivePrice != null) {
-      form.setFieldValue(
-        `lines[${idx}].unit_price`,
-        fromPaisa(unit.effectivePrice)
-      );
+      form.setFieldValue(`lines[${idx}].unit_price`, fromPaisa(unit.effectivePrice));
     }
   };
 
@@ -259,155 +257,172 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
                         warrantyDays: current?.warranty_days ?? ''
                       };
                     }}
-                    children={({ isPhone, productId, authenticity, unitCondition, warrantyDays }) => (
-                  <div
-                    className='relative grid gap-2 rounded-lg border p-3 pe-24 md:grid-cols-4'
-                  >
-                    {field.state.value.length > 1 && (
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='sm'
-                        className='absolute inset-e-2 top-2 h-7 text-muted-foreground hover:text-destructive'
-                        onClick={() => field.removeValue(idx)}
-                      >
-                        <Icons.trash className='me-1 h-4 w-4' />
-                        {t('common.remove')}
-                      </Button>
-                    )}
-                    <div className='md:col-span-2'>
-                      <form.Field
-                        name={`lines[${idx}].product_id`}
-                        children={(subField) => {
-                          const isInvalid = isFieldMetaInvalid(subField.state.meta);
-                          return (
-                            <FormEntitySelect<ProductPickerItem>
-                              name={subField.name}
-                              label={t('dukaan.sale.product')}
-                              required
-                              value={subField.state.value}
-                              onBlur={subField.handleBlur}
-                              onValueChange={(id, product) =>
-                                handleProductSelect(idx, subField, id, product)
-                              }
-                              isInvalid={isInvalid}
-                              errors={subField.state.meta.errors}
-                              queryKey={['products', 'picker']}
-                              fetchPage={fetchProductPage}
-                              placeholder={t('dukaan.sale.selectProduct')}
-                              searchPlaceholder={t('dukaan.sale.searchProducts')}
-                            />
-                          );
-                        }}
-                      />
-                    </div>
-                    <form.AppField
-                      name={`lines[${idx}].quantity`}
-                      children={(subField) => (
-                        <subField.TextField
-                          label={t('dukaan.sale.quantity')}
-                          type='number'
-                          min={1}
-                          max={isPhone ? 1 : INPUT_LIMITS.quantityMax}
-                          required
-                          disabled={isPhone}
-                          placeholder={t('dukaan.sale.quantityPlaceholder')}
-                        />
-                      )}
-                    />
-                    <form.AppField
-                      name={`lines[${idx}].unit_price`}
-                      children={(subField) => (
-                        <subField.TextField
-                          label={t('dukaan.sale.unitPrice')}
-                          type='number'
-                          min={0}
-                          max={INPUT_LIMITS.amountRupeesMax}
-                          required
-                          placeholder={t('dukaan.sale.unitPricePlaceholder')}
-                        />
-                      )}
-                    />
-                    {!isPhone && authenticity ? (
-                      <div className='md:col-span-4 space-y-2'>
-                        <Badge
-                          variant={authenticity === 'ORIGINAL' ? 'default' : 'secondary'}
-                          className='text-xs'
-                        >
-                          {authenticity === 'ORIGINAL'
-                            ? t('dukaan.product.authenticityOriginal')
-                            : t('dukaan.product.authenticityCopy')}
-                        </Badge>
-                        <Alert>
-                          <Icons.warning />
-                          <AlertDescription>
-                            {t('dukaan.sale.authenticityTellCustomer')}
-                          </AlertDescription>
-                        </Alert>
-                      </div>
-                    ) : null}
-                    {isPhone && productId ? (
-                      <div className='md:col-span-4 space-y-3'>
-                        <form.Field
-                          name={`lines[${idx}].inventory_unit_id`}
-                          children={(subField) => {
-                            const isInvalid = isFieldMetaInvalid(subField.state.meta);
-                            return (
-                              <SaleLineImeiField
-                                productId={productId}
-                                name={subField.name}
-                                value={subField.state.value ?? ''}
-                                onBlur={subField.handleBlur}
-                                onValueChange={(unitId, condition, unit) =>
-                                  handleImeiChange(
-                                    subField,
-                                    idx,
-                                    unitId,
-                                    condition,
-                                    warrantyDays,
-                                    unit
-                                  )
-                                }
-                                isInvalid={isInvalid}
-                                errors={subField.state.meta.errors}
-                                excludedUnitIds={excludedUnitIds}
-                              />
-                            );
-                          }}
-                        />
-                        {unitCondition === 'USED' ? (
-                          <form.AppField
-                            name={`lines[${idx}].warranty_days`}
-                            children={(subField) => (
-                              <subField.RadioGroupField
-                                label={t('dukaan.sale.shopWarranty')}
-                                required
-                                description={t('dukaan.sale.shopWarrantyHelp')}
-                                options={[
-                                  { value: '1', label: t('dukaan.sale.warrantyDays', { days: 1 }) },
-                                  { value: '2', label: t('dukaan.sale.warrantyDays', { days: 2 }) },
-                                  { value: '3', label: t('dukaan.sale.warrantyDays', { days: 3 }) }
-                                ]}
-                              />
-                            )}
+                    children={({
+                      isPhone,
+                      productId,
+                      authenticity,
+                      unitCondition,
+                      warrantyDays
+                    }) => (
+                      <div className='relative grid gap-2 rounded-lg border p-3 pe-24 md:grid-cols-4'>
+                        {field.state.value.length > 1 && (
+                          <Button
+                            type='button'
+                            variant='ghost'
+                            size='sm'
+                            className='absolute inset-e-2 top-2 h-7 text-muted-foreground hover:text-destructive'
+                            onClick={() => field.removeValue(idx)}
+                          >
+                            <Icons.trash className='me-1 h-4 w-4' />
+                            {t('common.remove')}
+                          </Button>
+                        )}
+                        <div className='md:col-span-2'>
+                          <form.Field
+                            name={`lines[${idx}].product_id`}
+                            children={(subField) => {
+                              const isInvalid = isFieldMetaInvalid(subField.state.meta);
+                              return (
+                                <FormEntitySelect<ProductPickerItem>
+                                  name={subField.name}
+                                  label={t('dukaan.sale.product')}
+                                  required
+                                  value={subField.state.value}
+                                  onBlur={subField.handleBlur}
+                                  onValueChange={(id, product) =>
+                                    handleProductSelect(idx, subField, id, product)
+                                  }
+                                  isInvalid={isInvalid}
+                                  errors={subField.state.meta.errors}
+                                  queryKey={['products', 'picker']}
+                                  fetchPage={fetchProductPage}
+                                  placeholder={t('dukaan.sale.selectProduct')}
+                                  searchPlaceholder={t('dukaan.sale.searchProducts')}
+                                />
+                              );
+                            }}
                           />
-                        ) : unitCondition === 'NEW' ? (
-                          <Alert>
-                            <Icons.warning />
-                            <AlertDescription>
-                              {t('dukaan.sale.companyWarranty')}
-                            </AlertDescription>
-                          </Alert>
+                        </div>
+                        <form.AppField
+                          name={`lines[${idx}].quantity`}
+                          children={(subField) => (
+                            <subField.TextField
+                              label={t('dukaan.sale.quantity')}
+                              type='number'
+                              min={1}
+                              max={isPhone ? 1 : INPUT_LIMITS.quantityMax}
+                              required
+                              disabled={isPhone}
+                              placeholder={t('dukaan.sale.quantityPlaceholder')}
+                            />
+                          )}
+                        />
+                        <form.AppField
+                          name={`lines[${idx}].unit_price`}
+                          children={(subField) => (
+                            <subField.TextField
+                              label={t('dukaan.sale.unitPrice')}
+                              type='number'
+                              min={0}
+                              max={INPUT_LIMITS.amountRupeesMax}
+                              required
+                              placeholder={t('dukaan.sale.unitPricePlaceholder')}
+                            />
+                          )}
+                        />
+                        {!isPhone && authenticity ? (
+                          <div className='md:col-span-4 space-y-2'>
+                            <Badge
+                              variant={authenticity === 'ORIGINAL' ? 'default' : 'secondary'}
+                              className='text-xs'
+                            >
+                              {authenticity === 'ORIGINAL'
+                                ? t('dukaan.product.authenticityOriginal')
+                                : t('dukaan.product.authenticityCopy')}
+                            </Badge>
+                            <Alert>
+                              <Icons.warning />
+                              <AlertDescription>
+                                {t('dukaan.sale.authenticityTellCustomer')}
+                              </AlertDescription>
+                            </Alert>
+                          </div>
+                        ) : null}
+                        {isPhone && productId ? (
+                          <div className='md:col-span-4 space-y-3'>
+                            <form.Field
+                              name={`lines[${idx}].inventory_unit_id`}
+                              children={(subField) => {
+                                const isInvalid = isFieldMetaInvalid(subField.state.meta);
+                                return (
+                                  <SaleLineImeiField
+                                    productId={productId}
+                                    name={subField.name}
+                                    value={subField.state.value ?? ''}
+                                    onBlur={subField.handleBlur}
+                                    onValueChange={(unitId, condition, unit) =>
+                                      handleImeiChange(
+                                        subField,
+                                        idx,
+                                        unitId,
+                                        condition,
+                                        warrantyDays,
+                                        unit
+                                      )
+                                    }
+                                    isInvalid={isInvalid}
+                                    errors={subField.state.meta.errors}
+                                    excludedUnitIds={excludedUnitIds}
+                                  />
+                                );
+                              }}
+                            />
+                            {unitCondition === 'USED' ? (
+                              <form.AppField
+                                name={`lines[${idx}].warranty_days`}
+                                children={(subField) => (
+                                  <subField.RadioGroupField
+                                    label={t('dukaan.sale.shopWarranty')}
+                                    required
+                                    description={t('dukaan.sale.shopWarrantyHelp')}
+                                    options={[
+                                      {
+                                        value: '1',
+                                        label: t('dukaan.sale.warrantyDays', { days: 1 })
+                                      },
+                                      {
+                                        value: '2',
+                                        label: t('dukaan.sale.warrantyDays', { days: 2 })
+                                      },
+                                      {
+                                        value: '3',
+                                        label: t('dukaan.sale.warrantyDays', { days: 3 })
+                                      }
+                                    ]}
+                                  />
+                                )}
+                              />
+                            ) : unitCondition === 'NEW' ? (
+                              <Alert>
+                                <Icons.warning />
+                                <AlertDescription>
+                                  {t('dukaan.sale.companyWarranty')}
+                                </AlertDescription>
+                              </Alert>
+                            ) : null}
+                          </div>
                         ) : null}
                       </div>
-                    ) : null}
-                  </div>
                     )}
                   />
                 );
               })}
               <div className='flex justify-end'>
-                <Button type='button' variant='outline' onClick={() => field.pushValue({ ...emptySaleLine })}>
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={() => field.pushValue({ ...emptySaleLine })}
+                >
                   <Icons.add className='me-2 h-4 w-4' />
                   {t('dukaan.sale.addItem')}
                 </Button>
@@ -426,7 +441,6 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
               type='number'
               min={0}
               max={INPUT_LIMITS.amountRupeesMax}
-              required
               placeholder={t('dukaan.sale.discountPlaceholder')}
             />
           )}

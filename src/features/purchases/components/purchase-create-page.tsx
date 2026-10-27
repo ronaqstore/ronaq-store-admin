@@ -11,7 +11,7 @@ import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
 import { formatPkCnic } from '@/lib/validation/pk';
 import { isFieldMetaInvalid, joinFieldErrors } from '@/lib/form-context';
-import { createClientRequestId } from '@/lib/dukaan/numbers';
+import { createClientRequestId, formatPkr } from '@/lib/dukaan/numbers';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import type { CreatePurchaseResult } from '@/lib/api/types';
 import type { OpeningStockChangeArgs, PurchaseFormValues } from '@/types/purchases';
@@ -49,14 +49,17 @@ export function PurchaseCreatePageClient() {
           shortfall: res.shortfall,
           message: res.message
         });
-        toast.warning(res.message || t('dukaan.actions.cashBelowZeroWarning'));
+        toast.warning(
+          t('purchases.overdraftPrompt', {
+            shortfall: formatPkr(res.shortfall ?? 0)
+          })
+        );
         return;
       }
       invalidateDomains({ queryClient: qc, domains: PURCHASE_SYNC_DOMAINS });
       router.push('/dashboard/purchases');
       toastSuccessAfterClose(
-        res?.message ||
-          t('dukaan.purchase.saved', { purchaseNo: res?.purchase?.purchaseNo ?? '' })
+        res?.message || t('dukaan.purchase.saved', { purchaseNo: res?.purchase?.purchaseNo ?? '' })
       );
     },
     onError: (e: Error) => toast.error(e.message)
