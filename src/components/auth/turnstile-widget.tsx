@@ -52,7 +52,7 @@ export function TurnstileWidget({ onTokenChange, className }: TurnstileWidgetPro
       widgetIdRef.current = turnstile.render(containerRef.current, {
         sitekey: siteKey,
         theme: 'light',
-        size: 'normal',
+        size: 'flexible',
         appearance: 'always',
         callback: (token: string) => {
           setWidgetReady(true);
@@ -94,9 +94,9 @@ export function TurnstileWidget({ onTokenChange, className }: TurnstileWidgetPro
   return (
     <div className={cn('relative w-full min-h-[65px]', className)}>
       {!widgetReady ? (
-        <Skeleton className='absolute inset-x-0 top-0 z-10 h-[65px] w-full max-w-[300px] rounded-md' />
+        <Skeleton className='absolute inset-x-0 top-0 z-10 h-[65px] w-full rounded-md' />
       ) : null}
-      <div ref={containerRef} className='w-full min-h-[65px]' />
+      <div ref={containerRef} className='w-full min-h-[65px] [&_iframe]:w-full' />
       <Script
         src={TURNSTILE_SCRIPT_URL}
         strategy='afterInteractive'
