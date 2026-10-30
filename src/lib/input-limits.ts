@@ -25,7 +25,7 @@ export const INPUT_LIMITS = {
   imageUrl: 500,
   password: 72,
   passwordMin: 8,
-  imei: 20,
+  imei: 15,
   imeiCountMax: 50_000,
   imeiList: 50_000 * 21,
   shopAddress: 250,

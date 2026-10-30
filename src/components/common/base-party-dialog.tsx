@@ -95,9 +95,22 @@ function BasePartyDialogBody({
   const resolvedPrimaryMode = primaryButtonMode ?? (isEdit ? 'edit' : 'add');
   const [formApiError, setFormApiError] = useState<string | null>(null);
 
+  const openingLocked =
+    isEdit &&
+    party?.currentBalance !== undefined &&
+    party.currentBalance !== party.openingBalance;
+
   const save = useMutation({
     mutationFn: async (value: BasePartyFormState) => {
-      const payload = buildPartyPayload(value, isEdit ? 'edit' : 'create', showCnic);
+      const payload = buildPartyPayload(
+        value,
+        isEdit ? 'edit' : 'create',
+        showCnic,
+        party?.openingBalance
+      );
+      if (openingLocked && 'openingBalance' in payload) {
+        delete payload.openingBalance;
+      }
       return onSave(payload, party?.id);
     },
     onSuccess: () => {
@@ -222,7 +235,11 @@ function BasePartyDialogBody({
                   type='number'
                   min={0}
                   max={INPUT_LIMITS.amountRupeesMax}
+                  disabled={openingLocked}
                   placeholder={t('dukaan.party.openingBalancePlaceholder')}
+                  description={
+                    openingLocked ? t('dukaan.party.openingBalanceLockedHelp') : undefined
+                  }
                 />
               )}
             />

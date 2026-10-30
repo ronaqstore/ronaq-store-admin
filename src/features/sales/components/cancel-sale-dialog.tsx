@@ -67,7 +67,7 @@ export function CancelSaleDialog({ sale, open, onOpenChange, onSuccess }: Cancel
     setReasonError('');
 
     if ((impact?.willCauseOverdraft || !!overdraftPrompt) && !confirmOverdraft) {
-      setReasonError(t('sales.cancelDialog.confirmOverdraftRequired') || 'Confirm overdraft before saving.');
+      setReasonError(t('sales.cancelDialog.confirmOverdraftRequired'));
       return;
     }
 

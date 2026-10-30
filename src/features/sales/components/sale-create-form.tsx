@@ -91,10 +91,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
     onSubmit: ({ value }: SaleFormSubmitContext) => {
       setFormApiError(null);
       if (belowCostPrompt && !confirmBelowCost) {
-        setFormApiError(
-          t('sales.confirmBelowCostRequired') ||
-            'Please check the confirmation box to confirm selling below cost.'
-        );
+        setFormApiError(t('sales.confirmBelowCostRequired'));
         return;
       }
       save.mutate(
@@ -129,7 +126,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
           checked={confirmBelowCost}
           onCheckedChange={setConfirmBelowCost}
           title={belowCostPrompt.message}
-          confirmLabel={t('sales.confirmBelowCost') || 'I confirm selling below cost'}
+          confirmLabel={t('sales.confirmBelowCost')}
           id='confirm-below-cost'
           variant='banner'
         />

@@ -59,7 +59,7 @@ export async function updateProduct(id: string, input: UpdateProductInput): Prom
 }
 
 export async function deactivateProduct(id: string): Promise<ProductDTO> {
-  return updateProduct(id, { isActive: false });
+  return updateProduct(id, { isActive: false, isPublished: false });
 }
 
 export async function reactivateProduct(id: string): Promise<ProductDTO> {

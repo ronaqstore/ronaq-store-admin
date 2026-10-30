@@ -37,6 +37,17 @@ export interface SupplierLedgerClientProps {
   id: string;
 }
 
+export interface SupplierLedgerPayArgs {
+  amount: number;
+  confirmOverdraft?: boolean;
+  resumeFrom?: number;
+}
+
+export interface SupplierLedgerPendingPay {
+  amount: number;
+  resumeFrom: number;
+}
+
 export interface SupplierLedgerEntryDTO {
   id: string;
   type: string;

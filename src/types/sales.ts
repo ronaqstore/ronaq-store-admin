@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react';
 import type {
   SaleDTO,
+  SaleItemDTO,
   SaleReturnDTO,
   CancelSaleInput,
+  ReturnPreviewDTO,
   ReturnPreviewInput,
   CreateReturnInput
 } from '@/lib/api/types';
@@ -86,6 +88,23 @@ export interface ItemReturnState {
   selected: boolean;
   quantity: number;
   condition: 'GOOD' | 'DAMAGED';
+}
+
+export interface ReturnSaleItemsProps {
+  items: SaleItemDTO[];
+  itemStates: Record<string, ItemReturnState>;
+  itemsError: string;
+  onSelectChange: (itemId: string, selected: boolean) => void;
+  onQuantityChange: (itemId: string, maxQty: number, valStr: string) => void;
+  onConditionChange: (itemId: string, condition: 'GOOD' | 'DAMAGED' | null) => void;
+}
+
+export interface ReturnSaleSettlementPreviewProps {
+  previewData: ReturnPreviewDTO | null;
+  showOverdraft: boolean;
+  shortfallAmount: string;
+  confirmOverdraft: boolean;
+  onConfirmOverdraftChange: (checked: boolean) => void;
 }
 
 export interface SaleRowActionsProps {

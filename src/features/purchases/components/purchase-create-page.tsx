@@ -83,14 +83,7 @@ export function PurchaseCreatePageClient() {
     defaultValues,
     validators: { onSubmit: createPurchaseFormSchema(t) as never },
     onSubmit: ({ value }) => {
-      if (warning) {
-        toast.warning(
-          t('purchases.overdraftPrompt', {
-            shortfall: formatPkr(warning.shortfall ?? 0)
-          })
-        );
-        return;
-      }
+      setWarning(null);
       submitPurchase(value, false);
     }
   });
@@ -108,13 +101,19 @@ export function PurchaseCreatePageClient() {
     submitPurchase(form.state.values, true);
   };
 
+  const clearOverdraftWarning = () => {
+    if (warning) setWarning(null);
+  };
+
   const handleSupplierChange = (id: string, supplier: SupplierPickerItem | null) => {
     form.setFieldValue('supplier_id', id);
     setSupplierCnic(formatPkCnic(supplier?.cnic) || null);
+    clearOverdraftWarning();
   };
 
   const handleOpeningStockChange = ({ value }: OpeningStockChangeArgs) => {
     if (value) form.setFieldValue('paid_now', 0);
+    clearOverdraftWarning();
   };
 
   const fetchSupplierPage = async (filters: PickerFetchFilters) =>
@@ -240,6 +239,7 @@ export function PurchaseCreatePageClient() {
                   paidNowField={
                     <form.AppField
                       name='paid_now'
+                      listeners={{ onChange: clearOverdraftWarning }}
                       children={(subField) => (
                         <subField.TextField
                           label={t('dukaan.purchase.paidNow')}

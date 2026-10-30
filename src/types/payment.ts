@@ -84,12 +84,6 @@ export interface CancelPaymentResult {
   message?: string;
 }
 
-export interface PaymentCreateBody {
-  notes?: string;
-  method?: string;
-  [key: string]: unknown;
-}
-
 export interface RecordPaymentFormErrors {
   customerId?: string;
   amount?: string;

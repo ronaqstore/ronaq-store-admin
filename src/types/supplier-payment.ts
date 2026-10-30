@@ -73,6 +73,11 @@ export type CreateSupplierPaymentResult =
   | SupplierPaymentSuccessResult
   | SupplierPaymentOverdraftPrompt;
 
+export type SupplierLedgerPayPlanResult = CreateSupplierPaymentResult & {
+  resumeFrom?: number;
+  amount?: number;
+};
+
 export interface CancelSupplierPaymentInput {
   cancelReason: string;
 }

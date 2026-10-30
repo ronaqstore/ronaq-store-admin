@@ -5,9 +5,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { BaseCancelDialog } from '@/components/common/base-cancel-dialog';
+import { OverdraftAlert } from '@/components/common/overdraft-alert';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { useT } from '@/i18n/use-t';
-import type { CancelImpactItem, CancelPurchaseDialogProps } from '@/types';
+import type { CancelImpactItem, CancelPurchaseDialogProps, OverdraftPrompt } from '@/types';
 import { purchaseCancelImpactQueryOptions } from '../api/queries';
 import { cancelPurchaseMutation } from '../api/mutations';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
@@ -23,6 +24,8 @@ export function CancelPurchaseDialog({
   const qc = useQueryClient();
   const [reason, setReason] = useState('');
   const [reasonError, setReasonError] = useState('');
+  const [confirmOverdraft, setConfirmOverdraft] = useState(false);
+  const [overdraftPrompt, setOverdraftPrompt] = useState<OverdraftPrompt | null>(null);
 
   const { data: impact, isLoading: impactLoading } = useQuery({
     ...purchaseCancelImpactQueryOptions(purchase.id),
@@ -33,6 +36,11 @@ export function CancelPurchaseDialog({
     ...cancelPurchaseMutation,
     onSuccess: (res) => {
       if (res && 'confirmOverdraft' in res && res.confirmOverdraft) {
+        setOverdraftPrompt({
+          shortfall: res.shortfall,
+          message: res.message
+        });
+        setConfirmOverdraft(false);
         toast.warning(
           t('purchases.cancelDialog.overdraftDescription', {
             shortfall: formatPkr(res.shortfall ?? 0)
@@ -61,10 +69,16 @@ export function CancelPurchaseDialog({
     }
     setReasonError('');
 
+    if ((impact?.willCauseOverdraft || !!overdraftPrompt) && !confirmOverdraft) {
+      setReasonError(t('purchases.cancelDialog.confirmOverdraftRequired'));
+      return;
+    }
+
     cancel.mutate({
       id: purchase.id,
       input: {
-        cancelReason: reason.trim()
+        cancelReason: reason.trim(),
+        confirmOverdraft: confirmOverdraft ? true : undefined
       }
     });
   };
@@ -93,6 +107,24 @@ export function CancelPurchaseDialog({
     });
   }
 
+  const shortfallAmount = formatPkr(
+    overdraftPrompt?.shortfall ?? (impact?.cashAfter != null && impact.cashAfter < 0 ? Math.abs(impact.cashAfter) : 0)
+  );
+
+  const overdraftSection =
+    impact?.willCauseOverdraft || overdraftPrompt ? (
+      <OverdraftAlert
+        checked={confirmOverdraft}
+        onCheckedChange={setConfirmOverdraft}
+        title={t('purchases.cancelDialog.overdraftWarning')}
+        description={t('purchases.cancelDialog.overdraftDescription', {
+          shortfall: shortfallAmount
+        })}
+        confirmLabel={t('purchases.cancelDialog.confirmOverdraft')}
+        id='purchase-confirm-overdraft'
+      />
+    ) : null;
+
   return (
     <BaseCancelDialog
       open={open}
@@ -116,6 +148,7 @@ export function CancelPurchaseDialog({
       isSubmitting={cancel.isPending}
       cancelButtonText={t('purchases.cancelDialog.cancel')}
       submitButtonText={t('purchases.cancelDialog.confirm')}
+      overdraftAlert={overdraftSection}
     />
   );
 }

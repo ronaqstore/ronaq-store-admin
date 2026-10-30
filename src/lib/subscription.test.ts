@@ -36,7 +36,7 @@ describe('calculateSubscriptionDaysRemaining', () => {
 describe('buildWhatsAppSupportUrl', () => {
   it('generates valid WhatsApp URL with default number', () => {
     const url = buildWhatsAppSupportUrl({ shopName: 'Al-Madina Mobile' });
-    assert.ok(url.startsWith('https://wa.me/923001234567?text='));
+    assert.ok(url.startsWith('https://wa.me/923029825213?text='));
     assert.ok(url.includes('Al-Madina%20Mobile'));
   });
 });

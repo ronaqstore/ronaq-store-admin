@@ -97,5 +97,11 @@ describe('buildPartyPayload', () => {
       assert.equal(payload.notes, null);
       assert.equal(payload.cnic, undefined);
     });
+
+    it('omits openingBalance on edit when unchanged from original', () => {
+      const payload = buildPartyPayload(baseForm, 'edit', false, 5000000);
+
+      assert.equal(payload.openingBalance, undefined);
+    });
   });
 });

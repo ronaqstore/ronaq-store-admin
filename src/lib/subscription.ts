@@ -2,7 +2,7 @@ import { env } from '@/config/env';
 import { whatsappReminderUrl } from '@/constants/api';
 import type { WhatsAppSupportUrlParams } from '@/types/subscription';
 
-export const DEFAULT_SUPPORT_WHATSAPP = '923001234567';
+export const DEFAULT_SUPPORT_WHATSAPP = '923029825213';
 
 export function getSupportWhatsAppNumber(): string {
   const envVal = env.NEXT_PUBLIC_SUPPORT_WHATSAPP;

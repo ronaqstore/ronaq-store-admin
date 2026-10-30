@@ -16,14 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
 import { Icons } from '@/components/icons';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
@@ -34,11 +26,13 @@ import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import type { ReturnPreviewDTO, ReturnItemInput } from '@/lib/api/types';
 import { todayIsoDate } from '@/lib/dates';
-import { OverdraftAlert } from '@/components/common/overdraft-alert';
+import type { OverdraftPrompt } from '@/types';
 import type { ReturnSaleDialogProps, ItemReturnState } from '@/types/sales';
 import { createReturnMutation, previewReturnMutation } from '../api/mutations';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { SALE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
+import { ReturnSaleItems } from './return-sale-items';
+import { ReturnSaleSettlementPreview } from './return-sale-settlement-preview';
 
 export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: ReturnSaleDialogProps) {
   const qc = useQueryClient();
@@ -49,6 +43,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
   const [notes, setNotes] = useState('');
   const [refundPkr, setRefundPkr] = useState<number>(0);
   const [confirmOverdraft, setConfirmOverdraft] = useState(false);
+  const [overdraftPrompt, setOverdraftPrompt] = useState<OverdraftPrompt | null>(null);
   const [previewData, setPreviewData] = useState<ReturnPreviewDTO | null>(null);
   const [itemsError, setItemsError] = useState('');
   const [reasonError, setReasonError] = useState('');
@@ -66,10 +61,18 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
     return initial;
   });
 
+  const clearPreview = () => {
+    setPreviewData(null);
+    setOverdraftPrompt(null);
+    setConfirmOverdraft(false);
+  };
+
   const preview = useMutation({
     ...previewReturnMutation,
     onSuccess: (data) => {
       setPreviewData(data);
+      setOverdraftPrompt(null);
+      setConfirmOverdraft(false);
     },
     onError: (err: Error) => {
       toast.error(err.message || t('sales.returnDialog.previewFailed'));
@@ -80,15 +83,18 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
     ...createReturnMutation,
     onSuccess: (res) => {
       if (res && 'confirmOverdraft' in res && res.confirmOverdraft) {
-        const shortfallPkr = formatPkr(
-          res.shortfall ?? (previewData?.cashAfter ? Math.abs(previewData.cashAfter) : 0)
-        );
+        setOverdraftPrompt({
+          shortfall: res.shortfall,
+          message: res.message
+        });
+        setConfirmOverdraft(false);
         toast.warning(
           t('sales.returnDialog.overdraftNotice', {
-            shortfall: shortfallPkr
+            shortfall: formatPkr(
+              res.shortfall ?? (previewData?.cashAfter ? Math.abs(previewData.cashAfter) : 0)
+            )
           })
         );
-        setConfirmOverdraft(false);
         return;
       }
 
@@ -109,6 +115,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
       [itemId]: { ...prev[itemId], selected }
     }));
     setItemsError('');
+    clearPreview();
   };
 
   const handleItemQuantityChange = (itemId: string, maxQty: number, valStr: string) => {
@@ -119,6 +126,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
       ...prev,
       [itemId]: { ...prev[itemId], quantity: val }
     }));
+    clearPreview();
   };
 
   const handleRefundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,6 +136,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
     });
     setRefundPkr(sanitized === '' ? 0 : Number(sanitized));
     setRefundError('');
+    clearPreview();
   };
 
   const handleReasonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -145,6 +154,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
       ...prev,
       [itemId]: { ...prev[itemId], condition }
     }));
+    clearPreview();
   };
 
   const getSelectedReturnItems = (): ReturnItemInput[] | null => {
@@ -197,7 +207,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
     if (!selectedItems) return;
 
     if (!previewData) {
-      setRefundError(t('sales.returnDialog.previewRequired') || 'Preview the settlement before saving.');
+      setRefundError(t('sales.returnDialog.previewRequired'));
       return;
     }
 
@@ -205,10 +215,8 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
       setRefundError(t('validation.refundExceedsMax'));
       return;
     }
-    if (previewData.willCauseOverdraft && !confirmOverdraft) {
-      setRefundError(
-        t('sales.returnDialog.confirmOverdraftRequired') || 'Confirm overdraft before saving.'
-      );
+    if ((previewData.willCauseOverdraft || !!overdraftPrompt) && !confirmOverdraft) {
+      setRefundError(t('sales.returnDialog.confirmOverdraftRequired'));
       return;
     }
     setRefundError('');
@@ -227,6 +235,14 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
     });
   };
 
+  const shortfallAmount = formatPkr(
+    overdraftPrompt?.shortfall ??
+      (previewData?.cashAfter != null && previewData.cashAfter < 0
+        ? Math.abs(previewData.cashAfter)
+        : 0)
+  );
+  const showOverdraft = !!(previewData?.willCauseOverdraft || overdraftPrompt);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-xl'>
@@ -236,85 +252,14 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className='space-y-4 py-2'>
-          <div className='space-y-2'>
-            <Label className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
-              {t('sales.returnDialog.selectItems')}
-            </Label>
-            <div
-              className={cn('space-y-2 rounded-lg border p-3', itemsError && 'border-destructive')}
-            >
-              {sale.items.map((item) => {
-                const state = itemStates[item.id] || {
-                  selected: false,
-                  quantity: item.quantity,
-                  condition: 'GOOD'
-                };
-
-                return (
-                  <div
-                    key={item.id}
-                    className='flex flex-col gap-2 rounded-md border p-2 text-sm sm:flex-row sm:items-center sm:justify-between'
-                  >
-                    <div className='flex items-center space-x-2'>
-                      <Checkbox
-                        id={`check-${item.id}`}
-                        checked={state.selected}
-                        onCheckedChange={(checked) =>
-                          handleItemSelectChange(item.id, Boolean(checked))
-                        }
-                      />
-                      <div>
-                        <Label htmlFor={`check-${item.id}`} className='font-medium cursor-pointer'>
-                          {item.productName}
-                        </Label>
-                        <p className='text-xs text-muted-foreground'>
-                          {t('sales.returnDialog.sold')} {item.quantity}{' '}
-                          {t('sales.returnDialog.price')} {formatPkr(item.unitPrice)}
-                          {item.imei && ` · ${t('inventory.imeiLabel')} ${item.imei}`}
-                        </p>
-                      </div>
-                    </div>
-
-                    {state.selected && (
-                      <div className='flex items-center gap-2 ps-6 sm:ps-0'>
-                        <div className='w-20'>
-                          <Input
-                            type='number'
-                            min={1}
-                            max={item.quantity}
-                            value={state.quantity}
-                            onChange={(e) =>
-                              handleItemQuantityChange(item.id, item.quantity, e.target.value)
-                            }
-                            className='h-8'
-                          />
-                        </div>
-                        <Select
-                          value={state.condition}
-                          onValueChange={(val: 'GOOD' | 'DAMAGED' | null) =>
-                            handleItemConditionChange(item.id, val)
-                          }
-                        >
-                          <SelectTrigger className='h-8 w-28'>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='GOOD'>
-                              {t('sales.returnDialog.conditionGood')}
-                            </SelectItem>
-                            <SelectItem value='DAMAGED'>
-                              {t('sales.returnDialog.conditionDamaged')}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <DialogFieldError message={itemsError} />
-          </div>
+          <ReturnSaleItems
+            items={sale.items}
+            itemStates={itemStates}
+            itemsError={itemsError}
+            onSelectChange={handleItemSelectChange}
+            onQuantityChange={handleItemQuantityChange}
+            onConditionChange={handleItemConditionChange}
+          />
 
           <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
             <div className='space-y-1.5'>
@@ -361,62 +306,13 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
             </Button>
           </div>
 
-          {previewData && (
-            <div className='space-y-2 rounded-lg border bg-muted/40 p-3 text-xs'>
-              <p className='font-semibold text-foreground'>
-                {t('sales.returnDialog.settlementPreview')}
-              </p>
-              <div className='grid grid-cols-2 gap-2'>
-                <div>
-                  <span className='text-muted-foreground'>
-                    {t('sales.returnDialog.returnValue')}{' '}
-                  </span>
-                  <span className='font-medium'>{formatPkr(previewData.returnAmount)}</span>
-                </div>
-                <div>
-                  <span className='text-muted-foreground'>
-                    {t('sales.returnDialog.maxRefundableCash')}{' '}
-                  </span>
-                  <span className='font-medium text-emerald-600 dark:text-emerald-400'>
-                    {formatPkr(previewData.refundable)}
-                  </span>
-                </div>
-                <div>
-                  <span className='text-muted-foreground'>
-                    {t('sales.returnDialog.udharRelief')}{' '}
-                  </span>
-                  <span className='font-medium'>
-                    {formatPkr(previewData.outstandingBefore - previewData.outstandingAfter)}
-                  </span>
-                </div>
-                <div>
-                  <span className='text-muted-foreground'>
-                    {t('sales.returnDialog.outstandingAfter')}{' '}
-                  </span>
-                  <span className='font-medium'>{formatPkr(previewData.outstandingAfter)}</span>
-                </div>
-                <div>
-                  <span className='text-muted-foreground'>
-                    {t('sales.returnDialog.drawerCashAfter')}{' '}
-                  </span>
-                  <span className='font-medium'>{formatPkr(previewData.cashAfter)}</span>
-                </div>
-              </div>
-
-              {previewData.willCauseOverdraft && (
-                <OverdraftAlert
-                  variant='compact'
-                  checked={confirmOverdraft}
-                  onCheckedChange={setConfirmOverdraft}
-                  description={t('sales.returnDialog.overdraftNotice', {
-                    shortfall: formatPkr(Math.abs(previewData.cashAfter))
-                  })}
-                  id='return-overdraft'
-                  className='mt-2'
-                />
-              )}
-            </div>
-          )}
+          <ReturnSaleSettlementPreview
+            previewData={previewData}
+            showOverdraft={showOverdraft}
+            shortfallAmount={shortfallAmount}
+            confirmOverdraft={confirmOverdraft}
+            onConfirmOverdraftChange={setConfirmOverdraft}
+          />
 
           <div className='space-y-1.5'>
             <Label htmlFor='returnReason'>

@@ -63,6 +63,7 @@ export interface BasePartyEntity {
   address?: string | null;
   notes?: string | null;
   openingBalance: number;
+  currentBalance?: number;
   isSystem?: boolean;
 }
 
@@ -72,7 +73,7 @@ export interface BasePartyPayload {
   cnic?: string | null;
   address?: string | null;
   notes?: string | null;
-  openingBalance: number;
+  openingBalance?: number;
   isActive: boolean;
 }
 

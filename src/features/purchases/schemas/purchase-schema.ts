@@ -5,7 +5,7 @@ import type { PurchasePhoneUnitDraft } from '@/types';
 
 type Translator = ReturnType<typeof useTranslations>;
 
-const IMEI_PATTERN = /^[0-9A-Za-z]{4,20}$/;
+const IMEI_PATTERN = /^\d{15}$/;
 
 const phoneUnitSchema = (t: Translator) =>
   z.object({

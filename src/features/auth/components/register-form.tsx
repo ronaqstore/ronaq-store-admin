@@ -34,9 +34,14 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileResetSignal, setTurnstileResetSignal] = useState(0);
   const turnstileOn = isTurnstileEnabled();
   const handleTokenChange = useCallback((token: string | null) => {
     setTurnstileToken(token);
+  }, []);
+  const resetTurnstile = useCallback(() => {
+    setTurnstileToken(null);
+    setTurnstileResetSignal((n) => n + 1);
   }, []);
 
   const registerSchema = z
@@ -96,13 +101,13 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
         );
 
         setSuccess(t('auth.registerSuccess'));
-        setTurnstileToken(null);
+        resetTurnstile();
         router.push('/login?registered=1');
         router.refresh();
       } catch (err) {
         const message = err instanceof Error ? err.message : t('auth.registerFailed');
         setError(message);
-        setTurnstileToken(null);
+        resetTurnstile();
       }
     }
   });
@@ -321,7 +326,12 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
               </div>
             </div>
 
-            {turnstileOn ? <TurnstileWidget onTokenChange={handleTokenChange} /> : null}
+            {turnstileOn ? (
+              <TurnstileWidget
+                onTokenChange={handleTokenChange}
+                resetSignal={turnstileResetSignal}
+              />
+            ) : null}
           </FieldGroup>
 
           <form.AppForm>

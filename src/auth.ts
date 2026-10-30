@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { authConfig } from '@/auth.config';
 import { isValidPkMobile, normalizePhone } from '@/lib/auth/phone';
 import { sessionTtlSeconds } from '@/lib/auth/session-ttl';
-import { verifyTurnstileToken } from '@/lib/auth/verify-turnstile';
 import type { LoginResult, AuthResponseData, AuthResponseBody } from '@/types/auth';
 import { API_BASE_URL } from '@/constants/api';
 
@@ -124,9 +123,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           turnstileToken = ''
         } = parsed.data;
         const rememberMe = rememberRaw === 'true';
-
-        const turnstileOk = await verifyTurnstileToken(turnstileToken);
-        if (!turnstileOk) return null;
 
         if (isPlatformAdmin === 'true') {
           return await tryPlatformAdminLogin(phone, password, rememberMe, turnstileToken);

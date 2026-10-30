@@ -26,10 +26,6 @@ export type TurnstileWidgetProps = {
   resetSignal?: number;
 };
 
-export type TurnstileSiteverifyResponse = {
-  success?: boolean;
-};
-
 export type TurnstileWindow = Window & {
   turnstile?: TurnstileApi;
 };
