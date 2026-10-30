@@ -86,14 +86,18 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
       createProduct.mutate(payload, {
         onSuccess: async (data) => {
           const newId = (data as { id?: string })?.id;
-          if (newId) {
+          void qc.invalidateQueries({ queryKey: productsQueryKeys.all });
+          if (newId && pendingFiles.length > 0) {
             try {
               await uploadPendingProductImages(newId, images, pendingFiles);
             } catch (uploadError) {
-              toast.error((uploadError as Error).message);
+              toast.error(
+                (uploadError as Error).message || t('photosUploadFailed')
+              );
+              router.replace(`/dashboard/products/${newId}/edit`);
+              return;
             }
           }
-          void qc.invalidateQueries({ queryKey: productsQueryKeys.all });
           router.push('/dashboard/products');
           toastSuccessAfterClose(t('productCreated'));
         },

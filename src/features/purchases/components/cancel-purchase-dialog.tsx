@@ -31,7 +31,16 @@ export function CancelPurchaseDialog({
 
   const cancel = useMutation({
     ...cancelPurchaseMutation,
-    onSuccess: () => {
+    onSuccess: (res) => {
+      if (res && 'confirmOverdraft' in res && res.confirmOverdraft) {
+        toast.warning(
+          t('purchases.cancelDialog.overdraftDescription', {
+            shortfall: formatPkr(res.shortfall ?? 0)
+          })
+        );
+        return;
+      }
+
       onOpenChange(false);
       invalidateDomains({ queryClient: qc, domains: PURCHASE_SYNC_DOMAINS });
       toastSuccessAfterClose(

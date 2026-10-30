@@ -49,7 +49,7 @@ export function CancelPaymentDialog({
           shortfall: res.shortfall,
           message: res.message
         });
-        setConfirmOverdraft(true);
+        setConfirmOverdraft(false);
         const shortfallPkr = formatPkr(
           res.shortfall ?? (impact?.cashAfter ? Math.abs(impact.cashAfter) : 0)
         );
@@ -89,7 +89,7 @@ export function CancelPaymentDialog({
       id: payment.id,
       input: {
         cancelReason: reason.trim(),
-        confirmOverdraft: confirmOverdraft || !!overdraftPrompt
+        confirmOverdraft: confirmOverdraft ? true : undefined
       }
     });
   };

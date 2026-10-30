@@ -46,7 +46,7 @@ export function DashboardKpisRow({ params }: DashboardKpisProps) {
         tooltip={t('dashboard.salesTrendTooltip')}
         change={calcChange(totals.sales, previousTotals.sales)}
         sparkline={sparklines.sales}
-        sparklineColor='hsl(var(--chart-1))'
+        sparklineColor='var(--chart-1)'
         href='/dashboard/sales'
       />
 
@@ -56,7 +56,7 @@ export function DashboardKpisRow({ params }: DashboardKpisProps) {
         tooltip={t('dashboard.profitWaterfallTooltip')}
         change={calcChange(totals.grossProfit, previousTotals.grossProfit)}
         sparkline={sparklines.grossProfit}
-        sparklineColor='hsl(var(--chart-2))'
+        sparklineColor='var(--chart-2)'
       />
 
       <KpiCard
@@ -65,7 +65,7 @@ export function DashboardKpisRow({ params }: DashboardKpisProps) {
         tooltip={t('dashboard.profitWaterfallTooltip')}
         change={calcChange(totals.netProfit, previousTotals.netProfit)}
         sparkline={sparklines.netProfit}
-        sparklineColor='hsl(var(--chart-3))'
+        sparklineColor='var(--chart-3)'
         className={
           totals.netProfit < 0
             ? 'border-rose-500/50 bg-rose-50/20 dark:bg-rose-950/20'
@@ -79,7 +79,7 @@ export function DashboardKpisRow({ params }: DashboardKpisProps) {
         tooltip={t('dashboard.expensesByCategoryTooltip')}
         change={calcChange(totals.expenses, previousTotals.expenses, true)}
         sparkline={sparklines.expenses}
-        sparklineColor='hsl(var(--chart-4))'
+        sparklineColor='var(--chart-4)'
         href='/dashboard/expenses'
       />
 

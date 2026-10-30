@@ -198,6 +198,7 @@ export interface ReturnPreviewDTO {
 }
 
 export interface CreateReturnInput {
+  clientRequestId: string;
   reason: string;
   returnDate: string;
   items: ReturnItemInput[];

@@ -540,6 +540,7 @@
     "product": {
       "productCreated": "Product created successfully",
       "productUpdated": "Product updated successfully",
+      "photosUploadFailed": "Product saved, but photo upload failed. Add photos again.",
       "imageAdded": "Image added successfully",
       "imageReordered": "Images reordered successfully",
       "imageRemoved": "Image removed successfully",
@@ -1796,7 +1797,8 @@
       "confirm": "Confirm Cancellation",
       "success": "Purchase {purchaseNo} cancelled successfully",
       "failed": "Failed to cancel purchase",
-      "reasonRequired": "Cancellation reason is required"
+      "reasonRequired": "Cancellation reason is required",
+      "overdraftDescription": "Warning: You have insufficient cash in your drawer (Shortfall: {shortfall}). Confirm overdraft before cancelling this purchase."
     },
     "createSuccess": "Purchase created successfully",
     "addAtLeastOneItem": "Please add at least one item",
@@ -1868,6 +1870,9 @@
     "batteryMinPlaceholder": "Min battery %",
     "batteryHealth": "Battery",
     "askingPrice": "Sell price",
+    "askingPricePkr": "Sell price (PKR)",
+    "batteryHealthPercent": "Battery (%)",
+    "batteryHealthRangeHint": "1 - 100",
     "purchaseInfo": "Purchase Details",
     "saleInfo": "Sale Details",
     "supplier": "Supplier",
@@ -2838,6 +2843,8 @@
     "bannerTitle": "Subscription Renewal Needed",
     "bannerTrialWarning": "Your 30-day trial ends in {count} days",
     "bannerTrialEndingToday": "Your 30-day trial ends today",
+    "bannerPlanWarning": "Your subscription ends in {count} days",
+    "bannerPlanEndingToday": "Your subscription ends today",
     "bannerDescription": "To ensure your store counter, POS sales, and inventory remain uninterrupted, please renew your subscription.",
     "contactSupport": "Contact Support on WhatsApp",
     "contactSupportToActivate": "Contact Support to Activate",

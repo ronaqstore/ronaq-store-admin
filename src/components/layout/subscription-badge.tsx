@@ -23,12 +23,10 @@ export function SubscriptionBadge() {
     setMounted(true);
   }, []);
 
-  // Strict role check: ONLY OWNER accounts, NEVER platform admins (SUPER_ADMIN)
   if (!session?.user || session.user.role !== 'OWNER') {
     return null;
   }
 
-  // Hydration safety: render placeholder or nothing until mounted on client
   if (!mounted) {
     return null;
   }
@@ -43,7 +41,6 @@ export function SubscriptionBadge() {
     return null;
   }
 
-  // Determine appearance variant based on days remaining
   let colorStyles = '';
   let dotStyles = '';
   let fullText = '';
@@ -80,7 +77,6 @@ export function SubscriptionBadge() {
       isAlert = true;
     }
   } else {
-    // Free Trial lifecycle
     if (daysLeft > 7) {
       colorStyles =
         'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/15';

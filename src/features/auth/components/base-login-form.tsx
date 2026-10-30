@@ -27,10 +27,16 @@ export function BaseLoginForm({
   const t = useTranslations();
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileResetSignal, setTurnstileResetSignal] = useState(0);
   const turnstileOn = isTurnstileEnabled();
 
   const handleTokenChange = useCallback((token: string | null) => {
     setTurnstileToken(token);
+  }, []);
+
+  const resetTurnstile = useCallback(() => {
+    setTurnstileToken(null);
+    setTurnstileResetSignal((n) => n + 1);
   }, []);
 
   const loginSchema = z.object({
@@ -63,6 +69,7 @@ export function BaseLoginForm({
       });
       if (errorMessage) {
         setError(errorMessage);
+        resetTurnstile();
       }
     }
   });
@@ -126,7 +133,12 @@ export function BaseLoginForm({
               name='rememberMe'
               children={(field) => <field.CheckboxField label={t('auth.rememberMe')} />}
             />
-            {turnstileOn ? <TurnstileWidget onTokenChange={handleTokenChange} /> : null}
+            {turnstileOn ? (
+              <TurnstileWidget
+                onTokenChange={handleTokenChange}
+                resetSignal={turnstileResetSignal}
+              />
+            ) : null}
           </FieldGroup>
 
           <form.AppForm>

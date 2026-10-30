@@ -73,7 +73,7 @@ export function RecordExpenseDialog({
           shortfall: res.shortfall,
           message: res.message
         });
-        setConfirmOverdraft(true);
+        setConfirmOverdraft(false);
         toast.warning(
           t('expenses.shortfallWarningDesc', {
             shortfall: formatPkr(res.shortfall ?? 0)
@@ -142,7 +142,7 @@ export function RecordExpenseDialog({
       amount: toPaisa(num),
       expenseDate,
       description: description.trim() ? description.trim() : undefined,
-      confirmOverdraft: confirmOverdraft || !!overdraftPrompt
+      confirmOverdraft: confirmOverdraft ? true : undefined
     });
   };
 

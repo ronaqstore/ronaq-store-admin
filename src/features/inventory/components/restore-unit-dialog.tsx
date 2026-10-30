@@ -20,14 +20,7 @@ import { useT } from '@/i18n/use-t';
 import { createInventoryAdjustment } from '../api/service';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { INVENTORY_SYNC_DOMAINS } from '@/lib/query/sync-domains';
-import type { InventoryUnitDTO } from '@/lib/api/types';
-
-interface RestoreUnitDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  productId: string;
-  unit: InventoryUnitDTO | null;
-}
+import type { RestoreUnitDialogProps } from '@/types/inventory';
 
 export function RestoreUnitDialog({ open, onOpenChange, productId, unit }: RestoreUnitDialogProps) {
   const qc = useQueryClient();
@@ -56,6 +49,11 @@ export function RestoreUnitDialog({ open, onOpenChange, productId, unit }: Resto
       toast.error(err.message || t('inventory.restoreFailed'));
     }
   });
+
+  const handleReasonChange = (value: string) => {
+    setReason(value);
+    if (error) setError(null);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,10 +107,7 @@ export function RestoreUnitDialog({ open, onOpenChange, productId, unit }: Resto
               <Textarea
                 id='restore-reason'
                 value={reason}
-                onChange={(e) => {
-                  setReason(e.target.value);
-                  if (error) setError(null);
-                }}
+                onChange={(e) => handleReasonChange(e.target.value)}
                 placeholder={t('inventory.reasonPlaceholder')}
                 rows={3}
                 className='resize-none'

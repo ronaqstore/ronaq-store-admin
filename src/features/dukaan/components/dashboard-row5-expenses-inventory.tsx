@@ -39,21 +39,21 @@ import { useT } from '@/i18n/use-t';
 import type { DashboardRow5Props } from '@/types/dashboard';
 
 const EXPENSE_COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
   'hsl(var(--destructive))',
   'hsl(var(--muted-foreground))',
 ];
 
 const EXPENSE_BG_CLASSES = [
-  'bg-[hsl(var(--chart-1))]',
-  'bg-[hsl(var(--chart-2))]',
-  'bg-[hsl(var(--chart-3))]',
-  'bg-[hsl(var(--chart-4))]',
-  'bg-[hsl(var(--chart-5))]',
+  'bg-[var(--chart-1)]',
+  'bg-[var(--chart-2)]',
+  'bg-[var(--chart-3)]',
+  'bg-[var(--chart-4)]',
+  'bg-[var(--chart-5)]',
   'bg-[hsl(var(--destructive))]',
   'bg-muted-foreground',
 ];
@@ -250,7 +250,7 @@ export function DashboardRow5ExpensesInventory({ params }: DashboardRow5Props) {
                   {invChartData.map((entry, idx) => (
                     <Cell
                       key={idx}
-                      fill={entry.bucketKey === '61-90' || entry.bucketKey === '90+' ? '#ef4444' : 'hsl(var(--chart-1))'}
+                      fill={entry.bucketKey === '61-90' || entry.bucketKey === '90+' ? '#ef4444' : 'var(--chart-1)'}
                     />
                   ))}
                 </Bar>

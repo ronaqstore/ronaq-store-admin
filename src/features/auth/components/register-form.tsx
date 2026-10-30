@@ -3,7 +3,6 @@
 import { useCallback, useRef, useState } from 'react';
 import Image from 'next/image';
 import { z } from 'zod';
-import { signIn } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { useAppForm } from '@/lib/form';
@@ -16,7 +15,6 @@ import { Icons } from '@/components/icons';
 import { isValidPkMobile, normalizePhone } from '@/lib/auth/phone';
 import { INPUT_LIMITS } from '@/lib/input-limits';
 import { sanitizePkMobileInput } from '@/lib/validation/pk';
-import { SHOP_HOME } from '@/lib/auth/routes';
 import { registerOwnerAccountWithOptionalLogo } from '@/features/auth/api/service';
 import { MarketplaceCityCombobox } from '@/components/marketplace/marketplace-city-combobox';
 import {
@@ -98,24 +96,13 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
         );
 
         setSuccess(t('auth.registerSuccess'));
-
-        const signInResult = await signIn('credentials', {
-          phone: normalizedPhone,
-          password: value.password,
-          turnstileToken: turnstileToken || '',
-          redirect: false
-        });
-
-        if (signInResult?.error) {
-          router.push('/login');
-          return;
-        }
-
-        router.replace(SHOP_HOME);
+        setTurnstileToken(null);
+        router.push('/login?registered=1');
         router.refresh();
       } catch (err) {
         const message = err instanceof Error ? err.message : t('auth.registerFailed');
         setError(message);
+        setTurnstileToken(null);
       }
     }
   });

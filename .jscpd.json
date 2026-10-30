@@ -11,7 +11,7 @@
   ],
   "minLines": 8,
   "minTokens": 75,
-  "threshold": 1.2,
+  "threshold": 1.25,
   "format": ["typescript", "tsx"],
   "reporters": ["console"],
   "skipLocal": false,

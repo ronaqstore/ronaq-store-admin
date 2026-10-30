@@ -160,7 +160,7 @@ export function DashboardRow2SalesProfit({ params, compare = false }: DashboardR
               <Bar
                 dataKey='sales'
                 name={t('dashboard.metrics.sales')}
-                fill='var(--color-sales, hsl(var(--chart-1)))'
+                fill='var(--color-sales, var(--chart-1))'
                 radius={[4, 4, 0, 0]}
                 maxBarSize={40}
               />
@@ -168,7 +168,7 @@ export function DashboardRow2SalesProfit({ params, compare = false }: DashboardR
                 type='monotone'
                 dataKey='netProfit'
                 name={t('dashboard.metrics.netProfit')}
-                stroke='var(--color-profit, hsl(var(--chart-3)))'
+                stroke='var(--color-profit, var(--chart-3))'
                 strokeWidth={2.5}
                 dot={{ r: 3 }}
               />
@@ -236,7 +236,7 @@ export function DashboardRow2SalesProfit({ params, compare = false }: DashboardR
                 {waterfallChartData.map((entry, idx) => {
                   const isTotal = idx === waterfallChartData.length - 1;
                   const fill = isTotal
-                    ? 'hsl(var(--chart-1))'
+                    ? 'var(--chart-1)'
                     : entry.isNegative
                       ? '#ef4444'
                       : '#10b981';

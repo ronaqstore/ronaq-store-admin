@@ -37,7 +37,7 @@ export function PurchaseCreatePageClient() {
   const qc = useQueryClient();
   const router = useRouter();
   const t = useT();
-  const [clientRequestId] = useState(() => createClientRequestId());
+  const [clientRequestId, setClientRequestId] = useState(() => createClientRequestId());
   const [warning, setWarning] = useState<OverdraftPrompt | null>(null);
   const [supplierCnic, setSupplierCnic] = useState<string | null>(null);
 
@@ -56,6 +56,8 @@ export function PurchaseCreatePageClient() {
         );
         return;
       }
+      setClientRequestId(createClientRequestId());
+      setWarning(null);
       invalidateDomains({ queryClient: qc, domains: PURCHASE_SYNC_DOMAINS });
       router.push('/dashboard/purchases');
       toastSuccessAfterClose(
@@ -81,7 +83,14 @@ export function PurchaseCreatePageClient() {
     defaultValues,
     validators: { onSubmit: createPurchaseFormSchema(t) as never },
     onSubmit: ({ value }) => {
-      setWarning(null);
+      if (warning) {
+        toast.warning(
+          t('purchases.overdraftPrompt', {
+            shortfall: formatPkr(warning.shortfall ?? 0)
+          })
+        );
+        return;
+      }
       submitPurchase(value, false);
     }
   });

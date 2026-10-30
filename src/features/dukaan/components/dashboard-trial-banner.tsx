@@ -21,11 +21,7 @@ export function DashboardTrialBanner() {
     return null;
   }
 
-  // If shop is already paid, no trial warning needed
-  if (session.user.subscriptionStatus === 'ACTIVE') {
-    return null;
-  }
-
+  const isPaid = session.user.subscriptionStatus === 'ACTIVE';
   const daysLeft = calculateSubscriptionDaysRemaining(session.user.subscriptionEndsAt);
   if (daysLeft === null || daysLeft > 7) {
     return null;
@@ -34,11 +30,18 @@ export function DashboardTrialBanner() {
   const shopName = session.user.shopName ?? '';
   const supportUrl = buildWhatsAppSupportUrl({
     shopName,
-    message: `Assalam-o-Alaikum, my trial for "${shopName}" ends in ${Math.max(0, daysLeft)} days. I want to renew my subscription.`
+    message: isPaid
+      ? `Assalam-o-Alaikum, my subscription for "${shopName}" ends in ${Math.max(0, daysLeft)} days. I want to renew.`
+      : `Assalam-o-Alaikum, my trial for "${shopName}" ends in ${Math.max(0, daysLeft)} days. I want to renew my subscription.`
   });
 
-  const title =
-    daysLeft === 0
+  const title = isPaid
+    ? daysLeft === 0
+      ? t('bannerPlanEndingToday')
+      : daysLeft < 0
+        ? t('planExpired')
+        : t('bannerPlanWarning', { count: daysLeft })
+    : daysLeft === 0
       ? t('bannerTrialEndingToday')
       : daysLeft < 0
         ? t('trialExpired')

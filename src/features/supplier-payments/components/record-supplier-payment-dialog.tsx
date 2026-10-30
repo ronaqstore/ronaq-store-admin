@@ -112,7 +112,7 @@ export function RecordSupplierPaymentDialog({
           shortfall: res.shortfall,
           message: res.message
         });
-        setConfirmOverdraft(true);
+        setConfirmOverdraft(false);
         toast.warning(
           t('supplierPayments.shortfallWarningDesc', {
             shortfall: formatPkr(res.shortfall ?? 0)
@@ -195,7 +195,7 @@ export function RecordSupplierPaymentDialog({
       purchaseId: targetType === 'purchase' ? selectedPurchaseId : null,
       amount: paisaAmount,
       paymentDate,
-      confirmOverdraft: confirmOverdraft || !!overdraftPrompt,
+      confirmOverdraft: confirmOverdraft ? true : undefined,
       notes: notes.trim() ? notes.trim() : undefined
     });
   };

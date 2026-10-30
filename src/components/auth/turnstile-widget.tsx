@@ -25,7 +25,11 @@ export function isTurnstileEnabled(): boolean {
   return getTurnstileSiteKey().length > 0;
 }
 
-export function TurnstileWidget({ onTokenChange, className }: TurnstileWidgetProps) {
+export function TurnstileWidget({
+  onTokenChange,
+  className,
+  resetSignal = 0
+}: TurnstileWidgetProps) {
   const siteKey = getTurnstileSiteKey();
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<TurnstileWidgetId | null>(null);
@@ -42,6 +46,15 @@ export function TurnstileWidget({ onTokenChange, className }: TurnstileWidgetPro
       setScriptReady(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!resetSignal) return;
+    const turnstile = getTurnstileApi();
+    if (turnstile && widgetIdRef.current !== null) {
+      turnstile.reset(widgetIdRef.current);
+      onTokenChangeRef.current(null);
+    }
+  }, [resetSignal]);
 
   useEffect(() => {
     const turnstile = getTurnstileApi();

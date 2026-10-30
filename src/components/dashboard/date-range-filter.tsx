@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { format } from 'date-fns';
 import type { DateRange } from 'react-day-picker';
@@ -69,6 +69,11 @@ export function DateRangeFilter({
   const [draftFrom, setDraftFrom] = useState(urlFrom);
   const [draftTo, setDraftTo] = useState(urlTo);
   const [pickerOpen, setPickerOpen] = useState(false);
+
+  useEffect(() => {
+    setDraftFrom(urlFrom);
+    setDraftTo(urlTo);
+  }, [urlFrom, urlTo]);
 
   const periods: DateRangePeriodOption[] = [
     { key: 'today', labelKey: 'dashboard.quickPills.today' },

@@ -51,7 +51,7 @@ export async function signOutForSubscriptionExpired(): Promise<void> {
         shopParam = `?shop=${encodeURIComponent(session.user.shopName)}`;
       }
     } catch {
-      // ignore
+      shopParam = '';
     }
   }
   await forceSignOut(`/subscription-expired${shopParam}`);

@@ -17,6 +17,8 @@ import {
 } from '@/features/payments/api/queries';
 import { createPayment } from '@/features/payments/api/service';
 import { todayIsoDate } from '@/lib/dates';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { PAYMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import { CustomerDialog } from './customer-dialog';
 import { CustomersTable } from './customers-table';
 import type { CustomersHeaderActionProps, CustomerLedgerClientProps } from '@/types';
@@ -71,6 +73,7 @@ export function CustomerLedgerClient({ id }: CustomerLedgerClientProps) {
       setClientRequestId(createClientRequestId());
       void qc.invalidateQueries({ queryKey: dukaanKeys.customer(id) });
       void qc.invalidateQueries({ queryKey: paymentKeys.receivable(id) });
+      invalidateDomains({ queryClient: qc, domains: PAYMENT_SYNC_DOMAINS });
     },
     onError: (e: Error) => toast.error(e.message)
   });

@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatPkr, fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
+import { createClientRequestId, formatPkr, fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
@@ -59,6 +59,7 @@ export function RecordPaymentDialog({
 }: RecordPaymentDialogProps) {
   const t = useT();
   const qc = useQueryClient();
+  const [clientRequestId, setClientRequestId] = useState(() => createClientRequestId());
   const [customerId, setCustomerId] = useState(defaultCustomerId ?? '');
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerDTO | null>(null);
   const [targetType, setTargetType] = useState<'opening' | 'sale'>('opening');
@@ -97,6 +98,7 @@ export function RecordPaymentDialog({
   }, [receivableData, targetType, selectedSaleId]);
 
   const resetForm = () => {
+    setClientRequestId(createClientRequestId());
     setCustomerId('');
     setSelectedCustomer(null);
     setTargetType('opening');
@@ -167,7 +169,7 @@ export function RecordPaymentDialog({
     setErrors({});
 
     recordMutation.mutate({
-      clientRequestId: crypto.randomUUID(),
+      clientRequestId,
       customerId,
       amount: paisaAmount,
       paymentDate,

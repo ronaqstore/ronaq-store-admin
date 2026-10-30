@@ -23,6 +23,7 @@ export type TurnstileApi = {
 export type TurnstileWidgetProps = {
   onTokenChange: (token: string | null) => void;
   className?: string;
+  resetSignal?: number;
 };
 
 export type TurnstileSiteverifyResponse = {

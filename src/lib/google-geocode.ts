@@ -1,32 +1,14 @@
 import { env } from '@/config/env';
 import { GOOGLE_GEOCODE_API_BASE } from '@/constants/api';
+import { AppError } from '@/lib/errors';
+import type {
+  GeocodeAddressComponent,
+  GeocodeApiResponse,
+  GeocodeApiResult,
+  GeocodePlace
+} from '@/types/geocode';
 
-type GeocodeAddressComponent = {
-  long_name: string;
-  short_name: string;
-  types: string[];
-};
-
-type GeocodeApiResult = {
-  place_id?: string;
-  formatted_address?: string;
-  address_components?: GeocodeAddressComponent[];
-  geometry?: { location?: { lat: number; lng: number } };
-};
-
-type GeocodeApiResponse = {
-  status: string;
-  error_message?: string;
-  results?: GeocodeApiResult[];
-};
-
-export type GeocodePlace = {
-  placeId: string;
-  label: string;
-  latitude: number;
-  longitude: number;
-  city: string | null;
-};
+export type { GeocodePlace } from '@/types/geocode';
 
 export function getGoogleMapsApiKey(): string {
   return env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY?.trim() ?? '';
@@ -65,19 +47,19 @@ function mapResult(result: GeocodeApiResult, index: number): GeocodePlace | null
 
 async function fetchGeocode(params: URLSearchParams): Promise<GeocodePlace[]> {
   const key = getGoogleMapsApiKey();
-  if (!key) throw new Error('Missing NEXT_PUBLIC_GOOGLE_MAPS_API_KEY');
+  if (!key) throw new AppError('Missing NEXT_PUBLIC_GOOGLE_MAPS_API_KEY');
 
   params.set('key', key);
   params.set('language', 'en');
   params.set('region', 'pk');
 
   const res = await fetch(`${GOOGLE_GEOCODE_API_BASE}?${params.toString()}`);
-  if (!res.ok) throw new Error(`Geocode HTTP ${res.status}`);
+  if (!res.ok) throw new AppError(`Geocode HTTP ${res.status}`);
 
   const data = (await res.json()) as GeocodeApiResponse;
   if (data.status === 'ZERO_RESULTS') return [];
   if (data.status !== 'OK' || !data.results?.length) {
-    throw new Error(data.error_message || `Geocode ${data.status}`);
+    throw new AppError(data.error_message || `Geocode ${data.status}`);
   }
 
   return data.results

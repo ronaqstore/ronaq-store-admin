@@ -26,18 +26,13 @@ import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { isAppleBrandName } from '@/lib/device-family';
+import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
+import { AppError } from '@/lib/errors';
 import { useT } from '@/i18n/use-t';
 import { updateInventoryUnit } from '../api/service';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { INVENTORY_SYNC_DOMAINS } from '@/lib/query/sync-domains';
-import type { InventoryUnitDTO } from '@/lib/api/types';
-
-interface EditInventoryUnitDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  unit: InventoryUnitDTO | null;
-  brandName?: string | null;
-}
+import type { EditInventoryUnitDialogProps } from '@/types/inventory';
 
 export function EditInventoryUnitDialog({
   open,
@@ -57,7 +52,7 @@ export function EditInventoryUnitDialog({
 
   useEffect(() => {
     if (!open || !unit) return;
-    setAskingPricePkr(unit.askingPrice != null ? String(Math.round(unit.askingPrice / 100)) : '');
+    setAskingPricePkr(unit.askingPrice != null ? String(Math.round(fromPaisa(unit.askingPrice))) : '');
     setCondition(unit.condition === 'USED' ? 'USED' : 'NEW');
     setBatteryHealth(unit.batteryHealth != null ? String(unit.batteryHealth) : '');
     setDefectNotes(unit.defectNotes ?? '');
@@ -66,10 +61,10 @@ export function EditInventoryUnitDialog({
 
   const updateMutation = useMutation({
     mutationFn: () => {
-      if (!unit) throw new Error('No unit selected');
+      if (!unit) throw new AppError('No unit selected');
 
       const askingPriceInPaisa = askingPricePkr.trim()
-        ? Math.round(Number(askingPricePkr.trim()) * 100)
+        ? toPaisa(Number(askingPricePkr.trim()))
         : null;
 
       const battery = isApple && batteryHealth.trim() ? Number(batteryHealth.trim()) : null;
@@ -90,6 +85,31 @@ export function EditInventoryUnitDialog({
       toast.error(err.message || t('inventory.editUnitFailed'));
     }
   });
+
+  const handleAskingPriceChange = (value: string) => {
+    setAskingPricePkr(sanitizeNumberInput(value));
+    if (errors.askingPrice) {
+      setErrors((prev) => ({ ...prev, askingPrice: '' }));
+    }
+  };
+
+  const handleBatteryHealthChange = (value: string) => {
+    setBatteryHealth(sanitizeNumberInput(value));
+    if (errors.batteryHealth) {
+      setErrors((prev) => ({ ...prev, batteryHealth: '' }));
+    }
+  };
+
+  const handleDefectNotesChange = (value: string) => {
+    setDefectNotes(value.slice(0, 500));
+    if (errors.defectNotes) {
+      setErrors((prev) => ({ ...prev, defectNotes: '' }));
+    }
+  };
+
+  const handleConditionChange = (val: string | null) => {
+    if (val === 'NEW' || val === 'USED') setCondition(val);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,19 +161,14 @@ export function EditInventoryUnitDialog({
 
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
               <div className='space-y-1.5'>
-                <Label htmlFor='unit-asking-price'>{t('inventory.askingPrice')} (PKR)</Label>
+                <Label htmlFor='unit-asking-price'>{t('inventory.askingPricePkr')}</Label>
                 <Input
                   id='unit-asking-price'
                   type='text'
                   inputMode='numeric'
                   onKeyDown={blockInvalidNumberKeys}
                   value={askingPricePkr}
-                  onChange={(e) => {
-                    setAskingPricePkr(sanitizeNumberInput(e.target.value));
-                    if (errors.askingPrice) {
-                      setErrors((prev) => ({ ...prev, askingPrice: '' }));
-                    }
-                  }}
+                  onChange={(e) => handleAskingPriceChange(e.target.value)}
                   placeholder={t('inventory.askingPricePlaceholder')}
                 />
                 <DialogFieldError message={errors.askingPrice} />
@@ -161,12 +176,7 @@ export function EditInventoryUnitDialog({
 
               <div className='space-y-1.5'>
                 <Label htmlFor='unit-condition'>{t('inventory.condition')}</Label>
-                <Select
-                  value={condition}
-                  onValueChange={(val) => {
-                    if (val === 'NEW' || val === 'USED') setCondition(val);
-                  }}
-                >
+                <Select value={condition} onValueChange={handleConditionChange}>
                   <SelectTrigger id='unit-condition'>
                     <SelectValue />
                   </SelectTrigger>
@@ -181,8 +191,10 @@ export function EditInventoryUnitDialog({
             {isApple ? (
               <div className='space-y-1.5'>
                 <div className='flex items-center justify-between'>
-                  <Label htmlFor='unit-battery-health'>{t('inventory.batteryHealth')} (%)</Label>
-                  <span className='text-[10px] text-muted-foreground'>1 - 100</span>
+                  <Label htmlFor='unit-battery-health'>{t('inventory.batteryHealthPercent')}</Label>
+                  <span className='text-[10px] text-muted-foreground'>
+                    {t('inventory.batteryHealthRangeHint')}
+                  </span>
                 </div>
                 <Input
                   id='unit-battery-health'
@@ -190,12 +202,7 @@ export function EditInventoryUnitDialog({
                   inputMode='numeric'
                   onKeyDown={blockInvalidNumberKeys}
                   value={batteryHealth}
-                  onChange={(e) => {
-                    setBatteryHealth(sanitizeNumberInput(e.target.value));
-                    if (errors.batteryHealth) {
-                      setErrors((prev) => ({ ...prev, batteryHealth: '' }));
-                    }
-                  }}
+                  onChange={(e) => handleBatteryHealthChange(e.target.value)}
                   placeholder={t('inventory.batteryHealthPlaceholder')}
                   maxLength={3}
                 />
@@ -211,12 +218,7 @@ export function EditInventoryUnitDialog({
               <Textarea
                 id='unit-defect-notes'
                 value={defectNotes}
-                onChange={(e) => {
-                  setDefectNotes(e.target.value.slice(0, 500));
-                  if (errors.defectNotes) {
-                    setErrors((prev) => ({ ...prev, defectNotes: '' }));
-                  }
-                }}
+                onChange={(e) => handleDefectNotesChange(e.target.value)}
                 placeholder={t('inventory.defectNotesPlaceholder')}
                 rows={3}
                 className='resize-none'

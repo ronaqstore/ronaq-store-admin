@@ -540,6 +540,7 @@
     "product": {
       "productCreated": "مصنوعہ کامیابی سے بنایا گیا",
       "productUpdated": "مصنوعہ کامیابی سے اپ ڈیٹ ہوا",
+      "photosUploadFailed": "محصول خوندي شو، خو انځورونه پورته نه شول. بیا یې اضافه کړئ.",
       "imageAdded": "تصویر کامیابی سے شامل ہو گئی",
       "imageReordered": "انځورونه په بریالیتوب سره بیا تنظیم شول",
       "imageRemoved": "تصویر کامیابی سے ہٹا دی گئی",
@@ -1796,7 +1797,8 @@
       "confirm": "د لغوه کولو تایید",
       "success": "پیرود {purchaseNo} په بریالیتوب سره لغوه شو",
       "failed": "د پیرود لغوه کول ناکام شول",
-      "reasonRequired": "د لغوه کولو دلیل اړین دی"
+      "reasonRequired": "د لغوه کولو دلیل اړین دی",
+      "overdraftDescription": "خبرداری: ستاسو په دراز کې نغدې کمې دي (کمښت: {shortfall}). د پیرود له لغوه کولو مخکې اوورډرافټ تایید کړئ."
     },
     "createSuccess": "پیرود په بریالیتوب سره ثبت شو",
     "addAtLeastOneItem": "مهرباني وکړئ لږترلږه یو توکی اضافه کړئ",
@@ -1868,6 +1870,9 @@
     "batteryMinPlaceholder": "لږترلږه بیټري %",
     "batteryHealth": "بیټري",
     "askingPrice": "د پلور بیه",
+    "askingPricePkr": "د پلور بیه (PKR)",
+    "batteryHealthPercent": "بیټري (%)",
+    "batteryHealthRangeHint": "1 - 100",
     "purchaseInfo": "د پیرودلو تفصیلات",
     "saleInfo": "د پلورلو تفصیلات",
     "supplier": "سپلائر",
@@ -2838,6 +2843,8 @@
     "bannerTitle": "د ګډون نوي کول پکار دي",
     "bannerTrialWarning": "ستاسو 30 ورځنی آزمایښت په {count} ورځو کې پای ته رسیږي",
     "bannerTrialEndingToday": "ستاسو 30 ورځنی آزمایښت نن پای ته رسیږي",
+    "bannerPlanWarning": "ستاسو ګډون په {count} ورځو کې پای ته رسیږي",
+    "bannerPlanEndingToday": "ستاسو ګډون نن پای ته رسیږي",
     "bannerDescription": "د خپل دوکان کاونټر، پی او ایس پلور او انوینټري دوام ډاډمنولو لپاره، مهرباني وکړئ خپل ګډون نوی کړئ.",
     "contactSupport": "په واټس اپ اړیکه ونیسئ",
     "contactSupportToActivate": "د فعالولو لپاره ملاتړ سره اړیکه ونیسئ",

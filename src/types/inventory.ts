@@ -120,3 +120,43 @@ export interface SerializedUnitsKpiCardsProps {
   totalStockValue: number;
   avgUnitCost: number;
 }
+
+export type SerializedUnitsStatusFilter = 'ALL' | 'IN_STOCK' | 'SOLD' | 'DAMAGED_LOST';
+export type SerializedUnitsConditionFilter = 'ALL' | 'NEW' | 'USED';
+
+export interface SerializedUnitsFilterOptions {
+  statusFilter: SerializedUnitsStatusFilter;
+  conditionFilter: SerializedUnitsConditionFilter;
+  batteryMin: string;
+  search: string;
+}
+
+export interface EditInventoryUnitDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  unit: InventoryUnitDTO | null;
+  brandName?: string | null;
+}
+
+export interface RestoreUnitDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  productId: string;
+  unit: InventoryUnitDTO | null;
+}
+
+export interface SerializedProductUnitsDialogsProps {
+  productId: string;
+  brandName?: string | null;
+  productItemDTO: InventoryItemDTO | null;
+  adjustOpen: boolean;
+  onAdjustOpenChange: (open: boolean) => void;
+  selectedUnitIdForAdjust: string;
+  selectedUnitLabelForAdjust: string;
+  restoreOpen: boolean;
+  onRestoreOpenChange: (open: boolean) => void;
+  selectedUnitForRestore: InventoryUnitDTO | null;
+  editOpen: boolean;
+  onEditOpenChange: (open: boolean) => void;
+  selectedUnitForEdit: InventoryUnitDTO | null;
+}

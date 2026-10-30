@@ -45,7 +45,7 @@ import { EMPTY_FORM_NUMBER } from '@/types/common';
 export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
   const qc = useQueryClient();
   const t = useT();
-  const [clientRequestId] = useState(() => createClientRequestId());
+  const [clientRequestId, setClientRequestId] = useState(() => createClientRequestId());
   const [formApiError, setFormApiError] = useState<string | null>(null);
   const [belowCostPrompt, setBelowCostPrompt] = useState<SaleBelowCostPrompt | null>(null);
   const [confirmBelowCost, setConfirmBelowCost] = useState(false);
@@ -59,6 +59,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
       }
       setBelowCostPrompt(null);
       setConfirmBelowCost(false);
+      setClientRequestId(createClientRequestId());
       invalidateDomains({ queryClient: qc, domains: SALE_SYNC_DOMAINS });
       onDone?.();
       toastSuccessAfterClose(

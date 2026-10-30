@@ -540,6 +540,7 @@
     "product": {
       "productCreated": "مصنوعہ کامیابی سے بنایا گیا",
       "productUpdated": "مصنوعہ کامیابی سے اپ ڈیٹ ہوا",
+      "photosUploadFailed": "پروڈکٹ محفوظ ہو گیا، لیکن تصاویر اپ لوڈ نہیں ہو سکیں۔ دوبارہ شامل کریں۔",
       "imageAdded": "تصویر کامیابی سے شامل ہو گئی",
       "imageReordered": "تصاویر کامیابی سے دوبارہ ترتیب دی گئیں",
       "imageRemoved": "تصویر کامیابی سے ہٹا دی گئی",
@@ -1796,7 +1797,8 @@
       "confirm": "منسوخی کی تصدیق کریں",
       "success": "خریداری {purchaseNo} کامیابی سے منسوخ ہو گئی",
       "failed": "خریداری منسوخ کرنے میں ناکامی",
-      "reasonRequired": "منسوخی کی وجہ درکار ہے"
+      "reasonRequired": "منسوخی کی وجہ درکار ہے",
+      "overdraftDescription": "وارننگ: آپ کے دراز میں رقم کم ہے (کمی: {shortfall})۔ خریداری منسوخ کرنے سے پہلے اوور ڈرافٹ کی تصدیق کریں۔"
     },
     "createSuccess": "خریداری کامیابی کے ساتھ درج کر لی گئی",
     "addAtLeastOneItem": "براہ کرم کم از کم ایک چیز شامل کریں",
@@ -1868,6 +1870,9 @@
     "batteryMinPlaceholder": "کم از کم بیٹری %",
     "batteryHealth": "بیٹری",
     "askingPrice": "فروخت قیمت",
+    "askingPricePkr": "فروخت قیمت (PKR)",
+    "batteryHealthPercent": "بیٹری (%)",
+    "batteryHealthRangeHint": "1 - 100",
     "purchaseInfo": "خریداری کی تفصیلات",
     "saleInfo": "فروخت کی تفصیلات",
     "supplier": "سپلائر",
@@ -2838,6 +2843,8 @@
     "bannerTitle": "سبسکرپشن کی تجدید درکار ہے",
     "bannerTrialWarning": "آپ کا 30 روزہ ٹرائل {count} دن میں ختم ہو جائے گا",
     "bannerTrialEndingToday": "آپ کا 30 روزہ ٹرائل آج ختم ہو رہا ہے",
+    "bannerPlanWarning": "آپ کی سبسکرپشن {count} دن میں ختم ہو جائے گی",
+    "bannerPlanEndingToday": "آپ کی سبسکرپشن آج ختم ہو رہی ہے",
     "bannerDescription": "کاؤنٹر، پی او ایس سیلز، اور انوینٹری بلا تعطل جاری رکھنے کے لیے برائے مہربانی سبسکرپشن کی تجدید کروائیں۔",
     "contactSupport": "واٹس ایپ پر رابطہ کریں",
     "contactSupportToActivate": "ایکٹیویٹ کرنے کے لیے سپورٹ سے رابطہ کریں",

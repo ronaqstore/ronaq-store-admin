@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
@@ -33,28 +32,24 @@ export function SubscriptionExpiredCard() {
 
   return (
     <div className='relative overflow-hidden rounded-2xl border border-border/80 bg-card p-6 sm:p-8 shadow-xl backdrop-blur-sm'>
-      {/* Subtle background glow */}
       <div
         aria-hidden
-        className='pointer-events-none absolute -top-24 -end-24 size-48 rounded-full bg-amber-500/10 blur-3xl'
+        className='pointer-events-none absolute -top-24 -inset-e-24 size-48 rounded-full bg-amber-500/10 blur-3xl'
       />
       <div
         aria-hidden
-        className='pointer-events-none absolute -bottom-24 -start-24 size-48 rounded-full bg-emerald-500/10 blur-3xl'
+        className='pointer-events-none absolute -bottom-24 -inset-s-24 size-48 rounded-full bg-emerald-500/10 blur-3xl'
       />
 
       <div className='relative z-10 flex flex-col items-center text-center'>
-        {/* Shield / Safety icon badge */}
         <div className='mb-5 flex size-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-8 ring-amber-500/5'>
           <IconShieldCheck className='size-9' />
         </div>
 
-        {/* Title */}
         <h1 className='text-2xl sm:text-3xl font-bold tracking-tight text-foreground'>
           {t('expiredTitle')}
         </h1>
 
-        {/* Safe Data Highlight Card */}
         <div className='my-5 w-full rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-start'>
           <div className='flex items-start gap-3'>
             <div className='mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'>
@@ -66,12 +61,10 @@ export function SubscriptionExpiredCard() {
           </div>
         </div>
 
-        {/* Subtext */}
         <p className='text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-md mb-6'>
           {t('renewPrompt')}
         </p>
 
-        {/* Action Buttons */}
         <div className='flex w-full flex-col gap-3'>
           <a
             href={whatsappUrl}
@@ -99,7 +92,6 @@ export function SubscriptionExpiredCard() {
           </div>
         </div>
 
-        {/* Back to sign in */}
         <div className='mt-8 pt-4 border-t border-border/60 w-full'>
           <Link
             href='/login'

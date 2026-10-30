@@ -157,7 +157,7 @@ export function DashboardRow3CashUdhar({ params }: DashboardRow3Props) {
               type='monotone'
               dataKey='closingBalance'
               name={t('dashboard.metrics.closingBalance')}
-              stroke='hsl(var(--chart-1))'
+              stroke='var(--chart-1)'
               strokeWidth={2}
               dot={{ r: 2.5 }}
             />
@@ -223,7 +223,7 @@ export function DashboardRow3CashUdhar({ params }: DashboardRow3Props) {
                 {agingChartData.map((entry, idx) => (
                   <Cell
                     key={idx}
-                    fill={entry.bucketKey === '60+' ? '#f59e0b' : 'hsl(var(--chart-1))'}
+                    fill={entry.bucketKey === '60+' ? '#f59e0b' : 'var(--chart-1)'}
                   />
                 ))}
               </Bar>

@@ -29,7 +29,7 @@ import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dia
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { cn } from '@/lib/utils';
 import { useT } from '@/i18n/use-t';
-import { formatPkr, toPaisa } from '@/lib/dukaan/numbers';
+import { createClientRequestId, formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import type { ReturnPreviewDTO, ReturnItemInput } from '@/lib/api/types';
@@ -43,6 +43,7 @@ import { SALE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: ReturnSaleDialogProps) {
   const qc = useQueryClient();
   const t = useT();
+  const [clientRequestId, setClientRequestId] = useState(() => createClientRequestId());
   const [returnDate, setReturnDate] = useState(todayIsoDate);
   const [reason, setReason] = useState('');
   const [notes, setNotes] = useState('');
@@ -87,10 +88,11 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
             shortfall: shortfallPkr
           })
         );
-        setConfirmOverdraft(true);
+        setConfirmOverdraft(false);
         return;
       }
 
+      setClientRequestId(createClientRequestId());
       onOpenChange(false);
       invalidateDomains({ queryClient: qc, domains: SALE_SYNC_DOMAINS });
       toastSuccessAfterClose(t('sales.returnDialog.success'));
@@ -194,8 +196,19 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
     const selectedItems = validateSelectedItems();
     if (!selectedItems) return;
 
-    if (previewData && toPaisa(refundPkr) > previewData.refundable) {
+    if (!previewData) {
+      setRefundError(t('sales.returnDialog.previewRequired') || 'Preview the settlement before saving.');
+      return;
+    }
+
+    if (toPaisa(refundPkr) > previewData.refundable) {
       setRefundError(t('validation.refundExceedsMax'));
+      return;
+    }
+    if (previewData.willCauseOverdraft && !confirmOverdraft) {
+      setRefundError(
+        t('sales.returnDialog.confirmOverdraftRequired') || 'Confirm overdraft before saving.'
+      );
       return;
     }
     setRefundError('');
@@ -203,11 +216,12 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
     recordReturn.mutate({
       id: sale.id,
       input: {
+        clientRequestId,
         reason: reason.trim(),
         returnDate,
         items: selectedItems,
         refundAmount: toPaisa(refundPkr),
-        confirmOverdraft,
+        confirmOverdraft: confirmOverdraft ? true : undefined,
         notes: notes.trim() || undefined
       }
     });

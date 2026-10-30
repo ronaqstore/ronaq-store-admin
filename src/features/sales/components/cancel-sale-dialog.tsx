@@ -36,7 +36,7 @@ export function CancelSaleDialog({ sale, open, onOpenChange, onSuccess }: Cancel
           shortfall: res.shortfall,
           message: res.message
         });
-        setConfirmOverdraft(true);
+        setConfirmOverdraft(false);
         const shortfallPkr = formatPkr(
           res.shortfall ?? (impact?.cashAfter ? Math.abs(impact.cashAfter) : 0)
         );
@@ -66,11 +66,16 @@ export function CancelSaleDialog({ sale, open, onOpenChange, onSuccess }: Cancel
     }
     setReasonError('');
 
+    if ((impact?.willCauseOverdraft || !!overdraftPrompt) && !confirmOverdraft) {
+      setReasonError(t('sales.cancelDialog.confirmOverdraftRequired') || 'Confirm overdraft before saving.');
+      return;
+    }
+
     cancel.mutate({
       id: sale.id,
       input: {
         cancelReason: reason.trim(),
-        confirmOverdraft: confirmOverdraft || !!overdraftPrompt
+        confirmOverdraft: confirmOverdraft ? true : undefined
       }
     });
   };

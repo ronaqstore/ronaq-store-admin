@@ -1,17 +1,18 @@
+import { env } from '@/config/env';
+import { whatsappReminderUrl } from '@/constants/api';
+import type { WhatsAppSupportUrlParams } from '@/types/subscription';
+
 export const DEFAULT_SUPPORT_WHATSAPP = '923001234567';
 
 export function getSupportWhatsAppNumber(): string {
-  const envVal = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP;
+  const envVal = env.NEXT_PUBLIC_SUPPORT_WHATSAPP;
   if (envVal && envVal.trim()) {
     return envVal.trim().replace(/\D/g, '');
   }
   return DEFAULT_SUPPORT_WHATSAPP;
 }
 
-export function buildWhatsAppSupportUrl(params?: {
-  shopName?: string | null;
-  message?: string;
-}): string {
+export function buildWhatsAppSupportUrl(params?: WhatsAppSupportUrlParams): string {
   const phone = getSupportWhatsAppNumber();
   let text = params?.message;
   if (!text) {
@@ -21,7 +22,7 @@ export function buildWhatsAppSupportUrl(params?: {
       text = 'Assalam-o-Alaikum, I need support / subscription renewal for my Ronaq Store account.';
     }
   }
-  return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+  return whatsappReminderUrl(phone, text);
 }
 
 export function calculateSubscriptionDaysRemaining(

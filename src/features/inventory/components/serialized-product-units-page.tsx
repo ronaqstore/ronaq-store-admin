@@ -22,13 +22,19 @@ import { Card } from '@/components/ui/card';
 import { SerializedUnitsKpiCards } from './serialized-units-kpi-cards';
 import { productQueryOptions } from '@/features/products/api/queries';
 import { inventoryUnitsQueryOptions } from '../api/queries';
-import { StockAdjustDialog } from './stock-adjust-dialog';
-import { RestoreUnitDialog } from './restore-unit-dialog';
-import { EditInventoryUnitDialog } from './edit-inventory-unit-dialog';
+import { SerializedProductUnitsDialogs } from './serialized-product-units-dialogs';
+import {
+  averageSerializedUnitCost,
+  filterSerializedUnits
+} from './serialized-product-units-helpers';
 import { SerializedUnitsGrid } from './serialized-units-grid';
 import { SerializedUnitsTable } from './serialized-units-table';
 import type { InventoryItemDTO, InventoryUnitDTO } from '@/lib/api/types';
-import type { SerializedProductUnitsPageProps } from '@/types/inventory';
+import type {
+  SerializedProductUnitsPageProps,
+  SerializedUnitsConditionFilter,
+  SerializedUnitsStatusFilter
+} from '@/types/inventory';
 
 export function SerializedProductUnitsPage({ productId }: SerializedProductUnitsPageProps) {
   const t = useTranslations('inventory');
@@ -37,10 +43,8 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
   const router = useRouter();
 
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'IN_STOCK' | 'SOLD' | 'DAMAGED_LOST'>(
-    'ALL'
-  );
-  const [conditionFilter, setConditionFilter] = useState<'ALL' | 'NEW' | 'USED'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<SerializedUnitsStatusFilter>('ALL');
+  const [conditionFilter, setConditionFilter] = useState<SerializedUnitsConditionFilter>('ALL');
   const [batteryMin, setBatteryMin] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [copiedImei, setCopiedImei] = useState<string | null>(null);
@@ -107,51 +111,21 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
     [inStockUnits]
   );
 
-  const avgUnitCost = useMemo(() => {
-    if (inStockUnits.length > 0) return Math.round(totalStockValue / inStockUnits.length);
-    if (units.length > 0) {
-      const sum = units.reduce((acc, u) => acc + (u.unitCost ?? 0), 0);
-      return Math.round(sum / units.length);
-    }
-    return 0;
-  }, [inStockUnits, totalStockValue, units]);
+  const avgUnitCost = useMemo(
+    () => averageSerializedUnitCost(inStockUnits, units, totalStockValue),
+    [inStockUnits, totalStockValue, units]
+  );
 
-  const filteredUnits = useMemo(() => {
-    const minBattery = batteryMin.trim() ? Number(batteryMin) : null;
-    return units.filter((unit) => {
-      if (statusFilter === 'IN_STOCK' && unit.status !== 'IN_STOCK') return false;
-      if (statusFilter === 'SOLD' && unit.status !== 'SOLD') return false;
-      if (statusFilter === 'DAMAGED_LOST' && unit.status !== 'DAMAGED' && unit.status !== 'LOST') {
-        return false;
-      }
-      if (conditionFilter !== 'ALL' && unit.condition !== conditionFilter) return false;
-      if (
-        minBattery != null &&
-        !Number.isNaN(minBattery) &&
-        (unit.batteryHealth == null || unit.batteryHealth < minBattery)
-      ) {
-        return false;
-      }
-      if (search.trim()) {
-        const query = search.trim().toLowerCase();
-        const matchesImei1 = unit.imei1.toLowerCase().includes(query);
-        const matchesImei2 = unit.imei2?.toLowerCase().includes(query) ?? false;
-        const matchesSupplier = unit.supplierName?.toLowerCase().includes(query) ?? false;
-        const matchesCustomer = unit.customerName?.toLowerCase().includes(query) ?? false;
-        const matchesPurchaseNo = unit.purchaseNo?.toLowerCase().includes(query) ?? false;
-        const matchesSaleNo = unit.saleNo?.toLowerCase().includes(query) ?? false;
-        return (
-          matchesImei1 ||
-          matchesImei2 ||
-          matchesSupplier ||
-          matchesCustomer ||
-          matchesPurchaseNo ||
-          matchesSaleNo
-        );
-      }
-      return true;
-    });
-  }, [units, statusFilter, conditionFilter, batteryMin, search]);
+  const filteredUnits = useMemo(
+    () =>
+      filterSerializedUnits(units, {
+        statusFilter,
+        conditionFilter,
+        batteryMin,
+        search
+      }),
+    [units, statusFilter, conditionFilter, batteryMin, search]
+  );
 
   const handleOpenWriteOff = (unitId: string, imeiLabel: string) => {
     setSelectedUnitIdForAdjust(unitId);
@@ -466,29 +440,22 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
         />
       )}
 
-      {adjustOpen && productItemDTO ? (
-        <StockAdjustDialog
-          open={adjustOpen}
-          onOpenChange={setAdjustOpen}
-          initialProduct={productItemDTO}
-          initialUnitId={selectedUnitIdForAdjust}
-          initialUnitLabel={selectedUnitLabelForAdjust}
-        />
-      ) : null}
-
-      <RestoreUnitDialog
-        open={restoreOpen}
-        onOpenChange={setRestoreOpen}
+      <SerializedProductUnitsDialogs
         productId={productId}
-        unit={selectedUnitForRestore}
-      />
-
-      <EditInventoryUnitDialog
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        unit={selectedUnitForEdit}
         brandName={product?.brandName}
+        productItemDTO={productItemDTO}
+        adjustOpen={adjustOpen}
+        onAdjustOpenChange={setAdjustOpen}
+        selectedUnitIdForAdjust={selectedUnitIdForAdjust}
+        selectedUnitLabelForAdjust={selectedUnitLabelForAdjust}
+        restoreOpen={restoreOpen}
+        onRestoreOpenChange={setRestoreOpen}
+        selectedUnitForRestore={selectedUnitForRestore}
+        editOpen={editOpen}
+        onEditOpenChange={setEditOpen}
+        selectedUnitForEdit={selectedUnitForEdit}
       />
     </div>
   );
+
 }
