@@ -843,7 +843,9 @@
     "selectState": "مهرباني وکړئ ولایت وټاکئ",
     "usernameTaken": "دا کارن نوم دمخه کارول کیږي",
     "passwordsDoNotMatch": "پټنومونه سمون نه کوي",
-    "lineItemsMinOne": "لږترلږه یو توکی اړین دی"
+    "lineItemsMinOne": "لږترلږه یو توکی اړین دی",
+    "batteryHealthRange": "د بیټرۍ روغتیا باید د 1 او 100 سلنې ترمنځ وي",
+    "notesTooLong": "نوټونه باید 500 یا لږ توري وي"
   },
   "pages": {
     "dashboard": {
@@ -1877,7 +1879,23 @@
     "gridView": "د کارتونو بڼه",
     "tableView": "د جدول بڼه",
     "addPurchase": "پیرودنه اضافه کړئ",
-    "unitNumber": "واحد"
+    "unitNumber": "واحد",
+    "restoreToStock": "بیرته ذخیرې ته راوستل",
+    "restoreTitle": "تلیفون بیرته فعال ذخیرې ته راوستل",
+    "restoreDescription": "دا خراب یا ورک شوی واحد بیرته فعال ذخیرې ته اضافه کړئ.",
+    "restoreConfirm": "واحد بیرته راوستل",
+    "restoreSuccess": "واحد په بریالیتوب سره ذخیرې ته راوستل شو",
+    "restoreFailed": "ذخیرې ته د واحد په راوستلو کې ستونزه راغله",
+    "editUnit": "واحد سمول",
+    "editUnitTitle": "د تلیفون معلومات سمول",
+    "editUnitDescription": "د دې تلیفون بیه، حالت، د بیټرۍ روغتیا او نوټونه تازه کړئ.",
+    "editUnitSuccess": "د واحد معلومات په بریالیتوب سره تازه شول",
+    "editUnitFailed": "د واحد د معلوماتو په تازه کولو کې ستونزه راغله",
+    "defectNotes": "د نیمګړتیاوو یادښتونه",
+    "defectNotesPlaceholder": "د مثال په توګه په سکرین لږ خراشونه...",
+    "askingPricePlaceholder": "د اصلي بیې لپاره دا خالي پریږدئ",
+    "batteryHealthPlaceholder": "1 - 100",
+    "appleBatteryOnly": "د بیټرۍ روغتیا یوازې د ایپل آئی فون لپاره ده"
   },
   "kanban": {
     "addNewTask": "دنده اضافه کړئ",

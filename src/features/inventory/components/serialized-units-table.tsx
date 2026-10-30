@@ -1,10 +1,12 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { IconCopy, IconCheck } from '@tabler/icons-react';
+import { IconCopy, IconCheck, IconEdit, IconRefresh, IconAlertTriangle } from '@tabler/icons-react';
 import { formatPkr, formatLabel } from '@/lib/dukaan/numbers';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { RowActionsMenu } from '@/components/common/row-actions-menu';
+import type { RowAction } from '@/types';
 import {
   Table,
   TableBody,
@@ -20,7 +22,9 @@ export function SerializedUnitsTable({
   units,
   copiedImei,
   onCopyImei,
-  onOpenWriteOff
+  onOpenWriteOff,
+  onOpenRestore,
+  onOpenEdit
 }: SerializedUnitsListProps) {
   const t = useTranslations('inventory');
 
@@ -43,7 +47,11 @@ export function SerializedUnitsTable({
         <TableBody>
           {units.map((unit, idx) => {
             const tone: StatusTone =
-              unit.status === 'IN_STOCK' ? 'success' : unit.status === 'SOLD' ? 'neutral' : 'danger';
+              unit.status === 'IN_STOCK'
+                ? 'success'
+                : unit.status === 'SOLD'
+                  ? 'neutral'
+                  : 'danger';
 
             return (
               <TableRow key={`${unit.id}-${idx}`}>
@@ -138,31 +146,46 @@ export function SerializedUnitsTable({
                   )}
                 </TableCell>
                 <TableCell>
-                  <StatusBadge
-                    status={unit.status}
-                    label={formatLabel(unit.status)}
-                    tone={tone}
-                  />
+                  <StatusBadge status={unit.status} label={formatLabel(unit.status)} tone={tone} />
                 </TableCell>
                 <TableCell className='text-end'>
-                  {unit.status === 'IN_STOCK' ? (
-                    <Button
-                      type='button'
-                      variant='ghost'
-                      size='sm'
-                      onClick={() =>
-                        onOpenWriteOff(
-                          unit.id,
-                          unit.imei2?.trim() ? `${unit.imei1} · ${unit.imei2}` : unit.imei1
-                        )
-                      }
-                      className='h-7 text-xs text-rose-600 dark:text-rose-400'
-                    >
-                      {t('markDamaged')}
-                    </Button>
-                  ) : (
-                    <span className='text-muted-foreground text-xs'>—</span>
-                  )}
+                  {(() => {
+                    const actions: RowAction[] = [];
+                    if (onOpenEdit && unit.status !== 'SOLD' && unit.status !== 'VOIDED') {
+                      actions.push({
+                        label: t('editUnit'),
+                        icon: IconEdit,
+                        onClick: () => onOpenEdit(unit)
+                      });
+                    }
+                    if (unit.status === 'IN_STOCK') {
+                      actions.push({
+                        label: t('markDamaged'),
+                        icon: IconAlertTriangle,
+                        variant: 'destructive',
+                        onClick: () =>
+                          onOpenWriteOff(
+                            unit.id,
+                            unit.imei2?.trim() ? `${unit.imei1} · ${unit.imei2}` : unit.imei1
+                          )
+                      });
+                    }
+                    if (onOpenRestore && (unit.status === 'DAMAGED' || unit.status === 'LOST')) {
+                      actions.push({
+                        label: t('restoreToStock'),
+                        icon: IconRefresh,
+                        onClick: () => onOpenRestore(unit)
+                      });
+                    }
+                    if (actions.length === 0) {
+                      return <span className='text-muted-foreground text-xs'>—</span>;
+                    }
+                    return (
+                      <div className='flex justify-end'>
+                        <RowActionsMenu actions={actions} />
+                      </div>
+                    );
+                  })()}
                 </TableCell>
               </TableRow>
             );

@@ -6,20 +6,26 @@ import {
   IconCheck,
   IconBuildingStore,
   IconUser,
-  IconAlertTriangle
+  IconAlertTriangle,
+  IconEdit,
+  IconRefresh
 } from '@tabler/icons-react';
 import { formatPkr, formatLabel } from '@/lib/dukaan/numbers';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { StatusBadge, type StatusTone } from '@/components/data-table';
+import { RowActionsMenu } from '@/components/common/row-actions-menu';
+import type { RowAction } from '@/types';
 import type { SerializedUnitsListProps } from '@/types/inventory';
 
 export function SerializedUnitsGrid({
   units,
   copiedImei,
   onCopyImei,
-  onOpenWriteOff
+  onOpenWriteOff,
+  onOpenRestore,
+  onOpenEdit
 }: SerializedUnitsListProps) {
   const t = useTranslations('inventory');
 
@@ -52,11 +58,7 @@ export function SerializedUnitsGrid({
                   </Badge>
                 </div>
 
-                <StatusBadge
-                  status={unit.status}
-                  label={formatLabel(unit.status)}
-                  tone={tone}
-                />
+                <StatusBadge status={unit.status} label={formatLabel(unit.status)} tone={tone} />
               </div>
 
               <div className='space-y-1.5'>
@@ -193,25 +195,52 @@ export function SerializedUnitsGrid({
               </div>
             </div>
 
-            {unit.status === 'IN_STOCK' ? (
-              <div className='px-4 py-2.5 bg-muted/20 border-t border-border/50 flex items-center justify-end gap-2'>
-                <Button
-                  type='button'
-                  variant='ghost'
-                  size='sm'
-                  onClick={() =>
+            {(() => {
+              const actions: RowAction[] = [];
+              if (onOpenEdit && unit.status !== 'SOLD' && unit.status !== 'VOIDED') {
+                actions.push({
+                  label: t('editUnit'),
+                  icon: IconEdit,
+                  onClick: () => onOpenEdit(unit)
+                });
+              }
+              if (unit.status === 'IN_STOCK') {
+                actions.push({
+                  label: t('markDamaged'),
+                  icon: IconAlertTriangle,
+                  variant: 'destructive',
+                  onClick: () =>
                     onOpenWriteOff(
                       unit.id,
                       unit.imei2?.trim() ? `${unit.imei1} · ${unit.imei2}` : unit.imei1
                     )
-                  }
-                  className='h-7 text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 hover:bg-rose-500/10'
-                >
-                  <IconAlertTriangle className='h-3.5 w-3.5 me-1' />
-                  {t('markDamaged')}
-                </Button>
-              </div>
-            ) : null}
+                });
+              }
+              if (onOpenRestore && (unit.status === 'DAMAGED' || unit.status === 'LOST')) {
+                actions.push({
+                  label: t('restoreToStock'),
+                  icon: IconRefresh,
+                  onClick: () => onOpenRestore(unit)
+                });
+              }
+
+              if (actions.length === 0) return null;
+
+              return (
+                <div className='px-4 py-2 bg-muted/20 border-t border-border/50 flex items-center justify-between gap-2'>
+                  <div className='text-xs text-muted-foreground truncate'>
+                    {unit.defectNotes ? (
+                      <span className='italic truncate text-[11px]' title={unit.defectNotes}>
+                        {unit.defectNotes}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className='flex items-center gap-1 ms-auto'>
+                    <RowActionsMenu actions={actions} />
+                  </div>
+                </div>
+              );
+            })()}
           </Card>
         );
       })}

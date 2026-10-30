@@ -843,7 +843,9 @@
     "selectState": "Please select a state",
     "usernameTaken": "Username is already taken",
     "passwordsDoNotMatch": "Passwords do not match",
-    "lineItemsMinOne": "At least one line item is required"
+    "lineItemsMinOne": "At least one line item is required",
+    "batteryHealthRange": "Battery health must be between 1 and 100%.",
+    "notesTooLong": "Notes must be 500 characters or fewer."
   },
   "pages": {
     "dashboard": {
@@ -1877,7 +1879,23 @@
     "gridView": "Cards View",
     "tableView": "Table View",
     "addPurchase": "Add Purchase",
-    "unitNumber": "Unit"
+    "unitNumber": "Unit",
+    "restoreToStock": "Restore to Stock",
+    "restoreTitle": "Restore Phone to Stock",
+    "restoreDescription": "Return this damaged or lost unit back to active in-stock inventory.",
+    "restoreConfirm": "Restore Unit",
+    "restoreSuccess": "Unit restored to stock successfully",
+    "restoreFailed": "Failed to restore unit to stock",
+    "editUnit": "Edit Unit",
+    "editUnitTitle": "Edit Unit Details",
+    "editUnitDescription": "Update pricing, condition, battery health, and defect notes for this phone.",
+    "editUnitSuccess": "Unit details updated successfully",
+    "editUnitFailed": "Failed to update unit details",
+    "defectNotes": "Defect Notes",
+    "defectNotesPlaceholder": "e.g. Minor scratches, camera glass replaced...",
+    "askingPricePlaceholder": "Leave blank to use default selling price",
+    "batteryHealthPlaceholder": "1 - 100",
+    "appleBatteryOnly": "Battery health is only tracked on Apple iPhones"
   },
   "kanban": {
     "addNewTask": "Add Task",

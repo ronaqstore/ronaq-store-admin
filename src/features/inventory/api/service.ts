@@ -6,7 +6,8 @@ import type {
   InventoryAdjustmentDTO,
   InventoryItemDTO,
   InventoryUnitDTO,
-  PaginatedResponse
+  PaginatedResponse,
+  UpdateInventoryUnitInput
 } from '@/lib/api/types';
 import type {
   InventoryStockFilters,
@@ -88,6 +89,17 @@ export async function createInventoryAdjustment(
 ): Promise<CreateInventoryAdjustmentResult> {
   return appFetch<CreateInventoryAdjustmentResult>('/api/inventory/adjustments', {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input)
+  });
+}
+
+export async function updateInventoryUnit(
+  id: string,
+  input: UpdateInventoryUnitInput
+): Promise<InventoryUnitDTO> {
+  return appFetch<InventoryUnitDTO>(`/api/inventory/units/${id}`, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input)
   });

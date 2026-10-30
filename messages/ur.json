@@ -843,7 +843,9 @@
     "selectState": "براہ کرم صوبہ منتخب کریں",
     "usernameTaken": "صارف نام پہلے سے استعمال ہو رہا ہے",
     "passwordsDoNotMatch": "پاس ورڈ مماثل نہیں ہیں",
-    "lineItemsMinOne": "کم از کم ایک آئٹم درکار ہے"
+    "lineItemsMinOne": "کم از کم ایک آئٹم درکار ہے",
+    "batteryHealthRange": "بیٹری کی صحت 1 سے 100 فیصد کے درمیان ہونی چاہیے",
+    "notesTooLong": "نوٹس 500 حروف یا اس سے کم ہونے چاہئیں"
   },
   "pages": {
     "dashboard": {
@@ -1877,7 +1879,23 @@
     "gridView": "کارڈز ویو",
     "tableView": "ٹیبل ویو",
     "addPurchase": "خریداری درج کریں",
-    "unitNumber": "یونٹ"
+    "unitNumber": "یونٹ",
+    "restoreToStock": "اسٹاک میں بحال کریں",
+    "restoreTitle": "فون کو دوبارہ اسٹاک میں بحال کریں",
+    "restoreDescription": "اس خراب یا گمشدہ یونٹ کو واپس فعال اسٹاک میں شامل کریں۔",
+    "restoreConfirm": "یونٹ بحال کریں",
+    "restoreSuccess": "یونٹ کامیابی سے اسٹاک میں بحال ہو گیا",
+    "restoreFailed": "یونٹ کو اسٹاک میں بحال کرنے میں ناکامی",
+    "editUnit": "یونٹ ایڈٹ کریں",
+    "editUnitTitle": "یونٹ کی تفصیلات تبدیل کریں",
+    "editUnitDescription": "اس فون کی قیمت، حالت، بیٹری ہیلتھ اور نقائص کی تفصیلات اپ ڈیٹ کریں۔",
+    "editUnitSuccess": "یونٹ کی تفصیلات کامیابی سے اپ ڈیٹ ہو گئیں",
+    "editUnitFailed": "یونٹ کی تفصیلات تبدیل کرنے میں ناکامی",
+    "defectNotes": "نقائص کے نوٹس",
+    "defectNotesPlaceholder": "مثلاً اسکرین پر معمولی خراشیں، کیمرہ تبدیل شدہ...",
+    "askingPricePlaceholder": "ڈیفالٹ قیمت رکھنے کے لیے خالی چھوڑیں",
+    "batteryHealthPlaceholder": "1 - 100",
+    "appleBatteryOnly": "بیٹری ہیلتھ صرف ایپل آئی فونز پر لاگو ہوتی ہے"
   },
   "kanban": {
     "addNewTask": "کام شامل کریں",

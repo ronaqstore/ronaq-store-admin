@@ -23,6 +23,8 @@ import { SerializedUnitsKpiCards } from './serialized-units-kpi-cards';
 import { productQueryOptions } from '@/features/products/api/queries';
 import { inventoryUnitsQueryOptions } from '../api/queries';
 import { StockAdjustDialog } from './stock-adjust-dialog';
+import { RestoreUnitDialog } from './restore-unit-dialog';
+import { EditInventoryUnitDialog } from './edit-inventory-unit-dialog';
 import { SerializedUnitsGrid } from './serialized-units-grid';
 import { SerializedUnitsTable } from './serialized-units-table';
 import type { InventoryItemDTO, InventoryUnitDTO } from '@/lib/api/types';
@@ -35,7 +37,9 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
   const router = useRouter();
 
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'IN_STOCK' | 'SOLD' | 'DAMAGED_LOST'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'IN_STOCK' | 'SOLD' | 'DAMAGED_LOST'>(
+    'ALL'
+  );
   const [conditionFilter, setConditionFilter] = useState<'ALL' | 'NEW' | 'USED'>('ALL');
   const [batteryMin, setBatteryMin] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
@@ -44,6 +48,14 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
   const [adjustOpen, setAdjustOpen] = useState(false);
   const [selectedUnitIdForAdjust, setSelectedUnitIdForAdjust] = useState<string>('');
   const [selectedUnitLabelForAdjust, setSelectedUnitLabelForAdjust] = useState<string>('');
+
+  const [restoreOpen, setRestoreOpen] = useState(false);
+  const [selectedUnitForRestore, setSelectedUnitForRestore] = useState<InventoryUnitDTO | null>(
+    null
+  );
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedUnitForEdit, setSelectedUnitForEdit] = useState<InventoryUnitDTO | null>(null);
 
   const { data: product } = useQuery(productQueryOptions(productId));
   const { data: unitsPage, isLoading } = useQuery(
@@ -145,6 +157,16 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
     setSelectedUnitIdForAdjust(unitId);
     setSelectedUnitLabelForAdjust(imeiLabel);
     setAdjustOpen(true);
+  };
+
+  const handleOpenRestore = (unit: InventoryUnitDTO) => {
+    setSelectedUnitForRestore(unit);
+    setRestoreOpen(true);
+  };
+
+  const handleOpenEdit = (unit: InventoryUnitDTO) => {
+    setSelectedUnitForEdit(unit);
+    setEditOpen(true);
   };
 
   const handleOpenGeneralAdjust = () => {
@@ -430,6 +452,8 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
           copiedImei={copiedImei}
           onCopyImei={handleCopyImei}
           onOpenWriteOff={handleOpenWriteOff}
+          onOpenRestore={handleOpenRestore}
+          onOpenEdit={handleOpenEdit}
         />
       ) : (
         <SerializedUnitsTable
@@ -437,6 +461,8 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
           copiedImei={copiedImei}
           onCopyImei={handleCopyImei}
           onOpenWriteOff={handleOpenWriteOff}
+          onOpenRestore={handleOpenRestore}
+          onOpenEdit={handleOpenEdit}
         />
       )}
 
@@ -449,6 +475,20 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
           initialUnitLabel={selectedUnitLabelForAdjust}
         />
       ) : null}
+
+      <RestoreUnitDialog
+        open={restoreOpen}
+        onOpenChange={setRestoreOpen}
+        productId={productId}
+        unit={selectedUnitForRestore}
+      />
+
+      <EditInventoryUnitDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        unit={selectedUnitForEdit}
+        brandName={product?.brandName}
+      />
     </div>
   );
 }

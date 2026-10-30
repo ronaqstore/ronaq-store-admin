@@ -420,11 +420,18 @@ export interface InventoryAdjustmentDTO {
 
 export interface CreateInventoryAdjustmentInput {
   productId: string;
-  type: 'ADJUSTMENT' | 'DAMAGED' | 'LOST';
+  type: 'ADJUSTMENT' | 'DAMAGED' | 'LOST' | 'RESTORE';
   reason: string;
   countedQuantity?: number;
   quantity?: number;
   inventoryUnitId?: string;
+}
+
+export interface UpdateInventoryUnitInput {
+  askingPrice?: number | null;
+  defectNotes?: string | null;
+  batteryHealth?: number | null;
+  condition?: 'NEW' | 'USED';
 }
 
 export interface CreateInventoryAdjustmentResult {

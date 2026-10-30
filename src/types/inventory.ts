@@ -108,6 +108,8 @@ export interface SerializedUnitsListProps {
   copiedImei: string | null;
   onCopyImei: (imei: string) => void;
   onOpenWriteOff: (unitId: string, imeiLabel: string) => void;
+  onOpenRestore?: (unit: InventoryUnitDTO) => void;
+  onOpenEdit?: (unit: InventoryUnitDTO) => void;
 }
 
 export interface SerializedUnitsKpiCardsProps {
