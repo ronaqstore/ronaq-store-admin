@@ -44,13 +44,7 @@ async function tryOwnerLogin(
   rememberMe: boolean,
   turnstileToken: string
 ): Promise<LoginResult | null> {
-  const data = await executeAuthPost(
-    '/auth/login',
-    phone,
-    password,
-    rememberMe,
-    turnstileToken
-  );
+  const data = await executeAuthPost('/auth/login', phone, password, rememberMe, turnstileToken);
   if (!data?.accessToken || !data.user) return null;
 
   return {
@@ -62,6 +56,7 @@ async function tryOwnerLogin(
     shopName: data.shop?.name ?? null,
     accessToken: data.accessToken,
     subscriptionEndsAt: data.shop?.subscriptionEndsAt ?? null,
+    subscriptionStatus: data.shop?.subscriptionStatus ?? null,
     rememberMe,
     sessionExpiresAt: Math.floor(Date.now() / 1000) + sessionTtlSeconds(rememberMe)
   };
@@ -91,6 +86,7 @@ async function tryPlatformAdminLogin(
     shopName: null,
     accessToken: data.accessToken,
     subscriptionEndsAt: null,
+    subscriptionStatus: null,
     rememberMe,
     sessionExpiresAt: Math.floor(Date.now() / 1000) + sessionTtlSeconds(rememberMe)
   };

@@ -47,21 +47,21 @@ export interface CashMovementQueryFilter {
 }
 
 export interface CreateOpeningCashInput {
-  clientRequestId?: string;
+  clientRequestId: string;
   amount: number;
   date?: string;
   notes?: string;
 }
 
 export interface CreateOwnerInvestmentInput {
-  clientRequestId?: string;
+  clientRequestId: string;
   amount: number;
   date?: string;
   notes?: string;
 }
 
 export interface CreateOwnerWithdrawalInput {
-  clientRequestId?: string;
+  clientRequestId: string;
   amount: number;
   date?: string;
   notes?: string;
@@ -107,6 +107,7 @@ export interface OwnerInvestmentDialogProps {
 }
 
 export interface BaseCashInflowInput {
+  clientRequestId: string;
   amount: number;
   date?: string;
   notes?: string;

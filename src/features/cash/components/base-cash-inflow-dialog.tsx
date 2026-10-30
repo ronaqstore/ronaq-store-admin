@@ -19,7 +19,7 @@ import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { cn } from '@/lib/utils';
-import { toPaisa } from '@/lib/dukaan/numbers';
+import { createClientRequestId, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import type { BaseCashInflowDialogProps } from '@/types/cash';
@@ -42,16 +42,24 @@ export function BaseCashInflowDialog({
 }: BaseCashInflowDialogProps) {
   const t = useT();
   const qc = useQueryClient();
+  const [clientRequestId, setClientRequestId] = useState(() => createClientRequestId());
   const [amountStr, setAmountStr] = useState('');
   const [date, setDate] = useState(todayIsoDate);
   const [notes, setNotes] = useState('');
   const [amountError, setAmountError] = useState('');
 
+  const resetForm = () => {
+    setAmountStr('');
+    setDate(todayIsoDate);
+    setNotes('');
+    setAmountError('');
+    setClientRequestId(createClientRequestId());
+  };
+
   const createMutation = useMutation({
     mutationFn: mutateFn,
     onSuccess: () => {
-      setAmountStr('');
-      setNotes('');
+      resetForm();
       onOpenChange(false);
       invalidateDomains({ queryClient: qc, domains: CASH_SYNC_DOMAINS });
       toastSuccessAfterClose(successMessage);
@@ -71,6 +79,7 @@ export function BaseCashInflowDialog({
     setAmountError('');
 
     createMutation.mutate({
+      clientRequestId,
       amount: toPaisa(parsedAmount),
       date: date || undefined,
       notes: notes.trim() || undefined
@@ -79,8 +88,7 @@ export function BaseCashInflowDialog({
 
   const handleOpenChange = (next: boolean) => {
     if (!next) {
-      setAmountStr('');
-      setNotes('');
+      resetForm();
     }
     onOpenChange(next);
   };
@@ -174,7 +182,7 @@ export function BaseCashInflowDialog({
 
           <DialogFooter className='gap-2 sm:gap-2.5 pt-2'>
             <DialogCancelButton
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
               disabled={createMutation.isPending}
             />
             <DialogPrimaryButton

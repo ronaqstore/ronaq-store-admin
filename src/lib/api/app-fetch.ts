@@ -2,7 +2,9 @@ import { ApiError, type ApiErrorBody, type ApiResponseBodyError } from '@/lib/ap
 import { APP_BASE_URL } from '@/constants/api';
 import {
   isAccessRevokedError,
-  signOutForAccessRevoked
+  isSubscriptionEndedError,
+  signOutForAccessRevoked,
+  signOutForSubscriptionExpired
 } from '@/lib/auth/access-revoked';
 import { signOutForUnauthorized } from '@/lib/auth/force-sign-out';
 
@@ -40,6 +42,8 @@ export async function appFetch<T>(path: string, init?: RequestInit): Promise<T> 
     const message = Array.isArray(rawMessage) ? rawMessage.join(', ') : String(rawMessage);
     if (res.status === 401 && typeof window !== 'undefined') {
       void signOutForUnauthorized();
+    } else if (isSubscriptionEndedError(res.status, body, message)) {
+      void signOutForSubscriptionExpired();
     } else if (isAccessRevokedError(res.status, body, message)) {
       void signOutForAccessRevoked();
     }

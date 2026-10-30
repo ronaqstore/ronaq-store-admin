@@ -1,9 +1,5 @@
 import type { NextAuthConfig } from 'next-auth';
-import {
-  readAuthRole,
-  readOptionalString,
-  readRequiredString
-} from '@/lib/auth/session-claims';
+import { readAuthRole, readOptionalString, readRequiredString } from '@/lib/auth/session-claims';
 import { SESSION_TTL_SECONDS } from '@/lib/auth/session-ttl';
 
 export const authConfig = {
@@ -24,6 +20,7 @@ export const authConfig = {
         token.shopName = user.shopName;
         token.accessToken = user.accessToken;
         token.subscriptionEndsAt = user.subscriptionEndsAt;
+        token.subscriptionStatus = user.subscriptionStatus;
         token.sessionExpiresAt = user.sessionExpiresAt;
       }
 
@@ -42,6 +39,7 @@ export const authConfig = {
         session.user.shopId = null;
         session.user.shopName = null;
         session.user.subscriptionEndsAt = null;
+        session.user.subscriptionStatus = null;
         session.user.role = undefined;
         return session;
       }
@@ -51,6 +49,8 @@ export const authConfig = {
       session.user.shopId = readOptionalString(token.shopId);
       session.user.shopName = readOptionalString(token.shopName);
       session.user.subscriptionEndsAt = readOptionalString(token.subscriptionEndsAt);
+      session.user.subscriptionStatus =
+        (readOptionalString(token.subscriptionStatus) as 'TRIALING' | 'ACTIVE' | 'EXPIRED') ?? null;
       session.accessToken = readRequiredString(token.accessToken);
       return session;
     },

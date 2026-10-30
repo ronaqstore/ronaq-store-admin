@@ -14,7 +14,8 @@ const envSchema = z.object({
   NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
   NEXT_PUBLIC_SENTRY_ORG: z.string().optional(),
   NEXT_PUBLIC_SENTRY_PROJECT: z.string().optional(),
-  NEXT_PUBLIC_SENTRY_DISABLED: z.string().optional()
+  NEXT_PUBLIC_SENTRY_DISABLED: z.string().optional(),
+  NEXT_PUBLIC_SUPPORT_WHATSAPP: z.string().optional()
 });
 
 const parsed = envSchema.safeParse({
@@ -31,7 +32,8 @@ const parsed = envSchema.safeParse({
   NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
   NEXT_PUBLIC_SENTRY_ORG: process.env.NEXT_PUBLIC_SENTRY_ORG,
   NEXT_PUBLIC_SENTRY_PROJECT: process.env.NEXT_PUBLIC_SENTRY_PROJECT,
-  NEXT_PUBLIC_SENTRY_DISABLED: process.env.NEXT_PUBLIC_SENTRY_DISABLED
+  NEXT_PUBLIC_SENTRY_DISABLED: process.env.NEXT_PUBLIC_SENTRY_DISABLED,
+  NEXT_PUBLIC_SUPPORT_WHATSAPP: process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP
 });
 
 import { AppError } from '@/lib/errors';

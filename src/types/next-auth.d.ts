@@ -8,6 +8,7 @@ declare module 'next-auth' {
     shopName: string | null;
     accessToken: string;
     subscriptionEndsAt: string | null;
+    subscriptionStatus?: 'TRIALING' | 'ACTIVE' | 'EXPIRED' | null;
     rememberMe?: boolean;
     sessionExpiresAt?: number;
   }
@@ -20,6 +21,7 @@ declare module 'next-auth' {
       shopId: string | null;
       shopName: string | null;
       subscriptionEndsAt?: string | null;
+      subscriptionStatus?: 'TRIALING' | 'ACTIVE' | 'EXPIRED' | null;
     } & DefaultSession['user'];
   }
 }
@@ -31,6 +33,7 @@ declare module 'next-auth/jwt' {
     shopName?: string | null;
     accessToken?: string;
     subscriptionEndsAt?: string | null;
+    subscriptionStatus?: 'TRIALING' | 'ACTIVE' | 'EXPIRED' | null;
     sessionExpiresAt?: number;
   }
 }

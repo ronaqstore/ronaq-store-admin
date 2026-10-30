@@ -60,6 +60,7 @@ export interface LoginResult {
   shopName: string | null;
   accessToken: string;
   subscriptionEndsAt: string | null;
+  subscriptionStatus?: 'TRIALING' | 'ACTIVE' | 'EXPIRED' | null;
   rememberMe: boolean;
   sessionExpiresAt: number;
 }
@@ -73,6 +74,7 @@ export interface AuthUserSummary {
 export interface AuthShopSummary {
   name?: string | null;
   subscriptionEndsAt?: string | null;
+  subscriptionStatus?: 'TRIALING' | 'ACTIVE' | 'EXPIRED' | null;
 }
 
 export interface AuthResponseData {

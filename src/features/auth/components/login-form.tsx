@@ -18,9 +18,11 @@ export function LoginForm() {
   const suspendedBanner =
     reason === 'suspended'
       ? t('auth.shopSuspendedLogout')
-      : reason === 'session'
-        ? t('auth.sessionExpiredLogout')
-        : null;
+      : reason === 'expired'
+        ? t('auth.trialExpiredLogout')
+        : reason === 'session'
+          ? t('auth.sessionExpiredLogout')
+          : null;
 
   const handleLogin = async (values: LoginValues): Promise<string | null> => {
     const result = await signIn('credentials', {

@@ -20,7 +20,7 @@ import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { cn } from '@/lib/utils';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
-import { formatPkr, toPaisa } from '@/lib/dukaan/numbers';
+import { createClientRequestId, formatPkr, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { createOwnerWithdrawalMutation } from '../api/mutations';
@@ -37,12 +37,25 @@ import { CASH_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDialogProps) {
   const t = useT();
   const qc = useQueryClient();
+  const [clientRequestId, setClientRequestId] = useState(() => createClientRequestId());
   const [amountStr, setAmountStr] = useState('');
   const [date, setDate] = useState(todayIsoDate);
   const [notes, setNotes] = useState('');
   const [overdraftPrompt, setOverdraftPrompt] = useState<CashOverdraftPrompt | null>(null);
   const [confirmOverdraft, setConfirmOverdraft] = useState(false);
   const [amountError, setAmountError] = useState('');
+  const [overdraftError, setOverdraftError] = useState('');
+
+  const resetForm = () => {
+    setAmountStr('');
+    setDate(todayIsoDate);
+    setNotes('');
+    setOverdraftPrompt(null);
+    setConfirmOverdraft(false);
+    setAmountError('');
+    setOverdraftError('');
+    setClientRequestId(createClientRequestId());
+  };
 
   const withdrawalMutation = useMutation({
     ...createOwnerWithdrawalMutation,
@@ -57,10 +70,7 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
         return;
       }
 
-      setAmountStr('');
-      setNotes('');
-      setOverdraftPrompt(null);
-      setConfirmOverdraft(false);
+      resetForm();
       onOpenChange(false);
       invalidateDomains({ queryClient: qc, domains: CASH_SYNC_DOMAINS });
       toastSuccessAfterClose(t('dukaan.cash.withdrawalSuccess'));
@@ -75,12 +85,20 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
       sanitizeNumberInput(e.target.value, { min: 1, max: INPUT_LIMITS.amountRupeesMax })
     );
     setAmountError('');
+    setOverdraftError('');
     setOverdraftPrompt(null);
     setConfirmOverdraft(false);
   };
 
   const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNotes(clampText(e.target.value, INPUT_LIMITS.notes));
+  };
+
+  const handleConfirmOverdraftChange = (checked: boolean) => {
+    setConfirmOverdraft(checked);
+    if (checked) {
+      setOverdraftError('');
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -92,20 +110,24 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
     }
     setAmountError('');
 
+    if (overdraftPrompt && !confirmOverdraft) {
+      setOverdraftError(t('dukaan.actions.cashBelowZeroWarning'));
+      return;
+    }
+    setOverdraftError('');
+
     withdrawalMutation.mutate({
+      clientRequestId,
       amount: toPaisa(parsedAmount),
       date: date || undefined,
       notes: notes.trim() || undefined,
-      confirmOverdraft: confirmOverdraft || undefined
+      confirmOverdraft: confirmOverdraft ? true : undefined
     });
   };
 
   const handleOpenChange = (next: boolean) => {
     if (!next) {
-      setAmountStr('');
-      setNotes('');
-      setOverdraftPrompt(null);
-      setConfirmOverdraft(false);
+      resetForm();
     }
     onOpenChange(next);
   };
@@ -183,21 +205,24 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
           </div>
 
           {overdraftPrompt && (
-            <OverdraftAlert
-              variant='banner'
-              checked={confirmOverdraft}
-              onCheckedChange={setConfirmOverdraft}
-              title={t('dukaan.cash.shortfallWarningTitle')}
-              description={t('dukaan.cash.shortfallWarningDesc', {
-                shortfall: formatPkr(overdraftPrompt.shortfall ?? 0)
-              })}
-              confirmLabel={t('dukaan.cash.confirmOverdraftLabel')}
-            />
+            <div className='space-y-1.5'>
+              <OverdraftAlert
+                variant='banner'
+                checked={confirmOverdraft}
+                onCheckedChange={handleConfirmOverdraftChange}
+                title={t('dukaan.cash.shortfallWarningTitle')}
+                description={t('dukaan.cash.shortfallWarningDesc', {
+                  shortfall: formatPkr(overdraftPrompt.shortfall ?? 0)
+                })}
+                confirmLabel={t('dukaan.cash.confirmOverdraftLabel')}
+              />
+              <DialogFieldError message={overdraftError} />
+            </div>
           )}
 
           <DialogFooter className='gap-2 sm:gap-2.5 pt-2'>
             <DialogCancelButton
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
               disabled={withdrawalMutation.isPending}
             />
             <DialogPrimaryButton

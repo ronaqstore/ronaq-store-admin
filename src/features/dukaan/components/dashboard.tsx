@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { DateRangeFilter } from '@/components/dashboard/date-range-filter';
 import { ChartSkeleton } from '@/components/dashboard/chart-skeleton';
+import { DashboardTrialBanner } from './dashboard-trial-banner';
 import { DashboardKpisRow } from './dashboard-kpis';
 import { DashboardRow2SalesProfit } from './dashboard-row2-sales-profit';
 import { DashboardRow3CashUdhar } from './dashboard-row3-cash-udhar';
@@ -16,25 +17,14 @@ import { cn } from '@/lib/utils';
 import type { DashboardPeriod, LazyChartSectionProps } from '@/types/charts';
 import type { DashboardRangeParams } from '@/types/dashboard';
 
-function LazySection({
-  children,
-  minHeight = 320,
-  skeletonType = 'bar',
-}: LazyChartSectionProps) {
+function LazySection({ children, minHeight = 320, skeletonType = 'bar' }: LazyChartSectionProps) {
   const { ref, inView } = useInView<HTMLDivElement>('240px');
   return (
     <div
       ref={ref}
-      className={cn(
-        !inView && 'min-h-[320px]',
-        !inView && minHeight >= 360 && 'min-h-[360px]',
-      )}
+      className={cn(!inView && 'min-h-[320px]', !inView && minHeight >= 360 && 'min-h-[360px]')}
     >
-      {inView ? (
-        children
-      ) : (
-        <ChartSkeleton type={skeletonType} height={minHeight} />
-      )}
+      {inView ? children : <ChartSkeleton type={skeletonType} height={minHeight} />}
     </div>
   );
 }
@@ -49,9 +39,7 @@ export function DukaanDashboard() {
   const period = (searchParams.get('period') as DashboardPeriod) || '7d';
   const compareParam = searchParams.get('compare');
   const compare =
-    compareParam !== null
-      ? compareParam === 'true'
-      : period !== 'today' && period !== 'yesterday';
+    compareParam !== null ? compareParam === 'true' : period !== 'today' && period !== 'yesterday';
 
   const params: DashboardRangeParams = useMemo(
     () => ({
@@ -67,9 +55,7 @@ export function DukaanDashboard() {
     <div className='flex flex-1 flex-col gap-6'>
       <div className='flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between'>
         <div>
-          <h1 className='text-2xl font-bold tracking-tight'>
-            {t('pages.dashboard.title')}
-          </h1>
+          <h1 className='text-2xl font-bold tracking-tight'>{t('pages.dashboard.title')}</h1>
           <p className='text-muted-foreground text-sm'>
             {shopName
               ? t('dashboard.snapshot', { shop: shopName })
@@ -78,6 +64,8 @@ export function DukaanDashboard() {
         </div>
         <DateRangeFilter currentPeriod={period} compare={compare} />
       </div>
+
+      <DashboardTrialBanner />
 
       <DashboardKpisRow params={params} />
       <DashboardRow2SalesProfit params={params} compare={compare} />

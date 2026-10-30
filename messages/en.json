@@ -1153,6 +1153,7 @@
     "shopLogoOptional": "Shop logo (optional)",
     "shopLogoHint": "Shown as a circle. JPEG, PNG or WebP.",
     "shopSuspendedLogout": "Your shop has been suspended or your subscription ended. Contact Ronaq Store support to renew.",
+    "trialExpiredLogout": "Your trial period has concluded. Contact support on WhatsApp to renew your subscription.",
     "sessionExpiredLogout": "Your session expired or was invalid. Please sign in again."
   },
   "storeSettings": {
@@ -2825,5 +2826,33 @@
       "selectAtLeastOne": "Please select at least one item to return",
       "reasonRequired": "Return reason is required"
     }
+  },
+  "subscription": {
+    "trialDaysLeft": "Trial: {count} days left",
+    "trialEndsToday": "Trial ends today",
+    "trialExpired": "Trial expired",
+    "planActive": "Plan Active",
+    "planDaysLeft": "Plan: {count} days left",
+    "planEndsToday": "Plan ends today",
+    "planExpired": "Plan expired",
+    "bannerTitle": "Subscription Renewal Needed",
+    "bannerTrialWarning": "Your 30-day trial ends in {count} days",
+    "bannerTrialEndingToday": "Your 30-day trial ends today",
+    "bannerDescription": "To ensure your store counter, POS sales, and inventory remain uninterrupted, please renew your subscription.",
+    "contactSupport": "Contact Support on WhatsApp",
+    "contactSupportToActivate": "Contact Support to Activate",
+    "status": "Subscription Status",
+    "freeTrial": "Free Trial (30 days)",
+    "activePlan": "Active Subscription",
+    "expiresOn": "Expires: {date}",
+    "exactExpiry": "Expiry Date",
+    "expiredTitle": "Trial Period Concluded",
+    "expiredDescription": "Your trial period for {shopName} has concluded. All your products, customer Udhar balances, and sales history are completely safe.",
+    "expiredDescriptionGeneral": "Your trial period has concluded. All your products, customer Udhar balances, and sales history are completely safe.",
+    "renewPrompt": "Renew your subscription today to restore full access to POS sales, counter operations, and real-time inventory.",
+    "renewNow": "Contact Support to Renew",
+    "backToLogin": "Back to Sign In",
+    "callSupport": "Call Support",
+    "compactDaysLeft": "{count}d left"
   }
 }

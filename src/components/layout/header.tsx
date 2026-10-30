@@ -8,6 +8,7 @@ import SearchInput from '../search-input';
 import { ThemeSelector } from '../themes/theme-selector';
 import { ThemeModeToggle } from '../themes/theme-mode-toggle';
 import { NotificationCenter } from '@/features/notifications/components/notification-center';
+import { SubscriptionBadge } from '@/components/layout/subscription-badge';
 import { UserNav } from '@/components/layout/user-nav';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
@@ -77,6 +78,7 @@ export default function Header() {
         <div className='hidden md:block'>
           <ThemeSelector />
         </div>
+        <SubscriptionBadge />
         <NotificationCenter />
         <UserNav />
       </div>
