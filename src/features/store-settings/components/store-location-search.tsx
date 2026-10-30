@@ -11,9 +11,11 @@ import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { cn } from '@/lib/utils';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import {
-  cityFromPlaceComponents,
-  loadGoogleMapsPlaces
-} from '@/lib/google-maps-loader';
+  geocodeAddress,
+  getGoogleMapsApiKey,
+  reverseGeocode,
+  type GeocodePlace
+} from '@/lib/google-geocode';
 import { googleMapsSearchUrl } from '@/constants/api';
 import { useT } from '@/i18n/use-t';
 import type { StoreLocationSearchProps } from '@/types/store-settings';
@@ -36,18 +38,14 @@ export function StoreLocationSearch({
   const t = useT();
   const inputId = useId();
   const listId = useId();
-  const placesAttrRef = useRef<HTMLDivElement>(null);
   const onChangeRef = useRef(onChange);
   const onCitySuggestRef = useRef(onCitySuggest);
-  const autocompleteServiceRef = useRef<GoogleMapsAutocompleteService | null>(null);
-  const placesServiceRef = useRef<GoogleMapsPlacesService | null>(null);
   const [bootError, setBootError] = useState('');
   const [ready, setReady] = useState(false);
-  const [booting, setBooting] = useState(true);
   const [searching, setSearching] = useState(false);
   const [resolving, setResolving] = useState(false);
   const [query, setQuery] = useState(value.placeLabel ?? '');
-  const [predictions, setPredictions] = useState<GoogleMapsAutocompletePrediction[]>([]);
+  const [predictions, setPredictions] = useState<GeocodePlace[]>([]);
   const [listOpen, setListOpen] = useState(false);
 
   useEffect(() => {
@@ -62,33 +60,13 @@ export function StoreLocationSearch({
   }, [value.placeLabel]);
 
   useEffect(() => {
-    let cancelled = false;
-    setBooting(true);
-
-    loadGoogleMapsPlaces()
-      .then((google) => {
-        if (cancelled) return;
-        autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
-        if (placesAttrRef.current) {
-          placesServiceRef.current = new google.maps.places.PlacesService(
-            placesAttrRef.current
-          );
-        }
-        setReady(true);
-        setBooting(false);
-        setBootError('');
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setBootError(t('storeSettings.locationMapsUnavailable'));
-          setReady(false);
-          setBooting(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
+    if (getGoogleMapsApiKey()) {
+      setReady(true);
+      setBootError('');
+      return;
+    }
+    setReady(false);
+    setBootError(t('storeSettings.locationMapsUnavailable'));
   }, [t]);
 
   useEffect(() => {
@@ -107,26 +85,21 @@ export function StoreLocationSearch({
 
     let cancelled = false;
     setResolving(true);
-    loadGoogleMapsPlaces()
-      .then((google) => {
-        if (cancelled || !google.maps.Geocoder) {
-          setResolving(false);
-          return;
-        }
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-          if (cancelled) return;
-          setResolving(false);
-          if (status !== 'OK' || !results?.[0]?.formatted_address) return;
-          const label = clampText(results[0].formatted_address, INPUT_LIMITS.address);
-          setQuery(label);
-          onChangeRef.current({
-            placeLabel: label,
-            latitude: lat,
-            longitude: lng,
-            typedWithoutPin: false
-          });
+    reverseGeocode(lat, lng)
+      .then((places) => {
+        if (cancelled) return;
+        setResolving(false);
+        const place = places[0];
+        if (!place) return;
+        const label = clampText(place.label, INPUT_LIMITS.address);
+        setQuery(label);
+        onChangeRef.current({
+          placeLabel: label,
+          latitude: lat,
+          longitude: lng,
+          typedWithoutPin: false
         });
+        if (place.city) onCitySuggestRef.current?.(clampText(place.city, INPUT_LIMITS.city));
       })
       .catch(() => {
         if (!cancelled) setResolving(false);
@@ -138,7 +111,7 @@ export function StoreLocationSearch({
   }, [ready, value.latitude, value.longitude, value.placeLabel]);
 
   useEffect(() => {
-    if (!ready || !autocompleteServiceRef.current) return;
+    if (!ready) return;
 
     const trimmed = query.trim();
     const hasPin =
@@ -163,38 +136,28 @@ export function StoreLocationSearch({
     let cancelled = false;
     setSearching(true);
     const timer = window.setTimeout(() => {
-      const bounds = window.google
-        ? new window.google.maps.LatLngBounds(
-            { lat: 23.6, lng: 60.9 },
-            { lat: 37.1, lng: 77.8 }
-          )
-        : undefined;
-
-      autocompleteServiceRef.current?.getPlacePredictions(
-        {
-          input: trimmed,
-          componentRestrictions: { country: 'pk' },
-          bounds
-        },
-        (next, status) => {
+      geocodeAddress(trimmed)
+        .then((places) => {
           if (cancelled) return;
           setSearching(false);
-          if (status !== 'OK' || !next?.length) {
-            setPredictions([]);
-            setListOpen(trimmed.length > 0);
-            return;
-          }
-          setPredictions(next);
-          setListOpen(true);
-        }
-      );
+          setBootError('');
+          setPredictions(places);
+          setListOpen(trimmed.length > 0);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setSearching(false);
+          setPredictions([]);
+          setListOpen(false);
+          setBootError(t('storeSettings.locationMapsUnavailable'));
+        });
     }, SEARCH_DEBOUNCE_MS);
 
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [query, ready, value.latitude, value.longitude, value.placeLabel, value.typedWithoutPin]);
+  }, [query, ready, value.latitude, value.longitude, value.placeLabel, value.typedWithoutPin, t]);
 
   const hasPin =
     value.latitude != null &&
@@ -204,7 +167,7 @@ export function StoreLocationSearch({
 
   const pinLat = hasPin ? value.latitude : null;
   const pinLng = hasPin ? value.longitude : null;
-  const showLoader = booting || searching || resolving;
+  const showLoader = searching || resolving;
 
   const handleClear = () => {
     setQuery('');
@@ -216,7 +179,7 @@ export function StoreLocationSearch({
       longitude: null,
       typedWithoutPin: false
     });
-    setBootError('');
+    if (getGoogleMapsApiKey()) setBootError('');
   };
 
   const handleQueryChange = (next: string) => {
@@ -230,43 +193,19 @@ export function StoreLocationSearch({
     });
   };
 
-  const handlePickPrediction = (prediction: GoogleMapsAutocompletePrediction) => {
-    if (!placesServiceRef.current) return;
-    setResolving(true);
+  const handlePickPlace = (place: GeocodePlace) => {
+    const label = clampText(place.label, INPUT_LIMITS.address);
+    setBootError('');
     setListOpen(false);
     setPredictions([]);
-    placesServiceRef.current.getDetails(
-      {
-        placeId: prediction.place_id,
-        fields: ['formatted_address', 'geometry', 'address_components', 'name']
-      },
-      (place, status) => {
-        setResolving(false);
-        const loc = place?.geometry?.location;
-        if (status !== 'OK' || !loc) {
-          setBootError(t('storeSettings.locationPickRequired'));
-          return;
-        }
-        const lat = loc.lat();
-        const lng = loc.lng();
-        const placeLabel =
-          place?.name?.trim() ||
-          place?.formatted_address?.trim() ||
-          prediction.structured_formatting?.main_text ||
-          prediction.description;
-        const city = cityFromPlaceComponents(place?.address_components);
-        const label = clampText(placeLabel, INPUT_LIMITS.address);
-        setBootError('');
-        setQuery(label);
-        onChange({
-          placeLabel: label,
-          latitude: lat,
-          longitude: lng,
-          typedWithoutPin: false
-        });
-        if (city) onCitySuggestRef.current?.(clampText(city, INPUT_LIMITS.city));
-      }
-    );
+    setQuery(label);
+    onChange({
+      placeLabel: label,
+      latitude: place.latitude,
+      longitude: place.longitude,
+      typedWithoutPin: false
+    });
+    if (place.city) onCitySuggest?.(clampText(place.city, INPUT_LIMITS.city));
   };
 
   const showError = error || bootError;
@@ -316,19 +255,15 @@ export function StoreLocationSearch({
               ) : null}
               {predictions.map((item) => (
                 <button
-                  key={item.place_id}
+                  key={item.placeId}
                   type='button'
                   className='flex w-full cursor-pointer flex-col gap-0.5 rounded-md px-2.5 py-2 text-start hover:bg-muted'
                   onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => handlePickPrediction(item)}
+                  onClick={() => handlePickPlace(item)}
                 >
-                  <span className='text-sm font-medium text-foreground'>
-                    {item.structured_formatting?.main_text || item.description}
-                  </span>
-                  {item.structured_formatting?.secondary_text ? (
-                    <span className='text-xs text-muted-foreground'>
-                      {item.structured_formatting.secondary_text}
-                    </span>
+                  <span className='text-sm font-medium text-foreground'>{item.label}</span>
+                  {item.city ? (
+                    <span className='text-xs text-muted-foreground'>{item.city}</span>
                   ) : null}
                 </button>
               ))}
@@ -365,7 +300,6 @@ export function StoreLocationSearch({
           </Button>
         ) : null}
       </div>
-      <div ref={placesAttrRef} className='hidden' aria-hidden />
       <p className='text-xs text-muted-foreground'>{t('storeSettings.locationHint')}</p>
       <DialogFieldError id={`${inputId}-error`} message={showError} />
     </div>
