@@ -5,12 +5,9 @@ import { ShopSettings } from '@/components/settings/shop-settings';
 import { SettingsPageSkeleton } from '@/components/settings/settings-page-skeleton';
 import { storeSettingsQueryOptions } from '@/features/store-settings';
 
-export function ShopSettingsRoute() {
+export function ShopSettingsPrefetchRoute() {
   return (
-    <PageContainer
-      pageTitle='pages.settings.title'
-      pageDescription='pages.settings.description'
-    >
+    <PageContainer pageTitle='pages.settings.title' pageDescription='pages.settings.description'>
       <PrefetchHydrationBoundary
         prefetch={(token, qc) => qc.prefetchQuery(storeSettingsQueryOptions(token))}
         fallback={<SettingsPageSkeleton />}

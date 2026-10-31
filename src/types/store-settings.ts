@@ -18,43 +18,34 @@ export interface StoreLocationSearchProps {
   error?: string;
 }
 
-export interface StoreSettingsDTO {
+export interface BaseStoreSettingsContactFields {
+  about?: string | null;
+  whatsappNumber?: string | null;
+  phoneNumber?: string | null;
+  address?: string | null;
+  city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  mapPlaceName?: string | null;
+  googleMapsUrl?: string | null;
+  openingHours?: string | null;
+  facebookUrl?: string | null;
+  instagramUrl?: string | null;
+}
+
+export interface StoreSettingsDTO extends BaseStoreSettingsContactFields {
   shopId: string;
   slug: string;
   isEnabled: boolean;
   displayName: string;
-  about?: string | null;
   logoUrl?: string | null;
   bannerUrl?: string | null;
-  whatsappNumber?: string | null;
-  phoneNumber?: string | null;
-  address?: string | null;
-  city?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  mapPlaceName?: string | null;
-  googleMapsUrl?: string | null;
-  openingHours?: string | null;
-  facebookUrl?: string | null;
-  instagramUrl?: string | null;
   showExactStock: boolean;
 }
 
-export interface UpdateStoreSettingsInput {
+export interface UpdateStoreSettingsInput extends BaseStoreSettingsContactFields {
   isEnabled?: boolean;
   displayName?: string;
-  about?: string | null;
-  whatsappNumber?: string | null;
-  phoneNumber?: string | null;
-  address?: string | null;
-  city?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  mapPlaceName?: string | null;
-  googleMapsUrl?: string | null;
-  openingHours?: string | null;
-  facebookUrl?: string | null;
-  instagramUrl?: string | null;
   showExactStock?: boolean;
 }
 

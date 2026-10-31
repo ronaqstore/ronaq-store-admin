@@ -1,4 +1,4 @@
-import { ShopSettingsRoute } from '@/components/settings/shop-settings-route';
+import { ShopSettingsPrefetchRoute } from '@/components/settings/shop-settings-route';
 import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata() {
@@ -9,5 +9,5 @@ export async function generateMetadata() {
 }
 
 export default function SettingsPage() {
-  return <ShopSettingsRoute />;
+  return <ShopSettingsPrefetchRoute />;
 }
