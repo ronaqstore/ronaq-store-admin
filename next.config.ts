@@ -30,6 +30,18 @@ const baseConfig: NextConfig = {
   },
 
   skipProxyUrlNormalize: true,
+  async rewrites() {
+    return [
+      {
+        source: '/sw.js',
+        destination: '/serwist/sw.js'
+      },
+      {
+        source: '/sw.js.map',
+        destination: '/serwist/sw.js.map'
+      }
+    ];
+  },
   async headers() {
     return [
       {
@@ -66,6 +78,16 @@ const baseConfig: NextConfig = {
       },
       {
         source: '/serwist/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self'"
+          }
+        ]
+      },
+      {
+        source: '/sw.js',
         headers: [
           { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
           {

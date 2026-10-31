@@ -27,5 +27,5 @@ export function PwaShell({ children }: PwaShellProps) {
     return body;
   }
 
-  return <SerwistProvider swUrl='/sw.js'>{body}</SerwistProvider>;
+  return <SerwistProvider swUrl='/serwist/sw.js'>{body}</SerwistProvider>;
 }
