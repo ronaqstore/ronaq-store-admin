@@ -7,6 +7,7 @@ import type {
   CreateOwnerInvestmentInput,
   CreateOwnerWithdrawalInput,
   CreateOwnerWithdrawalResult,
+  CreateCashReconciliationInput,
   CashStatusResult
 } from '@/types/cash';
 import { appFetch } from '@/lib/api/app-fetch';
@@ -54,5 +55,20 @@ export async function createOwnerWithdrawal(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input)
+  });
+}
+
+export async function createCashReconciliation(
+  input: CreateCashReconciliationInput
+): Promise<CashStatusResult> {
+  const payload = {
+    clientRequestId: input.clientRequestId,
+    countedCash: input.countedCash,
+    reason: input.reason ?? input.notes
+  };
+  return appFetch<CashStatusResult>('/api/cash/reconciliations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
   });
 }

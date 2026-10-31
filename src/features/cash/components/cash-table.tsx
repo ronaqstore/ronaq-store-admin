@@ -38,6 +38,7 @@ import { cashMovementsQueryOptions, cashOpeningStatusQueryOptions } from '../api
 import { OpeningCashDialog } from './opening-cash-dialog';
 import { OwnerInvestmentDialog } from './owner-investment-dialog';
 import { OwnerWithdrawalDialog } from './owner-withdrawal-dialog';
+import { ReconcileCashDialog } from './reconcile-cash-dialog';
 
 const cashMobileItem: MobileItemConfig<CashMovementDTO> = {
   title: (row: CashMovementDTO) => formatLabel(row.type),
@@ -95,33 +96,36 @@ export function CashTable({ toolbarAction }: CashTableProps) {
   const [openingCashOpen, setOpeningCashOpen] = useState(false);
   const [investmentOpen, setInvestmentOpen] = useState(false);
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
+  const [reconcileOpen, setReconcileOpen] = useState(false);
 
   const { data: openingStatus } = useQuery(cashOpeningStatusQueryOptions());
   const hasOpeningCash = openingStatus?.hasOpening === true;
   const showOpeningButton = openingStatus?.hasOpening === false;
 
   const sortableColumnIds = ['movementDate', 'amount'];
-  const { params, filters, search: noteSearch, sortBy, sortOrder, getPageCount } =
-    useDukaanListParams<CashMovementSortField>(
-      sortableColumnIds,
-      'note',
-      ['type', 'direction', 'movementDate', 'amount'],
-      'movementDate',
-      'desc'
-    );
+  const {
+    params,
+    filters,
+    search: noteSearch,
+    sortBy,
+    sortOrder,
+    getPageCount
+  } = useDukaanListParams<CashMovementSortField>(
+    sortableColumnIds,
+    'note',
+    ['type', 'direction', 'movementDate', 'amount'],
+    'movementDate',
+    'desc'
+  );
 
   const [typeParam] = useQueryState('type', parseAsString);
   const [directionParam] = useQueryState('direction', parseAsString);
   const [noteParam] = useQueryState('note', parseAsString);
-  const [movementDateParam] = useQueryState(
-    'movementDate',
-    parseAsArrayOf(parseAsString, ',')
-  );
+  const [movementDateParam] = useQueryState('movementDate', parseAsArrayOf(parseAsString, ','));
 
   const search = noteSearch?.trim() || undefined;
   const noteFilter =
-    firstFilterValue((filters as Record<string, unknown>).note) ??
-    (noteParam?.trim() || undefined);
+    firstFilterValue((filters as Record<string, unknown>).note) ?? (noteParam?.trim() || undefined);
 
   const rawType = (filters as Record<string, unknown>).type ?? typeParam;
   let typeFilter: CashMovementType | undefined;
@@ -153,12 +157,8 @@ export function CashTable({ toolbarAction }: CashTableProps) {
     ...(directionFilter ? { direction: directionFilter } : {}),
     ...(from ? { from } : {}),
     ...(to ? { to } : {}),
-    ...(amountRange.minAmount !== undefined
-      ? { minAmount: amountRange.minAmount }
-      : {}),
-    ...(amountRange.maxAmount !== undefined
-      ? { maxAmount: amountRange.maxAmount }
-      : {}),
+    ...(amountRange.minAmount !== undefined ? { minAmount: amountRange.minAmount } : {}),
+    ...(amountRange.maxAmount !== undefined ? { maxAmount: amountRange.maxAmount } : {}),
     sortBy,
     sortOrder
   };
@@ -293,10 +293,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
         const note = row.original.note;
         const rev = row.original.reversesMovementId;
         if (!note && !rev) return <span className='text-muted-foreground'>—</span>;
-        const label = [
-          note ?? '',
-          rev ? `${t('table.reverses')} ${rev.slice(0, 8)}…` : ''
-        ]
+        const label = [note ?? '', rev ? `${t('table.reverses')} ${rev.slice(0, 8)}…` : '']
           .filter(Boolean)
           .join(' · ');
         return <TruncateText className='font-normal text-muted-foreground'>{label}</TruncateText>;
@@ -352,6 +349,16 @@ export function CashTable({ toolbarAction }: CashTableProps) {
         <Icons.minus className='h-3.5 w-3.5' />
         <span>{t('common.withdraw')}</span>
       </Button>
+      <Button
+        type='button'
+        size='sm'
+        variant='outline'
+        className='h-8 gap-1.5'
+        onClick={() => setReconcileOpen(true)}
+      >
+        <Icons.adjustments className='h-3.5 w-3.5' />
+        <span>{t('common.reconcileDrawer')}</span>
+      </Button>
       {showOpeningButton ? (
         <Button
           type='button'
@@ -379,6 +386,10 @@ export function CashTable({ toolbarAction }: CashTableProps) {
 
       {withdrawalOpen && (
         <OwnerWithdrawalDialog open={withdrawalOpen} onOpenChange={setWithdrawalOpen} />
+      )}
+
+      {reconcileOpen && (
+        <ReconcileCashDialog open={reconcileOpen} onOpenChange={setReconcileOpen} />
       )}
 
       <ResponsiveDataTable

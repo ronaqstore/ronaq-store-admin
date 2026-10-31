@@ -96,6 +96,7 @@ export interface FlowKpiTotals {
   grossProfit: number;
   netProfit: number;
   expenses: number;
+  returns?: number;
 }
 
 export interface BalanceKpi {

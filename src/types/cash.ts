@@ -68,6 +68,13 @@ export interface CreateOwnerWithdrawalInput {
   confirmOverdraft?: boolean;
 }
 
+export interface CreateCashReconciliationInput {
+  clientRequestId: string;
+  countedCash: number;
+  reason?: string;
+  notes?: string;
+}
+
 export interface OverdraftPrompt {
   shortfall?: number;
   message?: string;
@@ -130,6 +137,11 @@ export interface BaseCashInflowDialogProps {
 }
 
 export interface OwnerWithdrawalDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export interface ReconcileCashDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
