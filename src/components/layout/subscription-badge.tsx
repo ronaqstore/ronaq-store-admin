@@ -49,9 +49,8 @@ export function SubscriptionBadge() {
 
   if (isPaid) {
     if (daysLeft > 7) {
-      colorStyles =
-        'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/15';
-      dotStyles = 'bg-emerald-500';
+      colorStyles = 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/15';
+      dotStyles = 'bg-primary';
       fullText = t('planActive');
       compactText = fullText;
     } else if (daysLeft >= 1) {
@@ -78,9 +77,8 @@ export function SubscriptionBadge() {
     }
   } else {
     if (daysLeft > 7) {
-      colorStyles =
-        'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/15';
-      dotStyles = 'bg-emerald-500';
+      colorStyles = 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/15';
+      dotStyles = 'bg-primary';
       fullText = t('trialDaysLeft', { count: daysLeft });
       compactText = `${daysLeft}d`;
     } else if (daysLeft >= 1) {
