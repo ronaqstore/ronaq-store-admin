@@ -38,15 +38,13 @@ import type {
 } from '@/types/inventory';
 import type { InventoryItemDTO } from '@/lib/api/types';
 import { createInventoryAdjustment, listInventoryStock, listInventoryUnits } from '../api/service';
+import { createClientRequestId } from '@/lib/dukaan/numbers';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { INVENTORY_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { CreateInventoryAdjustmentInput } from '@/lib/api/types';
 import { formatUnitImeiLabel } from '@/lib/inventory/format-unit-imei-label';
 
-function toProductOption(
-  item: InventoryItemDTO,
-  inStockDot: string
-): StockAdjustProductOption {
+function toProductOption(item: InventoryItemDTO, inStockDot: string): StockAdjustProductOption {
   return {
     id: item.id,
     productName: item.name,
@@ -176,11 +174,12 @@ export function StockAdjustDialog({
     [productId]
   );
 
-  const buildPayload = (): CreateInventoryAdjustmentInput | null => {
+  const buildPayload = (clientRequestId: string): CreateInventoryAdjustmentInput | null => {
     const payload: CreateInventoryAdjustmentInput = {
       productId,
       type,
-      reason: reason.trim()
+      reason: reason.trim(),
+      clientRequestId
     };
 
     if (type === 'ADJUSTMENT') {
@@ -241,7 +240,7 @@ export function StockAdjustDialog({
     }
     setErrors({});
 
-    const payload = buildPayload();
+    const payload = buildPayload(createClientRequestId());
     if (!payload) return;
     mutation.mutate(payload);
   };
@@ -265,9 +264,7 @@ export function StockAdjustDialog({
 
   const handleCountedQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCountedQuantity(
-      Number(
-        sanitizeNumberInput(e.target.value, { min: 0, max: INPUT_LIMITS.quantityMax })
-      ) || 0
+      Number(sanitizeNumberInput(e.target.value, { min: 0, max: INPUT_LIMITS.quantityMax })) || 0
     );
   };
 
@@ -276,11 +273,7 @@ export function StockAdjustDialog({
       setQuantity(0);
       return;
     }
-    setQuantity(
-      Number(
-        sanitizeNumberInput(e.target.value, { min: 1, max: writeOffQtyMax })
-      ) || 1
-    );
+    setQuantity(Number(sanitizeNumberInput(e.target.value, { min: 1, max: writeOffQtyMax })) || 1);
     setErrors((prev) => ({ ...prev, quantity: undefined }));
   };
 
@@ -307,11 +300,7 @@ export function StockAdjustDialog({
                 queryKey={['inventory', 'stock-adjust-products']}
                 fetchPage={fetchProductPage}
                 selectedLabel={selectedProductLabel || undefined}
-                extraItems={
-                  selectedProduct
-                    ? [toProductOption(selectedProduct, inStockDot)]
-                    : []
-                }
+                extraItems={selectedProduct ? [toProductOption(selectedProduct, inStockDot)] : []}
                 activeOnly={false}
                 placeholder={t('inventory.selectProduct')}
                 searchPlaceholder={t('search.products')}

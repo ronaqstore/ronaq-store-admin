@@ -1,18 +1,13 @@
 import { INPUT_LIMITS } from '@/lib/input-limits';
-import type {
-  BlockInvalidNumberKeysEvent,
-  SanitizeNumberInputOptions
-} from '@/types/forms';
+import type { BlockInvalidNumberKeysEvent, SanitizeNumberInputOptions } from '@/types/forms';
 
-export function sanitizeNumberInput(
-  raw: string,
-  options: SanitizeNumberInputOptions = {}
-): string {
+export function sanitizeNumberInput(raw: string, options: SanitizeNumberInputOptions = {}): string {
   const min = options.min ?? 0;
   const max = options.max ?? INPUT_LIMITS.amountRupeesMax;
   if (raw === '') return '';
 
-  const n = Number(raw);
+  const cleaned = raw.replace(/,/g, '');
+  const n = Number(cleaned);
   if (Number.isNaN(n)) return '';
 
   let next = n;

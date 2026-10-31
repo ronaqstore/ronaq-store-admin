@@ -18,6 +18,7 @@ import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
 import { createInventoryAdjustment } from '../api/service';
+import { createClientRequestId } from '@/lib/dukaan/numbers';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { INVENTORY_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { RestoreUnitDialogProps } from '@/types/inventory';
@@ -30,12 +31,13 @@ export function RestoreUnitDialog({ open, onOpenChange, productId, unit }: Resto
   const [error, setError] = useState<string | null>(null);
 
   const restoreMutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (clientRequestId: string) =>
       createInventoryAdjustment({
         productId,
         type: 'RESTORE',
         inventoryUnitId: unit?.id,
-        reason: reason.trim()
+        reason: reason.trim(),
+        clientRequestId
       }),
     onSuccess: (res) => {
       const message = res?.message || t('inventory.restoreSuccess');
@@ -62,7 +64,7 @@ export function RestoreUnitDialog({ open, onOpenChange, productId, unit }: Resto
       return;
     }
     setError(null);
-    restoreMutation.mutate();
+    restoreMutation.mutate(createClientRequestId());
   };
 
   const handleOpenChange = (nextOpen: boolean) => {

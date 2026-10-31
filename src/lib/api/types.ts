@@ -426,6 +426,7 @@ export interface CreateInventoryAdjustmentInput {
   countedQuantity?: number;
   quantity?: number;
   inventoryUnitId?: string;
+  clientRequestId?: string;
 }
 
 export interface UpdateInventoryUnitInput {
