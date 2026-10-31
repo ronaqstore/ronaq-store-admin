@@ -62,6 +62,7 @@ const CHECKS = [
   { id: 'button-safety',      cmd: ['node', 'scripts/code/check-button-safety.cjs'] },
   { id: 'accessibility',      cmd: ['node', 'scripts/code/check-accessibility.cjs'] },
   { id: 'react-purity',       cmd: ['node', 'scripts/code/check-react-purity.cjs'] },
+  { id: 'hydration',          cmd: ['node', 'scripts/code/check-hydration.cjs'] },
   { id: 'nextjs-features',    cmd: ['node', 'scripts/code/check-nextjs-best-practices.cjs'] },
   { id: 'mutation-hooks',     cmd: ['node', 'scripts/code/check-mutation-hooks.cjs'] },
   { id: 'clean-handlers',     cmd: ['node', 'scripts/code/check-clean-handlers.cjs'] },

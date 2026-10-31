@@ -21,6 +21,7 @@ import { platformAtRiskQueryOptions } from '../api/queries';
 const AT_RISK_PAGE_SIZE = 20;
 
 function openWhatsApp(phone: string, text: string) {
+  if (typeof window === 'undefined') return;
   window.open(whatsappReminderUrl(phone, text), '_blank', 'noopener,noreferrer');
 }
 
@@ -61,13 +62,9 @@ export function PlatformDashboardAtRisk() {
                     <TableCell className='font-medium'>{shop.name}</TableCell>
                     <TableCell>{shop.city || t('platform.unknownCity')}</TableCell>
                     <TableCell>
-                      {shop.lastSaleAt
-                        ? new Date(shop.lastSaleAt).toLocaleDateString()
-                        : '—'}
+                      {shop.lastSaleAt ? new Date(shop.lastSaleAt).toLocaleDateString() : '—'}
                     </TableCell>
-                    <TableCell>
-                      {new Date(shop.subscriptionEndsAt).toLocaleDateString()}
-                    </TableCell>
+                    <TableCell>{new Date(shop.subscriptionEndsAt).toLocaleDateString()}</TableCell>
                     <TableCell className='text-end'>
                       {phone ? (
                         <Button

@@ -34,6 +34,7 @@ const DISMISS_DAYS = 14;
 const MIN_VISITS = 2;
 
 function readDismissed(): boolean {
+  if (typeof window === 'undefined') return false;
   try {
     const raw = localStorage.getItem(DISMISS_KEY);
     if (!raw) return false;
@@ -131,6 +132,7 @@ export function InstallPrompt({ variant = 'both', className }: InstallPromptProp
   }, [eligible, standalone, variant]);
 
   const dismissBanner = () => {
+    if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(DISMISS_KEY, String(Date.now()));
     } catch {

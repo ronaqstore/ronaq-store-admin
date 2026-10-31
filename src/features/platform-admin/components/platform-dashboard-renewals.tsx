@@ -24,6 +24,7 @@ function copyPhone(phone: string) {
 }
 
 function openWhatsApp(phone: string, text: string) {
+  if (typeof window === 'undefined') return;
   window.open(whatsappReminderUrl(phone, text), '_blank', 'noopener,noreferrer');
 }
 
@@ -58,11 +59,7 @@ export function PlatformDashboardRenewals() {
             <XAxis dataKey='weekStart' tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
             <Tooltip />
-            <Bar
-              dataKey='expiringCount'
-              fill='var(--chart-4)'
-              name={t('platform.expiring')}
-            />
+            <Bar dataKey='expiringCount' fill='var(--chart-4)' name={t('platform.expiring')} />
           </ComposedChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -90,9 +87,7 @@ export function PlatformDashboardRenewals() {
                     {shop.city || t('platform.unknownCity')} ·{' '}
                     {new Date(shop.endsAt).toLocaleDateString()}
                   </p>
-                  <p className='text-muted-foreground text-xs tabular-nums'>
-                    {phone || '—'}
-                  </p>
+                  <p className='text-muted-foreground text-xs tabular-nums'>{phone || '—'}</p>
                 </div>
                 <div className='flex shrink-0 gap-1'>
                   {phone ? (

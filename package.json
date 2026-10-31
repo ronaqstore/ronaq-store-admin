@@ -10,6 +10,7 @@
     "test": "node --experimental-strip-types --import ./scripts/code/test-loader.mjs --test src/components/data-table/resolve-mobile-item.test.ts src/lib/dashboard/formatters.test.ts src/lib/products/product-form-defaults.test.ts src/lib/party/party-payload.test.ts src/lib/subscription.test.ts src/lib/form-number.test.ts",
     "check": "node scripts/run-checks.mjs",
     "knip": "node scripts/run-knip.mjs",
+    "check:hydration": "node scripts/code/check-hydration.cjs",
     "check:unused": "node scripts/code/check-unused.cjs",
     "fix:unused": "node scripts/code/check-unused.cjs --fix",
     "check:orphans": "node scripts/code/check-orphans.cjs",
