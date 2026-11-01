@@ -334,9 +334,9 @@ export function ConsignmentIntakeDialog({
                   <Label htmlFor='condition'>{t('table.col.condition')}</Label>
                   <Select
                     value={condition}
-                    onValueChange={(val: 'NEW' | 'LIKE_NEW' | 'USED' | 'REFURBISHED') =>
-                      setCondition(val)
-                    }
+                    onValueChange={(val) => {
+                      if (val) setCondition(val);
+                    }}
                   >
                     <SelectTrigger id='condition'>
                       <SelectValue />

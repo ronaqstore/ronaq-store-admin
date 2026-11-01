@@ -218,9 +218,9 @@ export function SettleConsignmentDialog({
               </Label>
               <Select
                 value={payoutMethod}
-                onValueChange={(val: 'CASH' | 'BANK' | 'JAZZCASH' | 'EASYPAISA') =>
-                  setPayoutMethod(val)
-                }
+                onValueChange={(val) => {
+                  if (val) setPayoutMethod(val);
+                }}
               >
                 <SelectTrigger id='payout-method'>
                   <SelectValue />
