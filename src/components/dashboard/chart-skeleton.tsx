@@ -7,7 +7,7 @@ import type {
   ChartSkeletonHeightProps,
   ChartSkeletonProps,
   ChartSkeletonShellProps,
-  ChartSkeletonType,
+  ChartSkeletonType
 } from '@/types/charts';
 
 const BAR_HEIGHTS = [40, 70, 55, 85, 60, 45, 90, 50, 75, 65];
@@ -16,10 +16,7 @@ const FUNNEL_WIDTHS = [100, 82, 70, 55, 42, 30];
 
 function ChartFrame({ height, className, children }: ChartSkeletonFrameProps) {
   return (
-    <div
-      className={cn('w-full overflow-hidden p-4', className)}
-      style={{ height }}
-    >
+    <div className={cn('w-full overflow-hidden p-4', className)} style={{ height }}>
       {children}
     </div>
   );
@@ -54,11 +51,7 @@ function BarSkeleton({ height }: ChartSkeletonHeightProps) {
   return (
     <ChartFrame height={height} className='flex items-end justify-between gap-2'>
       {BAR_HEIGHTS.map((h, i) => (
-        <Skeleton
-          key={i}
-          className='w-7 rounded-t-md sm:w-8'
-          style={{ height: `${h}%` }}
-        />
+        <Skeleton key={i} className='w-7 rounded-t-md sm:w-8' style={{ height: `${h}%` }} />
       ))}
     </ChartFrame>
   );
@@ -66,10 +59,7 @@ function BarSkeleton({ height }: ChartSkeletonHeightProps) {
 
 function LineSkeleton({ height }: ChartSkeletonHeightProps) {
   return (
-    <ChartFrame
-      height={height}
-      className='relative flex flex-col justify-end gap-3'
-    >
+    <ChartFrame height={height} className='relative flex flex-col justify-end gap-3'>
       <div className='flex flex-1 items-end justify-between gap-2 pt-6'>
         {BAR_HEIGHTS.map((h, i) => (
           <div key={i} className='flex h-full flex-1 flex-col justify-end'>
@@ -90,19 +80,10 @@ function LineSkeleton({ height }: ChartSkeletonHeightProps) {
 
 function ComposedSkeleton({ height }: ChartSkeletonHeightProps) {
   return (
-    <ChartFrame
-      height={height}
-      className='relative flex items-end justify-between gap-1.5'
-    >
+    <ChartFrame height={height} className='relative flex items-end justify-between gap-1.5'>
       {BAR_HEIGHTS.map((h, i) => (
-        <div
-          key={i}
-          className='flex h-full flex-1 flex-col items-center justify-end gap-1'
-        >
-          <Skeleton
-            className='w-2/3 max-w-6 rounded-t-sm'
-            style={{ height: `${h}%` }}
-          />
+        <div key={i} className='flex h-full flex-1 flex-col items-center justify-end gap-1'>
+          <Skeleton className='w-2/3 max-w-6 rounded-t-sm' style={{ height: `${h}%` }} />
         </div>
       ))}
       <div className='pointer-events-none absolute inset-x-6 top-[28%]'>
@@ -137,16 +118,9 @@ function DonutSkeleton({ height }: ChartSkeletonHeightProps) {
 function WaterfallSkeleton({ height }: ChartSkeletonHeightProps) {
   const steps = [78, 28, 48, 36, 58];
   return (
-    <ChartFrame
-      height={height}
-      className='flex items-end justify-between gap-3 px-6'
-    >
+    <ChartFrame height={height} className='flex items-end justify-between gap-3 px-6'>
       {steps.map((h, i) => (
-        <Skeleton
-          key={i}
-          className='w-12 rounded-t-md sm:w-14'
-          style={{ height: `${h}%` }}
-        />
+        <Skeleton key={i} className='w-12 rounded-t-md sm:w-14' style={{ height: `${h}%` }} />
       ))}
     </ChartFrame>
   );
@@ -169,10 +143,7 @@ function ListSkeleton({ height }: ChartSkeletonHeightProps) {
   return (
     <ChartFrame height={height} className='flex flex-col gap-2.5'>
       {Array.from({ length: 5 }).map((_, i) => (
-        <div
-          key={i}
-          className='flex items-center justify-between gap-3 rounded-md border p-2.5'
-        >
+        <div key={i} className='flex items-center justify-between gap-3 rounded-md border p-2.5'>
           <div className='flex min-w-0 flex-1 flex-col gap-1.5'>
             <Skeleton className='h-3.5 w-2/3' />
             <Skeleton className='h-3 w-1/3' />
@@ -203,13 +174,13 @@ function FunnelSkeleton({ height }: ChartSkeletonHeightProps) {
 function TableSkeleton({ height }: ChartSkeletonHeightProps) {
   return (
     <ChartFrame height={height} className='flex flex-col gap-2'>
-      <div className='grid grid-cols-5 gap-2 border-b pb-2'>
+      <div className='grid grid-cols-3 gap-2 border-b pb-2 sm:grid-cols-5'>
         {Array.from({ length: 5 }).map((_, i) => (
           <Skeleton key={i} className='h-3 w-full' />
         ))}
       </div>
       {Array.from({ length: 6 }).map((_, row) => (
-        <div key={row} className='grid grid-cols-5 gap-2 py-1.5'>
+        <div key={row} className='grid grid-cols-3 gap-2 py-1.5 sm:grid-cols-5'>
           {Array.from({ length: 5 }).map((_, col) => (
             <Skeleton key={col} className='h-3.5 w-full' />
           ))}
@@ -316,10 +287,7 @@ function RowPlatformRiskSkeleton({ height }: ChartSkeletonHeightProps) {
   return <CardShell>{renderSingle('table', height)}</CardShell>;
 }
 
-export function ChartSkeleton({
-  type = 'bar',
-  height = 280,
-}: ChartSkeletonProps) {
+export function ChartSkeleton({ type = 'bar', height = 280 }: ChartSkeletonProps) {
   switch (type) {
     case 'row-sales-profit':
       return <RowSalesProfitSkeleton height={height} />;

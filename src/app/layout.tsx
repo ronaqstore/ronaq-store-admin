@@ -20,11 +20,7 @@ import {
 import { isRtlLocale, locales } from '@/i18n/request';
 import { cn } from '@/lib/utils';
 import { env } from '@/config/env';
-import {
-  ACCENT_FOREGROUND_OKLCH,
-  ACCENT_OKLCH,
-  RADIUS_REM
-} from '@/lib/appearance/apply';
+import { ACCENT_FOREGROUND_OKLCH, ACCENT_OKLCH, RADIUS_REM } from '@/lib/appearance/apply';
 import type {
   AppearanceAccent,
   AppearanceRadius,
@@ -179,7 +175,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       data-appearance-density={densityToApply}
       data-appearance-digits={digitsToApply}
       className={cn(
-        'h-full overflow-hidden',
+        'h-dvh overflow-hidden',
         locale === 'ur' && 'font-urdu',
         locale === 'ps' && 'font-pashto'
       )}

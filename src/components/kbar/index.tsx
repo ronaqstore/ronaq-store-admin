@@ -72,18 +72,18 @@ const KBarComponent = ({ children }: KBarComponentProps) => {
   return (
     <>
       <KBarPortal>
-        <KBarPositioner className='bg-black/10 supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-99999 flex items-start! justify-center p-4! pt-[14vh]!'>
-          <KBarAnimator className='bg-popover text-popover-foreground ring-foreground/10 relative mx-auto w-full max-w-[600px] overflow-hidden rounded-xl shadow-lg ring-1'>
+        <KBarPositioner className='bg-black/10 supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-99999 flex items-start! justify-center p-4! pt-[max(1.5rem,10dvh)]!'>
+          <KBarAnimator className='bg-popover text-popover-foreground ring-foreground/10 relative mx-auto flex max-h-[min(85dvh,600px)] w-full max-w-[600px] flex-col overflow-hidden rounded-xl shadow-lg ring-1'>
             <div className='bg-popover sticky top-0 z-10 border-b'>
               <KBarSearch
                 defaultPlaceholder={t('searchPlaceholder')}
-                className='placeholder:text-muted-foreground/55 w-full border-none bg-transparent px-4 py-3.5 text-sm outline-hidden focus:ring-0 focus:outline-hidden'
+                className='placeholder:text-muted-foreground/55 w-full border-none bg-transparent px-4 py-3.5 text-base outline-hidden focus:ring-0 focus:outline-hidden md:text-sm'
               />
             </div>
-            <div className='h-[400px]'>
+            <div className='min-h-0 flex-1'>
               <RenderResults />
             </div>
-            <div className='text-muted-foreground flex items-center gap-3 border-t px-3 py-2 text-xs'>
+            <div className='text-muted-foreground flex shrink-0 items-center gap-3 border-t px-3 py-2 text-xs'>
               <span className='flex items-center gap-1'>
                 <Kbd>↑</Kbd>
                 <Kbd>↓</Kbd> {t('navigate')}

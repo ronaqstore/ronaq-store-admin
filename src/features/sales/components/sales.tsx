@@ -191,7 +191,9 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
                 <TableCell className='max-w-none'>
                   {item.imei
                     ? item.warrantyDays
-                      ? t('dukaan.sale.warrantyDays', { days: item.warrantyDays })
+                      ? t('dukaan.sale.warrantyDays', {
+                          days: item.warrantyDays
+                        })
                       : t('dukaan.sale.companyWarranty')
                     : '—'}
                 </TableCell>
@@ -267,7 +269,10 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
           <h4 className='font-semibold text-sm'>{t('dukaan.sale.returnsHistory')}</h4>
           <div className='space-y-2'>
             {data.returns.map((ret, index) => (
-              <div key={`${ret.id}-${index}`} className='rounded-md border bg-muted/30 p-3 text-xs space-y-1.5'>
+              <div
+                key={`${ret.id}-${index}`}
+                className='rounded-md border bg-muted/30 p-3 text-xs space-y-1.5'
+              >
                 <div className='flex items-center justify-between'>
                   <span className='font-semibold'>{ret.reason}</span>
                   <span className='font-medium text-destructive'>
@@ -331,34 +336,38 @@ export function SaleReceiptClient({ id }: SaleReceiptClientProps) {
       <div className='text-sm'>
         {t('table.col.customer')}: {data.customerName ?? t('dukaan.sale.walkIn')}
       </div>
-      <table className='w-full text-sm'>
-        <thead>
-          <tr className='border-b text-start'>
-            <th className='py-1'>{t('dukaan.sale.item')}</th>
-            <th>IMEI</th>
-            <th>{t('table.col.qty')}</th>
-            <th>{t('dukaan.sale.warranty')}</th>
-            <th className='text-end'>{t('table.col.amount')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {(data.items ?? []).map((item, index) => (
-            <tr key={`${item.id}-${index}`} className='border-b'>
-              <td className='py-1'>{item.productName}</td>
-              <td>{item.imei ?? '—'}</td>
-              <td>{item.quantity}</td>
-              <td>
-                {item.imei
-                  ? item.warrantyDays
-                    ? t('dukaan.sale.warrantyDays', { days: item.warrantyDays })
-                    : t('dukaan.sale.companyWarranty')
-                  : '—'}
-              </td>
-              <td className='text-end'>{formatPkr(item.total)}</td>
+      <div className='-mx-1 overflow-x-auto px-1'>
+        <table className='w-full min-w-[360px] text-sm'>
+          <thead>
+            <tr className='border-b text-start'>
+              <th className='py-1'>{t('dukaan.sale.item')}</th>
+              <th>IMEI</th>
+              <th>{t('table.col.qty')}</th>
+              <th>{t('dukaan.sale.warranty')}</th>
+              <th className='text-end'>{t('table.col.amount')}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {(data.items ?? []).map((item, index) => (
+              <tr key={`${item.id}-${index}`} className='border-b'>
+                <td className='py-1'>{item.productName}</td>
+                <td>{item.imei ?? '—'}</td>
+                <td>{item.quantity}</td>
+                <td>
+                  {item.imei
+                    ? item.warrantyDays
+                      ? t('dukaan.sale.warrantyDays', {
+                          days: item.warrantyDays
+                        })
+                      : t('dukaan.sale.companyWarranty')
+                    : '—'}
+                </td>
+                <td className='text-end'>{formatPkr(item.total)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <div className='space-y-1 text-sm'>
         <div className='flex justify-between'>
           <span>{t('common.subtotal')}</span>
