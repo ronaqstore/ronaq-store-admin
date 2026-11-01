@@ -32,7 +32,7 @@ export default function Header() {
   const showBack = isDetailPath(pathname);
 
   return (
-    <header className='bg-background/95 z-20 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border/60 pt-[env(safe-area-inset-top)] backdrop-blur-md md:h-14'>
+    <header className='bg-background/95 z-20 flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center justify-between gap-2 border-b border-border/60 pt-[env(safe-area-inset-top)] backdrop-blur-md'>
       <div className='flex min-w-0 flex-1 items-center gap-2 px-4'>
         {showBack ? (
           <Button
