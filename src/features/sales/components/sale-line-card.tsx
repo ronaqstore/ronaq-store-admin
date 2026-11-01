@@ -35,13 +35,7 @@ export const SaleLineCard = withForm({
     onRemove: (() => undefined) as () => void,
     excludedUnitIds: [] as string[]
   },
-  render: function SaleLineCardRender({
-    form,
-    index,
-    canRemove,
-    onRemove,
-    excludedUnitIds
-  }) {
+  render: function SaleLineCardRender({ form, index, canRemove, onRemove, excludedUnitIds }) {
     const t = useT();
 
     const handleProductSelect = (
@@ -54,6 +48,7 @@ export const SaleLineCard = withForm({
         (product as { trackingType?: ProductPickerItem['tracking_type'] } | null)?.trackingType;
       const isPhone = trackingType === 'SERIALIZED';
       subField.handleChange(id);
+      form.setFieldValue(`lines[${index}].product_name`, product?.name ?? '');
       form.setFieldValue(
         `lines[${index}].unit_price`,
         product ? fromPaisa(product.default_selling_price) : EMPTY_FORM_NUMBER
@@ -111,13 +106,7 @@ export const SaleLineCard = withForm({
             warrantyDays: current?.warranty_days ?? ''
           };
         }}
-        children={({
-          isPhone,
-          productId,
-          authenticity,
-          unitCondition,
-          warrantyDays
-        }) => (
+        children={({ isPhone, productId, authenticity, unitCondition, warrantyDays }) => (
           <div className='relative grid gap-2 rounded-lg border p-3 pe-24 md:grid-cols-4'>
             {canRemove && (
               <Button
@@ -142,10 +131,9 @@ export const SaleLineCard = withForm({
                       label={t('dukaan.sale.product')}
                       required
                       value={subField.state.value}
+                      selectedLabel={form.getFieldValue(`lines[${index}].product_name`)}
                       onBlur={subField.handleBlur}
-                      onValueChange={(id, product) =>
-                        handleProductSelect(subField, id, product)
-                      }
+                      onValueChange={(id, product) => handleProductSelect(subField, id, product)}
                       isInvalid={isInvalid}
                       errors={subField.state.meta.errors}
                       queryKey={['products', 'picker']}
@@ -196,9 +184,7 @@ export const SaleLineCard = withForm({
                 </Badge>
                 <Alert>
                   <Icons.warning />
-                  <AlertDescription>
-                    {t('dukaan.sale.authenticityTellCustomer')}
-                  </AlertDescription>
+                  <AlertDescription>{t('dukaan.sale.authenticityTellCustomer')}</AlertDescription>
                 </Alert>
               </div>
             ) : null}
@@ -215,13 +201,7 @@ export const SaleLineCard = withForm({
                         value={subField.state.value ?? ''}
                         onBlur={subField.handleBlur}
                         onValueChange={(unitId, condition, unit) =>
-                          handleImeiChange(
-                            subField,
-                            unitId,
-                            condition,
-                            warrantyDays,
-                            unit
-                          )
+                          handleImeiChange(subField, unitId, condition, warrantyDays, unit)
                         }
                         isInvalid={isInvalid}
                         errors={subField.state.meta.errors}
@@ -258,9 +238,7 @@ export const SaleLineCard = withForm({
                 ) : unitCondition === 'NEW' ? (
                   <Alert>
                     <Icons.warning />
-                    <AlertDescription>
-                      {t('dukaan.sale.companyWarranty')}
-                    </AlertDescription>
+                    <AlertDescription>{t('dukaan.sale.companyWarranty')}</AlertDescription>
                   </Alert>
                 ) : null}
               </div>

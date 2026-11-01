@@ -158,13 +158,10 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
             </form.AppField>
             <form.AppField name='city'>
               {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>
-                      {t('platform.fields.city')} *
-                    </FieldLabel>
+                    <FieldLabel htmlFor={field.name}>{t('platform.fields.city')} *</FieldLabel>
                     <MarketplaceCityCombobox
                       id={field.name}
                       value={field.state.value}
@@ -172,10 +169,7 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
                       required
                     />
                     {isInvalid ? (
-                      <FieldError
-                        id={`${field.name}-error`}
-                        errors={field.state.meta.errors}
-                      />
+                      <FieldError id={`${field.name}-error`} errors={field.state.meta.errors} />
                     ) : null}
                   </Field>
                 );
@@ -217,7 +211,11 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
 
           <DialogFooter>
             <DialogCancelButton onClick={() => onOpenChange(false)} disabled={create.isPending} />
-            <DialogPrimaryButton mode='add' loading={create.isPending} disabled={create.isPending} />
+            <DialogPrimaryButton
+              mode='add'
+              loading={create.isPending}
+              disabled={create.isPending}
+            />
           </DialogFooter>
         </form>
       )}

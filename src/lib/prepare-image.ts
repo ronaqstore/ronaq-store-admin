@@ -6,10 +6,7 @@ const BANNER_WIDTH = 1600;
 const BANNER_HEIGHT = 700;
 const JPEG_QUALITY = 0.85;
 
-export async function prepareProductImage(
-  file: File,
-  maxEdge = PRODUCT_MAX_EDGE
-): Promise<File> {
+export async function prepareProductImage(file: File, maxEdge = PRODUCT_MAX_EDGE): Promise<File> {
   const img = await loadImage(file);
   const { width, height } = fitInside(img.width, img.height, maxEdge);
   const blob = await drawToJpeg(img, width, height, 0, 0, img.width, img.height);

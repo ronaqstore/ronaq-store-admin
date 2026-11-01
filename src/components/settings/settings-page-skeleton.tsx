@@ -2,11 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function SettingsPageSkeleton() {
   return (
-    <div
-      role='status'
-      className='flex min-w-0 flex-col gap-10'
-      aria-busy='true'
-    >
+    <div role='status' className='flex min-w-0 flex-col gap-10' aria-busy='true'>
       <section className='space-y-4'>
         <div className='flex items-start gap-3'>
           <Skeleton className='h-10 w-10 shrink-0 rounded-xl' />

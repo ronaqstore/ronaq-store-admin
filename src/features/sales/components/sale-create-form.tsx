@@ -24,6 +24,7 @@ import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { SALE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import {
   buildCreateSalePayload,
+  buildQuickSaleDefaults,
   calcSaleTotals,
   emptySaleLine,
   isPhoneSaleLine,
@@ -42,7 +43,7 @@ import type {
 } from '@/types/sales';
 import { EMPTY_FORM_NUMBER } from '@/types/common';
 
-export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
+export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) {
   const qc = useQueryClient();
   const t = useT();
   const [clientRequestId, setClientRequestId] = useState(() => createClientRequestId());
@@ -77,13 +78,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
     }
   });
 
-  const defaultValues: SaleFormValues = {
-    customer_id: '__walkin__',
-    discount: EMPTY_FORM_NUMBER,
-    paid_now: EMPTY_FORM_NUMBER,
-    notes: '',
-    lines: [{ ...emptySaleLine }]
-  };
+  const defaultValues: SaleFormValues = buildQuickSaleDefaults(initialProduct);
 
   const form = useAppForm({
     defaultValues,

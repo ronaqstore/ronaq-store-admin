@@ -12,10 +12,7 @@ export type TurnstileRenderOptions = {
 };
 
 export type TurnstileApi = {
-  render: (
-    container: HTMLElement | string,
-    options: TurnstileRenderOptions
-  ) => TurnstileWidgetId;
+  render: (container: HTMLElement | string, options: TurnstileRenderOptions) => TurnstileWidgetId;
   reset: (widgetId?: TurnstileWidgetId) => void;
   remove: (widgetId?: TurnstileWidgetId) => void;
 };

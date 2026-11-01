@@ -53,9 +53,7 @@ export function EditStoreProfileDialog({
 }: EditStoreProfileDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {open ? (
-        <EditStoreProfileDialogBody settings={settings} onOpenChange={onOpenChange} />
-      ) : null}
+      {open ? <EditStoreProfileDialogBody settings={settings} onOpenChange={onOpenChange} /> : null}
     </Dialog>
   );
 }
@@ -63,8 +61,7 @@ export function EditStoreProfileDialog({
 function locationFromSettings(settings: StoreSettingsDTO): StoreLocationValue {
   const lat = settings.latitude ?? null;
   const lng = settings.longitude ?? null;
-  const hasPin =
-    lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng);
+  const hasPin = lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng);
   return {
     placeLabel: hasPin ? settings.mapPlaceName?.trim() || null : null,
     latitude: hasPin ? lat : null,
@@ -72,10 +69,7 @@ function locationFromSettings(settings: StoreSettingsDTO): StoreLocationValue {
   };
 }
 
-function EditStoreProfileDialogBody({
-  settings,
-  onOpenChange
-}: EditStoreProfileDialogBodyProps) {
+function EditStoreProfileDialogBody({ settings, onOpenChange }: EditStoreProfileDialogBodyProps) {
   const t = useT();
   const updateMutation = useUpdateStoreSettings();
 
@@ -212,8 +206,7 @@ function EditStoreProfileDialogBody({
             code === 'PHONE_ALREADY_TAKEN' ||
             lower.includes('already in use') ||
             lower.includes('already used');
-          const invalid =
-            lower.includes('pakistani mobile') || lower.includes('not a valid phone');
+          const invalid = lower.includes('pakistani mobile') || lower.includes('not a valid phone');
           const msg = taken
             ? t('validation.phoneAlreadyTaken')
             : invalid

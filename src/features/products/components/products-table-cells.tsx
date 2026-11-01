@@ -2,17 +2,15 @@
 
 import { PreviewableImage } from '@/components/media/previewable-image';
 import { SimpleEntityCellAction } from '@/components/common/simple-entity-cell-action';
+import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/constants/placeholders';
 import { formatEmpty } from '@/lib/format-empty';
 import { productsQueryKeys } from '../api/queries';
 import { deactivateProduct, reactivateProduct } from '../api/service';
-import type {
-  ProductCellActionProps,
-  ProductImagesFieldProps
-} from '@/types/products';
+import type { ProductCellActionProps, ProductImagesFieldProps } from '@/types/products';
 
-export function ProductCellAction({ data }: ProductCellActionProps) {
+export function ProductCellAction({ data, onSell }: ProductCellActionProps) {
   const t = useT();
 
   return (
@@ -29,23 +27,28 @@ export function ProductCellAction({ data }: ProductCellActionProps) {
       onDeactivate={deactivateProduct}
       onActivate={reactivateProduct}
       invalidateQueryKey={productsQueryKeys.all}
+      extraActions={
+        data.isActive && onSell
+          ? [
+              {
+                label: t('dukaan.product.sell'),
+                icon: Icons.receipt,
+                className: 'text-emerald-600 focus:text-emerald-700 dark:text-emerald-400',
+                onClick: () => onSell(data)
+              }
+            ]
+          : undefined
+      }
     />
   );
 }
 
 export function ProductImagesField({ row }: ProductImagesFieldProps) {
   const t = useT();
-  const urls =
-    row.imageUrls?.length ?
-      row.imageUrls
-    : row.imageUrl ?
-      [row.imageUrl]
-    : [];
+  const urls = row.imageUrls?.length ? row.imageUrls : row.imageUrl ? [row.imageUrl] : [];
 
   if (urls.length === 0) {
-    return (
-      <span className='text-muted-foreground'>{t('dukaan.product.noImages')}</span>
-    );
+    return <span className='text-muted-foreground'>{t('dukaan.product.noImages')}</span>;
   }
 
   return (

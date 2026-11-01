@@ -3,6 +3,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import type { NextIntlClientProvider } from 'next-intl';
 import type { IconProps } from '@tabler/icons-react';
 import type { ActionId, ActionImpl } from 'kbar';
+import type { RowAction } from './dukaan';
 
 export type TranslateMaybeFn = {
   (key: string): string;
@@ -288,6 +289,7 @@ export interface SimpleEntityCellActionProps {
   onActivate: (id: string) => Promise<unknown>;
   invalidateQueryKey: readonly unknown[];
   renderDialog?: (open: boolean, onOpenChange: (open: boolean) => void) => ReactNode;
+  extraActions?: RowAction[];
 }
 
 export interface NotFoundViewProps {

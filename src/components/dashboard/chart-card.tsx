@@ -6,30 +6,19 @@ import {
   IconDownload,
   IconHelpCircle,
   IconRefresh,
-  IconTable,
+  IconTable
 } from '@tabler/icons-react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from '@/components/ui/table';
 import { ChartSkeleton } from './chart-skeleton';
 import { EmptyChart } from './empty-chart';
@@ -57,7 +46,7 @@ export function ChartCard({
   tableColumns,
   tableRows,
   csvFilename = 'chart-export',
-  children,
+  children
 }: ChartCardProps) {
   const t = useT();
   const [viewMode, setViewMode] = useState<'chart' | 'table'>('chart');
@@ -71,11 +60,11 @@ export function ChartCard({
           const val = row[c.key] ?? '';
           return `"${String(val).replaceAll('"', '""')}"`;
         })
-        .join(','),
+        .join(',')
     );
     const csvContent = [headerRow, ...dataRows].join('\n');
     const blob = new Blob(['\uFEFF' + csvContent], {
-      type: 'text/csv;charset=utf-8;',
+      type: 'text/csv;charset=utf-8;'
     });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -146,13 +135,9 @@ export function ChartCard({
                 <TooltipTrigger
                   type='button'
                   className='hover:bg-muted inline-flex h-8 w-8 items-center justify-center rounded-md border'
-                  onClick={() =>
-                    setViewMode((v) => (v === 'chart' ? 'table' : 'chart'))
-                  }
+                  onClick={() => setViewMode((v) => (v === 'chart' ? 'table' : 'chart'))}
                   aria-label={
-                    viewMode === 'chart'
-                      ? t('dashboard.tableToggle')
-                      : t('dashboard.chartToggle')
+                    viewMode === 'chart' ? t('dashboard.tableToggle') : t('dashboard.chartToggle')
                   }
                 >
                   {viewMode === 'chart' ? (
@@ -162,9 +147,7 @@ export function ChartCard({
                   )}
                 </TooltipTrigger>
                 <TooltipContent side='bottom' className='text-xs'>
-                  {viewMode === 'chart'
-                    ? t('dashboard.tableToggle')
-                    : t('dashboard.chartToggle')}
+                  {viewMode === 'chart' ? t('dashboard.tableToggle') : t('dashboard.chartToggle')}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -202,13 +185,7 @@ export function ChartCard({
               {error.message || t('dashboard.errorLoading')}
             </p>
             {onRetry ? (
-              <Button
-                type='button'
-                size='sm'
-                variant='outline'
-                className='mt-3'
-                onClick={onRetry}
-              >
+              <Button type='button' size='sm' variant='outline' className='mt-3' onClick={onRetry}>
                 <IconRefresh className='me-1.5 h-3.5 w-3.5' />
                 {t('dashboard.retry')}
               </Button>

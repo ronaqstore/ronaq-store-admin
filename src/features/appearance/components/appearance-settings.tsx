@@ -270,9 +270,7 @@ export function AppearanceSettings() {
                     variant={density === d ? 'default' : 'outline'}
                     onClick={() => prefs.setDensity(d)}
                   >
-                    {d === 'comfortable'
-                      ? t('appearance.comfortable')
-                      : t('appearance.compact')}
+                    {d === 'comfortable' ? t('appearance.comfortable') : t('appearance.compact')}
                   </Button>
                 ))}
               </div>

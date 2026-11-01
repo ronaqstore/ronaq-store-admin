@@ -31,10 +31,7 @@ export const cashOpeningStatusQueryOptions = (token?: string) =>
   queryOptions({
     queryKey: cashKeys.openingStatus(),
     queryFn: async () => {
-      const res = await listCashMovements(
-        { type: 'OPENING_CASH', page: 1, pageSize: 1 },
-        token
-      );
+      const res = await listCashMovements({ type: 'OPENING_CASH', page: 1, pageSize: 1 }, token);
       return { hasOpening: (res.total ?? res.items.length) > 0 };
     },
     staleTime: 30_000

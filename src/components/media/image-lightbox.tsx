@@ -2,17 +2,10 @@
 
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { isPreviewableImageSrc } from '@/lib/media';
 import { cn } from '@/lib/utils';
-import type {
-  ImageLightboxOpenChangeDetails,
-  ImageLightboxProps
-} from '@/types/media';
+import type { ImageLightboxOpenChangeDetails, ImageLightboxProps } from '@/types/media';
 
 function suppressUnderlyingPointerBriefly() {
   const swallow = (event: Event) => {
@@ -34,10 +27,7 @@ export function ImageLightbox({ src, alt, open, onOpenChange }: ImageLightboxPro
   const t = useTranslations();
   const canPreview = isPreviewableImageSrc(src);
 
-  const handleOpenChange = (
-    nextOpen: boolean,
-    eventDetails?: ImageLightboxOpenChangeDetails
-  ) => {
+  const handleOpenChange = (nextOpen: boolean, eventDetails?: ImageLightboxOpenChangeDetails) => {
     if (!nextOpen && eventDetails?.reason === 'outside-press') {
       suppressUnderlyingPointerBriefly();
     }

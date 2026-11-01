@@ -9,8 +9,7 @@ export function formatPartyLedgerLabel(
   status: string | undefined,
   t: LedgerLabelTranslator
 ): string {
-  const cancelled =
-    status && status !== 'ACTIVE' ? ` (${t('status.cancelled')})` : '';
+  const cancelled = status && status !== 'ACTIVE' ? ` (${t('status.cancelled')})` : '';
 
   switch (type) {
     case 'SALE':

@@ -8,7 +8,8 @@ export const metadata: Metadata = {
   description: 'Sign in to the Ronaq Store platform admin panel to manage shops and subscriptions.',
   openGraph: {
     title: 'Platform Admin Sign In — Ronaq Store',
-    description: 'Sign in to the Ronaq Store platform admin panel to manage shops and subscriptions.'
+    description:
+      'Sign in to the Ronaq Store platform admin panel to manage shops and subscriptions.'
   }
 };
 

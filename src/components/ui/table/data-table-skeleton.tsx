@@ -70,7 +70,9 @@ export function DataTableSkeleton({
               <div key={i} className='flex min-h-16 items-center gap-3 px-3 py-2.5'>
                 <Skeleton className='size-10 shrink-0 rounded-lg bg-muted/70' />
                 <div className='flex min-w-0 flex-1 flex-col gap-2'>
-                  <Skeleton className={cn('h-4 rounded bg-muted/80', i % 2 === 0 ? 'w-40' : 'w-28')} />
+                  <Skeleton
+                    className={cn('h-4 rounded bg-muted/80', i % 2 === 0 ? 'w-40' : 'w-28')}
+                  />
                   <Skeleton className='h-3 w-16 rounded bg-muted/50' />
                 </div>
                 <Skeleton className='h-5 w-14 shrink-0 rounded-full bg-muted/60' />
@@ -221,7 +223,10 @@ export function DataTableSkeleton({
                           <Skeleton className='h-5 w-16 rounded-full bg-muted/60' />
                         ) : (
                           <Skeleton
-                            className={cn('h-4', j === 0 ? (i % 2 === 0 ? 'w-40' : 'w-28') : 'w-3/5')}
+                            className={cn(
+                              'h-4',
+                              j === 0 ? (i % 2 === 0 ? 'w-40' : 'w-28') : 'w-3/5'
+                            )}
                           />
                         )}
                       </TableCell>

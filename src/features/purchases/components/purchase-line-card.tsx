@@ -51,10 +51,7 @@ export const PurchaseLineCard = withForm({
       const condition =
         (form.getFieldValue(`lines[${index}].condition`) as 'NEW' | 'USED') || 'NEW';
       if (product?.tracking_type === 'SERIALIZED') {
-        form.setFieldValue(
-          `lines[${index}].phone_units`,
-          resizePhoneUnits([], qty, condition)
-        );
+        form.setFieldValue(`lines[${index}].phone_units`, resizePhoneUnits([], qty, condition));
       } else {
         form.setFieldValue(`lines[${index}].phone_units`, []);
       }
@@ -69,10 +66,7 @@ export const PurchaseLineCard = withForm({
       applyProduct(id, product);
     };
 
-    const handleQuickVariantCreated = (
-      subField: SubFieldApi,
-      product: ProductPickerItem
-    ) => {
+    const handleQuickVariantCreated = (subField: SubFieldApi, product: ProductPickerItem) => {
       subField.handleChange(product.id);
       applyProduct(product.id, product);
     };
@@ -97,9 +91,7 @@ export const PurchaseLineCard = withForm({
           units: s.values.lines[index]?.phone_units ?? []
         })}
         children={({ productLabel, trackingType, brandName, units }) => {
-          const title =
-            productLabel ||
-            t('dukaan.purchase.lineUntitled') + ` ${index + 1}`;
+          const title = productLabel || t('dukaan.purchase.lineUntitled') + ` ${index + 1}`;
 
           return (
             <article className='rounded-xl border border-border bg-background p-4 shadow-xs sm:p-5'>
@@ -163,9 +155,7 @@ export const PurchaseLineCard = withForm({
                         <QuickVariantDialog
                           open={quickOpen}
                           onOpenChange={setQuickOpen}
-                          onCreated={(product) =>
-                            handleQuickVariantCreated(subField, product)
-                          }
+                          onCreated={(product) => handleQuickVariantCreated(subField, product)}
                         />
                       </div>
                     );
@@ -180,12 +170,10 @@ export const PurchaseLineCard = withForm({
                         if (trackingType !== 'SERIALIZED') return;
                         const qty = Math.max(1, Number(value) || 1);
                         const capped = Math.min(qty, INPUT_LIMITS.imeiCountMax);
-                        const current =
-                          form.getFieldValue(`lines[${index}].phone_units`) ?? [];
+                        const current = form.getFieldValue(`lines[${index}].phone_units`) ?? [];
                         const condition =
-                          (form.getFieldValue(`lines[${index}].condition`) as
-                            | 'NEW'
-                            | 'USED') || 'NEW';
+                          (form.getFieldValue(`lines[${index}].condition`) as 'NEW' | 'USED') ||
+                          'NEW';
                         form.setFieldValue(
                           `lines[${index}].phone_units`,
                           resizePhoneUnits(current, capped, condition)
@@ -313,9 +301,7 @@ export const PurchaseLineCard = withForm({
                                     type='number'
                                     min={1}
                                     max={100}
-                                    placeholder={t(
-                                      'dukaan.purchase.batteryHealthPlaceholder'
-                                    )}
+                                    placeholder={t('dukaan.purchase.batteryHealthPlaceholder')}
                                   />
                                 )}
                               />
@@ -328,9 +314,7 @@ export const PurchaseLineCard = withForm({
                                   type='number'
                                   min={0}
                                   max={INPUT_LIMITS.amountRupeesMax}
-                                  placeholder={t(
-                                    'dukaan.purchase.askingPricePlaceholder'
-                                  )}
+                                  placeholder={t('dukaan.purchase.askingPricePlaceholder')}
                                 />
                               )}
                             />
@@ -340,9 +324,7 @@ export const PurchaseLineCard = withForm({
                                 <subField.TextField
                                   label={t('dukaan.purchase.defectNotes')}
                                   maxLength={500}
-                                  placeholder={t(
-                                    'dukaan.purchase.defectNotesPlaceholder'
-                                  )}
+                                  placeholder={t('dukaan.purchase.defectNotesPlaceholder')}
                                 />
                               )}
                             />

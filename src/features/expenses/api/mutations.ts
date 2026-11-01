@@ -1,10 +1,7 @@
 import { mutationOptions } from '@tanstack/react-query';
 import { getQueryClient } from '@/lib/query-client';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
-import {
-  EXPENSE_CATEGORY_SYNC_DOMAINS,
-  EXPENSE_SYNC_DOMAINS
-} from '@/lib/query/sync-domains';
+import { EXPENSE_CATEGORY_SYNC_DOMAINS, EXPENSE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type {
   CreateExpenseInput,
   CreateExpenseCategoryInput,

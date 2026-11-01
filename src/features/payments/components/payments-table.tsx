@@ -35,10 +35,7 @@ import { CancelPaymentDialog } from './cancel-payment-dialog';
 import { RecordPaymentDialog } from './record-payment-dialog';
 import type { RowAction } from '@/types/dukaan';
 import { formatPaymentMethod } from '@/lib/format-payment';
-import {
-  PAYMENT_METHOD_OPTIONS,
-  parsePaymentMethodFilter
-} from '@/lib/dukaan/payment-methods';
+import { PAYMENT_METHOD_OPTIONS, parsePaymentMethodFilter } from '@/lib/dukaan/payment-methods';
 import {
   createActiveCancelledStatusColumn,
   createAmountColumn
@@ -127,30 +124,24 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
   const sortableColumnIds = ['customerName', 'paymentDate', 'amount'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     PaymentsListFilters['sortBy']
-  >(sortableColumnIds, 'customerName', [
-    'status',
-    'customerId',
-    'paymentDate',
-    'amount',
-    'method'
-  ], 'paymentDate');
+  >(
+    sortableColumnIds,
+    'customerName',
+    ['status', 'customerId', 'paymentDate', 'amount', 'method'],
+    'paymentDate'
+  );
 
   const [searchParam] = useQueryState('search', parseAsString);
   const [customerNameParam] = useQueryState('customerName', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
-  const [paymentDateParam] = useQueryState(
-    'paymentDate',
-    parseAsArrayOf(parseAsString, ',')
-  );
+  const [paymentDateParam] = useQueryState('paymentDate', parseAsArrayOf(parseAsString, ','));
 
   const search = searchParam || customerNameParam || undefined;
   const statusFilter = parseActiveCancelledStatus(
     (filters as Record<string, unknown>).status ?? statusParam
   );
   const customerId = firstFilterValue((filters as Record<string, unknown>).customerId);
-  const methodFilter = parsePaymentMethodFilter(
-    (filters as Record<string, unknown>).method
-  );
+  const methodFilter = parsePaymentMethodFilter((filters as Record<string, unknown>).method);
   const amountRange = parseRupeeMoneyRange((filters as Record<string, unknown>).amount);
   const { from, to } = parseFacetDateRange(
     (filters as Record<string, unknown>).paymentDate ?? paymentDateParam

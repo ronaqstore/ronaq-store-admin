@@ -132,7 +132,10 @@ export function DataTableToolbar<TData>({
     <div
       role='toolbar'
       aria-orientation='horizontal'
-      className={cn('flex w-full min-w-0 flex-col gap-2 p-1 sm:flex-row sm:items-start sm:justify-between', className)}
+      className={cn(
+        'flex w-full min-w-0 flex-col gap-2 p-1 sm:flex-row sm:items-start sm:justify-between',
+        className
+      )}
       {...props}
     >
       <div className='flex min-w-0 w-full flex-1 flex-wrap items-center gap-2'>

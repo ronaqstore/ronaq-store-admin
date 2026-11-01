@@ -21,10 +21,7 @@ export const PAYMENT_METHOD_OPTIONS: PaymentMethodSelectOption[] = [
 ];
 
 export function isStoredPaymentMethod(value: unknown): value is StoredPaymentMethod {
-  return (
-    typeof value === 'string' &&
-    (PAYMENT_METHOD_VALUES as readonly string[]).includes(value)
-  );
+  return typeof value === 'string' && (PAYMENT_METHOD_VALUES as readonly string[]).includes(value);
 }
 
 export function parsePaymentMethodFilter(value: unknown): StoredPaymentMethod | undefined {

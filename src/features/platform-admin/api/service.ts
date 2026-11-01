@@ -54,9 +54,7 @@ function shopsQuery(filters: PlatformShopFilters = {}): string {
   } as Record<string, unknown>);
 }
 
-export async function getPlatformDashboardKpis(
-  token?: string
-): Promise<PlatformDashboardKpis> {
+export async function getPlatformDashboardKpis(token?: string): Promise<PlatformDashboardKpis> {
   return fetchPlatformDashboard<PlatformDashboardKpis>('kpis', undefined, token);
 }
 
@@ -67,21 +65,14 @@ export async function getPlatformShopGrowth(
   return fetchPlatformDashboard<ShopGrowthResponse>('shop-growth', { months }, token);
 }
 
-export async function getPlatformRenewals(
-  weeks = 8,
-  token?: string
-): Promise<RenewalsResponse> {
+export async function getPlatformRenewals(weeks = 8, token?: string): Promise<RenewalsResponse> {
   return fetchPlatformDashboard<RenewalsResponse>('renewals', { weeks }, token);
 }
 
 export async function getPlatformOnboardingFunnel(
   token?: string
 ): Promise<OnboardingFunnelResponse> {
-  return fetchPlatformDashboard<OnboardingFunnelResponse>(
-    'onboarding-funnel',
-    undefined,
-    token
-  );
+  return fetchPlatformDashboard<OnboardingFunnelResponse>('onboarding-funnel', undefined, token);
 }
 
 export async function getPlatformShopsByCity(

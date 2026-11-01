@@ -15,10 +15,7 @@ import { ChartCard } from '@/components/dashboard/chart-card';
 import { Badge } from '@/components/ui/badge';
 import { formatNumber } from '@/lib/dashboard/formatters';
 import { useT } from '@/i18n/use-t';
-import {
-  platformActivityQueryOptions,
-  platformCitiesQueryOptions
-} from '../api/queries';
+import { platformActivityQueryOptions, platformCitiesQueryOptions } from '../api/queries';
 
 export function PlatformDashboardCitiesActivity() {
   const t = useT();
@@ -91,12 +88,7 @@ export function PlatformDashboardCitiesActivity() {
             <ComposedChart data={activity?.series ?? []}>
               <CartesianGrid strokeDasharray='3 3' className='stroke-border' />
               <XAxis dataKey='date' tick={{ fontSize: 10 }} minTickGap={24} />
-              <YAxis
-                yAxisId='sales'
-                tick={{ fontSize: 11 }}
-                allowDecimals={false}
-                width={48}
-              />
+              <YAxis yAxisId='sales' tick={{ fontSize: 11 }} allowDecimals={false} width={48} />
               <YAxis
                 yAxisId='shops'
                 orientation='right'

@@ -6,7 +6,8 @@ import type {
   CancelSaleInput,
   ReturnPreviewDTO,
   ReturnPreviewInput,
-  CreateReturnInput
+  CreateReturnInput,
+  ProductDTO
 } from '@/lib/api/types';
 import type { ProductAuthenticity, TrackingType } from '@/lib/api/types';
 import type { FormNumber } from './common';
@@ -119,6 +120,7 @@ export interface SaleCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   clearDefaultQuery?: boolean;
+  initialProduct?: ProductDTO | null;
 }
 
 export interface SalesHeaderActionProps {
@@ -132,6 +134,7 @@ export interface SalesListClientProps {
 
 export interface SaleLineItem {
   product_id: string;
+  product_name?: string;
   quantity: number;
   unit_price: FormNumber;
   inventory_unit_id?: string;
@@ -186,6 +189,7 @@ export interface SaleFormSubmitContext {
 
 export interface SaleCreateFormProps {
   onDone?: () => void;
+  initialProduct?: ProductDTO | null;
 }
 
 export interface SaleDetailClientProps {

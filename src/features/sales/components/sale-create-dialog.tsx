@@ -33,7 +33,12 @@ function SaleCreateFormSkeleton() {
   );
 }
 
-export function SaleCreateDialog({ open, onOpenChange, clearDefaultQuery }: SaleCreateDialogProps) {
+export function SaleCreateDialog({
+  open,
+  onOpenChange,
+  clearDefaultQuery,
+  initialProduct
+}: SaleCreateDialogProps) {
   const router = useRouter();
   const t = useT();
 
@@ -53,7 +58,7 @@ export function SaleCreateDialog({ open, onOpenChange, clearDefaultQuery }: Sale
         </DialogHeader>
         <div className='no-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-4'>
           <Suspense fallback={<SaleCreateFormSkeleton />}>
-            <SaleCreateForm onDone={() => onOpenChange(false)} />
+            <SaleCreateForm onDone={() => onOpenChange(false)} initialProduct={initialProduct} />
           </Suspense>
         </div>
       </DialogContent>

@@ -11,29 +11,25 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis,
+  YAxis
 } from 'recharts';
 import {
   IconAlertTriangle,
   IconArrowRight,
   IconBuildingStore,
   IconCash,
-  IconClock,
+  IconClock
 } from '@tabler/icons-react';
 import { ChartCard } from '@/components/dashboard/chart-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Link } from '@/i18n/navigation';
-import {
-  formatNumber,
-  formatPkrCompact,
-  formatPkrFull,
-} from '@/lib/dashboard/formatters';
+import { formatNumber, formatPkrCompact, formatPkrFull } from '@/lib/dashboard/formatters';
 import {
   shopAttentionQueryOptions,
   shopExpensesByCategoryQueryOptions,
-  shopInventoryAgingQueryOptions,
+  shopInventoryAgingQueryOptions
 } from '../api/queries';
 import { useT } from '@/i18n/use-t';
 import type { DashboardRow5Props } from '@/types/dashboard';
@@ -45,7 +41,7 @@ const EXPENSE_COLORS = [
   'var(--chart-4)',
   'var(--chart-5)',
   'hsl(var(--destructive))',
-  'hsl(var(--muted-foreground))',
+  'hsl(var(--muted-foreground))'
 ];
 
 const EXPENSE_BG_CLASSES = [
@@ -55,7 +51,7 @@ const EXPENSE_BG_CLASSES = [
   'bg-[var(--chart-4)]',
   'bg-[var(--chart-5)]',
   'bg-[hsl(var(--destructive))]',
-  'bg-muted-foreground',
+  'bg-muted-foreground'
 ];
 
 export function DashboardRow5ExpensesInventory({ params }: DashboardRow5Props) {
@@ -65,40 +61,40 @@ export function DashboardRow5ExpensesInventory({ params }: DashboardRow5Props) {
     data: expenses,
     isLoading: isExpensesLoading,
     error: expensesError,
-    refetch: refetchExpenses,
+    refetch: refetchExpenses
   } = useQuery(shopExpensesByCategoryQueryOptions(params));
 
   const {
     data: invAging,
     isLoading: isInvLoading,
     error: invError,
-    refetch: refetchInv,
+    refetch: refetchInv
   } = useQuery(shopInventoryAgingQueryOptions());
 
   const {
     data: attention,
     isLoading: isAttentionLoading,
     error: attentionError,
-    refetch: refetchAttention,
+    refetch: refetchAttention
   } = useQuery(shopAttentionQueryOptions());
 
   const expenseCategories = expenses?.categories ?? [];
   const expenseChartData = expenseCategories.map((c) => ({
     name: c.name,
     amount: c.amount,
-    percentage: c.percentage,
+    percentage: c.percentage
   }));
 
   const expenseTableColumns = [
     { key: 'name', label: t('dashboard.metrics.category') },
     { key: 'formattedAmount', label: t('dashboard.metrics.amount'), align: 'right' as const },
-    { key: 'percentage', label: t('dashboard.metrics.share'), align: 'right' as const },
+    { key: 'percentage', label: t('dashboard.metrics.share'), align: 'right' as const }
   ];
 
   const expenseTableRows = expenseCategories.map((c) => ({
     name: c.name,
     formattedAmount: formatPkrFull(c.amount),
-    percentage: `${c.percentage}%`,
+    percentage: `${c.percentage}%`
   }));
 
   const agingBuckets = invAging?.agingBuckets ?? [];
@@ -108,19 +104,19 @@ export function DashboardRow5ExpensesInventory({ params }: DashboardRow5Props) {
     label: b.label,
     bucketKey: b.bucket,
     count: b.count,
-    costValue: b.costValue,
+    costValue: b.costValue
   }));
 
   const invTableColumns = [
     { key: 'label', label: t('dashboard.metrics.bucket') },
     { key: 'count', label: t('dashboard.metrics.units'), align: 'right' as const },
-    { key: 'formattedCost', label: t('dashboard.metrics.costOfGoods'), align: 'right' as const },
+    { key: 'formattedCost', label: t('dashboard.metrics.costOfGoods'), align: 'right' as const }
   ];
 
   const invTableRows = agingBuckets.map((b) => ({
     label: b.label,
     count: b.count,
-    formattedCost: formatPkrFull(b.costValue),
+    formattedCost: formatPkrFull(b.costValue)
   }));
 
   return (
@@ -162,11 +158,17 @@ export function DashboardRow5ExpensesInventory({ params }: DashboardRow5Props) {
                       <div className='rounded-lg border bg-background p-2.5 shadow-md text-xs'>
                         <div className='font-semibold text-foreground'>{data.name}</div>
                         <div className='mt-1 flex items-center justify-between gap-4'>
-                          <span className='text-muted-foreground'>{t('dashboard.metrics.amount')}:</span>
-                          <span className='font-semibold text-foreground'>{formatPkrFull(data.amount)}</span>
+                          <span className='text-muted-foreground'>
+                            {t('dashboard.metrics.amount')}:
+                          </span>
+                          <span className='font-semibold text-foreground'>
+                            {formatPkrFull(data.amount)}
+                          </span>
                         </div>
                         <div className='flex items-center justify-between gap-4'>
-                          <span className='text-muted-foreground'>{t('dashboard.metrics.share')}:</span>
+                          <span className='text-muted-foreground'>
+                            {t('dashboard.metrics.share')}:
+                          </span>
                           <span className='font-medium text-foreground'>{data.percentage}%</span>
                         </div>
                       </div>
@@ -212,18 +214,29 @@ export function DashboardRow5ExpensesInventory({ params }: DashboardRow5Props) {
             {conditionSplit ? (
               <div className='grid grid-cols-2 gap-2 border-b pb-2 text-xs'>
                 <div className='rounded bg-muted/40 p-2'>
-                  <div className='text-muted-foreground'>{t('dashboard.newPhones', { count: conditionSplit.newCount })}</div>
-                  <div className='font-bold tabular-nums'>{formatPkrCompact(conditionSplit.newCostValue)}</div>
+                  <div className='text-muted-foreground'>
+                    {t('dashboard.newPhones', { count: conditionSplit.newCount })}
+                  </div>
+                  <div className='font-bold tabular-nums'>
+                    {formatPkrCompact(conditionSplit.newCostValue)}
+                  </div>
                 </div>
                 <div className='rounded bg-muted/40 p-2'>
-                  <div className='text-muted-foreground'>{t('dashboard.usedPhones', { count: conditionSplit.usedCount })}</div>
-                  <div className='font-bold tabular-nums'>{formatPkrCompact(conditionSplit.usedCostValue)}</div>
+                  <div className='text-muted-foreground'>
+                    {t('dashboard.usedPhones', { count: conditionSplit.usedCount })}
+                  </div>
+                  <div className='font-bold tabular-nums'>
+                    {formatPkrCompact(conditionSplit.usedCostValue)}
+                  </div>
                 </div>
               </div>
             ) : null}
 
             <ResponsiveContainer width='100%' height={210}>
-              <ComposedChart data={invChartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <ComposedChart
+                data={invChartData}
+                margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
+              >
                 <CartesianGrid strokeDasharray='3 3' className='stroke-muted/40' />
                 <XAxis dataKey='label' className='text-[10px]' tickLine={false} />
                 <YAxis className='text-xs' tickLine={false} axisLine={false} />
@@ -235,12 +248,20 @@ export function DashboardRow5ExpensesInventory({ params }: DashboardRow5Props) {
                       <div className='rounded-lg border bg-background p-2.5 shadow-md text-xs'>
                         <div className='font-semibold text-foreground'>{data.label}</div>
                         <div className='mt-1 flex items-center justify-between gap-4'>
-                          <span className='text-muted-foreground'>{t('dashboard.metrics.units')}:</span>
-                          <span className='font-semibold text-foreground'>{formatNumber(data.count)}</span>
+                          <span className='text-muted-foreground'>
+                            {t('dashboard.metrics.units')}:
+                          </span>
+                          <span className='font-semibold text-foreground'>
+                            {formatNumber(data.count)}
+                          </span>
                         </div>
                         <div className='flex items-center justify-between gap-4'>
-                          <span className='text-muted-foreground'>{t('dashboard.metrics.costOfGoods')}:</span>
-                          <span className='font-medium text-foreground'>{formatPkrFull(data.costValue)}</span>
+                          <span className='text-muted-foreground'>
+                            {t('dashboard.metrics.costOfGoods')}:
+                          </span>
+                          <span className='font-medium text-foreground'>
+                            {formatPkrFull(data.costValue)}
+                          </span>
                         </div>
                       </div>
                     );
@@ -250,7 +271,11 @@ export function DashboardRow5ExpensesInventory({ params }: DashboardRow5Props) {
                   {invChartData.map((entry, idx) => (
                     <Cell
                       key={idx}
-                      fill={entry.bucketKey === '61-90' || entry.bucketKey === '90+' ? '#ef4444' : 'var(--chart-1)'}
+                      fill={
+                        entry.bucketKey === '61-90' || entry.bucketKey === '90+'
+                          ? '#ef4444'
+                          : 'var(--chart-1)'
+                      }
                     />
                   ))}
                 </Bar>
@@ -261,10 +286,7 @@ export function DashboardRow5ExpensesInventory({ params }: DashboardRow5Props) {
       </div>
 
       <div className='lg:col-span-4'>
-        <Card
-          className='flex h-full flex-col'
-          aria-label={t('dashboard.attentionTitle')}
-        >
+        <Card className='flex h-full flex-col' aria-label={t('dashboard.attentionTitle')}>
           <CardHeader className='pb-2'>
             <div className='flex items-center gap-2'>
               <IconAlertTriangle className='h-4 w-4 text-amber-500' />
@@ -277,9 +299,7 @@ export function DashboardRow5ExpensesInventory({ params }: DashboardRow5Props) {
             {attentionError ? (
               <div className='flex flex-col items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3'>
                 <p className='text-destructive text-xs'>
-                  {attentionError instanceof Error
-                    ? attentionError.message
-                    : t('dashboard.retry')}
+                  {attentionError instanceof Error ? attentionError.message : t('dashboard.retry')}
                 </p>
                 <Button
                   type='button'
@@ -302,7 +322,9 @@ export function DashboardRow5ExpensesInventory({ params }: DashboardRow5Props) {
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center gap-1.5 font-semibold text-amber-800 dark:text-amber-300'>
                       <IconClock className='h-3.5 w-3.5' />
-                      <span>{t('dashboard.customerUdhar')} ({attention.overdueUdhar.count})</span>
+                      <span>
+                        {t('dashboard.customerUdhar')} ({attention.overdueUdhar.count})
+                      </span>
                     </div>
                     <span className='font-bold tabular-nums text-amber-900 dark:text-amber-200'>
                       {formatPkrCompact(attention.overdueUdhar.totalAmount)}
@@ -321,11 +343,16 @@ export function DashboardRow5ExpensesInventory({ params }: DashboardRow5Props) {
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center gap-1.5 font-semibold'>
                       <IconBuildingStore className='h-3.5 w-3.5 text-muted-foreground' />
-                      <span>{t('dashboard.lowStock')} ({attention.lowStock.length})</span>
+                      <span>
+                        {t('dashboard.lowStock')} ({attention.lowStock.length})
+                      </span>
                     </div>
                   </div>
                   {attention.lowStock.slice(0, 2).map((item) => (
-                    <div key={item.productId} className='flex items-center justify-between text-[11px] text-muted-foreground'>
+                    <div
+                      key={item.productId}
+                      className='flex items-center justify-between text-[11px] text-muted-foreground'
+                    >
                       <span className='truncate'>{item.name}</span>
                       <span className='tabular-nums text-rose-600 dark:text-rose-400 font-medium'>
                         {item.currentStock} / {item.threshold}

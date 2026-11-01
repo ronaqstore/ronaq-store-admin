@@ -6,7 +6,7 @@ import {
   formatPercent,
   formatPkrCompact,
   formatPkrFull,
-  truncateChartLabel,
+  truncateChartLabel
 } from './formatters.ts';
 
 describe('Dashboard Formatters', () => {
@@ -47,7 +47,7 @@ describe('Dashboard Formatters', () => {
     assert.equal(truncateChartLabel('Short', 22), 'Short');
     assert.equal(
       truncateChartLabel('Anker Car Charger Dual 0.5m 3-Port Soft Touch Starlight', 22),
-      'Anker Car Charger Dua…',
+      'Anker Car Charger Dua…'
     );
   });
 });

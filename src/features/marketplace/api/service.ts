@@ -28,9 +28,7 @@ export async function fetchMarketplaceHubsPage(
   };
 }
 
-export async function resolveMarketplaceCitySuggestion(
-  suggested: string
-): Promise<string | null> {
+export async function resolveMarketplaceCitySuggestion(suggested: string): Promise<string | null> {
   const token = suggested.trim().toLowerCase();
   if (!token) return null;
   const page = await fetchMarketplaceHubsPage({
@@ -41,8 +39,7 @@ export async function resolveMarketplaceCitySuggestion(
   const exact = page.items.find((hub) => hub.name.toLowerCase() === token);
   if (exact) return exact.name;
   const partial = page.items.find(
-    (hub) =>
-      hub.name.toLowerCase().includes(token) || token.includes(hub.name.toLowerCase())
+    (hub) => hub.name.toLowerCase().includes(token) || token.includes(hub.name.toLowerCase())
   );
   return partial?.name ?? null;
 }

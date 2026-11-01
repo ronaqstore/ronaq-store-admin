@@ -555,6 +555,8 @@
       "paidNowPlaceholder": "اب ادا"
     },
     "product": {
+      "sell": "فروخت کریں",
+      "quickSell": "فوری فروخت",
       "productCreated": "مصنوعہ کامیابی سے بنایا گیا",
       "productUpdated": "مصنوعہ کامیابی سے اپ ڈیٹ ہوا",
       "photosUploadFailed": "پروڈکٹ محفوظ ہو گیا، لیکن تصاویر اپ لوڈ نہیں ہو سکیں۔ دوبارہ شامل کریں۔",

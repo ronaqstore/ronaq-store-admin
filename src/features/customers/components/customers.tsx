@@ -11,10 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useT } from '@/i18n/use-t';
 import { createClientRequestId, toPaisa } from '@/lib/dukaan/numbers';
 import { customerQueryOptions, dukaanKeys } from '@/features/dukaan/api/queries';
-import {
-  customerReceivableQueryOptions,
-  paymentKeys
-} from '@/features/payments/api/queries';
+import { customerReceivableQueryOptions, paymentKeys } from '@/features/payments/api/queries';
 import { createPayment } from '@/features/payments/api/service';
 import { todayIsoDate } from '@/lib/dates';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';

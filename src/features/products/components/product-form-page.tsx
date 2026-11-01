@@ -51,9 +51,7 @@ export function ProductFormPageClient({ productId }: ProductFormPageProps) {
       <Alert variant='destructive'>
         <Icons.warning />
         <AlertDescription>
-          {productQuery.error instanceof Error
-            ? productQuery.error.message
-            : t('updateFailed')}
+          {productQuery.error instanceof Error ? productQuery.error.message : t('updateFailed')}
         </AlertDescription>
       </Alert>
     );

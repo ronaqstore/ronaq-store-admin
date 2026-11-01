@@ -111,9 +111,7 @@ export function StoreSettingsForm() {
               </div>
               <Switch
                 checked={Boolean(data.showExactStock)}
-                onCheckedChange={(checked) =>
-                  updateMutation.mutate({ showExactStock: checked })
-                }
+                onCheckedChange={(checked) => updateMutation.mutate({ showExactStock: checked })}
                 disabled={updateMutation.isPending}
               />
             </div>
@@ -152,11 +150,7 @@ export function StoreSettingsForm() {
         </Card>
       </div>
 
-      <EditStoreProfileDialog
-        open={profileOpen}
-        onOpenChange={setProfileOpen}
-        settings={data}
-      />
+      <EditStoreProfileDialog open={profileOpen} onOpenChange={setProfileOpen} settings={data} />
     </>
   );
 }

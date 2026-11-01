@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { FormNumber } from './common';
+import type { RowAction } from './dukaan';
 
 export interface BasePartyRecord {
   id: string;
@@ -185,4 +186,5 @@ export interface PartyCellActionProps {
   onActivate: (id: string) => Promise<unknown>;
   invalidateQueryKey: readonly unknown[];
   renderEditDialog?: (open: boolean, onOpenChange: (open: boolean) => void) => ReactNode;
+  extraActions?: RowAction[];
 }

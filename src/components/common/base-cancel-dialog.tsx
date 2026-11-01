@@ -132,10 +132,7 @@ export function BaseCancelDialog({
                 }
                 placeholder={reasonPlaceholder || ''}
                 rows={3}
-                className={cn(
-                  'resize-none text-xs',
-                  reasonError && 'border-destructive'
-                )}
+                className={cn('resize-none text-xs', reasonError && 'border-destructive')}
                 maxLength={INPUT_LIMITS.cancelReason}
                 aria-invalid={!!reasonError}
                 required

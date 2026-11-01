@@ -23,10 +23,7 @@ import {
   useDukaanListParams
 } from '@/components/data-table/list-params';
 import type { SupplierDTO } from '@/lib/api/types';
-import {
-  MONEY_RANGE_RUPEES,
-  parseRupeeMoneyRange
-} from '@/lib/dukaan/money-range-filter';
+import { MONEY_RANGE_RUPEES, parseRupeeMoneyRange } from '@/lib/dukaan/money-range-filter';
 import { supplierKeys, suppliersQueryOptions } from '../api/queries';
 import { deactivateSupplier, reactivateSupplier } from '../api/service';
 import type { EntityStatusConfirm, SupplierListFilters } from '@/types';
@@ -127,20 +124,12 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
   const router = useRouter();
   const qc = useQueryClient();
   const [editSupplier, setEditSupplier] = useState<SupplierDTO | null>(null);
-  const [statusConfirm, setStatusConfirm] = useState<EntityStatusConfirm | null>(
-    null
-  );
+  const [statusConfirm, setStatusConfirm] = useState<EntityStatusConfirm | null>(null);
 
   const sortableColumnIds = ['name', 'openingBalance'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     SupplierListFilters['sortBy']
-  >(
-    sortableColumnIds,
-    'name',
-    ['isActive', 'currentBalance', 'openingBalance'],
-    'name',
-    'asc'
-  );
+  >(sortableColumnIds, 'name', ['isActive', 'currentBalance', 'openingBalance'], 'name', 'asc');
 
   const [nameParam] = useQueryState('name', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
@@ -150,12 +139,8 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
   const isActiveFilter = parseBooleanFacet(
     (filters as Record<string, unknown>).isActive ?? isActiveParam
   );
-  const creditRange = parseRupeeMoneyRange(
-    (filters as Record<string, unknown>).currentBalance
-  );
-  const openingRange = parseRupeeMoneyRange(
-    (filters as Record<string, unknown>).openingBalance
-  );
+  const creditRange = parseRupeeMoneyRange((filters as Record<string, unknown>).currentBalance);
+  const openingRange = parseRupeeMoneyRange((filters as Record<string, unknown>).openingBalance);
 
   const { data, isFetching } = useQuery(
     suppliersQueryOptions({
@@ -278,9 +263,7 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
             ? t('dukaan.party.supplierActivateDescription')
             : t('dukaan.party.supplierDeactivateDescription')
         }
-        confirmLabel={
-          statusConfirm?.nextActive ? t('common.activate') : t('common.deactivate')
-        }
+        confirmLabel={statusConfirm?.nextActive ? t('common.activate') : t('common.deactivate')}
         confirmVariant={statusConfirm?.nextActive ? 'default' : 'destructive'}
       />
       <ResponsiveDataTable

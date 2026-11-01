@@ -88,23 +88,15 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
   const [peekCancelSale, setPeekCancelSale] = useState<SaleDTO | null>(null);
   const [peekReturnSale, setPeekReturnSale] = useState<SaleDTO | null>(null);
 
-  const sortableColumnIds = [
-    'saleDate',
-    'saleNo',
-    'totalAmount',
-    'paid',
-    'outstanding'
-  ];
+  const sortableColumnIds = ['saleDate', 'saleNo', 'totalAmount', 'paid', 'outstanding'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     SalesListFilters['sortBy']
-  >(sortableColumnIds, 'saleDate', [
-    'status',
-    'customerId',
+  >(
+    sortableColumnIds,
     'saleDate',
-    'totalAmount',
-    'paid',
-    'outstanding'
-  ], 'saleDate');
+    ['status', 'customerId', 'saleDate', 'totalAmount', 'paid', 'outstanding'],
+    'saleDate'
+  );
 
   const [saleNoParam] = useQueryState('saleNo', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
@@ -118,18 +110,11 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
   const payStatusFilter = parseSalePayStatus(
     (filters as Record<string, unknown>).status ?? statusParam
   );
-  const customerId = firstSaleFilterValue(
-    (filters as Record<string, unknown>).customerId
-  );
-  const totalRange = parseRupeeMoneyRange(
-    (filters as Record<string, unknown>).totalAmount
-  );
+  const customerId = firstSaleFilterValue((filters as Record<string, unknown>).customerId);
+  const totalRange = parseRupeeMoneyRange((filters as Record<string, unknown>).totalAmount);
   const paidRange = parseRupeeMoneyRange((filters as Record<string, unknown>).paid);
-  const outstandingRange = parseRupeeMoneyRange(
-    (filters as Record<string, unknown>).outstanding
-  );
-  const dateRaw =
-    (filters as Record<string, unknown>).saleDate ?? saleDateParam;
+  const outstandingRange = parseRupeeMoneyRange((filters as Record<string, unknown>).outstanding);
+  const dateRaw = (filters as Record<string, unknown>).saleDate ?? saleDateParam;
   const dateParts = Array.isArray(dateRaw)
     ? (dateRaw as string[])
     : typeof dateRaw === 'string'
@@ -332,45 +317,44 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
           row.status === 'CANCELLED' ? 0 : outstandingAmount(row.totalAmount, paid);
         const badge = salePayBadge(row, t);
         return [
-        {
-          title: t('pages.sales.title'),
-          fields: [
-            { label: t('sales.saleNoCol'), value: row.saleNo },
-            { label: t('table.col.date'), value: formatIsoDate(row.saleDate) },
-            {
-              label: t('table.col.customer'),
-              value: row.customerName ?? t('sales.walkInBadge')
-            },
-            { label: t('table.col.total'), value: formatPkr(row.totalAmount) },
-            {
-              label: t('table.col.paid'),
-              value: formatPkr(paid)
-            },
-            {
-              label: t('table.col.outstanding'),
-              value:
-                row.status === 'CANCELLED' ? '—' : formatPkr(outstanding)
-            },
-            {
-              label: t('table.col.status'),
-              value: <StatusBadge status={badge.status} label={badge.label} />
-            }
-          ]
-        },
-        ...(row.status === 'CANCELLED' && row.cancelledAt
-          ? [
+          {
+            title: t('pages.sales.title'),
+            fields: [
+              { label: t('sales.saleNoCol'), value: row.saleNo },
+              { label: t('table.col.date'), value: formatIsoDate(row.saleDate) },
               {
-                title: t('status.cancelled'),
-                fields: [
-                  { label: t('table.col.note'), value: row.cancelReason || '—' },
-                  {
-                    label: t('table.col.date'),
-                    value: formatIsoDate(row.cancelledAt)
-                  }
-                ]
+                label: t('table.col.customer'),
+                value: row.customerName ?? t('sales.walkInBadge')
+              },
+              { label: t('table.col.total'), value: formatPkr(row.totalAmount) },
+              {
+                label: t('table.col.paid'),
+                value: formatPkr(paid)
+              },
+              {
+                label: t('table.col.outstanding'),
+                value: row.status === 'CANCELLED' ? '—' : formatPkr(outstanding)
+              },
+              {
+                label: t('table.col.status'),
+                value: <StatusBadge status={badge.status} label={badge.label} />
               }
             ]
-          : [])
+          },
+          ...(row.status === 'CANCELLED' && row.cancelledAt
+            ? [
+                {
+                  title: t('status.cancelled'),
+                  fields: [
+                    { label: t('table.col.note'), value: row.cancelReason || '—' },
+                    {
+                      label: t('table.col.date'),
+                      value: formatIsoDate(row.cancelledAt)
+                    }
+                  ]
+                }
+              ]
+            : [])
         ];
       },
       actions: (row) => {

@@ -61,12 +61,12 @@ const MONTH_NAMES = [
   'Sep',
   'Oct',
   'Nov',
-  'Dec',
+  'Dec'
 ];
 
 export function formatDateLabel(
   dateStr: string,
-  granularity: 'day' | 'week' | 'month' | 'hour' = 'day',
+  granularity: 'day' | 'week' | 'month' | 'hour' = 'day'
 ): string {
   if (!dateStr) return '';
   if (granularity === 'hour') {

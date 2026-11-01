@@ -64,9 +64,7 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
         ...(debouncedSearch ? { search: debouncedSearch } : {})
       });
       const items = activeOnly
-        ? result.items.filter(
-            (item) => item.isActive !== false && item.is_active !== false
-          )
+        ? result.items.filter((item) => item.isActive !== false && item.is_active !== false)
         : result.items;
       return { ...result, items };
     },
