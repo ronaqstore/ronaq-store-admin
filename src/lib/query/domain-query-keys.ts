@@ -14,6 +14,7 @@ const DOMAIN_QUERY_KEYS: Record<QuerySyncDomain, readonly QueryKey[]> = {
   suppliers: [['suppliers']],
   brands: [['brands']],
   categories: [['categories']],
+  consignments: [['consignments']],
   storeSettings: [['store-settings']],
   platform: [['platform']],
   dashboard: [['dukaan', 'dashboard']],

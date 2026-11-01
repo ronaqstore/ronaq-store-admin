@@ -13,6 +13,7 @@ export type QuerySyncDomain =
   | 'suppliers'
   | 'brands'
   | 'categories'
+  | 'consignments'
   | 'storeSettings'
   | 'platform'
   | 'dashboard'

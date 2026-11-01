@@ -583,6 +583,96 @@ export interface ProductListFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
+export type ConsignmentStatus =
+  | 'IN_CUSTODY'
+  | 'SOLD'
+  | 'SETTLED'
+  | 'RETURNED_TO_OWNER'
+  | 'CANCELLED';
+
+export interface ConsignmentDTO {
+  id: string;
+  consignmentNo: string;
+  customerId: string | null;
+  customerName: string | null;
+  consignorName: string;
+  consignorPhone: string;
+  consignorCnic: string | null;
+  productId: string;
+  productName: string;
+  imei1: string;
+  imei2: string | null;
+  condition: 'NEW' | 'LIKE_NEW' | 'USED' | 'REFURBISHED';
+  batteryHealth: number | null;
+  defectNotes: string | null;
+  agreedPayout: number;
+  targetSellingPrice: number | null;
+  status: ConsignmentStatus;
+  intakeDate: string;
+  inventoryUnitId: string | null;
+  saleItemId: string | null;
+  soldAt: string | null;
+  soldPrice: number | null;
+  settledAt: string | null;
+  settledAmount: number | null;
+  payoutMethod: 'CASH' | 'BANK' | 'JAZZCASH' | 'EASYPAISA' | null;
+  payoutReference: string | null;
+  returnedAt: string | null;
+  returnReason: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateConsignmentInput {
+  clientRequestId: string;
+  customerId?: string | null;
+  consignorName: string;
+  consignorPhone: string;
+  consignorCnic?: string | null;
+  productId: string;
+  imei1: string;
+  imei2?: string | null;
+  condition: 'NEW' | 'LIKE_NEW' | 'USED' | 'REFURBISHED';
+  batteryHealth?: number | null;
+  defectNotes?: string | null;
+  agreedPayout: number;
+  targetSellingPrice?: number | null;
+  intakeDate: string;
+  notes?: string | null;
+}
+
+export interface SettleConsignmentInput {
+  clientRequestId: string;
+  settledAmount?: number;
+  payoutMethod: 'CASH' | 'BANK' | 'JAZZCASH' | 'EASYPAISA';
+  payoutReference?: string | null;
+  notes?: string | null;
+  confirmOverdraft?: boolean;
+}
+
+export interface ReturnConsignmentInput {
+  returnReason: string;
+  notes?: string | null;
+}
+
+export interface CancelConsignmentInput {
+  cancelReason: string;
+}
+
+export interface ConsignmentListFilters {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: ConsignmentStatus | string;
+  customerId?: string;
+  productId?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
 export * from '@/types/supplier-payment';
 export * from '@/types/expense';
 export * from '@/types/cash';

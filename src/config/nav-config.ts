@@ -28,6 +28,13 @@ const shopNavGroups: NavGroup[] = [
         items: []
       },
       {
+        title: 'nav.consignments',
+        url: '/dashboard/consignments',
+        icon: 'phone',
+        isActive: false,
+        items: []
+      },
+      {
         title: 'nav.customers',
         url: '/dashboard/customers',
         icon: 'teams',

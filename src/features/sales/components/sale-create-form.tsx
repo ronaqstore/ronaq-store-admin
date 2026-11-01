@@ -145,51 +145,39 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
       />
 
       <FieldGroup className='max-w-md gap-3'>
-        <form.Subscribe
-          selector={(s) => s.values.lines}
-          children={(lines) => {
-            const hasPhone = lines.some((l) => isPhoneSaleLine(l));
+        <form.Field
+          name='customer_id'
+          children={(field) => {
+            const isInvalid = isFieldMetaInvalid(field.state.meta);
             return (
-              <form.Field
-                name='customer_id'
-                children={(field) => {
-                  const isInvalid = isFieldMetaInvalid(field.state.meta);
-                  return (
-                    <FormEntitySelect
-                      name={field.name}
-                      label={
-                        hasPhone
-                          ? t('dukaan.sale.customerRequiredPhones')
-                          : t('dukaan.sale.customerRequiredUdhar')
-                      }
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onValueChange={(id) => field.handleChange(id || '__walkin__')}
-                      isInvalid={isInvalid}
-                      errors={field.state.meta.errors}
-                      queryKey={['customers', 'picker']}
-                      fetchPage={(filters) =>
-                        listCustomers(filters).then((res) => ({
-                          items: res.items,
-                          total: res.total,
-                          page: res.page,
-                          limit: res.pageSize
-                        }))
-                      }
-                      placeholder={t('dukaan.sale.walkInOrCustomer')}
-                      searchPlaceholder={t('dukaan.sale.searchCustomers')}
-                      selectedLabel={
-                        field.state.value === '__walkin__' ? t('dukaan.sale.walkIn') : undefined
-                      }
-                      extraItems={[
-                        {
-                          id: '__walkin__',
-                          name: t('dukaan.sale.walkInCashOnly')
-                        }
-                      ]}
-                    />
-                  );
-                }}
+              <FormEntitySelect
+                name={field.name}
+                label={t('dukaan.sale.customerRequiredUdhar')}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onValueChange={(id) => field.handleChange(id || '__walkin__')}
+                isInvalid={isInvalid}
+                errors={field.state.meta.errors}
+                queryKey={['customers', 'picker']}
+                fetchPage={(filters) =>
+                  listCustomers(filters).then((res) => ({
+                    items: res.items,
+                    total: res.total,
+                    page: res.page,
+                    limit: res.pageSize
+                  }))
+                }
+                placeholder={t('dukaan.sale.walkInOrCustomer')}
+                searchPlaceholder={t('dukaan.sale.searchCustomers')}
+                selectedLabel={
+                  field.state.value === '__walkin__' ? t('dukaan.sale.walkIn') : undefined
+                }
+                extraItems={[
+                  {
+                    id: '__walkin__',
+                    name: t('dukaan.sale.walkInCashOnly')
+                  }
+                ]}
               />
             );
           }}
