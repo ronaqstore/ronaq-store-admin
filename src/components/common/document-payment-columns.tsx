@@ -5,10 +5,7 @@ import { StatusBadge } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { Icons } from '@/components/icons';
 import { formatPkr } from '@/lib/dukaan/numbers';
-import {
-  outstandingAmount,
-  sumActivePaid
-} from '@/lib/dukaan/document-payment-state';
+import { outstandingAmount, sumActivePaid } from '@/lib/dukaan/document-payment-state';
 import type {
   DocumentColumnPriority,
   DocumentMoneyColumnOptions,
@@ -25,29 +22,20 @@ export function documentOutstandingMeta(
 ): string {
   if (row.status === 'CANCELLED' || row.isOpeningStock) return '';
   const outstanding = outstandingAmount(row.totalAmount, sumActivePaid(row.payments));
-  return outstanding > 0
-    ? `${translate('table.col.outstanding')} ${formatPkr(outstanding)}`
-    : '';
+  return outstanding > 0 ? `${translate('table.col.outstanding')} ${formatPkr(outstanding)}` : '';
 }
 
 export function createDocumentTotalColumn<T extends HasDocumentPayments>(
-  opts?: Pick<
-    DocumentMoneyColumnOptions,
-    'totalPriority' | 'enableRangeFilter' | 'range' | 'unit'
-  >
+  opts?: Pick<DocumentMoneyColumnOptions, 'totalPriority' | 'enableRangeFilter' | 'range' | 'unit'>
 ): ColumnDef<T> {
   const priority: DocumentColumnPriority = opts?.totalPriority ?? 3;
   const enableRange = opts?.enableRangeFilter === true;
   return {
     id: 'totalAmount',
     accessorKey: 'totalAmount',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={t('table.col.total')} />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.total')} />,
     cell: ({ row }) => (
-      <span className='font-normal text-foreground'>
-        {formatPkr(row.original.totalAmount)}
-      </span>
+      <span className='font-normal text-foreground'>{formatPkr(row.original.totalAmount)}</span>
     ),
     meta: {
       label: 'table.col.total',
@@ -77,9 +65,7 @@ export function createDocumentPaidColumn<T extends HasDocumentPayments>(
     accessorKey: 'paid',
     accessorFn: (row) =>
       hideOpening && row.isOpeningStock ? row.totalAmount : sumActivePaid(row.payments),
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={t('table.col.paid')} />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.paid')} />,
     cell: ({ row }) => {
       if (hideOpening && row.original.isOpeningStock) {
         return <span className='text-muted-foreground'>—</span>;
@@ -106,11 +92,7 @@ export function createDocumentPaidColumn<T extends HasDocumentPayments>(
 export function createDocumentOutstandingColumn<T extends HasDocumentPayments>(
   opts?: Pick<
     DocumentMoneyColumnOptions,
-    | 'outstandingPriority'
-    | 'hidePaidForOpeningStock'
-    | 'enableRangeFilter'
-    | 'range'
-    | 'unit'
+    'outstandingPriority' | 'hidePaidForOpeningStock' | 'enableRangeFilter' | 'range' | 'unit'
   >
 ): ColumnDef<T> {
   const hideOpening = opts?.hidePaidForOpeningStock ?? false;
@@ -127,10 +109,7 @@ export function createDocumentOutstandingColumn<T extends HasDocumentPayments>(
       <DataTableColumnHeader column={column} title={t('table.col.outstanding')} />
     ),
     cell: ({ row }) => {
-      if (
-        row.original.status === 'CANCELLED' ||
-        (hideOpening && row.original.isOpeningStock)
-      ) {
+      if (row.original.status === 'CANCELLED' || (hideOpening && row.original.isOpeningStock)) {
         return <span className='text-muted-foreground'>—</span>;
       }
       const outstanding = outstandingAmount(
@@ -170,9 +149,7 @@ export function createDocumentPayStatusColumn<T extends HasDocumentPayments>(
   return {
     id: 'status',
     accessorKey: 'status',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={t('table.col.status')} />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.col.status')} />,
     cell: ({ row }) => {
       const badge = resolveBadge(row.original, t);
       return <StatusBadge status={badge.status} label={badge.label} />;

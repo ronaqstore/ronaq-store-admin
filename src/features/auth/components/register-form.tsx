@@ -17,10 +17,7 @@ import { INPUT_LIMITS } from '@/lib/input-limits';
 import { sanitizePkMobileInput } from '@/lib/validation/pk';
 import { registerOwnerAccountWithOptionalLogo } from '@/features/auth/api/service';
 import { MarketplaceCityCombobox } from '@/components/marketplace/marketplace-city-combobox';
-import {
-  isTurnstileEnabled,
-  TurnstileWidget
-} from '@/components/auth/turnstile-widget';
+import { isTurnstileEnabled, TurnstileWidget } from '@/components/auth/turnstile-widget';
 import { shopLogoSrc } from '@/constants/placeholders';
 import { prepareShopLogo } from '@/lib/prepare-image';
 import type { RegisterFormValues, RegisterFormProps } from '@/types/auth';
@@ -247,13 +244,10 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
               <form.AppField
                 name='city'
                 children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>
-                        {t('auth.city')} *
-                      </FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{t('auth.city')} *</FieldLabel>
                       <MarketplaceCityCombobox
                         id={field.name}
                         value={field.state.value}
@@ -261,10 +255,7 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
                         required
                       />
                       {isInvalid ? (
-                        <FieldError
-                          id={`${field.name}-error`}
-                          errors={field.state.meta.errors}
-                        />
+                        <FieldError id={`${field.name}-error`} errors={field.state.meta.errors} />
                       ) : null}
                     </Field>
                   );
@@ -297,22 +288,12 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
                     className='object-cover'
                   />
                 </div>
-                <Button
-                  type='button'
-                  variant='outline'
-                  size='sm'
-                  onClick={handlePickLogoClick}
-                >
+                <Button type='button' variant='outline' size='sm' onClick={handlePickLogoClick}>
                   <Icons.upload className='me-2 h-4 w-4' />
                   {logoFile ? t('storeSettings.changeLogo') : t('storeSettings.uploadLogo')}
                 </Button>
                 {logoFile ? (
-                  <Button
-                    type='button'
-                    variant='ghost'
-                    size='sm'
-                    onClick={handleClearLogo}
-                  >
+                  <Button type='button' variant='ghost' size='sm' onClick={handleClearLogo}>
                     {t('storeSettings.removeLogo')}
                   </Button>
                 ) : null}

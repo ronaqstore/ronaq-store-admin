@@ -11,9 +11,7 @@ export async function generateMetadata() {
 
 export default async function Page() {
   return (
-    <PageContainer
-      pageTitle='dukaan.purchase.newTitle'
-    >
+    <PageContainer pageTitle='dukaan.purchase.newTitle'>
       <PurchaseCreatePageClient />
     </PageContainer>
   );

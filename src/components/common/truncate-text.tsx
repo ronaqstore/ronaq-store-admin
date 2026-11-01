@@ -2,7 +2,8 @@ import { cn } from '@/lib/utils';
 import type { TruncateTextProps } from '@/types/common';
 
 export function TruncateText({ children, className, title, lines = 1 }: TruncateTextProps) {
-  const autoTitle = typeof children === 'string' || typeof children === 'number' ? String(children) : undefined;
+  const autoTitle =
+    typeof children === 'string' || typeof children === 'number' ? String(children) : undefined;
 
   return (
     <span

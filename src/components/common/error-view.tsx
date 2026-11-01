@@ -34,7 +34,9 @@ export function ErrorView({ error, reset }: AppErrorProps) {
   return (
     <div className='flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-4 p-6 text-center'>
       <div className='space-y-2'>
-        <h1 className='text-2xl font-bold tracking-tight'>{staticT('common.somethingWentWrong')}</h1>
+        <h1 className='text-2xl font-bold tracking-tight'>
+          {staticT('common.somethingWentWrong')}
+        </h1>
         <p className='text-muted-foreground max-w-md text-sm'>
           {error.message || staticT('common.unexpectedError')}
         </p>

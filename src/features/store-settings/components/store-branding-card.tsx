@@ -163,9 +163,7 @@ export function StoreBrandingCard({ settings }: StoreBrandingCardProps) {
                 isLoading={logoPreparing || uploadLogoMutation.isPending}
               >
                 <Icons.upload className='me-2 h-4 w-4' />
-                {settings.logoUrl
-                  ? t('storeSettings.changeLogo')
-                  : t('storeSettings.uploadLogo')}
+                {settings.logoUrl ? t('storeSettings.changeLogo') : t('storeSettings.uploadLogo')}
               </Button>
               {settings.logoUrl ? (
                 <Button

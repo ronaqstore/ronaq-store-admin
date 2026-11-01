@@ -16,7 +16,8 @@ export function SimpleEntityCellAction({
   onDeactivate,
   onActivate,
   invalidateQueryKey,
-  renderDialog
+  renderDialog,
+  extraActions
 }: SimpleEntityCellActionProps) {
   return (
     <PartyCellAction
@@ -33,6 +34,7 @@ export function SimpleEntityCellAction({
       onActivate={onActivate}
       invalidateQueryKey={invalidateQueryKey}
       renderEditDialog={renderDialog}
+      extraActions={extraActions}
     />
   );
 }

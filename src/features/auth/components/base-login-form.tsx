@@ -10,10 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Icons } from '@/components/icons';
 import { isValidPkMobile } from '@/lib/auth/phone';
 import { INPUT_LIMITS } from '@/lib/input-limits';
-import {
-  isTurnstileEnabled,
-  TurnstileWidget
-} from '@/components/auth/turnstile-widget';
+import { isTurnstileEnabled, TurnstileWidget } from '@/components/auth/turnstile-widget';
 import type { BaseLoginFormProps, LoginValues } from '@/types/auth';
 
 export function BaseLoginForm({

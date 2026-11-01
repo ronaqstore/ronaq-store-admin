@@ -27,9 +27,7 @@ export function PaymentTargetSection({
       }))}
       selectedBillId={selectedSaleId}
       billIdError={saleIdError}
-      onTargetTypeChange={(val) =>
-        onTargetTypeChange(val === 'bill' ? 'sale' : 'opening')
-      }
+      onTargetTypeChange={(val) => onTargetTypeChange(val === 'bill' ? 'sale' : 'opening')}
       onSelectBill={onSelectSale}
       onChooseBillTarget={onChooseSaleTarget}
       labels={{

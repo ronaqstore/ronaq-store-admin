@@ -9,14 +9,8 @@ export const createSaleFormSchema = (t: Translator) =>
   z
     .object({
       customer_id: z.string(),
-      discount: z.union([
-        z.number().min(0, t('validation.valueNonNegative')),
-        z.literal('')
-      ]),
-      paid_now: z.union([
-        z.number().min(0, t('validation.valueNonNegative')),
-        z.literal('')
-      ]),
+      discount: z.union([z.number().min(0, t('validation.valueNonNegative')), z.literal('')]),
+      paid_now: z.union([z.number().min(0, t('validation.valueNonNegative')), z.literal('')]),
       notes: z.string(),
       lines: z
         .array(
@@ -74,7 +68,6 @@ export const createSaleFormSchema = (t: Translator) =>
     })
     .superRefine((value, ctx) => {
       const lines = value.lines.filter((l) => l.product_id);
-      const hasPhone = lines.some((l) => l.tracking_type === 'SERIALIZED');
       const subtotalRs = lines.reduce(
         (sum, l) => sum + (Number(l.quantity) || 0) * (Number(l.unit_price) || 0),
         0
@@ -98,14 +91,6 @@ export const createSaleFormSchema = (t: Translator) =>
           code: 'custom',
           path: ['paid_now'],
           message: t('validation.paidExceedsTotal')
-        });
-      }
-
-      if (isWalkIn && hasPhone) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['customer_id'],
-          message: t('validation.customerForPhones')
         });
       }
 

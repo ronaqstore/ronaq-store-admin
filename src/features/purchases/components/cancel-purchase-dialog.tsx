@@ -108,7 +108,8 @@ export function CancelPurchaseDialog({
   }
 
   const shortfallAmount = formatPkr(
-    overdraftPrompt?.shortfall ?? (impact?.cashAfter != null && impact.cashAfter < 0 ? Math.abs(impact.cashAfter) : 0)
+    overdraftPrompt?.shortfall ??
+      (impact?.cashAfter != null && impact.cashAfter < 0 ? Math.abs(impact.cashAfter) : 0)
   );
 
   const overdraftSection =

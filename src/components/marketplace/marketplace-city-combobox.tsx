@@ -31,14 +31,7 @@ export function MarketplaceCityCombobox({
         className={className}
       />
       {required ? (
-        <input
-          id={id}
-          className='sr-only'
-          value={value}
-          required
-          readOnly
-          tabIndex={-1}
-        />
+        <input id={id} className='sr-only' value={value} required readOnly tabIndex={-1} />
       ) : id ? (
         <input id={id} className='sr-only' value={value} readOnly tabIndex={-1} />
       ) : null}

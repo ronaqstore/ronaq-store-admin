@@ -6,6 +6,15 @@ export const SALE_SYNC_DOMAINS = [
   'products',
   'payments',
   'customers',
+  'consignments',
+  'cash',
+  'dashboard'
+] as const satisfies readonly QuerySyncDomain[];
+
+export const CONSIGNMENT_SYNC_DOMAINS = [
+  'consignments',
+  'inventory',
+  'products',
   'cash',
   'dashboard'
 ] as const satisfies readonly QuerySyncDomain[];

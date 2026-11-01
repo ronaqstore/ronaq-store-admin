@@ -7,15 +7,9 @@ type Translator = ReturnType<typeof useTranslations>;
 export const createPartyFormSchema = (t: Translator) =>
   z.object({
     name: z.string().trim().min(1, t('validation.nameRequired')),
-    phone: z
-      .string()
-      .trim()
-      .refine(isOptionalPkMobile, t('validation.phoneInvalidPk')),
+    phone: z.string().trim().refine(isOptionalPkMobile, t('validation.phoneInvalidPk')),
     address: z.string(),
     notes: z.string(),
-    opening_balance: z.union([
-      z.number().min(0, t('validation.valueNonNegative')),
-      z.literal('')
-    ]),
+    opening_balance: z.union([z.number().min(0, t('validation.valueNonNegative')), z.literal('')]),
     isActive: z.boolean().optional()
   });

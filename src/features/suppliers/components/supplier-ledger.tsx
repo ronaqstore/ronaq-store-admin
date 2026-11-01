@@ -72,8 +72,11 @@ export function SupplierLedgerClient({ id }: SupplierLedgerClientProps) {
   };
 
   const pay = useMutation({
-    mutationFn: async ({ amount, confirmOverdraft: confirm, resumeFrom = 0 }: SupplierLedgerPayArgs) =>
-      runSupplierPayPlan(id, amount, payable, !!confirm, resumeFrom),
+    mutationFn: async ({
+      amount,
+      confirmOverdraft: confirm,
+      resumeFrom = 0
+    }: SupplierLedgerPayArgs) => runSupplierPayPlan(id, amount, payable, !!confirm, resumeFrom),
     onSuccess: (res) => {
       if (!res) {
         toast.error(t('dukaan.party.paymentRecorded'));

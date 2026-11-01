@@ -17,12 +17,7 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import * as React from 'react';
 
@@ -114,18 +109,14 @@ export function DataTableFacetedFilter<TData, TValue>({
                 <div
                   className={cn(
                     'border-primary flex size-4 items-center justify-center rounded-sm border',
-                    isSelected
-                      ? 'bg-primary text-white'
-                      : 'opacity-50 [&_svg]:invisible'
+                    isSelected ? 'bg-primary text-white' : 'opacity-50 [&_svg]:invisible'
                   )}
                 >
                   <Icons.check className='size-3.5 text-current' />
                 </div>
                 {option.icon && <option.icon />}
                 <span className='truncate'>{option.label}</span>
-                {option.count && (
-                  <span className='ms-auto font-mono text-xs'>{option.count}</span>
-                )}
+                {option.count && <span className='ms-auto font-mono text-xs'>{option.count}</span>}
               </CommandItem>
             );
           })}
@@ -174,7 +165,10 @@ export function DataTableFacetedFilter<TData, TValue>({
             overlayClassName='z-[60]'
             className='z-[60] max-h-[85dvh] gap-0 rounded-t-[var(--radius)] pb-[max(1rem,env(safe-area-inset-bottom))]'
           >
-            <div className='bg-muted mx-auto mt-1 mb-2 h-1 w-10 shrink-0 rounded-full' aria-hidden />
+            <div
+              className='bg-muted mx-auto mt-1 mb-2 h-1 w-10 shrink-0 rounded-full'
+              aria-hidden
+            />
             <SheetHeader className='border-b border-border'>
               <SheetTitle>{title}</SheetTitle>
             </SheetHeader>

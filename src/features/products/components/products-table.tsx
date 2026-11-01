@@ -51,6 +51,8 @@ import {
   parseExactStockQuantity,
   parseRupeePriceRange
 } from './products-table-filters';
+import { Button } from '@/components/ui/button';
+import { SaleCreateDialog } from '@/features/sales/components/sale-create-dialog';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { PRODUCT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
@@ -63,6 +65,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
   const router = useRouter();
   const qc = useQueryClient();
   const [statusConfirm, setStatusConfirm] = useState<EntityStatusConfirm | null>(null);
+  const [quickSellProduct, setQuickSellProduct] = useState<ProductDTO | null>(null);
 
   const sortableColumnIds = ['name', 'defaultSellingPrice'];
   const { params, filters, sortBy, sortOrder } = useDukaanListParams(
@@ -329,18 +332,33 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       },
       {
         id: 'actions',
-        size: 48,
+        size: 96,
         enableSorting: false,
         enableHiding: false,
         meta: { mobile: 'hidden' },
         cell: ({ row }) => (
-          <div className='flex justify-end'>
-            <ProductCellAction data={row.original} />
+          <div className='flex items-center justify-end gap-1.5'>
+            {row.original.isActive ? (
+              <Button
+                type='button'
+                variant='outline'
+                size='xs'
+                className='h-7 px-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setQuickSellProduct(row.original);
+                }}
+              >
+                <Icons.cash className='me-1 h-3.5 w-3.5' />
+                {t('dukaan.product.sell')}
+              </Button>
+            ) : null}
+            <ProductCellAction data={row.original} onSell={(p) => setQuickSellProduct(p)} />
           </div>
         )
       }
     ],
-    []
+    [t]
   );
 
   const productMobileItem: MobileItemConfig<ProductDTO> = useMemo(
@@ -423,6 +441,17 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
         }
       ],
       actions: (row) => [
+        ...(row.isActive
+          ? [
+              {
+                label: t('dukaan.product.sell'),
+                icon: Icons.cash,
+                className:
+                  'text-emerald-600 focus:text-emerald-700 dark:text-emerald-400 font-medium',
+                onClick: () => setQuickSellProduct(row)
+              }
+            ]
+          : []),
         {
           label: t('common.edit'),
           onClick: () => router.push(`/dashboard/products/${row.id}/edit`)
@@ -489,6 +518,13 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
         detail={productDetail}
         quickFilters={productQuickFilters}
         isLoading={isFetching}
+      />
+      <SaleCreateDialog
+        open={quickSellProduct != null}
+        onOpenChange={(open) => {
+          if (!open) setQuickSellProduct(null);
+        }}
+        initialProduct={quickSellProduct}
       />
     </>
   );

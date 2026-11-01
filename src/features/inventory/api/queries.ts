@@ -15,13 +15,8 @@ export const inventoryKeys = {
     [...inventoryKeys.all, 'adjustments', filters] as const,
   movements: (filters?: InventoryAdjustmentsFilters) =>
     [...inventoryKeys.all, 'movements', filters] as const,
-  units: (
-    productId: string,
-    status?: string,
-    search?: string,
-    page?: number,
-    pageSize?: number
-  ) => [...inventoryKeys.all, 'units', productId, status, search, page, pageSize] as const
+  units: (productId: string, status?: string, search?: string, page?: number, pageSize?: number) =>
+    [...inventoryKeys.all, 'units', productId, status, search, page, pageSize] as const
 };
 
 export const inventoryStockQueryOptions = (filters: InventoryStockFilters = {}, token?: string) => {
@@ -53,12 +48,6 @@ export const inventoryUnitsQueryOptions = (
   extra?: ListInventoryUnitsExtraOptions & InventoryUnitsListFilters
 ) =>
   queryOptions({
-    queryKey: inventoryKeys.units(
-      productId,
-      status,
-      search,
-      extra?.page,
-      extra?.pageSize
-    ),
+    queryKey: inventoryKeys.units(productId, status, search, extra?.page, extra?.pageSize),
     queryFn: () => listInventoryUnits(productId, status, search, token, extra)
   });

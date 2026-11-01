@@ -128,39 +128,42 @@ export function DataTableSliderFilter<TData>({ column, title }: DataTableSliderF
     column.setFilterValue(ordered);
   }, [appliedRange, column, fromDraft, max, min, toDraft]);
 
-  const onFromInputChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const next = event.target.value;
-    if (next === '' || /^\d*$/.test(next)) {
-      setFromDraft(next);
-      const parsed = parseDraftNumber(next);
-      if (parsed != null) {
-        setSliderDraft((prev) => orderRange(clamp(parsed, min, max), prev[1]));
-      }
-    }
-  }, [max, min]);
-
-  const onToInputChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const next = event.target.value;
-    if (next === '' || /^\d*$/.test(next)) {
-      setToDraft(next);
-      const parsed = parseDraftNumber(next);
-      if (parsed != null) {
-        setSliderDraft((prev) => orderRange(prev[0], clamp(parsed, min, max)));
-      }
-    }
-  }, [max, min]);
-
-  const onSliderValueChange = React.useCallback(
-    (value: number | readonly number[]) => {
-      if (Array.isArray(value) && value.length === 2) {
-        const next = orderRange(Number(value[0]), Number(value[1]));
-        setSliderDraft(next);
-        setFromDraft(String(next[0]));
-        setToDraft(String(next[1]));
+  const onFromInputChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const next = event.target.value;
+      if (next === '' || /^\d*$/.test(next)) {
+        setFromDraft(next);
+        const parsed = parseDraftNumber(next);
+        if (parsed != null) {
+          setSliderDraft((prev) => orderRange(clamp(parsed, min, max), prev[1]));
+        }
       }
     },
-    []
+    [max, min]
   );
+
+  const onToInputChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const next = event.target.value;
+      if (next === '' || /^\d*$/.test(next)) {
+        setToDraft(next);
+        const parsed = parseDraftNumber(next);
+        if (parsed != null) {
+          setSliderDraft((prev) => orderRange(prev[0], clamp(parsed, min, max)));
+        }
+      }
+    },
+    [max, min]
+  );
+
+  const onSliderValueChange = React.useCallback((value: number | readonly number[]) => {
+    if (Array.isArray(value) && value.length === 2) {
+      const next = orderRange(Number(value[0]), Number(value[1]));
+      setSliderDraft(next);
+      setFromDraft(String(next[0]));
+      setToDraft(String(next[1]));
+    }
+  }, []);
 
   const onReset = React.useCallback(
     (event: React.MouseEvent | React.KeyboardEvent) => {

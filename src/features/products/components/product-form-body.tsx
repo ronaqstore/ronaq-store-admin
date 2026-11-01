@@ -91,9 +91,7 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
             try {
               await uploadPendingProductImages(newId, images, pendingFiles);
             } catch (uploadError) {
-              toast.error(
-                (uploadError as Error).message || t('photosUploadFailed')
-              );
+              toast.error((uploadError as Error).message || t('photosUploadFailed'));
               router.replace(`/dashboard/products/${newId}/edit`);
               return;
             }

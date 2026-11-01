@@ -153,7 +153,9 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
         <DataTableColumnHeader column={column} title={t('table.col.product')} />
       ),
       cell: ({ row }) => {
-        const meta = [row.original.brandName, row.original.categoryName].filter(Boolean).join(' · ');
+        const meta = [row.original.brandName, row.original.categoryName]
+          .filter(Boolean)
+          .join(' · ');
         return (
           <div className='min-w-0 space-y-0.5'>
             {row.original.trackingType === 'SERIALIZED' ? (
@@ -166,7 +168,9 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
                 {row.original.name}
               </Link>
             ) : (
-              <TruncateText className='font-normal text-foreground'>{row.original.name}</TruncateText>
+              <TruncateText className='font-normal text-foreground'>
+                {row.original.name}
+              </TruncateText>
             )}
             <div className='flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground'>
               {meta ? <TruncateText>{meta}</TruncateText> : null}

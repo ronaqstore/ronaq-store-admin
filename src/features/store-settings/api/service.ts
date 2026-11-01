@@ -9,9 +9,7 @@ export async function getStoreSettings(token?: string): Promise<StoreSettingsDTO
   return appFetch<StoreSettingsDTO>('/api/store/settings');
 }
 
-export async function updateStoreSettings(
-  input: UpdateStoreSettingsInput
-): Promise<unknown> {
+export async function updateStoreSettings(input: UpdateStoreSettingsInput): Promise<unknown> {
   return appFetch<unknown>('/api/store/settings', {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -24,11 +22,7 @@ export async function uploadShopLogo(file: File, token?: string): Promise<unknow
   formData.append('image', file);
 
   if (token) {
-    return apiRequest<unknown>(
-      '/store/settings/logo',
-      { method: 'POST', body: formData },
-      token
-    );
+    return apiRequest<unknown>('/store/settings/logo', { method: 'POST', body: formData }, token);
   }
 
   return appFetch<unknown>('/api/store/settings/logo', {
@@ -48,11 +42,7 @@ export async function uploadShopBanner(file: File, token?: string): Promise<unkn
   formData.append('image', file);
 
   if (token) {
-    return apiRequest<unknown>(
-      '/store/settings/banner',
-      { method: 'POST', body: formData },
-      token
-    );
+    return apiRequest<unknown>('/store/settings/banner', { method: 'POST', body: formData }, token);
   }
 
   return appFetch<unknown>('/api/store/settings/banner', {

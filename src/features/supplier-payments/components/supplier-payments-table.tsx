@@ -114,20 +114,17 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
   const sortableColumnIds = ['supplierName', 'paymentDate', 'amount'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     SupplierPaymentQueryFilter['sortBy']
-  >(sortableColumnIds, 'supplierName', [
-    'status',
-    'supplierId',
-    'paymentDate',
-    'amount'
-  ], 'paymentDate');
+  >(
+    sortableColumnIds,
+    'supplierName',
+    ['status', 'supplierId', 'paymentDate', 'amount'],
+    'paymentDate'
+  );
 
   const [searchParam] = useQueryState('search', parseAsString);
   const [supplierNameParam] = useQueryState('supplierName', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
-  const [paymentDateParam] = useQueryState(
-    'paymentDate',
-    parseAsArrayOf(parseAsString, ',')
-  );
+  const [paymentDateParam] = useQueryState('paymentDate', parseAsArrayOf(parseAsString, ','));
 
   const search = searchParam || supplierNameParam || undefined;
   const statusFilter = parseActiveCancelledStatus(

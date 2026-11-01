@@ -63,6 +63,10 @@ const baseConfig: NextConfig = {
               "font-src 'self' data: https://fonts.gstatic.com chrome-extension:",
               "connect-src 'self' data: https: http://localhost:* http://127.0.0.1:* ws: wss: chrome-extension:",
               "frame-src https://challenges.cloudflare.com https://www.google.com https://maps.google.com",
+              "img-src 'self' data: blob: https:",
+              "font-src 'self' data: https://fonts.gstatic.com",
+              "connect-src 'self' data: https: http://localhost:* http://127.0.0.1:* ws: wss:",
+              'frame-src https://challenges.cloudflare.com https://www.google.com https://maps.google.com',
               "worker-src 'self' blob:",
               process.env.NODE_ENV === 'production'
                 ? "frame-ancestors 'self' chrome-extension:*"

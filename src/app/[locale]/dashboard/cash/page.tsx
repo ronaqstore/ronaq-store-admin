@@ -1,9 +1,5 @@
 import PageContainer from '@/components/layout/page-container';
-import {
-  CashLedgerClient,
-  cashOpeningStatusQueryOptions,
-  cashQueryOptions
-} from '@/features/cash';
+import { CashLedgerClient, cashOpeningStatusQueryOptions, cashQueryOptions } from '@/features/cash';
 import { getQueryClient } from '@/lib/query-client';
 import { auth } from '@/auth';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';

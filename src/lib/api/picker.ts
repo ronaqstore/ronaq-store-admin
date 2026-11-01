@@ -22,8 +22,7 @@ export function formatProductPickerName(product: ProductDTO): string {
     product.ptaStatus?.replaceAll('_', ' '),
     product.authenticity ?? null
   ].filter(Boolean) as string[];
-  const label =
-    bits.length === 0 ? product.name : `${product.name} · ${bits.join(' · ')}`;
+  const label = bits.length === 0 ? product.name : `${product.name} · ${bits.join(' · ')}`;
   return toTitleCase(label);
 }
 

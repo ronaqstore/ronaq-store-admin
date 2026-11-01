@@ -1,7 +1,7 @@
 import { todayIsoDate } from '@/lib/dates';
-import { toPaisa } from '@/lib/dukaan/numbers';
-import type { CreateSaleInput, CreateSaleItemInput } from '@/lib/api/types';
-import type { SaleLineItem, SaleTotalsSelectorState } from '@/types/sales';
+import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
+import type { CreateSaleInput, CreateSaleItemInput, ProductDTO } from '@/lib/api/types';
+import type { SaleFormValues, SaleLineItem, SaleTotalsSelectorState } from '@/types/sales';
 import { EMPTY_FORM_NUMBER, type FormNumber } from '@/types/common';
 
 export const emptySaleLine: SaleLineItem = {
@@ -71,5 +71,44 @@ export function selectSaleTotals(state: SaleTotalsSelectorState) {
     lines: state.values.lines,
     discount: state.values.discount,
     paidNow: state.values.paid_now
+  };
+}
+
+export function buildQuickSaleDefaults(product?: ProductDTO | null): SaleFormValues {
+  if (!product || !product.isActive) {
+    return {
+      customer_id: '__walkin__',
+      discount: EMPTY_FORM_NUMBER,
+      paid_now: EMPTY_FORM_NUMBER,
+      notes: '',
+      lines: [{ ...emptySaleLine }]
+    };
+  }
+
+  const initialPriceRs =
+    product.defaultSellingPrice != null && product.defaultSellingPrice > 0
+      ? fromPaisa(product.defaultSellingPrice)
+      : EMPTY_FORM_NUMBER;
+
+  const isPhone = product.trackingType === 'SERIALIZED';
+
+  const initialLine: SaleLineItem = {
+    product_id: product.id,
+    product_name: product.name,
+    quantity: 1,
+    unit_price: initialPriceRs,
+    tracking_type: product.trackingType,
+    authenticity: isPhone ? null : (product.authenticity ?? null),
+    inventory_unit_id: '',
+    unit_condition: undefined,
+    warranty_days: ''
+  };
+
+  return {
+    customer_id: '__walkin__',
+    discount: EMPTY_FORM_NUMBER,
+    paid_now: initialPriceRs,
+    notes: '',
+    lines: [initialLine]
   };
 }

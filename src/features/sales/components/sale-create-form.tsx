@@ -24,6 +24,7 @@ import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { SALE_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import {
   buildCreateSalePayload,
+  buildQuickSaleDefaults,
   calcSaleTotals,
   emptySaleLine,
   isPhoneSaleLine,
@@ -42,7 +43,7 @@ import type {
 } from '@/types/sales';
 import { EMPTY_FORM_NUMBER } from '@/types/common';
 
-export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
+export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) {
   const qc = useQueryClient();
   const t = useT();
   const [clientRequestId, setClientRequestId] = useState(() => createClientRequestId());
@@ -77,13 +78,7 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
     }
   });
 
-  const defaultValues: SaleFormValues = {
-    customer_id: '__walkin__',
-    discount: EMPTY_FORM_NUMBER,
-    paid_now: EMPTY_FORM_NUMBER,
-    notes: '',
-    lines: [{ ...emptySaleLine }]
-  };
+  const defaultValues: SaleFormValues = buildQuickSaleDefaults(initialProduct);
 
   const form = useAppForm({
     defaultValues,
@@ -145,51 +140,39 @@ export function SaleCreateForm({ onDone }: SaleCreateFormProps) {
       />
 
       <FieldGroup className='max-w-md gap-3'>
-        <form.Subscribe
-          selector={(s) => s.values.lines}
-          children={(lines) => {
-            const hasPhone = lines.some((l) => isPhoneSaleLine(l));
+        <form.Field
+          name='customer_id'
+          children={(field) => {
+            const isInvalid = isFieldMetaInvalid(field.state.meta);
             return (
-              <form.Field
-                name='customer_id'
-                children={(field) => {
-                  const isInvalid = isFieldMetaInvalid(field.state.meta);
-                  return (
-                    <FormEntitySelect
-                      name={field.name}
-                      label={
-                        hasPhone
-                          ? t('dukaan.sale.customerRequiredPhones')
-                          : t('dukaan.sale.customerRequiredUdhar')
-                      }
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onValueChange={(id) => field.handleChange(id || '__walkin__')}
-                      isInvalid={isInvalid}
-                      errors={field.state.meta.errors}
-                      queryKey={['customers', 'picker']}
-                      fetchPage={(filters) =>
-                        listCustomers(filters).then((res) => ({
-                          items: res.items,
-                          total: res.total,
-                          page: res.page,
-                          limit: res.pageSize
-                        }))
-                      }
-                      placeholder={t('dukaan.sale.walkInOrCustomer')}
-                      searchPlaceholder={t('dukaan.sale.searchCustomers')}
-                      selectedLabel={
-                        field.state.value === '__walkin__' ? t('dukaan.sale.walkIn') : undefined
-                      }
-                      extraItems={[
-                        {
-                          id: '__walkin__',
-                          name: t('dukaan.sale.walkInCashOnly')
-                        }
-                      ]}
-                    />
-                  );
-                }}
+              <FormEntitySelect
+                name={field.name}
+                label={t('dukaan.sale.customerRequiredUdhar')}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onValueChange={(id) => field.handleChange(id || '__walkin__')}
+                isInvalid={isInvalid}
+                errors={field.state.meta.errors}
+                queryKey={['customers', 'picker']}
+                fetchPage={(filters) =>
+                  listCustomers(filters).then((res) => ({
+                    items: res.items,
+                    total: res.total,
+                    page: res.page,
+                    limit: res.pageSize
+                  }))
+                }
+                placeholder={t('dukaan.sale.walkInOrCustomer')}
+                searchPlaceholder={t('dukaan.sale.searchCustomers')}
+                selectedLabel={
+                  field.state.value === '__walkin__' ? t('dukaan.sale.walkIn') : undefined
+                }
+                extraItems={[
+                  {
+                    id: '__walkin__',
+                    name: t('dukaan.sale.walkInCashOnly')
+                  }
+                ]}
               />
             );
           }}

@@ -1,15 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "eslint",
-    "typescript",
-    "unicorn",
-    "oxc",
-    "react",
-    "nextjs",
-    "import",
-    "jsx-a11y"
-  ],
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "react", "nextjs", "import", "jsx-a11y"],
   "env": {
     "es6": true,
     "browser": true,
@@ -39,10 +30,7 @@
     "no-debugger": "error",
     "no-empty": "error",
     "no-var": "error",
-    "eqeqeq": [
-      "error",
-      "smart"
-    ],
+    "eqeqeq": ["error", "smart"],
     "no-warning-comments": "warn",
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-non-null-assertion": "error",
@@ -57,11 +45,7 @@
     "no-underscore-dangle": [
       "warn",
       {
-        "allow": [
-          "__dukaanStore",
-          "__dukaanSeedVersion",
-          "__SW_MANIFEST"
-        ]
+        "allow": ["__dukaanStore", "__dukaanSeedVersion", "__SW_MANIFEST"]
       }
     ],
     "no-unused-vars": "off",
@@ -84,12 +68,8 @@
     "jsx-a11y/alt-text": [
       "warn",
       {
-        "elements": [
-          "img"
-        ],
-        "img": [
-          "Image"
-        ]
+        "elements": ["img"],
+        "img": ["Image"]
       }
     ],
     "jsx-a11y/aria-props": "warn",
@@ -108,12 +88,7 @@
   },
   "overrides": [
     {
-      "files": [
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.mts",
-        "**/*.cts"
-      ],
+      "files": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
       "rules": {
         "constructor-super": "off",
         "no-const-assign": "off",

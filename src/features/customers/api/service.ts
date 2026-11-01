@@ -81,7 +81,6 @@ export async function getCustomerLedgerView(
   };
 }
 
-
 export async function createCustomer(input: CreateCustomerInput): Promise<CustomerDTO> {
   return appFetch<CustomerDTO>('/api/customers', {
     method: 'POST',

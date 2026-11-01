@@ -14,16 +14,9 @@ export function PlatformLazyBlock({
   return (
     <div
       ref={ref}
-      className={cn(
-        !inView && 'min-h-[280px]',
-        !inView && minHeight >= 360 && 'min-h-[360px]'
-      )}
+      className={cn(!inView && 'min-h-[280px]', !inView && minHeight >= 360 && 'min-h-[360px]')}
     >
-      {inView ? (
-        children
-      ) : (
-        <ChartSkeleton type={skeletonType} height={minHeight} />
-      )}
+      {inView ? children : <ChartSkeleton type={skeletonType} height={minHeight} />}
     </div>
   );
 }
