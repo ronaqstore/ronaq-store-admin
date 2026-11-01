@@ -27,7 +27,8 @@ export function PartyCellAction({
   onDeactivate,
   onActivate,
   invalidateQueryKey,
-  renderEditDialog
+  renderEditDialog,
+  extraActions
 }: PartyCellActionProps) {
   const t = useT();
   const qc = useQueryClient();
@@ -84,6 +85,7 @@ export function PartyCellAction({
       {renderEditDialog ? renderEditDialog(editOpen, setEditOpen) : null}
       <RowActionsMenu
         actions={[
+          ...(extraActions ?? []),
           ...(ledgerHref
             ? [
                 {
@@ -96,9 +98,7 @@ export function PartyCellAction({
           {
             label: t('common.edit'),
             icon: Icons.edit,
-            ...(editHref
-              ? { href: editHref }
-              : { onClick: () => setEditOpen(true) })
+            ...(editHref ? { href: editHref } : { onClick: () => setEditOpen(true) })
           },
           ...(!isSystem && isActive
             ? [

@@ -87,6 +87,7 @@ export interface ProductsHeaderActionProps {
 
 export interface ProductCellActionProps {
   data: ProductDTO;
+  onSell?: (product: ProductDTO) => void;
 }
 
 export interface ProductImagesFieldProps {

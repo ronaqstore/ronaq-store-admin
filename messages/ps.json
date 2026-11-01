@@ -555,6 +555,8 @@
       "paidNowPlaceholder": "اوس تادیه"
     },
     "product": {
+      "sell": "پلورل",
+      "quickSell": "فوري پلور",
       "productCreated": "مصنوعہ کامیابی سے بنایا گیا",
       "productUpdated": "مصنوعہ کامیابی سے اپ ڈیٹ ہوا",
       "photosUploadFailed": "محصول خوندي شو، خو انځورونه پورته نه شول. بیا یې اضافه کړئ.",
