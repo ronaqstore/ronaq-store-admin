@@ -96,9 +96,7 @@ function BasePartyDialogBody({
   const [formApiError, setFormApiError] = useState<string | null>(null);
 
   const openingLocked =
-    isEdit &&
-    party?.currentBalance !== undefined &&
-    party.currentBalance !== party.openingBalance;
+    isEdit && party?.currentBalance !== undefined && party.currentBalance !== party.openingBalance;
 
   const save = useMutation({
     mutationFn: async (value: BasePartyFormState) => {

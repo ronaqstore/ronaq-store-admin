@@ -1,6 +1,5 @@
 const sentryEnabled =
-  process.env.NEXT_PUBLIC_SENTRY_DISABLED !== 'true' &&
-  Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN);
+  process.env.NEXT_PUBLIC_SENTRY_DISABLED !== 'true' && Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN);
 
 export async function register() {
   if (!sentryEnabled) return;

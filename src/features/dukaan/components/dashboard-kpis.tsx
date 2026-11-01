@@ -27,11 +27,7 @@ export function DashboardKpisRow({ params }: DashboardKpisProps) {
 
   const { totals, previousTotals, balance, sparklines } = kpis;
 
-  const calcChange = (
-    cur: number,
-    prev: number,
-    isInverse = false
-  ): KpiCardChange | undefined => {
+  const calcChange = (cur: number, prev: number, isInverse = false): KpiCardChange | undefined => {
     if (prev <= 0 && cur <= 0) return undefined;
     if (prev <= 0) return { percentage: 100, absolute: cur, isInverse };
     const pct = Math.round(((cur - prev) / prev) * 100 * 10) / 10;
@@ -67,9 +63,7 @@ export function DashboardKpisRow({ params }: DashboardKpisProps) {
         sparkline={sparklines.netProfit}
         sparklineColor='var(--chart-3)'
         className={
-          totals.netProfit < 0
-            ? 'border-rose-500/50 bg-rose-50/20 dark:bg-rose-950/20'
-            : ''
+          totals.netProfit < 0 ? 'border-rose-500/50 bg-rose-50/20 dark:bg-rose-950/20' : ''
         }
       />
 

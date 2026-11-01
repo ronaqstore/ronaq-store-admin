@@ -1,8 +1,5 @@
 import PageContainer from '@/components/layout/page-container';
-import {
-  SerializedProductUnitsPage,
-  inventoryUnitsQueryOptions
-} from '@/features/inventory';
+import { SerializedProductUnitsPage, inventoryUnitsQueryOptions } from '@/features/inventory';
 import { productQueryOptions } from '@/features/products/api/queries';
 import { getQueryClient } from '@/lib/query-client';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';

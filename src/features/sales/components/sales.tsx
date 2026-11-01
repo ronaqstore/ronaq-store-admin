@@ -267,7 +267,10 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
           <h4 className='font-semibold text-sm'>{t('dukaan.sale.returnsHistory')}</h4>
           <div className='space-y-2'>
             {data.returns.map((ret, index) => (
-              <div key={`${ret.id}-${index}`} className='rounded-md border bg-muted/30 p-3 text-xs space-y-1.5'>
+              <div
+                key={`${ret.id}-${index}`}
+                className='rounded-md border bg-muted/30 p-3 text-xs space-y-1.5'
+              >
                 <div className='flex items-center justify-between'>
                   <span className='font-semibold'>{ret.reason}</span>
                   <span className='font-medium text-destructive'>

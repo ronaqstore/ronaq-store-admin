@@ -24,9 +24,7 @@ export function isCancelledStatusError(errorBody: unknown, status: number): bool
   if (status !== 400) return false;
   const body = errorBody as UpstreamErrorBody | null;
   const rawMsg =
-    safeJoinMessages(body?.message) ||
-    (typeof body?.error === 'string' ? body.error : '') ||
-    '';
+    safeJoinMessages(body?.message) || (typeof body?.error === 'string' ? body.error : '') || '';
   return rawMsg.includes('CANCELLED status') || rawMsg.includes('Cannot modify a cancelled');
 }
 

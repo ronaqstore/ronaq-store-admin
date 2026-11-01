@@ -17,9 +17,7 @@ function formatSaleUnitOption(unit: SaleUnitOptionSource, t: ReturnType<typeof u
   const parts = [
     formatUnitImeiLabel(unit.imei1, unit.imei2),
     unit.condition || null,
-    unit.batteryHealth != null
-      ? t('dukaan.sale.batteryPct', { pct: unit.batteryHealth })
-      : null
+    unit.batteryHealth != null ? t('dukaan.sale.batteryPct', { pct: unit.batteryHealth }) : null
   ].filter(Boolean);
   return parts.join(' · ');
 }
@@ -101,9 +99,7 @@ export function SaleLineImeiField({
           queryKey={['inventory', 'sale-units-select', productId, excludedKey]}
           fetchPage={fetchImeiPage}
           selectedLabel={selectedLabel || undefined}
-          extraItems={
-            value && selectedLabel ? [{ id: value, name: selectedLabel }] : []
-          }
+          extraItems={value && selectedLabel ? [{ id: value, name: selectedLabel }] : []}
           activeOnly={false}
           disabled={!productId}
           placeholder={t('dukaan.sale.selectImei')}

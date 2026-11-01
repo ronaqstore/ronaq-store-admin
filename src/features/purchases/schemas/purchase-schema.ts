@@ -29,10 +29,7 @@ export const createPurchaseFormSchema = (t: Translator) =>
       supplier_id: z.string().min(1, t('validation.supplierRequired')),
       supplier_invoice_ref: z.string(),
       is_opening_stock: z.boolean(),
-      paid_now: z.union([
-        z.number().min(0, t('validation.valueNonNegative')),
-        z.literal('')
-      ]),
+      paid_now: z.union([z.number().min(0, t('validation.valueNonNegative')), z.literal('')]),
       lines: z
         .array(
           z

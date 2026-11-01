@@ -57,11 +57,7 @@ export function parseFacetDateRange(value: unknown): FacetDateRangeFilter {
 }
 
 export function parseExactNonNegativeInt(value: unknown): number | undefined {
-  const raw = Array.isArray(value)
-    ? value[0]
-    : typeof value === 'string'
-      ? value.trim()
-      : value;
+  const raw = Array.isArray(value) ? value[0] : typeof value === 'string' ? value.trim() : value;
   if (raw === undefined || raw === null || raw === '') return undefined;
   const qty = Number(raw);
   if (!Number.isFinite(qty) || qty < 0 || !Number.isInteger(qty)) return undefined;

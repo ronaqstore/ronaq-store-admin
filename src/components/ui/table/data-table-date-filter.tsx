@@ -156,9 +156,7 @@ export function DataTableDateFilter<TData>({
   const label = React.useMemo(() => {
     if (multiple) {
       const hasSelectedDates = !!(range.from || range.to);
-      const dateText = hasSelectedDates
-        ? formatRangeLabel(range)
-        : t('common.pickDateRange');
+      const dateText = hasSelectedDates ? formatRangeLabel(range) : t('common.pickDateRange');
 
       return (
         <span className='flex items-center gap-2'>
@@ -221,7 +219,9 @@ export function DataTableDateFilter<TData>({
                 onSelect={onSelectFrom}
                 disabled={range.to ? { after: range.to } : undefined}
               />
-              <p className='px-1 text-[11px] text-muted-foreground'>{t('common.fromOptionalHint')}</p>
+              <p className='px-1 text-[11px] text-muted-foreground'>
+                {t('common.fromOptionalHint')}
+              </p>
             </div>
             <Separator className='sm:hidden' />
             <div className='hidden w-px self-stretch bg-border sm:block' aria-hidden />

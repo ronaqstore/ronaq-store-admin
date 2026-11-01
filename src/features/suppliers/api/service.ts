@@ -5,11 +5,7 @@ import type {
   CreateSupplierInput,
   UpdateSupplierInput
 } from '@/lib/api/types';
-import type {
-  SupplierListFilters,
-  SupplierLedgerDTO,
-  SupplierLedgerView
-} from '@/types';
+import type { SupplierListFilters, SupplierLedgerDTO, SupplierLedgerView } from '@/types';
 import { appFetch } from '@/lib/api/app-fetch';
 
 import { buildQueryString } from '@/lib/api/query-params';

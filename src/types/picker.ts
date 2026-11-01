@@ -20,4 +20,3 @@ export interface SupplierPickerItem {
   is_active: boolean;
   cnic?: string | null;
 }
-

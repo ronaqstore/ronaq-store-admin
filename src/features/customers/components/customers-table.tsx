@@ -119,20 +119,12 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
   const router = useRouter();
   const qc = useQueryClient();
   const [editCustomer, setEditCustomer] = useState<CustomerDTO | null>(null);
-  const [statusConfirm, setStatusConfirm] = useState<EntityStatusConfirm | null>(
-    null
-  );
+  const [statusConfirm, setStatusConfirm] = useState<EntityStatusConfirm | null>(null);
 
   const sortableColumnIds = ['name', 'openingBalance'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     CustomerListFilters['sortBy']
-  >(
-    sortableColumnIds,
-    'name',
-    ['isActive', 'currentBalance', 'openingBalance'],
-    'name',
-    'asc'
-  );
+  >(sortableColumnIds, 'name', ['isActive', 'currentBalance', 'openingBalance'], 'name', 'asc');
 
   const [nameParam] = useQueryState('name', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
@@ -142,12 +134,8 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
   const isActiveFilter = parseBooleanFacet(
     (filters as Record<string, unknown>).isActive ?? isActiveParam
   );
-  const creditRange = parseRupeeMoneyRange(
-    (filters as Record<string, unknown>).currentBalance
-  );
-  const openingRange = parseRupeeMoneyRange(
-    (filters as Record<string, unknown>).openingBalance
-  );
+  const creditRange = parseRupeeMoneyRange((filters as Record<string, unknown>).currentBalance);
+  const openingRange = parseRupeeMoneyRange((filters as Record<string, unknown>).openingBalance);
 
   const { data, isFetching } = useQuery(
     customersQueryOptions({
@@ -263,9 +251,7 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
             ? t('dukaan.party.customerActivateDescription')
             : t('dukaan.party.customerDeactivateDescription')
         }
-        confirmLabel={
-          statusConfirm?.nextActive ? t('common.activate') : t('common.deactivate')
-        }
+        confirmLabel={statusConfirm?.nextActive ? t('common.activate') : t('common.deactivate')}
         confirmVariant={statusConfirm?.nextActive ? 'default' : 'destructive'}
       />
       <ResponsiveDataTable

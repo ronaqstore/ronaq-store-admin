@@ -13,7 +13,7 @@ export const platformKeys = {
   activity: (days: number) => [...platformKeys.all, 'activity', days] as const,
   atRisk: (page: number, pageSize: number) =>
     [...platformKeys.all, 'atRisk', page, pageSize] as const,
-   shops: (filters: PlatformShopFilters) => [...platformKeys.all, 'shops', filters] as const
+  shops: (filters: PlatformShopFilters) => [...platformKeys.all, 'shops', filters] as const
 };
 
 export const platformDashboardKpisQueryOptions = (token?: string) =>

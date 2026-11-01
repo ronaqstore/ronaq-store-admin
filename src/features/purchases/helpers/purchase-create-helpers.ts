@@ -51,9 +51,7 @@ function mapPurchaseLine(line: PurchaseLineDraft): CreatePurchaseItemInput | nul
   if (!line.product_id) return null;
 
   const phoneUnits =
-    line.tracking_type === 'SERIALIZED'
-      ? (line.phone_units ?? []).map(mapPhoneUnit)
-      : undefined;
+    line.tracking_type === 'SERIALIZED' ? (line.phone_units ?? []).map(mapPhoneUnit) : undefined;
 
   return {
     productId: line.product_id,

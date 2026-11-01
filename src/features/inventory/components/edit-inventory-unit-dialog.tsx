@@ -52,7 +52,9 @@ export function EditInventoryUnitDialog({
 
   useEffect(() => {
     if (!open || !unit) return;
-    setAskingPricePkr(unit.askingPrice != null ? String(Math.round(fromPaisa(unit.askingPrice))) : '');
+    setAskingPricePkr(
+      unit.askingPrice != null ? String(Math.round(fromPaisa(unit.askingPrice))) : ''
+    );
     setCondition(unit.condition === 'USED' ? 'USED' : 'NEW');
     setBatteryHealth(unit.batteryHealth != null ? String(unit.batteryHealth) : '');
     setDefectNotes(unit.defectNotes ?? '');

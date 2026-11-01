@@ -5,10 +5,7 @@ import type { MappedPartyApiError, PartyErrorTranslator } from '@/types/party';
 const PHONE_ALREADY_TAKEN = 'PHONE_ALREADY_TAKEN';
 const SUPPLIER_CNIC_DUPLICATE = 'SUPPLIER_CNIC_DUPLICATE';
 
-export function mapPartyApiError(
-  error: ApiError,
-  t: PartyErrorTranslator
-): MappedPartyApiError {
+export function mapPartyApiError(error: ApiError, t: PartyErrorTranslator): MappedPartyApiError {
   const code = error.details?.code;
   const raw = safeJoinMessages(error.details?.message) || error.message;
 

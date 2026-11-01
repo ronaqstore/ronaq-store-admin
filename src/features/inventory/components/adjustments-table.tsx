@@ -21,10 +21,7 @@ import { DUKAAN_DEFAULT_PAGE_SIZE, useDukaanListParams } from '@/components/data
 import { formatIsoDate } from '@/lib/dates';
 import { formatLabel } from '@/lib/dukaan/numbers';
 import type { InventoryAdjustmentDTO } from '@/lib/api/types';
-import type {
-  AdjustmentsTableProps,
-  InventoryMovementTypeFilter
-} from '@/types/inventory';
+import type { AdjustmentsTableProps, InventoryMovementTypeFilter } from '@/types/inventory';
 import { inventoryAdjustmentsQueryOptions } from '../api/queries';
 import { StockAdjustDialog } from './stock-adjust-dialog';
 import {
@@ -70,10 +67,7 @@ function movementTypeBadgeClass(type: string): string {
   }
 }
 
-export function AdjustmentsTable({
-  toolbarAction,
-  mode = 'adjustments'
-}: AdjustmentsTableProps) {
+export function AdjustmentsTable({ toolbarAction, mode = 'adjustments' }: AdjustmentsTableProps) {
   const t = useT();
   const [adjustOpen, setAdjustOpen] = useState(false);
   const isMovements = mode === 'movements';
@@ -363,16 +357,14 @@ export function AdjustmentsTable({
   });
 
   const resolvedToolbar =
-    toolbarAction !== undefined
-      ? toolbarAction
-      : isMovements
-        ? null
-        : (
-            <Button type='button' size='sm' onClick={() => setAdjustOpen(true)}>
-              <IconPlus className='me-1.5 h-4 w-4' />
-              {t('common.adjustStock')}
-            </Button>
-          );
+    toolbarAction !== undefined ? (
+      toolbarAction
+    ) : isMovements ? null : (
+      <Button type='button' size='sm' onClick={() => setAdjustOpen(true)}>
+        <IconPlus className='me-1.5 h-4 w-4' />
+        {t('common.adjustStock')}
+      </Button>
+    );
 
   return (
     <>

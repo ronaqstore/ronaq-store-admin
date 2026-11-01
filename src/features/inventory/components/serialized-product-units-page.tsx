@@ -457,5 +457,4 @@ export function SerializedProductUnitsPage({ productId }: SerializedProductUnits
       />
     </div>
   );
-
 }

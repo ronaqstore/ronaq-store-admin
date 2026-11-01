@@ -73,10 +73,7 @@ export default function AppSidebar({ role }: AppSidebarProps) {
   const navUrls = React.useMemo(
     () =>
       visibleGroups.flatMap((group) =>
-        group.items.flatMap((item) => [
-          item.url,
-          ...(item.items?.map((sub) => sub.url) ?? [])
-        ])
+        group.items.flatMap((item) => [item.url, ...(item.items?.map((sub) => sub.url) ?? [])])
       ),
     [visibleGroups]
   );

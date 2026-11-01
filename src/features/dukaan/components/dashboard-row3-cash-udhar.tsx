@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis,
+  YAxis
 } from 'recharts';
 import { IconBrandWhatsapp } from '@tabler/icons-react';
 import { ChartCard } from '@/components/dashboard/chart-card';
@@ -21,12 +21,9 @@ import {
   formatDateLabel,
   formatNumber,
   formatPkrCompact,
-  formatPkrFull,
+  formatPkrFull
 } from '@/lib/dashboard/formatters';
-import {
-  shopCashFlowQueryOptions,
-  shopReceivablesAgingQueryOptions,
-} from '../api/queries';
+import { shopCashFlowQueryOptions, shopReceivablesAgingQueryOptions } from '../api/queries';
 import { whatsappReminderUrl } from '@/constants/api';
 import { useT } from '@/i18n/use-t';
 import type { DashboardRow3Props } from '@/types/dashboard';
@@ -38,14 +35,14 @@ export function DashboardRow3CashUdhar({ params }: DashboardRow3Props) {
     data: cashFlow,
     isLoading: isCashLoading,
     error: cashError,
-    refetch: refetchCash,
+    refetch: refetchCash
   } = useQuery(shopCashFlowQueryOptions(params));
 
   const {
     data: aging,
     isLoading: isAgingLoading,
     error: agingError,
-    refetch: refetchAging,
+    refetch: refetchAging
   } = useQuery(shopReceivablesAgingQueryOptions());
 
   const cashSeries = cashFlow?.series ?? [];
@@ -54,7 +51,7 @@ export function DashboardRow3CashUdhar({ params }: DashboardRow3Props) {
     cashIn: item.cashIn,
     cashOut: item.cashOut,
     netChange: item.netChange,
-    closingBalance: item.closingBalance,
+    closingBalance: item.closingBalance
   }));
 
   const cashTableColumns = [
@@ -62,7 +59,11 @@ export function DashboardRow3CashUdhar({ params }: DashboardRow3Props) {
     { key: 'formattedIn', label: t('dashboard.metrics.cashIn'), align: 'right' as const },
     { key: 'formattedOut', label: t('dashboard.metrics.cashOut'), align: 'right' as const },
     { key: 'formattedNet', label: t('dashboard.metrics.netChange'), align: 'right' as const },
-    { key: 'formattedClosing', label: t('dashboard.metrics.closingBalance'), align: 'right' as const },
+    {
+      key: 'formattedClosing',
+      label: t('dashboard.metrics.closingBalance'),
+      align: 'right' as const
+    }
   ];
 
   const cashTableRows = cashSeries.map((item) => ({
@@ -70,7 +71,7 @@ export function DashboardRow3CashUdhar({ params }: DashboardRow3Props) {
     formattedIn: formatPkrFull(item.cashIn),
     formattedOut: formatPkrFull(item.cashOut),
     formattedNet: formatPkrFull(item.netChange),
-    formattedClosing: formatPkrFull(item.closingBalance),
+    formattedClosing: formatPkrFull(item.closingBalance)
   }));
 
   const agingBuckets = aging?.buckets ?? [];
@@ -80,19 +81,19 @@ export function DashboardRow3CashUdhar({ params }: DashboardRow3Props) {
     label: b.label,
     bucketKey: b.bucket,
     amount: b.amount,
-    customerCount: b.customerCount,
+    customerCount: b.customerCount
   }));
 
   const agingTableColumns = [
     { key: 'label', label: t('dashboard.metrics.bucket') },
     { key: 'formattedAmount', label: t('dashboard.metrics.amount'), align: 'right' as const },
-    { key: 'customerCount', label: t('dashboard.metrics.customer'), align: 'right' as const },
+    { key: 'customerCount', label: t('dashboard.metrics.customer'), align: 'right' as const }
   ];
 
   const agingTableRows = agingBuckets.map((b) => ({
     label: b.label,
     formattedAmount: formatPkrFull(b.amount),
-    customerCount: formatNumber(b.customerCount),
+    customerCount: formatNumber(b.customerCount)
   }));
 
   const handleWhatsApp = (phone: string, name: string, amount: number) => {
@@ -134,16 +135,28 @@ export function DashboardRow3CashUdhar({ params }: DashboardRow3Props) {
                     <div className='font-semibold text-foreground'>{data.displayDate}</div>
                     <div className='mt-1.5 flex flex-col gap-1'>
                       <div className='flex items-center justify-between gap-4'>
-                        <span className='text-emerald-600 dark:text-emerald-400'>{t('dashboard.metrics.cashIn')}:</span>
-                        <span className='font-medium text-foreground'>{formatPkrFull(data.cashIn)}</span>
+                        <span className='text-emerald-600 dark:text-emerald-400'>
+                          {t('dashboard.metrics.cashIn')}:
+                        </span>
+                        <span className='font-medium text-foreground'>
+                          {formatPkrFull(data.cashIn)}
+                        </span>
                       </div>
                       <div className='flex items-center justify-between gap-4'>
-                        <span className='text-rose-600 dark:text-rose-400'>{t('dashboard.metrics.cashOut')}:</span>
-                        <span className='font-medium text-foreground'>{formatPkrFull(data.cashOut)}</span>
+                        <span className='text-rose-600 dark:text-rose-400'>
+                          {t('dashboard.metrics.cashOut')}:
+                        </span>
+                        <span className='font-medium text-foreground'>
+                          {formatPkrFull(data.cashOut)}
+                        </span>
                       </div>
                       <div className='flex items-center justify-between gap-4 pt-1 border-t'>
-                        <span className='text-muted-foreground'>{t('dashboard.metrics.closingBalance')}:</span>
-                        <span className='font-semibold text-foreground'>{formatPkrFull(data.closingBalance)}</span>
+                        <span className='text-muted-foreground'>
+                          {t('dashboard.metrics.closingBalance')}:
+                        </span>
+                        <span className='font-semibold text-foreground'>
+                          {formatPkrFull(data.closingBalance)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -151,8 +164,20 @@ export function DashboardRow3CashUdhar({ params }: DashboardRow3Props) {
               }}
             />
             <Legend verticalAlign='top' align='right' height={36} />
-            <Bar dataKey='cashIn' name={t('dashboard.metrics.cashIn')} fill='#10b981' radius={[4, 4, 0, 0]} maxBarSize={30} />
-            <Bar dataKey='cashOut' name={t('dashboard.metrics.cashOut')} fill='#ef4444' radius={[4, 4, 0, 0]} maxBarSize={30} />
+            <Bar
+              dataKey='cashIn'
+              name={t('dashboard.metrics.cashIn')}
+              fill='#10b981'
+              radius={[4, 4, 0, 0]}
+              maxBarSize={30}
+            />
+            <Bar
+              dataKey='cashOut'
+              name={t('dashboard.metrics.cashOut')}
+              fill='#ef4444'
+              radius={[4, 4, 0, 0]}
+              maxBarSize={30}
+            />
             <Line
               type='monotone'
               dataKey='closingBalance'
@@ -208,12 +233,20 @@ export function DashboardRow3CashUdhar({ params }: DashboardRow3Props) {
                     <div className='rounded-lg border bg-background p-2.5 shadow-md text-xs'>
                       <div className='font-semibold text-foreground'>{data.label}</div>
                       <div className='mt-1 flex items-center justify-between gap-4'>
-                        <span className='text-muted-foreground'>{t('dashboard.metrics.amount')}:</span>
-                        <span className='font-semibold text-foreground'>{formatPkrFull(data.amount)}</span>
+                        <span className='text-muted-foreground'>
+                          {t('dashboard.metrics.amount')}:
+                        </span>
+                        <span className='font-semibold text-foreground'>
+                          {formatPkrFull(data.amount)}
+                        </span>
                       </div>
                       <div className='flex items-center justify-between gap-4'>
-                        <span className='text-muted-foreground'>{t('dashboard.metrics.customer')}:</span>
-                        <span className='font-medium text-foreground'>{formatNumber(data.customerCount)}</span>
+                        <span className='text-muted-foreground'>
+                          {t('dashboard.metrics.customer')}:
+                        </span>
+                        <span className='font-medium text-foreground'>
+                          {formatNumber(data.customerCount)}
+                        </span>
                       </div>
                     </div>
                   );
@@ -221,10 +254,7 @@ export function DashboardRow3CashUdhar({ params }: DashboardRow3Props) {
               />
               <Bar dataKey='amount' radius={[0, 4, 4, 0]} maxBarSize={22}>
                 {agingChartData.map((entry, idx) => (
-                  <Cell
-                    key={idx}
-                    fill={entry.bucketKey === '60+' ? '#f59e0b' : 'var(--chart-1)'}
-                  />
+                  <Cell key={idx} fill={entry.bucketKey === '60+' ? '#f59e0b' : 'var(--chart-1)'} />
                 ))}
               </Bar>
             </ComposedChart>
@@ -250,7 +280,10 @@ export function DashboardRow3CashUdhar({ params }: DashboardRow3Props) {
                         {formatPkrFull(d.amount)}
                       </span>
                       {d.oldestDays > 30 ? (
-                        <Badge variant='outline' className='text-[10px] text-amber-600 dark:text-amber-400'>
+                        <Badge
+                          variant='outline'
+                          className='text-[10px] text-amber-600 dark:text-amber-400'
+                        >
                           {d.oldestDays}d
                         </Badge>
                       ) : null}

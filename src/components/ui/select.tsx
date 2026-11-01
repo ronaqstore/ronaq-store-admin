@@ -48,7 +48,9 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon
-        render={<IconSelector className='pointer-events-none size-4 shrink-0 text-muted-foreground' />}
+        render={
+          <IconSelector className='pointer-events-none size-4 shrink-0 text-muted-foreground' />
+        }
       />
     </SelectPrimitive.Trigger>
   );
@@ -121,7 +123,9 @@ function SelectItem({ className, children, title, ...props }: SelectPrimitive.It
       )}
       {...props}
     >
-      <SelectPrimitive.ItemText className='min-w-0 flex-1 truncate'>{children}</SelectPrimitive.ItemText>
+      <SelectPrimitive.ItemText className='min-w-0 flex-1 truncate'>
+        {children}
+      </SelectPrimitive.ItemText>
       <SelectPrimitive.ItemIndicator
         render={
           <span className='pointer-events-none absolute inset-e-2 flex size-4 shrink-0 items-center justify-center' />

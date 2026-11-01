@@ -1,9 +1,7 @@
 import { listProducts } from '@/features/products/api/service';
 import type { AsyncFacetedFilterConfig } from '@/types/data-table';
 
-export function createProductAsyncFilter(
-  queryKeyTail: string
-): AsyncFacetedFilterConfig {
+export function createProductAsyncFilter(queryKeyTail: string): AsyncFacetedFilterConfig {
   return {
     queryKey: ['products', queryKeyTail],
     searchPlaceholderKey: 'search.products',

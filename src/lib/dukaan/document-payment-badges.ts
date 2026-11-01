@@ -1,8 +1,4 @@
-import {
-  purchasePaymentState,
-  salePaymentState,
-  sumActivePaid
-} from './document-payment-state';
+import { purchasePaymentState, salePaymentState, sumActivePaid } from './document-payment-state';
 import type {
   DocumentPayBadge,
   DocumentPayTranslator,
@@ -34,11 +30,7 @@ export function purchasePayBadge(
     return { label: t('purchases.openingBadge'), status: 'ACTIVE' };
   }
   const paid = sumActivePaid(purchase.payments);
-  const state = purchasePaymentState(
-    purchase.totalAmount,
-    paid,
-    purchase.isOpeningStock
-  );
+  const state = purchasePaymentState(purchase.totalAmount, paid, purchase.isOpeningStock);
   if (state === 'PAID') return { label: t('status.paid'), status: 'PAID' };
   if (state === 'PARTIAL') return { label: t('status.partial'), status: 'PARTIAL' };
   return { label: t('status.payable'), status: 'PAYABLE' };

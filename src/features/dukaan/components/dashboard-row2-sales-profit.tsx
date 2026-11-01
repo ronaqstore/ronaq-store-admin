@@ -11,19 +11,16 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis,
+  YAxis
 } from 'recharts';
 import { ChartCard } from '@/components/dashboard/chart-card';
 import {
   formatDateLabel,
   formatNumber,
   formatPkrCompact,
-  formatPkrFull,
+  formatPkrFull
 } from '@/lib/dashboard/formatters';
-import {
-  shopProfitWaterfallQueryOptions,
-  shopSalesTrendQueryOptions,
-} from '../api/queries';
+import { shopProfitWaterfallQueryOptions, shopSalesTrendQueryOptions } from '../api/queries';
 import { useT } from '@/i18n/use-t';
 import type { DashboardRow2Props } from '@/types/dashboard';
 
@@ -34,14 +31,14 @@ export function DashboardRow2SalesProfit({ params, compare = false }: DashboardR
     data: trend,
     isLoading: isTrendLoading,
     error: trendError,
-    refetch: refetchTrend,
+    refetch: refetchTrend
   } = useQuery(shopSalesTrendQueryOptions(params));
 
   const {
     data: waterfall,
     isLoading: isWaterfallLoading,
     error: waterfallError,
-    refetch: refetchWaterfall,
+    refetch: refetchWaterfall
   } = useQuery(shopProfitWaterfallQueryOptions(params));
 
   const trendSeries = trend?.series ?? [];
@@ -56,16 +53,20 @@ export function DashboardRow2SalesProfit({ params, compare = false }: DashboardR
       grossProfit: item.grossProfit,
       netProfit: item.netProfit,
       ordersCount: item.ordersCount,
-      prevSales: prevItem ? prevItem.sales : undefined,
+      prevSales: prevItem ? prevItem.sales : undefined
     };
   });
 
   const trendTableColumns = [
     { key: 'displayDate', label: t('dashboard.metrics.date') },
     { key: 'formattedSales', label: t('dashboard.metrics.sales'), align: 'right' as const },
-    { key: 'formattedGrossProfit', label: t('dashboard.metrics.grossProfit'), align: 'right' as const },
+    {
+      key: 'formattedGrossProfit',
+      label: t('dashboard.metrics.grossProfit'),
+      align: 'right' as const
+    },
     { key: 'formattedNetProfit', label: t('dashboard.metrics.netProfit'), align: 'right' as const },
-    { key: 'ordersCount', label: t('dashboard.metrics.units'), align: 'right' as const },
+    { key: 'ordersCount', label: t('dashboard.metrics.units'), align: 'right' as const }
   ];
 
   const trendTableRows = trendSeries.map((s) => ({
@@ -73,7 +74,7 @@ export function DashboardRow2SalesProfit({ params, compare = false }: DashboardR
     formattedSales: formatPkrFull(s.sales),
     formattedGrossProfit: formatPkrFull(s.grossProfit),
     formattedNetProfit: formatPkrFull(s.netProfit),
-    ordersCount: s.ordersCount,
+    ordersCount: s.ordersCount
   }));
 
   const waterfallSteps = waterfall?.steps ?? [];
@@ -83,19 +84,19 @@ export function DashboardRow2SalesProfit({ params, compare = false }: DashboardR
     signedAmount: step.amount,
     displayAmount: formatPkrCompact(step.amount),
     runningTotal: step.runningTotal,
-    isNegative: step.isNegative,
+    isNegative: step.isNegative
   }));
 
   const waterfallTableColumns = [
     { key: 'name', label: t('dashboard.metrics.step') },
     { key: 'amount', label: t('dashboard.metrics.amount'), align: 'right' as const },
-    { key: 'runningTotal', label: t('dashboard.metrics.closingBalance'), align: 'right' as const },
+    { key: 'runningTotal', label: t('dashboard.metrics.closingBalance'), align: 'right' as const }
   ];
 
   const waterfallTableRows = waterfallSteps.map((step) => ({
     name: step.name,
     amount: formatPkrFull(step.amount),
-    runningTotal: formatPkrFull(step.runningTotal),
+    runningTotal: formatPkrFull(step.runningTotal)
   }));
 
   return (
@@ -116,7 +117,10 @@ export function DashboardRow2SalesProfit({ params, compare = false }: DashboardR
           csvFilename='sales-profit-trend'
         >
           <ResponsiveContainer width='100%' height={320}>
-            <ComposedChart data={trendChartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <ComposedChart
+              data={trendChartData}
+              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray='3 3' className='stroke-muted/40' />
               <XAxis dataKey='displayDate' className='text-xs' tickLine={false} />
               <YAxis
@@ -134,21 +138,37 @@ export function DashboardRow2SalesProfit({ params, compare = false }: DashboardR
                       <div className='font-semibold text-foreground'>{data.displayDate}</div>
                       <div className='mt-1.5 flex flex-col gap-1'>
                         <div className='flex items-center justify-between gap-4'>
-                          <span className='text-muted-foreground'>{t('dashboard.metrics.sales')}:</span>
-                          <span className='font-medium text-foreground'>{formatPkrFull(data.sales)}</span>
+                          <span className='text-muted-foreground'>
+                            {t('dashboard.metrics.sales')}:
+                          </span>
+                          <span className='font-medium text-foreground'>
+                            {formatPkrFull(data.sales)}
+                          </span>
                         </div>
                         <div className='flex items-center justify-between gap-4'>
-                          <span className='text-muted-foreground'>{t('dashboard.metrics.netProfit')}:</span>
-                          <span className='font-medium text-foreground'>{formatPkrFull(data.netProfit)}</span>
+                          <span className='text-muted-foreground'>
+                            {t('dashboard.metrics.netProfit')}:
+                          </span>
+                          <span className='font-medium text-foreground'>
+                            {formatPkrFull(data.netProfit)}
+                          </span>
                         </div>
                         <div className='flex items-center justify-between gap-4'>
-                          <span className='text-muted-foreground'>{t('dashboard.metrics.units')}:</span>
-                          <span className='font-medium text-foreground'>{formatNumber(data.ordersCount)}</span>
+                          <span className='text-muted-foreground'>
+                            {t('dashboard.metrics.units')}:
+                          </span>
+                          <span className='font-medium text-foreground'>
+                            {formatNumber(data.ordersCount)}
+                          </span>
                         </div>
                         {compare && data.prevSales !== undefined ? (
                           <div className='flex items-center justify-between gap-4 pt-1 border-t'>
-                            <span className='text-muted-foreground'>{t('dashboard.previousPeriod')}:</span>
-                            <span className='font-medium text-muted-foreground'>{formatPkrFull(data.prevSales)}</span>
+                            <span className='text-muted-foreground'>
+                              {t('dashboard.previousPeriod')}:
+                            </span>
+                            <span className='font-medium text-muted-foreground'>
+                              {formatPkrFull(data.prevSales)}
+                            </span>
                           </div>
                         ) : null}
                       </div>
@@ -202,7 +222,10 @@ export function DashboardRow2SalesProfit({ params, compare = false }: DashboardR
           csvFilename='profit-waterfall'
         >
           <ResponsiveContainer width='100%' height={320}>
-            <ComposedChart data={waterfallChartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <ComposedChart
+              data={waterfallChartData}
+              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray='3 3' className='stroke-muted/40' />
               <XAxis dataKey='name' className='text-[10px]' tickLine={false} interval={0} />
               <YAxis
@@ -219,14 +242,20 @@ export function DashboardRow2SalesProfit({ params, compare = false }: DashboardR
                     <div className='rounded-lg border bg-background p-2.5 shadow-md text-xs'>
                       <div className='font-semibold text-foreground'>{data.name}</div>
                       <div className='mt-1 flex items-center justify-between gap-4'>
-                        <span className='text-muted-foreground'>{t('dashboard.metrics.amount')}:</span>
+                        <span className='text-muted-foreground'>
+                          {t('dashboard.metrics.amount')}:
+                        </span>
                         <span className='font-medium text-foreground'>
                           {formatPkrFull(data.signedAmount)}
                         </span>
                       </div>
                       <div className='flex items-center justify-between gap-4'>
-                        <span className='text-muted-foreground'>{t('dashboard.metrics.closingBalance')}:</span>
-                        <span className='font-medium text-foreground'>{formatPkrFull(data.runningTotal)}</span>
+                        <span className='text-muted-foreground'>
+                          {t('dashboard.metrics.closingBalance')}:
+                        </span>
+                        <span className='font-medium text-foreground'>
+                          {formatPkrFull(data.runningTotal)}
+                        </span>
                       </div>
                     </div>
                   );

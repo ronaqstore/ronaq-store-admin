@@ -80,7 +80,9 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
             <span className='flex min-w-0 items-center gap-2 truncate' title={currentItem.label}>
               <span className='truncate font-normal text-foreground'>{currentItem.label}</span>
               {currentItem.subLabel ? (
-                <span className='shrink-0 text-xs text-muted-foreground'>({currentItem.subLabel})</span>
+                <span className='shrink-0 text-xs text-muted-foreground'>
+                  ({currentItem.subLabel})
+                </span>
               ) : null}
             </span>
           ) : (
@@ -163,7 +165,10 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
                       {item.label}
                     </span>
                     {item.subLabel ? (
-                      <span className='block truncate text-xs text-muted-foreground' title={item.subLabel}>
+                      <span
+                        className='block truncate text-xs text-muted-foreground'
+                        title={item.subLabel}
+                      >
                         {item.subLabel}
                       </span>
                     ) : null}

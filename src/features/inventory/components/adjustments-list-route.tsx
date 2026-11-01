@@ -29,9 +29,7 @@ async function AdjustmentsRouteShell({
   return (
     <PageContainer fill pageTitle={pageTitle} pageDescription={pageDescription}>
       <PrefetchHydrationBoundary
-        prefetch={(token, qc) =>
-          qc.prefetchQuery(inventoryAdjustmentsQueryOptions(filters, token))
-        }
+        prefetch={(token, qc) => qc.prefetchQuery(inventoryAdjustmentsQueryOptions(filters, token))}
       >
         {children}
       </PrefetchHydrationBoundary>

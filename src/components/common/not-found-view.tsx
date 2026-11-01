@@ -10,9 +10,7 @@ export function NotFoundView({ onBack, onHome }: NotFoundViewProps) {
       <span className='from-foreground bg-linear-to-b to-transparent bg-clip-text text-[10rem] leading-none font-extrabold text-transparent'>
         404
       </span>
-      <h2 className='font-heading my-2 text-2xl font-bold'>
-        {staticT('errors.notFoundTitle')}
-      </h2>
+      <h2 className='font-heading my-2 text-2xl font-bold'>{staticT('errors.notFoundTitle')}</h2>
       <p>{staticT('errors.notFoundDescription')}</p>
       <div className='mt-8 flex justify-center gap-2'>
         <Button type='button' onClick={onBack} variant='default' size='lg'>

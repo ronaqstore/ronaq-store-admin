@@ -6,11 +6,7 @@ import type {
   CancelPaymentInput,
   CancelImpactDTO
 } from '@/lib/api/types';
-import type {
-  PaymentsListFilters,
-  CancelPaymentResult,
-  CustomerReceivableDTO
-} from '@/types';
+import type { PaymentsListFilters, CancelPaymentResult, CustomerReceivableDTO } from '@/types';
 import { appFetch } from '@/lib/api/app-fetch';
 
 import { buildQueryString } from '@/lib/api/query-params';

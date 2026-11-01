@@ -13,8 +13,7 @@ export function PlatformAdminLoginForm() {
   const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const banner =
-    searchParams.get('reason') === 'session' ? t('auth.sessionExpiredLogout') : null;
+  const banner = searchParams.get('reason') === 'session' ? t('auth.sessionExpiredLogout') : null;
 
   const handleLogin = async (values: LoginValues): Promise<string | null> => {
     const result = await signIn('credentials', {
@@ -53,10 +52,7 @@ export function PlatformAdminLoginForm() {
           <p className='text-muted-foreground'>{t('auth.platformAdminNotice')}</p>
           <p className='text-muted-foreground'>
             {t('auth.shopOwnerPrompt')}{' '}
-            <Link
-              href='/login'
-              className='text-foreground underline-offset-4 hover:underline'
-            >
+            <Link href='/login' className='text-foreground underline-offset-4 hover:underline'>
               {t('auth.shopOwnerSignInLink')}
             </Link>
           </p>

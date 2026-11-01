@@ -4,9 +4,7 @@ import type { ListRouteOpenAddProps } from '@/types/dashboard';
 import { purchasesQueryOptions } from '../api/queries';
 import { PurchasesListClient } from './purchases';
 
-export async function PurchasesListRoute({
-  defaultOpenAdd = false
-}: ListRouteOpenAddProps) {
+export async function PurchasesListRoute({ defaultOpenAdd = false }: ListRouteOpenAddProps) {
   return (
     <PageContainer
       fill

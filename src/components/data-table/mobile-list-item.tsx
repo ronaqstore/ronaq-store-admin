@@ -124,7 +124,9 @@ export function MobileListItem<TData>({
               <div
                 className={cn(
                   'shrink-0',
-                  isCard ? 'flex items-baseline justify-between gap-2' : 'ms-1 w-[5.5rem] text-end sm:w-24'
+                  isCard
+                    ? 'flex items-baseline justify-between gap-2'
+                    : 'ms-1 w-[5.5rem] text-end sm:w-24'
                 )}
               >
                 <p

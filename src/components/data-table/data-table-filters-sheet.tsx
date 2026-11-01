@@ -90,10 +90,7 @@ export function DataTableFiltersSheet<TData>({
                 items={[
                   { value: '__none__', label: '—' },
                   ...sortable.flatMap((column) => {
-                    const label = translateMaybe(
-                      column.columnDef.meta?.label ?? column.id,
-                      t
-                    );
+                    const label = translateMaybe(column.columnDef.meta?.label ?? column.id, t);
                     return [
                       { value: `${column.id}:asc`, label: `${label} ↑` },
                       { value: `${column.id}:desc`, label: `${label} ↓` }
@@ -115,10 +112,7 @@ export function DataTableFiltersSheet<TData>({
                   <SelectGroup>
                     <SelectItem value='__none__'>—</SelectItem>
                     {sortable.map((column) => {
-                      const label = translateMaybe(
-                        column.columnDef.meta?.label ?? column.id,
-                        t
-                      );
+                      const label = translateMaybe(column.columnDef.meta?.label ?? column.id, t);
                       return (
                         <React.Fragment key={column.id}>
                           <SelectItem value={`${column.id}:asc`}>{label} ↑</SelectItem>

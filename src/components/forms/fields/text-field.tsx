@@ -45,8 +45,7 @@ export function TextField({
   const resolvedMin = min ?? (isNumber ? 0 : undefined);
   const resolvedMax = max ?? (isNumber ? INPUT_LIMITS.amountRupeesMax : undefined);
   const resolvedMaxLength =
-    maxLength ??
-    (isPassword ? INPUT_LIMITS.password : isNumber ? undefined : INPUT_LIMITS.name);
+    maxLength ?? (isPassword ? INPUT_LIMITS.password : isNumber ? undefined : INPUT_LIMITS.name);
 
   const sharedInputProps = {
     ...inputProps,
@@ -69,9 +68,7 @@ export function TextField({
       if (!isNumber) {
         const sanitized = sanitize ? sanitize(e.target.value) : e.target.value;
         const next =
-          resolvedMaxLength !== undefined
-            ? clampText(sanitized, resolvedMaxLength)
-            : sanitized;
+          resolvedMaxLength !== undefined ? clampText(sanitized, resolvedMaxLength) : sanitized;
         field.handleChange(next);
         return;
       }
@@ -133,7 +130,9 @@ export function TextField({
       ) : (
         <div className='relative'>
           <Input className={className} {...sharedInputProps} />
-          {isValidating && <Spinner className='absolute top-1/2 inset-e-3 h-4 w-4 -translate-y-1/2' />}
+          {isValidating && (
+            <Spinner className='absolute top-1/2 inset-e-3 h-4 w-4 -translate-y-1/2' />
+          )}
         </div>
       )}
       {description && <FieldDescription>{description}</FieldDescription>}

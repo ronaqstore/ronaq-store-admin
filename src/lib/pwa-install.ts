@@ -1,7 +1,6 @@
 import { isStandaloneDisplay } from '@/lib/pwa';
 import type { BeforeInstallPromptEvent, NavigatorWithRelatedApps } from '@/types/common';
 
-
 type Listener = () => void;
 
 const INSTALLED_FLAG_KEY = 'pwa-app-installed';
@@ -86,7 +85,6 @@ export function ensureInstallListeners(): void {
     }
     emit();
   });
-
 
   window.addEventListener('appinstalled', () => {
     installed = true;

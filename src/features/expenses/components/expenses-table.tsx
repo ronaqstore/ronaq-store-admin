@@ -105,20 +105,17 @@ export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
   const sortableColumnIds = ['expenseDate', 'categoryName', 'amount'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     ExpenseQueryFilter['sortBy']
-  >(sortableColumnIds, 'categoryName', [
-    'status',
-    'categoryId',
-    'expenseDate',
-    'amount'
-  ], 'expenseDate');
+  >(
+    sortableColumnIds,
+    'categoryName',
+    ['status', 'categoryId', 'expenseDate', 'amount'],
+    'expenseDate'
+  );
 
   const [searchParam] = useQueryState('search', parseAsString);
   const [categoryNameParam] = useQueryState('categoryName', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
-  const [expenseDateParam] = useQueryState(
-    'expenseDate',
-    parseAsArrayOf(parseAsString, ',')
-  );
+  const [expenseDateParam] = useQueryState('expenseDate', parseAsArrayOf(parseAsString, ','));
 
   const search = searchParam || categoryNameParam || undefined;
   const statusFilter = parseActiveCancelledStatus(

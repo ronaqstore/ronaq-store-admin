@@ -103,10 +103,7 @@ const purchaseMobileItem: MobileItemConfig<PurchaseDTO> = {
   subtitle: (row) => row.supplierInvoiceRef || row.supplierName || '—',
   badge: (row) => purchasePayBadge(row, staticT),
   value: (row) => formatPkr(row.totalAmount),
-  meta: [
-    (row) => formatIsoDate(row.purchaseDate),
-    (row) => documentOutstandingMeta(row, staticT)
-  ],
+  meta: [(row) => formatIsoDate(row.purchaseDate), (row) => documentOutstandingMeta(row, staticT)],
   ariaLabel: (row) => `${row.purchaseNo}, ${row.supplierName ?? ''}, ${formatPkr(row.totalAmount)}`
 };
 
@@ -114,22 +111,15 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
   const t = useT();
   const router = useRouter();
   const [peekCancelPurchase, setPeekCancelPurchase] = useState<PurchaseDTO | null>(null);
-  const sortableColumnIds = [
-    'purchaseDate',
-    'purchaseNo',
-    'totalAmount',
-    'paid',
-    'outstanding'
-  ];
+  const sortableColumnIds = ['purchaseDate', 'purchaseNo', 'totalAmount', 'paid', 'outstanding'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     PurchasesListFilters['sortBy']
-  >(sortableColumnIds, 'purchaseDate', [
-    'status',
-    'supplierId',
-    'totalAmount',
-    'paid',
-    'outstanding'
-  ], 'purchaseDate');
+  >(
+    sortableColumnIds,
+    'purchaseDate',
+    ['status', 'supplierId', 'totalAmount', 'paid', 'outstanding'],
+    'purchaseDate'
+  );
 
   const [purchaseNoParam] = useQueryState('purchaseNo', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
@@ -142,16 +132,10 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
   const payStatusFilter = parsePurchasePayStatus(
     (filters as Record<string, unknown>).status ?? statusParam
   );
-  const supplierId = firstPurchaseFilterValue(
-    (filters as Record<string, unknown>).supplierId
-  );
-  const totalRange = parseRupeeMoneyRange(
-    (filters as Record<string, unknown>).totalAmount
-  );
+  const supplierId = firstPurchaseFilterValue((filters as Record<string, unknown>).supplierId);
+  const totalRange = parseRupeeMoneyRange((filters as Record<string, unknown>).totalAmount);
   const paidRange = parseRupeeMoneyRange((filters as Record<string, unknown>).paid);
-  const outstandingRange = parseRupeeMoneyRange(
-    (filters as Record<string, unknown>).outstanding
-  );
+  const outstandingRange = parseRupeeMoneyRange((filters as Record<string, unknown>).outstanding);
 
   const backendSortBy =
     sortBy === 'purchaseDate' ||
@@ -375,8 +359,7 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
                     { label: t('table.col.paid'), value: formatPkr(paid) },
                     {
                       label: t('table.col.outstanding'),
-                      value:
-                        row.status === 'CANCELLED' ? '—' : formatPkr(outstanding)
+                      value: row.status === 'CANCELLED' ? '—' : formatPkr(outstanding)
                     }
                   ]),
               {

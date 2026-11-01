@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis,
+  YAxis
 } from 'recharts';
 import { ChartCard } from '@/components/dashboard/chart-card';
 import { Badge } from '@/components/ui/badge';
@@ -21,12 +21,9 @@ import {
   formatPercent,
   formatPkrCompact,
   formatPkrFull,
-  truncateChartLabel,
+  truncateChartLabel
 } from '@/lib/dashboard/formatters';
-import {
-  shopSalesMixQueryOptions,
-  shopTopProductsQueryOptions,
-} from '../api/queries';
+import { shopSalesMixQueryOptions, shopTopProductsQueryOptions } from '../api/queries';
 import { useT } from '@/i18n/use-t';
 import type { DashboardRow4Props } from '@/types/dashboard';
 
@@ -36,7 +33,7 @@ const DONUT_COLORS = [
   'var(--chart-3)',
   'var(--chart-4)',
   'var(--chart-5)',
-  'hsl(var(--muted-foreground))',
+  'hsl(var(--muted-foreground))'
 ];
 
 const DONUT_BG_CLASSES = [
@@ -45,7 +42,7 @@ const DONUT_BG_CLASSES = [
   'bg-[var(--chart-3)]',
   'bg-[var(--chart-4)]',
   'bg-[var(--chart-5)]',
-  'bg-muted-foreground',
+  'bg-muted-foreground'
 ];
 
 export function DashboardRow4ProductsMix({ params }: DashboardRow4Props) {
@@ -56,14 +53,14 @@ export function DashboardRow4ProductsMix({ params }: DashboardRow4Props) {
     data: topProducts,
     isLoading: isProductsLoading,
     error: productsError,
-    refetch: refetchProducts,
+    refetch: refetchProducts
   } = useQuery(shopTopProductsQueryOptions({ ...params, metric, limit: 7 }));
 
   const {
     data: salesMix,
     isLoading: isMixLoading,
     error: mixError,
-    refetch: refetchMix,
+    refetch: refetchMix
   } = useQuery(shopSalesMixQueryOptions(params));
 
   const productItems = topProducts?.items ?? [];
@@ -74,7 +71,7 @@ export function DashboardRow4ProductsMix({ params }: DashboardRow4Props) {
     trackingType: item.trackingType,
     value: item.value,
     marginPct: item.marginPct,
-    unitsSold: item.unitsSold,
+    unitsSold: item.unitsSold
   }));
   const productsChartHeight = Math.max(280, productItems.length * 44);
 
@@ -82,17 +79,14 @@ export function DashboardRow4ProductsMix({ params }: DashboardRow4Props) {
     { key: 'name', label: t('dashboard.metrics.product') },
     { key: 'trackingType', label: t('dashboard.metrics.trackingType') },
     { key: 'formattedValue', label: t(`dashboard.metrics.${metric}`), align: 'right' as const },
-    { key: 'formattedMargin', label: t('dashboard.metrics.margin'), align: 'right' as const },
+    { key: 'formattedMargin', label: t('dashboard.metrics.margin'), align: 'right' as const }
   ];
 
   const productsTableRows = productItems.map((item) => ({
     name: `${item.name} (${item.brand})`,
     trackingType: item.trackingType === 'SERIALIZED' ? 'IMEI' : 'QTY',
-    formattedValue:
-      metric === 'units'
-        ? formatNumber(item.value)
-        : formatPkrFull(item.value),
-    formattedMargin: formatPercent(item.marginPct),
+    formattedValue: metric === 'units' ? formatNumber(item.value) : formatPkrFull(item.value),
+    formattedMargin: formatPercent(item.marginPct)
   }));
 
   const trackingMix = salesMix?.byTrackingType ?? [];
@@ -101,25 +95,25 @@ export function DashboardRow4ProductsMix({ params }: DashboardRow4Props) {
   const mixDonutData = categoryMix.map((c) => ({
     name: c.name,
     value: c.revenue,
-    percentage: c.percentage,
+    percentage: c.percentage
   }));
 
   const mixTableColumns = [
     { key: 'name', label: t('dashboard.metrics.category') },
     { key: 'formattedRevenue', label: t('dashboard.metrics.revenue'), align: 'right' as const },
-    { key: 'percentage', label: t('dashboard.metrics.share'), align: 'right' as const },
+    { key: 'percentage', label: t('dashboard.metrics.share'), align: 'right' as const }
   ];
 
   const mixTableRows = categoryMix.map((c) => ({
     name: c.name,
     formattedRevenue: formatPkrFull(c.revenue),
-    percentage: `${c.percentage}%`,
+    percentage: `${c.percentage}%`
   }));
 
   const metricOptions = [
     { key: 'revenue', label: t('dashboard.metrics.revenue') },
     { key: 'profit', label: t('dashboard.metrics.profit') },
-    { key: 'units', label: t('dashboard.metrics.units') },
+    { key: 'units', label: t('dashboard.metrics.units') }
   ];
 
   return (
@@ -173,7 +167,9 @@ export function DashboardRow4ProductsMix({ params }: DashboardRow4Props) {
                 return (
                   <div className='bg-background max-w-65 rounded-lg border p-2.5 text-xs shadow-md'>
                     <div className='flex flex-col gap-1.5'>
-                      <span className='text-foreground wrap-break-word font-semibold'>{data.name}</span>
+                      <span className='text-foreground wrap-break-word font-semibold'>
+                        {data.name}
+                      </span>
                       <div className='flex flex-wrap gap-1'>
                         <Badge variant='outline' className='text-[10px]'>
                           {data.brand}
@@ -185,13 +181,19 @@ export function DashboardRow4ProductsMix({ params }: DashboardRow4Props) {
                     </div>
                     <div className='mt-1.5 flex flex-col gap-1'>
                       <div className='flex items-center justify-between gap-4'>
-                        <span className='text-muted-foreground'>{t(`dashboard.metrics.${metric}`)}:</span>
+                        <span className='text-muted-foreground'>
+                          {t(`dashboard.metrics.${metric}`)}:
+                        </span>
                         <span className='font-medium text-foreground'>
-                          {metric === 'units' ? formatNumber(data.value) : formatPkrFull(data.value)}
+                          {metric === 'units'
+                            ? formatNumber(data.value)
+                            : formatPkrFull(data.value)}
                         </span>
                       </div>
                       <div className='flex items-center justify-between gap-4'>
-                        <span className='text-muted-foreground'>{t('dashboard.metrics.margin')}:</span>
+                        <span className='text-muted-foreground'>
+                          {t('dashboard.metrics.margin')}:
+                        </span>
                         <span className='font-medium text-emerald-600 dark:text-emerald-400'>
                           {formatPercent(data.marginPct)}
                         </span>
@@ -201,12 +203,7 @@ export function DashboardRow4ProductsMix({ params }: DashboardRow4Props) {
                 );
               }}
             />
-            <Bar
-              dataKey='value'
-              fill='var(--chart-2)'
-              radius={[0, 4, 4, 0]}
-              maxBarSize={18}
-            />
+            <Bar dataKey='value' fill='var(--chart-2)' radius={[0, 4, 4, 0]} maxBarSize={18} />
           </ComposedChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -264,11 +261,17 @@ export function DashboardRow4ProductsMix({ params }: DashboardRow4Props) {
                       <div className='rounded-lg border bg-background p-2.5 shadow-md text-xs'>
                         <div className='font-semibold text-foreground'>{data.name}</div>
                         <div className='mt-1 flex items-center justify-between gap-4'>
-                          <span className='text-muted-foreground'>{t('dashboard.metrics.revenue')}:</span>
-                          <span className='font-semibold text-foreground'>{formatPkrFull(data.value)}</span>
+                          <span className='text-muted-foreground'>
+                            {t('dashboard.metrics.revenue')}:
+                          </span>
+                          <span className='font-semibold text-foreground'>
+                            {formatPkrFull(data.value)}
+                          </span>
                         </div>
                         <div className='flex items-center justify-between gap-4'>
-                          <span className='text-muted-foreground'>{t('dashboard.metrics.share')}:</span>
+                          <span className='text-muted-foreground'>
+                            {t('dashboard.metrics.share')}:
+                          </span>
                           <span className='font-medium text-foreground'>{data.percentage}%</span>
                         </div>
                       </div>

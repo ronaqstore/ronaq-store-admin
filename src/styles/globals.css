@@ -10,7 +10,6 @@
 @custom-variant data-horizontal (&[data-orientation='horizontal']);
 @custom-variant data-vertical (&[data-orientation='vertical']);
 
-
 @import './theme.css';
 
 /* Semantic status tones (tables/badges) — independent of brand primary. */
@@ -58,7 +57,6 @@
   [role='button'] {
     touch-action: manipulation;
   }
-
 
   /* Hide scrollbars globally; scrolling still works */
   * {
@@ -795,7 +793,9 @@ html[lang='ur'] :where(.leading-none, .leading-tight, .leading-snug) {
 }
 
 /* Expanded sidebar only — keep icon-collapsed size-8 intact */
-html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-menu-button'],
+html[lang='ur']
+  [data-slot='sidebar']:not([data-collapsible='icon'])
+  [data-slot='sidebar-menu-button'],
 html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='menu-button'] {
   height: auto !important;
   min-height: 2.5rem;
@@ -804,15 +804,23 @@ html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sideb
   padding-block: 0.45rem;
 }
 
-html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-menu-button'] > span:last-child,
-html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='menu-button'] > span:last-child {
+html[lang='ur']
+  [data-slot='sidebar']:not([data-collapsible='icon'])
+  [data-slot='sidebar-menu-button']
+  > span:last-child,
+html[lang='ur']
+  [data-slot='sidebar']:not([data-collapsible='icon'])
+  [data-sidebar='menu-button']
+  > span:last-child {
   overflow: visible !important;
   text-overflow: clip !important;
   line-height: 2.15;
   padding-block: 0.1rem;
 }
 
-html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-group-label'],
+html[lang='ur']
+  [data-slot='sidebar']:not([data-collapsible='icon'])
+  [data-slot='sidebar-group-label'],
 html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='group-label'] {
   height: auto !important;
   min-height: 2rem;
@@ -821,8 +829,12 @@ html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sideb
   padding-block: 0.35rem;
 }
 
-html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-menu-sub-button'],
-html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='menu-sub-button'] {
+html[lang='ur']
+  [data-slot='sidebar']:not([data-collapsible='icon'])
+  [data-slot='sidebar-menu-sub-button'],
+html[lang='ur']
+  [data-slot='sidebar']:not([data-collapsible='icon'])
+  [data-sidebar='menu-sub-button'] {
   height: auto !important;
   min-height: 2rem;
   overflow: visible !important;
@@ -830,8 +842,14 @@ html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sideb
   padding-block: 0.35rem;
 }
 
-html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-menu-sub-button'] > span:last-child,
-html[lang='ur'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='menu-sub-button'] > span:last-child {
+html[lang='ur']
+  [data-slot='sidebar']:not([data-collapsible='icon'])
+  [data-slot='sidebar-menu-sub-button']
+  > span:last-child,
+html[lang='ur']
+  [data-slot='sidebar']:not([data-collapsible='icon'])
+  [data-sidebar='menu-sub-button']
+  > span:last-child {
   overflow: visible !important;
   text-overflow: clip !important;
 }
@@ -859,7 +877,9 @@ html[lang='ur'] [data-slot='breadcrumb-link'] {
   overflow: visible;
 }
 
-html[lang='ps'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-menu-button'],
+html[lang='ps']
+  [data-slot='sidebar']:not([data-collapsible='icon'])
+  [data-slot='sidebar-menu-button'],
 html[lang='ps'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='menu-button'] {
   height: auto !important;
   min-height: 2.25rem;
@@ -868,8 +888,14 @@ html[lang='ps'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sideb
   padding-block: 0.35rem;
 }
 
-html[lang='ps'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-slot='sidebar-menu-button'] > span:last-child,
-html[lang='ps'] [data-slot='sidebar']:not([data-collapsible='icon']) [data-sidebar='menu-button'] > span:last-child {
+html[lang='ps']
+  [data-slot='sidebar']:not([data-collapsible='icon'])
+  [data-slot='sidebar-menu-button']
+  > span:last-child,
+html[lang='ps']
+  [data-slot='sidebar']:not([data-collapsible='icon'])
+  [data-sidebar='menu-button']
+  > span:last-child {
   overflow: visible !important;
   text-overflow: clip !important;
 }

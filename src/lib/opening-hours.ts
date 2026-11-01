@@ -27,9 +27,7 @@ export function composeOpeningHours(opens: string, closes: string): string | nul
 
 export function parseOpeningHours(raw: string | null | undefined): OpeningHoursRange | null {
   if (!raw?.trim()) return null;
-  const match = raw
-    .trim()
-    .match(/(\d{1,2}:\d{2})\s*(?:[–—−-]|\bto\b)\s*(\d{1,2}:\d{2})/i);
+  const match = raw.trim().match(/(\d{1,2}:\d{2})\s*(?:[–—−-]|\bto\b)\s*(\d{1,2}:\d{2})/i);
   if (!match?.[1] || !match[2]) return null;
 
   const opens = normalizeHhmm(match[1]);

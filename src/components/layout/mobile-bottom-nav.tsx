@@ -62,7 +62,6 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
         className={cn(
           'bg-background/95 fixed inset-x-0 bottom-0 z-40 border-t border-border backdrop-blur-md',
           'pb-[env(safe-area-inset-bottom)] lg:hidden'
-
         )}
       >
         <ul className='mx-auto flex h-14 max-w-lg items-stretch justify-around px-1'>

@@ -41,12 +41,7 @@ function formatSignedAmount(amount: number): string {
   return formatPkr(0);
 }
 
-function LedgerRows({
-  openingBalance,
-  ledger,
-  openingLabel,
-  runningLabel
-}: PartyLedgerRowsProps) {
+function LedgerRows({ openingBalance, ledger, openingLabel, runningLabel }: PartyLedgerRowsProps) {
   const t = useT();
   const rows = [
     {
@@ -153,8 +148,7 @@ export function PartyLedgerView({
 }: PartyLedgerViewProps) {
   const t = useT();
   const hasDue = currentBalance > 0;
-  const hasOutstandingParts =
-    outstanding.openingRemaining > 0 || outstanding.bills.length > 0;
+  const hasOutstandingParts = outstanding.openingRemaining > 0 || outstanding.bills.length > 0;
 
   const form = useAppForm({
     defaultValues: { amount: undefined as number | undefined },
@@ -190,9 +184,7 @@ export function PartyLedgerView({
             </Avatar>
             <div className='min-w-0 space-y-1'>
               <div className='flex flex-wrap items-center gap-2'>
-                <h2 className='truncate text-lg font-semibold tracking-tight sm:text-xl'>
-                  {name}
-                </h2>
+                <h2 className='truncate text-lg font-semibold tracking-tight sm:text-xl'>{name}</h2>
                 {!hasDue ? (
                   <Badge variant='secondary'>{t('dukaan.party.ledgerSettled')}</Badge>
                 ) : null}
@@ -216,9 +208,7 @@ export function PartyLedgerView({
                   </p>
                 ) : null}
               </div>
-              {notes ? (
-                <p className='text-muted-foreground line-clamp-2 text-sm'>{notes}</p>
-              ) : null}
+              {notes ? <p className='text-muted-foreground line-clamp-2 text-sm'>{notes}</p> : null}
             </div>
           </div>
 

@@ -1,26 +1,14 @@
 'use client';
 
-import {
-  IconArrowDownRight,
-  IconArrowUpRight,
-  IconHelpCircle,
-} from '@tabler/icons-react';
+import { IconArrowDownRight, IconArrowUpRight, IconHelpCircle } from '@tabler/icons-react';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Link } from '@/i18n/navigation';
 import { formatPercent, formatPkrFull } from '@/lib/dashboard/formatters';
 import { cn } from '@/lib/utils';
 import type { KpiCardProps, MiniSparklineProps } from '@/types/charts';
 
-function MiniSparkline({
-  points,
-  color = 'currentColor',
-}: MiniSparklineProps) {
+function MiniSparkline({ points, color = 'currentColor' }: MiniSparklineProps) {
   if (!points || points.length < 2) return null;
 
   const min = Math.min(...points);
@@ -32,8 +20,7 @@ function MiniSparkline({
 
   const coords = points.map((val, idx) => {
     const x = padding + (idx / (points.length - 1)) * (width - 2 * padding);
-    const y =
-      height - padding - ((val - min) / range) * (height - 2 * padding);
+    const y = height - padding - ((val - min) / range) * (height - 2 * padding);
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   });
 
@@ -43,12 +30,7 @@ function MiniSparkline({
   const lastY = Number(lastCoord[1]);
 
   return (
-    <svg
-      width={width}
-      height={height}
-      className='overflow-visible'
-      aria-hidden='true'
-    >
+    <svg width={width} height={height} className='overflow-visible' aria-hidden='true'>
       <polyline
         fill='none'
         stroke={color}
@@ -70,29 +52,23 @@ export function KpiCard({
   sparkline,
   sparklineColor = 'var(--primary)',
   href,
-  className,
+  className
 }: KpiCardProps) {
   let isPositive = false;
   let isNegative = false;
   let trendClass = 'text-muted-foreground bg-muted/50';
 
   if (change) {
-    const isGood = change.isInverse
-      ? change.percentage < 0
-      : change.percentage > 0;
-    const isBad = change.isInverse
-      ? change.percentage > 0
-      : change.percentage < 0;
+    const isGood = change.isInverse ? change.percentage < 0 : change.percentage > 0;
+    const isBad = change.isInverse ? change.percentage > 0 : change.percentage < 0;
 
     isPositive = change.percentage > 0;
     isNegative = change.percentage < 0;
 
     if (isGood) {
-      trendClass =
-        'text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/40';
+      trendClass = 'text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/40';
     } else if (isBad) {
-      trendClass =
-        'text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-950/40';
+      trendClass = 'text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-950/40';
     }
   }
 
@@ -107,14 +83,12 @@ export function KpiCard({
       className={cn(
         'group transition-all duration-200',
         href ? 'hover:border-primary/50 hover:shadow-sm cursor-pointer' : '',
-        className,
+        className
       )}
     >
       <CardContent className='p-4 sm:p-5'>
         <div className='flex items-center justify-between gap-2'>
-          <span className='text-muted-foreground text-xs font-medium tracking-tight'>
-            {label}
-          </span>
+          <span className='text-muted-foreground text-xs font-medium tracking-tight'>{label}</span>
           {tooltip ? (
             <TooltipProvider>
               <Tooltip>
@@ -144,7 +118,7 @@ export function KpiCard({
             <div
               className={cn(
                 'inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium tabular-nums',
-                trendClass,
+                trendClass
               )}
             >
               {isPositive ? (
