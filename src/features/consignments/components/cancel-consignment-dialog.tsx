@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -18,6 +18,8 @@ import { DialogCancelButton } from '@/components/common/dialog-actions';
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { CONSIGNMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { CancelConsignmentDialogProps } from '@/types/consignments';
 import { cancelConsignmentMutation } from '../api/mutations';
 import { cancelConsignmentFormSchema } from '../schemas/consignment-schema';
@@ -29,6 +31,7 @@ export function CancelConsignmentDialog({
   onSuccess
 }: CancelConsignmentDialogProps) {
   const t = useT();
+  const qc = useQueryClient();
   const [cancelReason, setCancelReason] = useState('');
   const [error, setError] = useState('');
 
@@ -38,6 +41,7 @@ export function CancelConsignmentDialog({
       onOpenChange(false);
       setCancelReason('');
       setError('');
+      invalidateDomains({ queryClient: qc, domains: CONSIGNMENT_SYNC_DOMAINS });
       toastSuccessAfterClose(
         t('consignments.cancelSuccess', {
           consignmentNo: consignment?.consignmentNo ?? ''

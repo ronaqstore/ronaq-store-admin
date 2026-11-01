@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -35,6 +35,8 @@ import { mapProductToPicker } from '@/lib/api/picker';
 import { listCustomers } from '@/features/customers/api/service';
 import { listProducts } from '@/features/products/api/service';
 import { QuickVariantDialog } from '@/features/purchases/components/quick-variant-dialog';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { CONSIGNMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { ConsignmentDTO, CustomerDTO } from '@/lib/api/types';
 import type { ConsignmentIntakeDialogProps } from '@/types/consignments';
 import type { ProductPickerItem } from '@/types/picker';
@@ -47,6 +49,7 @@ export function ConsignmentIntakeDialog({
   onSuccess
 }: ConsignmentIntakeDialogProps) {
   const t = useT();
+  const qc = useQueryClient();
 
   const [customerId, setCustomerId] = useState<string>('');
   const [consignorName, setConsignorName] = useState('');
@@ -75,6 +78,7 @@ export function ConsignmentIntakeDialog({
     onSuccess: (data: ConsignmentDTO) => {
       onOpenChange(false);
       resetForm();
+      invalidateDomains({ queryClient: qc, domains: CONSIGNMENT_SYNC_DOMAINS });
       toastSuccessAfterClose(
         t('consignments.intakeSuccess', { consignmentNo: data.consignmentNo })
       );
