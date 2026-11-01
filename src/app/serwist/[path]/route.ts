@@ -11,8 +11,6 @@ export const { dynamic, dynamicParams, revalidate, generateStaticParams, GET } =
     useNativeEsbuild: true,
     additionalPrecacheEntries: [
       { url: '/~offline', revision },
-      { url: '/icons/icon-192.png', revision },
-      { url: '/icons/icon-512.png', revision },
       { url: '/manifest.webmanifest', revision }
     ]
   }
