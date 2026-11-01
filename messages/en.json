@@ -558,6 +558,9 @@
     "product": {
       "sell": "Sell",
       "quickSell": "Quick Sell",
+      "purchase": "Buy",
+      "quickPurchase": "Quick Buy",
+      "restock": "Restock",
       "productCreated": "Product created successfully",
       "productUpdated": "Product updated successfully",
       "photosUploadFailed": "Product saved, but photo upload failed. Add photos again.",

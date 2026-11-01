@@ -53,6 +53,7 @@ import {
 } from './products-table-filters';
 import { Button } from '@/components/ui/button';
 import { SaleCreateDialog } from '@/features/sales/components/sale-create-dialog';
+import { PurchaseCreateDialog } from '@/features/purchases/components/purchase-create-dialog';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { PRODUCT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
@@ -66,6 +67,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
   const qc = useQueryClient();
   const [statusConfirm, setStatusConfirm] = useState<EntityStatusConfirm | null>(null);
   const [quickSellProduct, setQuickSellProduct] = useState<ProductDTO | null>(null);
+  const [quickPurchaseProduct, setQuickPurchaseProduct] = useState<ProductDTO | null>(null);
 
   const sortableColumnIds = ['name', 'defaultSellingPrice'];
   const { params, filters, sortBy, sortOrder } = useDukaanListParams(
@@ -332,28 +334,47 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       },
       {
         id: 'actions',
-        size: 96,
+        size: 148,
         enableSorting: false,
         enableHiding: false,
         meta: { mobile: 'hidden' },
         cell: ({ row }) => (
           <div className='flex items-center justify-end gap-1.5'>
             {row.original.isActive ? (
-              <Button
-                type='button'
-                variant='outline'
-                size='xs'
-                className='h-7 px-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400'
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setQuickSellProduct(row.original);
-                }}
-              >
-                <Icons.cash className='me-1 h-3.5 w-3.5' />
-                {t('dukaan.product.sell')}
-              </Button>
+              <>
+                <Button
+                  type='button'
+                  variant='outline'
+                  size='xs'
+                  className='h-7 px-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setQuickSellProduct(row.original);
+                  }}
+                >
+                  <Icons.cash className='me-1 h-3.5 w-3.5' />
+                  {t('dukaan.product.sell')}
+                </Button>
+                <Button
+                  type='button'
+                  variant='outline'
+                  size='xs'
+                  className='h-7 px-2 text-xs font-medium text-sky-600 hover:text-sky-700 dark:text-sky-400'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setQuickPurchaseProduct(row.original);
+                  }}
+                >
+                  <Icons.box className='me-1 h-3.5 w-3.5' />
+                  {t('dukaan.product.purchase')}
+                </Button>
+              </>
             ) : null}
-            <ProductCellAction data={row.original} onSell={(p) => setQuickSellProduct(p)} />
+            <ProductCellAction
+              data={row.original}
+              onSell={(p) => setQuickSellProduct(p)}
+              onPurchase={(p) => setQuickPurchaseProduct(p)}
+            />
           </div>
         )
       }
@@ -449,6 +470,12 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
                 className:
                   'text-emerald-600 focus:text-emerald-700 dark:text-emerald-400 font-medium',
                 onClick: () => setQuickSellProduct(row)
+              },
+              {
+                label: t('dukaan.product.purchase'),
+                icon: Icons.box,
+                className: 'text-sky-600 focus:text-sky-700 dark:text-sky-400 font-medium',
+                onClick: () => setQuickPurchaseProduct(row)
               }
             ]
           : []),
@@ -525,6 +552,13 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
           if (!open) setQuickSellProduct(null);
         }}
         initialProduct={quickSellProduct}
+      />
+      <PurchaseCreateDialog
+        open={quickPurchaseProduct != null}
+        onOpenChange={(open) => {
+          if (!open) setQuickPurchaseProduct(null);
+        }}
+        initialProduct={quickPurchaseProduct}
       />
     </>
   );

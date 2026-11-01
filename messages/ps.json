@@ -558,6 +558,9 @@
     "product": {
       "sell": "پلورل",
       "quickSell": "فوري پلور",
+      "purchase": "پیرودل",
+      "quickPurchase": "فوري پیرود",
+      "restock": "سټاک اضافه کړئ",
       "productCreated": "مصنوعہ کامیابی سے بنایا گیا",
       "productUpdated": "مصنوعہ کامیابی سے اپ ڈیٹ ہوا",
       "photosUploadFailed": "محصول خوندي شو، خو انځورونه پورته نه شول. بیا یې اضافه کړئ.",
