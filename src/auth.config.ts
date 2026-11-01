@@ -13,7 +13,7 @@ export const authConfig = {
   },
   trustHost: true,
   callbacks: {
-    jwt({ token, user }) {
+    jwt({ token, user, trigger, session }) {
       if (user) {
         token.role = user.role;
         token.shopId = user.shopId;
@@ -22,6 +22,28 @@ export const authConfig = {
         token.subscriptionEndsAt = user.subscriptionEndsAt;
         token.subscriptionStatus = user.subscriptionStatus;
         token.sessionExpiresAt = user.sessionExpiresAt;
+      }
+
+      if (trigger === 'update' && session) {
+        const updateData = session as Record<string, unknown>;
+        if (
+          typeof updateData.subscriptionEndsAt === 'string' ||
+          updateData.subscriptionEndsAt === null
+        ) {
+          token.subscriptionEndsAt = updateData.subscriptionEndsAt;
+        }
+        if (
+          typeof updateData.subscriptionStatus === 'string' ||
+          updateData.subscriptionStatus === null
+        ) {
+          token.subscriptionStatus = updateData.subscriptionStatus as
+            | 'TRIALING'
+            | 'ACTIVE'
+            | 'EXPIRED';
+        }
+        if (typeof updateData.shopName === 'string' || updateData.shopName === null) {
+          token.shopName = updateData.shopName;
+        }
       }
 
       const expiresAt = token.sessionExpiresAt;

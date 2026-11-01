@@ -142,6 +142,18 @@ export function ResponsiveDataTable<TData>({
     (cachedRowsCount && cachedRowsCount > 0 ? cachedRowsCount : null) ??
     5;
 
+  const activeSideRow = React.useMemo(() => {
+    if (!sideRow) return null;
+    const sideRowOriginal = sideRow.original as { id?: string | number } | null | undefined;
+    if (sideRowOriginal?.id != null) {
+      const match = table
+        .getRowModel()
+        .rows.find((r) => (r.original as { id?: string | number })?.id === sideRowOriginal.id);
+      if (match) return match;
+    }
+    return table.getRowModel().rows.find((r) => r.id === sideRow.id) ?? sideRow;
+  }, [table, sideRow]);
+
   return (
     <div
       ref={ref}
@@ -201,12 +213,12 @@ export function ResponsiveDataTable<TData>({
       )}
 
       <RecordDetail
-        open={sideRow != null}
+        open={activeSideRow != null}
         onOpenChange={(open) => {
           if (!open) setSideRow(null);
         }}
         presentation={isList ? 'sheet' : 'side'}
-        data={sideRow?.original ?? null}
+        data={activeSideRow?.original ?? null}
         detail={{
           ...detail,
           actions: (row) => {

@@ -1,33 +1,26 @@
 'use client';
 
 import * as React from 'react';
-import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { IconAlertTriangle, IconBrandWhatsapp } from '@tabler/icons-react';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { calculateSubscriptionDaysRemaining, buildWhatsAppSupportUrl } from '@/lib/subscription';
+import { buildWhatsAppSupportUrl } from '@/lib/subscription';
+import { useShopSubscription } from '@/hooks/use-shop-subscription';
 
 export function DashboardTrialBanner() {
-  const { data: session } = useSession();
   const t = useTranslations('subscription');
   const [mounted, setMounted] = React.useState(false);
+  const { isOwner, isPaid, daysLeft, shopName } = useShopSubscription();
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted || !session?.user || session.user.role !== 'OWNER') {
+  if (!mounted || !isOwner || daysLeft === null || daysLeft > 7) {
     return null;
   }
 
-  const isPaid = session.user.subscriptionStatus === 'ACTIVE';
-  const daysLeft = calculateSubscriptionDaysRemaining(session.user.subscriptionEndsAt);
-  if (daysLeft === null || daysLeft > 7) {
-    return null;
-  }
-
-  const shopName = session.user.shopName ?? '';
   const supportUrl = buildWhatsAppSupportUrl({
     shopName,
     message: isPaid

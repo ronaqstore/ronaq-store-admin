@@ -12,10 +12,7 @@ import {
   type MobileItemConfig,
   type QuickFilterChip
 } from '@/components/data-table';
-import {
-  DUKAAN_DEFAULT_PAGE_SIZE,
-  useDukaanListParams
-} from '@/components/data-table/list-params';
+import { DUKAAN_DEFAULT_PAGE_SIZE, useDukaanListParams } from '@/components/data-table/list-params';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
 import { Icons } from '@/components/icons';
@@ -27,13 +24,15 @@ import { AlertModal } from '@/components/modal/alert-modal';
 import { formatIsoDate } from '@/lib/dates';
 import { formatPkMobileLocal } from '@/lib/auth/phone';
 import { parseFacetDateRange } from '@/lib/dukaan/money-range-filter';
-import type {
-  PlatformShop,
-  PlatformShopAccessStatus,
-  ShopRowActionsProps
-} from '../api/types';
-import { platformShopsQueryOptions } from '../api/queries';
+import type { PlatformShop, PlatformShopAccessStatus, ShopRowActionsProps } from '../api/types';
+import { platformKeys, platformShopsQueryOptions } from '../api/queries';
 import { updateShopSubscription } from '../api/service';
+import {
+  restoreShopsQueries,
+  snapshotShopsQueries,
+  syncShopWithResult,
+  updateShopInCache
+} from '../api/mutations';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { PLATFORM_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import {
@@ -163,22 +162,70 @@ function ShopRowActions({ shop }: ShopRowActionsProps) {
 
   const suspend = useMutation({
     mutationFn: () => updateShopSubscription(shop.id, { isActive: false }),
-    onSuccess: () => {
+    onMutate: async () => {
       setSuspendOpen(false);
-      invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
+      await qc.cancelQueries({ queryKey: platformKeys.all });
+      const previous = snapshotShopsQueries(qc);
+
+      updateShopInCache(qc, shop.id, (prev) => ({
+        ...prev,
+        status: 'SUSPENDED',
+        accessStatus: 'SUSPENDED',
+        isAccessible: false
+      }));
+
+      return { previous };
+    },
+    onSuccess: (res) => {
+      setSuspendOpen(false);
+      syncShopWithResult(qc, res);
       toastSuccessAfterClose(t('platform.suspendSuccess', { name: shop.name }));
     },
-    onError: (err: Error) => toast.error(err.message || t('platform.suspendFailed'))
+    onError: (err: Error, _vars, context) => {
+      restoreShopsQueries(qc, context?.previous);
+      toast.error(err.message || t('platform.suspendFailed'));
+    },
+    onSettled: () => {
+      invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
+    }
   });
 
   const reactivate = useMutation({
     mutationFn: () => updateShopSubscription(shop.id, { isActive: true }),
-    onSuccess: () => {
+    onMutate: async () => {
       setReactivateOpen(false);
-      invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
+      await qc.cancelQueries({ queryKey: platformKeys.all });
+      const previous = snapshotShopsQueries(qc);
+
+      updateShopInCache(qc, shop.id, (prev) => {
+        const isExpired = new Date(prev.subscriptionEndsAt).getTime() <= Date.now();
+        const accessStatus: PlatformShopAccessStatus = isExpired
+          ? 'EXPIRED'
+          : prev.subscriptionStatus === 'TRIALING'
+            ? 'TRIALING'
+            : 'ACTIVE';
+        return {
+          ...prev,
+          status: 'ACTIVE',
+          isAccessible: !isExpired,
+          accessStatus
+        };
+      });
+
+      return { previous };
+    },
+    onSuccess: (res) => {
+      setReactivateOpen(false);
+      syncShopWithResult(qc, res);
       toastSuccessAfterClose(t('platform.reactivateSuccess', { name: shop.name }));
     },
-    onError: (err: Error) => toast.error(err.message || t('platform.reactivateFailed'))
+    onError: (err: Error, _vars, context) => {
+      restoreShopsQueries(qc, context?.previous);
+      toast.error(err.message || t('platform.reactivateFailed'));
+    },
+    onSettled: () => {
+      invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
+    }
   });
 
   const busy = suspend.isPending || reactivate.isPending;
@@ -247,10 +294,10 @@ const shopMobileItem: MobileItemConfig<PlatformShop> = {
   value: (row) => formatIsoDate(row.subscriptionEndsAt),
   valueLabel: () => staticT('platform.subscriptionEnds'),
   meta: [
-    (row) => (row.hasPassword ? staticT('platform.passwordSet') : staticT('platform.passwordPending'))
+    (row) =>
+      row.hasPassword ? staticT('platform.passwordSet') : staticT('platform.passwordPending')
   ],
-  ariaLabel: (row) =>
-    `${row.name}, ${row.ownerName ?? ''}, ${statusLabel(row.accessStatus)}`
+  ariaLabel: (row) => `${row.name}, ${row.ownerName ?? ''}, ${statusLabel(row.accessStatus)}`
 };
 
 const shopDetail: DetailConfig<PlatformShop> = {
@@ -337,9 +384,7 @@ export function PlatformShopsTable() {
 
   const accessStatusRaw = (filters as Record<string, string | undefined>).accessStatus;
   const accessStatusFilter =
-    typeof accessStatusRaw === 'string' && accessStatusRaw.length > 0
-      ? accessStatusRaw
-      : undefined;
+    typeof accessStatusRaw === 'string' && accessStatusRaw.length > 0 ? accessStatusRaw : undefined;
 
   const subscriptionRange = parseFacetDateRange(
     (filters as Record<string, unknown>).subscriptionEndsAt ?? subscriptionEndsParam
@@ -374,6 +419,7 @@ export function PlatformShopsTable() {
     rowCount: total,
     shallow: true,
     debounceMs: 400,
+    getRowId: (row) => row.id,
     initialState: {
       pagination: { pageIndex: 0, pageSize: DUKAAN_DEFAULT_PAGE_SIZE },
       columnPinning: { right: ['actions'] },

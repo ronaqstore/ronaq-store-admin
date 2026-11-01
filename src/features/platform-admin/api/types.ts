@@ -162,3 +162,10 @@ export interface UpdateSubscriptionResult {
   subscriptionEndsAt: string;
   isAccessible: boolean;
 }
+
+export interface ComputeAccessStatusParams {
+  status: 'ACTIVE' | 'SUSPENDED';
+  subscriptionEndsAt: string;
+  subscriptionStatus?: 'TRIALING' | 'ACTIVE' | 'EXPIRED';
+  now?: Date;
+}

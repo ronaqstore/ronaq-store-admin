@@ -96,3 +96,21 @@ export interface AuthRoleHolder {
 export interface AuthRedirectSession {
   user?: AuthRoleHolder;
 }
+
+export interface AuthMeShop {
+  id: string;
+  name: string;
+  shopStatus: string;
+  subscriptionStatus: 'TRIALING' | 'ACTIVE' | 'EXPIRED';
+  trialEndsAt: string | null;
+  subscriptionEndsAt: string;
+}
+
+export interface AuthMeResponse {
+  id: string;
+  name: string;
+  phone: string;
+  role: AuthAccountRole;
+  status: string;
+  shop: AuthMeShop;
+}

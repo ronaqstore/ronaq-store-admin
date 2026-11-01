@@ -1,6 +1,10 @@
 import { env } from '@/config/env';
 import { whatsappReminderUrl } from '@/constants/api';
-import type { WhatsAppSupportUrlParams } from '@/types/subscription';
+import type {
+  WhatsAppSupportUrlParams,
+  SubscriptionSource,
+  EffectiveSubscriptionResult
+} from '@/types/subscription';
 
 export const DEFAULT_SUPPORT_WHATSAPP = '923029825213';
 
@@ -60,4 +64,25 @@ export function formatSubscriptionExpiryDate(
   } catch {
     return d.toISOString().slice(0, 10);
   }
+}
+
+export function resolveEffectiveSubscription(
+  sessionSource?: SubscriptionSource | null,
+  liveSource?: SubscriptionSource | null,
+  currentDate = new Date()
+): EffectiveSubscriptionResult {
+  const endsAt = liveSource?.subscriptionEndsAt ?? sessionSource?.subscriptionEndsAt ?? null;
+  const subscriptionStatus =
+    liveSource?.subscriptionStatus ?? sessionSource?.subscriptionStatus ?? null;
+  const shopName = liveSource?.shopName ?? sessionSource?.shopName ?? '';
+  const isPaid = subscriptionStatus === 'ACTIVE';
+  const daysLeft = calculateSubscriptionDaysRemaining(endsAt, currentDate);
+
+  return {
+    endsAt,
+    subscriptionStatus,
+    isPaid,
+    daysLeft,
+    shopName
+  };
 }
