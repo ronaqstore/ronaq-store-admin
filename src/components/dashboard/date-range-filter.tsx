@@ -16,7 +16,7 @@ import type {
   DashboardCustomDateRange,
   DashboardPeriod,
   DateRangeFilterProps,
-  DateRangePeriodOption,
+  DateRangePeriodOption
 } from '@/types/charts';
 
 function toYmd(date: Date): string {
@@ -44,7 +44,7 @@ export function DateRangeFilter({
   compare,
   onPeriodChange,
   onCompareChange,
-  className,
+  className
 }: DateRangeFilterProps) {
   const t = useT();
   const router = useRouter();
@@ -52,8 +52,7 @@ export function DateRangeFilter({
   const searchParams = useSearchParams();
 
   const activePeriod =
-    (currentPeriod as DashboardPeriod) ??
-    ((searchParams.get('period') as DashboardPeriod) || '7d');
+    (currentPeriod as DashboardPeriod) ?? ((searchParams.get('period') as DashboardPeriod) || '7d');
 
   const compareParam = searchParams.get('compare');
   const isCompareChecked =
@@ -82,14 +81,14 @@ export function DateRangeFilter({
     { key: '30d', labelKey: 'dashboard.quickPills.last30d' },
     { key: 'this_month', labelKey: 'dashboard.quickPills.thisMonth' },
     { key: 'last_month', labelKey: 'dashboard.quickPills.lastMonth' },
-    { key: 'custom', labelKey: 'dashboard.quickPills.custom' },
+    { key: 'custom', labelKey: 'dashboard.quickPills.custom' }
   ];
 
   const pushParams = useCallback(
     (next: URLSearchParams) => {
       router.push(`${pathname}?${next.toString()}`);
     },
-    [router, pathname],
+    [router, pathname]
   );
 
   const commitCustom = useCallback(
@@ -107,7 +106,7 @@ export function DateRangeFilter({
       onPeriodChange?.('custom');
       pushParams(params);
     },
-    [searchParams, onPeriodChange, pushParams],
+    [searchParams, onPeriodChange, pushParams]
   );
 
   const updatePreset = useCallback(
@@ -121,7 +120,7 @@ export function DateRangeFilter({
       }
       pushParams(params);
     },
-    [searchParams, pushParams],
+    [searchParams, pushParams]
   );
 
   const handleSelectPeriod = (periodKey: DashboardPeriod) => {
@@ -182,9 +181,9 @@ export function DateRangeFilter({
   const canApply = Boolean(draftFrom && draftTo);
 
   return (
-    <div className={cn('flex w-full flex-col gap-3', className)}>
-      <div className='flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
-        <div className='bg-muted/60 flex flex-wrap items-center gap-1 rounded-lg p-1'>
+    <div className={cn('flex flex-col gap-3', className)}>
+      <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
+        <div className='bg-muted/70 flex max-w-full items-center gap-1 overflow-x-auto rounded-lg p-1 no-scrollbar'>
           {periods.map((p) => {
             const isSelected = activePeriod === p.key;
             return (
@@ -193,14 +192,13 @@ export function DateRangeFilter({
                 type='button'
                 size='sm'
                 variant={isSelected ? 'default' : 'ghost'}
-                className='h-8 text-xs font-medium'
+                className='h-8 shrink-0 px-2.5 text-xs font-medium'
                 aria-pressed={isSelected}
                 aria-label={t(p.labelKey)}
                 onClick={() => handleSelectPeriod(p.key)}
               >
-                {isSelected ? (
-                  <IconCheck className='me-1 h-3.5 w-3.5' />
-                ) : (
+                {isSelected && <IconCheck className='me-1 h-3.5 w-3.5' />}
+                {p.key === 'custom' && !isSelected && (
                   <IconCalendar className='text-muted-foreground me-1 h-3.5 w-3.5' />
                 )}
                 {t(p.labelKey)}
@@ -209,7 +207,7 @@ export function DateRangeFilter({
           })}
         </div>
 
-        <div className='flex shrink-0 items-center gap-2 px-1'>
+        <div className='flex h-10 shrink-0 items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3'>
           <Checkbox
             id='dashboard-compare-toggle'
             checked={isCompareChecked}
@@ -217,7 +215,7 @@ export function DateRangeFilter({
           />
           <label
             htmlFor='dashboard-compare-toggle'
-            className='text-muted-foreground hover:text-foreground cursor-pointer text-xs font-medium select-none'
+            className='text-muted-foreground hover:text-foreground cursor-pointer text-xs font-medium select-none whitespace-nowrap'
           >
             {t('dashboard.compareWithPrevious')}
           </label>

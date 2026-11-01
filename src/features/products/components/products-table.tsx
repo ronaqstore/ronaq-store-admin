@@ -190,7 +190,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
                     variant='outline'
                     className='shrink-0 text-[10px] px-1 py-0 h-4 font-mono text-muted-foreground'
                   >
-                    SKU: {product.sku}
+                    {staticT('dukaan.product.sku')}: {product.sku}
                   </Badge>
                 ) : null}
               </div>
