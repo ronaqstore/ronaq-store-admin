@@ -307,7 +307,7 @@ export function RecordSupplierPaymentDialog({
           )}
 
           {noDebt ? (
-            <div className='rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-3.5 py-3 text-sm text-foreground'>
+            <div className='rounded-xl border border-primary/30 bg-primary/5 px-3.5 py-3 text-sm text-foreground'>
               <p className='font-medium'>{t('supplierPayments.noDebtTitle')}</p>
               <p className='mt-1 text-muted-foreground'>{t('supplierPayments.noDebtToPay')}</p>
             </div>
