@@ -29,6 +29,7 @@ This document tracks all audit findings, security reviews, and bug fixes for `ro
 |---|---|---|---|---|
 | **BUG-007** | LOW | UX / Input Validation | `sanitizeNumberInput` wipes input values containing standard thousand-separator commas | FIXED |
 | **BUG-003** | MEDIUM | Idempotency / Concurrency | Inventory adjustments lacked `clientRequestId` and double-submit protection in dialogs | FIXED |
+| **BUG-008** | MEDIUM | State Synchronization / Auth | Subscription badge and trial banner displayed stale JWT claims (362 days) instead of actual remaining shop subscription | FIXED |
 
 ---
 
@@ -78,6 +79,32 @@ This document tracks all audit findings, security reviews, and bug fixes for `ro
   - Admin `npm run typecheck` clean.
   - Admin `npm run lint` clean.
   - Admin `npm run build` Turbopack 134 pages generated with exit code 0.
+
+---
+
+### BUG-008
+- **Severity:** MEDIUM
+- **Category:** State Synchronization / Auth / NextAuth Session Claims
+- **Location:**
+  - `src/lib/subscription.ts`
+  - `src/hooks/use-shop-subscription.ts`
+  - `src/components/layout/subscription-badge.tsx`
+  - `src/features/dukaan/components/dashboard-trial-banner.tsx`
+  - `src/features/auth/components/session-access-guard.tsx`
+  - `src/auth.config.ts`
+- **Why It Was Wrong:**
+  NextAuth session tokens store `subscriptionEndsAt` upon initial login inside an encrypted 30-day JWT cookie. When a shop's subscription was updated or renewed in PostgreSQL to `2026-11-04` (~4 days left), the client-side session cookie remained frozen with its initial 1-year registration timestamp (`2027-10-28`), causing both `SubscriptionBadge` and `DashboardTrialBanner` to show `"Trial: 362 days left"`. In addition, `auth.config.ts` lacked support for `trigger === 'update'` in the `jwt` callback, preventing session updates.
+- **Status:** FIXED
+- **Fix Details:**
+  - Added pure resolver `resolveEffectiveSubscription(sessionSource, liveSource, currentDate)` in `src/lib/subscription.ts` to prioritize fresh live shop data from TanStack Query while falling back safely to NextAuth session claims.
+  - Implemented centralized hook `useShopSubscription()` in `src/hooks/use-shop-subscription.ts` consuming typed `/api/auth/me` shop data.
+  - Updated `SubscriptionBadge` and `DashboardTrialBanner` to use `useShopSubscription()`.
+  - Added session synchronization in `SessionAccessGuard` calling `update({ user: { subscriptionEndsAt, subscriptionStatus, shopName } })` when live data differs from session token.
+  - Handled `trigger === 'update'` in `auth.config.ts` `jwt` callback to persist refreshed claims to the encrypted JWT cookie.
+- **Verification Evidence:**
+  - Added unit test suite in `src/lib/subscription.test.ts` verifying remaining days calculation and live-over-session claim resolution.
+  - Admin `npm test`: 54 tests passed across 19 suites.
+  - Admin `npm run typecheck`, `npm run lint`, `npm run knip`, `check-nest-type.cjs`, and `check-comments.cjs` passed with 0 errors.
 
 ---
 

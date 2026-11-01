@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 import { fetchAuthMe } from './service';
+import type { AuthMeResponse } from '@/types/auth';
 
 export const authKeys = {
   all: ['auth'] as const,
@@ -7,7 +8,7 @@ export const authKeys = {
 };
 
 export function authMeQueryOptions() {
-  return queryOptions({
+  return queryOptions<AuthMeResponse>({
     queryKey: authKeys.me(),
     queryFn: () => fetchAuthMe()
   });

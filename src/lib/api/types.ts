@@ -215,13 +215,14 @@ export interface ApiErrorBody {
 }
 
 export class ApiError extends Error {
-  constructor(
-    public readonly statusCode: number,
-    message: string,
-    public readonly details?: ApiErrorBody
-  ) {
+  public readonly statusCode: number;
+  public readonly details?: ApiErrorBody;
+
+  constructor(statusCode: number, message: string, details?: ApiErrorBody) {
     super(message);
     this.name = 'ApiError';
+    this.statusCode = statusCode;
+    this.details = details;
   }
 }
 

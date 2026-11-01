@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {
   calculateSubscriptionDaysRemaining,
   buildWhatsAppSupportUrl,
-  formatSubscriptionExpiryDate
+  formatSubscriptionExpiryDate,
+  resolveEffectiveSubscription
 } from './subscription.ts';
 
 describe('calculateSubscriptionDaysRemaining', () => {
@@ -30,6 +31,50 @@ describe('calculateSubscriptionDaysRemaining', () => {
 
     // Yesterday (expired)
     assert.equal(calculateSubscriptionDaysRemaining('2026-10-29T23:59:59.000Z', now), -1);
+  });
+
+  it('calculates 4 days remaining for 2026-11-04 from 2026-10-31', () => {
+    const now = new Date('2026-10-31T20:16:43+05:00');
+    assert.equal(calculateSubscriptionDaysRemaining('2026-11-04', now), 4);
+    assert.equal(calculateSubscriptionDaysRemaining('2026-11-04T00:00:00.000Z', now), 4);
+  });
+});
+
+describe('resolveEffectiveSubscription', () => {
+  it('prefers live shop subscription data over stale session claims', () => {
+    const now = new Date('2026-10-31T20:16:43+05:00');
+    const staleSession = {
+      subscriptionEndsAt: '2027-10-28T00:00:00.000Z',
+      subscriptionStatus: 'TRIALING' as const,
+      shopName: 'Dukan Pro Mobile'
+    };
+    const liveShop = {
+      subscriptionEndsAt: '2026-11-04T00:00:00.000Z',
+      subscriptionStatus: 'TRIALING' as const,
+      shopName: 'Dukan Pro Mobile'
+    };
+
+    const result = resolveEffectiveSubscription(staleSession, liveShop, now);
+
+    assert.equal(result.endsAt, '2026-11-04T00:00:00.000Z');
+    assert.equal(result.daysLeft, 4);
+    assert.equal(result.isPaid, false);
+    assert.equal(result.shopName, 'Dukan Pro Mobile');
+  });
+
+  it('falls back to session claims when live data is unavailable', () => {
+    const now = new Date('2026-10-31T20:16:43+05:00');
+    const session = {
+      subscriptionEndsAt: '2026-11-04T00:00:00.000Z',
+      subscriptionStatus: 'ACTIVE' as const,
+      shopName: 'Dukan Pro Mobile'
+    };
+
+    const result = resolveEffectiveSubscription(session, null, now);
+
+    assert.equal(result.endsAt, '2026-11-04T00:00:00.000Z');
+    assert.equal(result.daysLeft, 4);
+    assert.equal(result.isPaid, true);
   });
 });
 

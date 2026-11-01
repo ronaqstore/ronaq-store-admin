@@ -37,6 +37,11 @@ import { getActiveStatusQuickFilters } from '@/components/common/party-table-hel
 import type { ProductsTableProps } from '@/types/products';
 import type { EntityStatusConfirm } from '@/types/common';
 import { TruncateText } from '@/components/common/truncate-text';
+import {
+  formatAuthenticity,
+  formatPtaStatus,
+  getProductSpecBadges
+} from '@/lib/products/product-specs';
 import { ProductCellAction, ProductImagesField } from './products-table-cells';
 import {
   SELLING_PRICE_RANGE_RUPEES,
@@ -74,9 +79,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
   const brandId = firstFilterValue((filters as Record<string, unknown>).brandId);
   const isActiveFilter = parseBooleanFacet((filters as Record<string, unknown>).isActive);
   const isPublishedFilter = parseBooleanFacet((filters as Record<string, unknown>).isPublished);
-  const priceRange = parseRupeePriceRange(
-    (filters as Record<string, unknown>).defaultSellingPrice
-  );
+  const priceRange = parseRupeePriceRange((filters as Record<string, unknown>).defaultSellingPrice);
   const stockFilter = parseExactStockQuantity(
     (filters as Record<string, unknown>).quantityOnHand ?? stockParam
   );
@@ -146,7 +149,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       {
         id: 'name',
         accessorKey: 'name',
-        size: 240,
+        size: 260,
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={staticT('table.col.name')} />
         ),
@@ -162,13 +165,35 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
         enableColumnFilter: true,
         enableSorting: true,
         cell: ({ row }) => {
-          const skuLine = row.original.sku
-            ? `SKU: ${row.original.sku}`
-            : formatEmpty(row.original.brandName);
+          const product = row.original;
+          const specs = getProductSpecBadges(product);
           return (
-            <div className='min-w-0 space-y-0.5'>
-              <TruncateText className='font-medium'>{formatEmpty(row.original.name)}</TruncateText>
-              <TruncateText className='text-xs text-muted-foreground'>{skuLine}</TruncateText>
+            <div className='min-w-0 space-y-1 py-0.5'>
+              <TruncateText className='font-medium'>{formatEmpty(product.name)}</TruncateText>
+              <div className='flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground'>
+                {product.brandName ? (
+                  <span>{product.brandName}</span>
+                ) : specs.length === 0 && !product.sku ? (
+                  formatEmpty(null)
+                ) : null}
+                {specs.map((spec) => (
+                  <Badge
+                    key={spec}
+                    variant='secondary'
+                    className='shrink-0 text-[10px] px-1.5 py-0 h-4 font-normal'
+                  >
+                    {spec}
+                  </Badge>
+                ))}
+                {product.sku ? (
+                  <Badge
+                    variant='outline'
+                    className='shrink-0 text-[10px] px-1 py-0 h-4 font-mono text-muted-foreground'
+                  >
+                    SKU: {product.sku}
+                  </Badge>
+                ) : null}
+              </div>
             </div>
           );
         }
@@ -190,9 +215,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
         },
         enableColumnFilter: true,
         enableSorting: false,
-        cell: ({ row }) => (
-          <TruncateText>{formatEmpty(row.original.categoryName)}</TruncateText>
-        )
+        cell: ({ row }) => <TruncateText>{formatEmpty(row.original.categoryName)}</TruncateText>
       },
       {
         id: 'brandId',
@@ -326,14 +349,19 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
       leadingIcon: Icons.product,
       imageUrl: (row) => productCoverUrl(row),
       title: (row) => row.name,
-      subtitle: (row) => row.categoryName || (row.isActive ? t('status.active') : t('status.inactive')),
+      subtitle: (row) => {
+        const specs = getProductSpecBadges(row);
+        const parts = [row.brandName, ...specs].filter(Boolean);
+        return parts.length > 0
+          ? parts.join(' · ')
+          : row.categoryName || (row.isActive ? t('status.active') : t('status.inactive'));
+      },
       badge: (row) => ({
         label: row.isActive ? t('status.active') : t('status.inactive'),
         status: row.isActive ? 'ACTIVE' : 'INACTIVE'
       }),
       value: (row) => formatPkr(row.defaultSellingPrice),
-      ariaLabel: (row) =>
-        `${row.name}, ${row.isActive ? t('status.active') : t('status.inactive')}`
+      ariaLabel: (row) => `${row.name}, ${row.isActive ? t('status.active') : t('status.inactive')}`
     }),
     [t]
   );
@@ -356,8 +384,30 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
           title: t('dukaan.product.title'),
           fields: [
             { label: t('table.col.name'), value: row.name },
+            ...(row.model ? [{ label: t('dukaan.product.model'), value: row.model }] : []),
             { label: t('dukaan.product.category'), value: formatEmpty(row.categoryName) },
             { label: t('dukaan.product.brand'), value: formatEmpty(row.brandName) },
+            ...(row.color ? [{ label: t('dukaan.product.color'), value: row.color }] : []),
+            ...(row.storage ? [{ label: t('dukaan.product.storage'), value: row.storage }] : []),
+            ...(row.ram ? [{ label: t('dukaan.product.ram'), value: row.ram }] : []),
+            ...(row.ptaStatus
+              ? [
+                  {
+                    label: t('dukaan.product.ptaStatus'),
+                    value: formatPtaStatus(row.ptaStatus) ?? row.ptaStatus
+                  }
+                ]
+              : []),
+            ...(row.authenticity
+              ? [
+                  {
+                    label: t('dukaan.product.authenticity'),
+                    value: formatAuthenticity(row.authenticity) ?? row.authenticity
+                  }
+                ]
+              : []),
+            ...(row.sku ? [{ label: t('dukaan.product.sku'), value: row.sku }] : []),
+            ...(row.barcode ? [{ label: t('dukaan.product.barcode'), value: row.barcode }] : []),
             { label: t('dukaan.product.sellingPrice'), value: formatPkr(row.defaultSellingPrice) },
             { label: t('dukaan.product.stock'), value: String(row.quantityOnHand ?? 0) },
             {
@@ -429,9 +479,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
             ? t('dukaan.product.activateDescription')
             : t('dukaan.product.deactivateDescription')
         }
-        confirmLabel={
-          statusConfirm?.nextActive ? t('common.activate') : t('common.deactivate')
-        }
+        confirmLabel={statusConfirm?.nextActive ? t('common.activate') : t('common.deactivate')}
         confirmVariant={statusConfirm?.nextActive ? 'default' : 'destructive'}
       />
       <ResponsiveDataTable

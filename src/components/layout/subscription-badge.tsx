@@ -1,43 +1,25 @@
 'use client';
 
 import * as React from 'react';
-import { useSession } from 'next-auth/react';
 import { useTranslations, useLocale } from 'next-intl';
 import { IconBrandWhatsapp, IconClock, IconAlertTriangle } from '@tabler/icons-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { buttonVariants } from '@/components/ui/button';
-import {
-  calculateSubscriptionDaysRemaining,
-  formatSubscriptionExpiryDate,
-  buildWhatsAppSupportUrl
-} from '@/lib/subscription';
+import { formatSubscriptionExpiryDate } from '@/lib/subscription';
+import { useShopSubscription } from '@/hooks/use-shop-subscription';
 import { cn } from '@/lib/utils';
 
 export function SubscriptionBadge() {
-  const { data: session } = useSession();
   const t = useTranslations('subscription');
   const locale = useLocale();
   const [mounted, setMounted] = React.useState(false);
+  const { isOwner, endsAt, isPaid, daysLeft, shopName, supportUrl } = useShopSubscription();
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!session?.user || session.user.role !== 'OWNER') {
-    return null;
-  }
-
-  if (!mounted) {
-    return null;
-  }
-
-  const endsAt = session.user.subscriptionEndsAt;
-  const daysLeft = calculateSubscriptionDaysRemaining(endsAt);
-  const isPaid = session.user.subscriptionStatus === 'ACTIVE';
-  const shopName = session.user.shopName ?? '';
-  const supportUrl = buildWhatsAppSupportUrl({ shopName });
-
-  if (daysLeft === null) {
+  if (!isOwner || !mounted || daysLeft === null) {
     return null;
   }
 

@@ -21,6 +21,13 @@ import { updateShopSubscription } from '../api/service';
 import type { RenewSubscriptionDialogProps } from '@/types';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { PLATFORM_SYNC_DOMAINS } from '@/lib/query/sync-domains';
+import { platformKeys } from '../api/queries';
+import {
+  restoreShopsQueries,
+  snapshotShopsQueries,
+  syncShopWithResult,
+  updateShopInCache
+} from '../api/mutations';
 
 function parseEndsAt(iso: string): Date {
   const d = new Date(iso);
@@ -70,13 +77,39 @@ function RenewSubscriptionDialogBody({
   const renew = useMutation({
     mutationFn: (subscriptionEndsAt: string) =>
       updateShopSubscription(shopId, { subscriptionEndsAt }),
-    onSuccess: async (res) => {
+    onMutate: async (subscriptionEndsAt) => {
+      await qc.cancelQueries({ queryKey: platformKeys.all });
+      const previous = snapshotShopsQueries(qc);
+
+      updateShopInCache(qc, shopId, (prev) => {
+        const chosen = new Date(subscriptionEndsAt);
+        const endsAtIso = !Number.isNaN(chosen.getTime())
+          ? chosen.toISOString()
+          : subscriptionEndsAt;
+        return {
+          ...prev,
+          subscriptionEndsAt: endsAtIso,
+          status: 'ACTIVE',
+          subscriptionStatus: 'ACTIVE',
+          trialEndsAt: null,
+          isAccessible: true,
+          accessStatus: 'ACTIVE'
+        };
+      });
+
+      return { previous };
+    },
+    onSuccess: (res) => {
       onOpenChange(false);
-      invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
+      syncShopWithResult(qc, res);
       toastSuccessAfterClose(t('platform.renewSuccess', { name: res.shopName }));
     },
-    onError: (err: Error) => {
+    onError: (err: Error, _vars, context) => {
+      restoreShopsQueries(qc, context?.previous);
       toast.error(err.message || t('platform.renewFailed'));
+    },
+    onSettled: () => {
+      invalidateDomains({ queryClient: qc, domains: PLATFORM_SYNC_DOMAINS });
     }
   });
 
@@ -103,9 +136,7 @@ function RenewSubscriptionDialogBody({
     <DialogContent className='w-full sm:max-w-md'>
       <DialogHeader>
         <DialogTitle>{t('platform.renewTitle')}</DialogTitle>
-        <DialogDescription>
-          {t('platform.renewDescription', { name: shopName })}
-        </DialogDescription>
+        <DialogDescription>{t('platform.renewDescription', { name: shopName })}</DialogDescription>
       </DialogHeader>
 
       <form className='space-y-4 pt-2' onSubmit={handleSubmit}>
