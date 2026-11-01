@@ -41,7 +41,6 @@ import type {
   CreateSaleResult,
   SaleBelowCostPrompt
 } from '@/types/sales';
-import { EMPTY_FORM_NUMBER } from '@/types/common';
 
 export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) {
   const qc = useQueryClient();

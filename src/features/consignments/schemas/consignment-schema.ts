@@ -33,7 +33,7 @@ export const createConsignmentFormSchema = (t: Translator) =>
         .min(1, t('validation.imeiRequired'))
         .regex(IMEI_PATTERN, t('validation.imeiInvalidFormat')),
       imei2: z.string().trim().optional().nullable(),
-      condition: z.enum(['NEW', 'LIKE_NEW', 'USED', 'REFURBISHED']),
+      condition: z.enum(['NEW', 'USED']),
       batteryHealth: z
         .union([
           z

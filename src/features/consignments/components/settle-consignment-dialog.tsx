@@ -222,7 +222,7 @@ export function SettleConsignmentDialog({
                   if (val) setPayoutMethod(val);
                 }}
               >
-                <SelectTrigger id='payout-method'>
+                <SelectTrigger id='payout-method' className='w-full'>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

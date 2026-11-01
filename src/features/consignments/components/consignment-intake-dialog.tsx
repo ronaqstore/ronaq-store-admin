@@ -59,7 +59,7 @@ export function ConsignmentIntakeDialog({
 
   const [imei1, setImei1] = useState('');
   const [imei2, setImei2] = useState('');
-  const [condition, setCondition] = useState<'NEW' | 'LIKE_NEW' | 'USED' | 'REFURBISHED'>('USED');
+  const [condition, setCondition] = useState<'NEW' | 'USED'>('USED');
   const [batteryHealth, setBatteryHealth] = useState('');
   const [defectNotes, setDefectNotes] = useState('');
 
@@ -158,20 +158,21 @@ export function ConsignmentIntakeDialog({
 
     mutation.mutate({
       clientRequestId: createClientRequestId(),
-      customerId: customerId || null,
+      customerId: customerId || undefined,
       consignorName: consignorName.trim(),
       consignorPhone: consignorPhone.trim(),
-      consignorCnic: consignorCnic.trim() || null,
+      consignorCnic: consignorCnic.trim() || undefined,
       productId,
       imei1: imei1.trim(),
-      imei2: imei2.trim() || null,
+      imei2: imei2.trim() || undefined,
       condition,
-      batteryHealth: typeof batteryNum === 'number' ? batteryNum : null,
-      defectNotes: defectNotes.trim() || null,
+      batteryHealth: typeof batteryNum === 'number' && batteryNum > 0 ? batteryNum : undefined,
+      defectNotes: defectNotes.trim() || undefined,
       agreedPayout: toPaisa(Number(payoutNum)),
-      targetSellingPrice: typeof targetNum === 'number' ? toPaisa(targetNum) : null,
+      targetSellingPrice:
+        typeof targetNum === 'number' && targetNum > 0 ? toPaisa(targetNum) : undefined,
       intakeDate,
-      notes: notes.trim() || null
+      notes: notes.trim() || undefined
     });
   };
 
@@ -331,22 +332,18 @@ export function ConsignmentIntakeDialog({
                 </div>
 
                 <div className='space-y-1.5'>
-                  <Label htmlFor='condition'>{t('table.col.condition')}</Label>
+                  <Label htmlFor='condition'>{t('consignments.condition')}</Label>
                   <Select
                     value={condition}
                     onValueChange={(val) => {
-                      if (val) setCondition(val);
+                      if (val === 'NEW' || val === 'USED') setCondition(val);
                     }}
                   >
-                    <SelectTrigger id='condition'>
+                    <SelectTrigger id='condition' className='w-full'>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value='USED'>{t('consignments.conditionUsed')}</SelectItem>
-                      <SelectItem value='LIKE_NEW'>{t('consignments.conditionLikeNew')}</SelectItem>
-                      <SelectItem value='REFURBISHED'>
-                        {t('consignments.conditionRefurbished')}
-                      </SelectItem>
                       <SelectItem value='NEW'>{t('consignments.conditionNew')}</SelectItem>
                     </SelectContent>
                   </Select>
