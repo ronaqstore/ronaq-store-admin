@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { buildQuickSaleDefaults } from './sale-create-helpers.ts';
+import { buildQuickSaleDefaults, getSalePricingFingerprint } from './sale-create-helpers.ts';
 import { EMPTY_FORM_NUMBER } from '../../../types/common.ts';
 import type { ProductDTO } from '../../../lib/api/types.ts';
 
@@ -115,5 +115,40 @@ describe('Quick Sell - buildQuickSaleDefaults', () => {
     const nullDefaults = buildQuickSaleDefaults(null);
     assert.equal(nullDefaults.lines[0].product_id, '');
     assert.equal(nullDefaults.paid_now, EMPTY_FORM_NUMBER);
+  });
+});
+
+describe('getSalePricingFingerprint', () => {
+  const lineItem = {
+    product_id: 'prod-1',
+    inventory_unit_id: 'unit-1',
+    unit_price: 49000,
+    quantity: 1
+  };
+
+  it('generates deterministic fingerprint for identical inputs', () => {
+    const fp1 = getSalePricingFingerprint([lineItem], 0);
+    const fp2 = getSalePricingFingerprint([{ ...lineItem }], 0);
+    assert.equal(fp1, fp2);
+  });
+
+  it('detects unit price change (e.g. from 49k to 55k)', () => {
+    const fpBefore = getSalePricingFingerprint([lineItem], 0);
+    const fpAfter = getSalePricingFingerprint([{ ...lineItem, unit_price: 55000 }], 0);
+    assert.notEqual(fpBefore, fpAfter);
+  });
+
+  it('detects discount change', () => {
+    const fp1 = getSalePricingFingerprint([lineItem], 0);
+    const fp2 = getSalePricingFingerprint([lineItem], 500);
+    assert.notEqual(fp1, fp2);
+  });
+
+  it('detects quantity or unit change', () => {
+    const fp1 = getSalePricingFingerprint([lineItem], 0);
+    const fpQty = getSalePricingFingerprint([{ ...lineItem, quantity: 2 }], 0);
+    const fpUnit = getSalePricingFingerprint([{ ...lineItem, inventory_unit_id: 'unit-2' }], 0);
+    assert.notEqual(fp1, fpQty);
+    assert.notEqual(fp1, fpUnit);
   });
 });

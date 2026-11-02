@@ -158,7 +158,7 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
             <span className='font-medium text-foreground'>{row.original.productName}</span>
             <div className='flex items-center gap-1.5 text-xs text-muted-foreground font-mono'>
               <span>
-                {t('dukaan.inventory.imeiLabel')} {row.original.imei1}
+                {t('inventory.imeiLabel')} {row.original.imei1}
               </span>
               {row.original.batteryHealth != null && (
                 <span className='rounded bg-muted px-1 text-[10px]'>
@@ -201,7 +201,11 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
         header: t('consignments.soldPrice'),
         cell: ({ row }) => {
           if (row.original.soldPrice != null) {
-            const margin = row.original.soldPrice - row.original.agreedPayout;
+            const effectivePayout =
+              row.original.settledAmount != null
+                ? row.original.settledAmount
+                : row.original.agreedPayout;
+            const margin = row.original.soldPrice - effectivePayout;
             return (
               <div className='flex flex-col font-medium'>
                 <span className='text-foreground'>{formatPkr(row.original.soldPrice)}</span>
@@ -262,7 +266,7 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
       }),
       value: (row) => formatPkr(row.agreedPayout),
       meta: [
-        (row) => `${t('dukaan.inventory.imeiLabel')} ${row.imei1}`,
+        (row) => `${t('inventory.imeiLabel')} ${row.imei1}`,
         (row) => formatIsoDate(row.intakeDate)
       ],
       ariaLabel: (row) => `${row.consignmentNo}, ${row.productName}, ${formatPkr(row.agreedPayout)}`

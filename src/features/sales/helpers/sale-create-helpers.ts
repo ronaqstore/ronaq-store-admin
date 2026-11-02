@@ -112,3 +112,18 @@ export function buildQuickSaleDefaults(product?: ProductDTO | null): SaleFormVal
     lines: [initialLine]
   };
 }
+
+export function getSalePricingFingerprint(
+  lines: Array<Pick<SaleLineItem, 'product_id' | 'inventory_unit_id' | 'unit_price' | 'quantity'>>,
+  discount: FormNumber
+): string {
+  return JSON.stringify({
+    d: String(discount ?? '').trim(),
+    l: lines.map((l) => [
+      l.product_id,
+      l.inventory_unit_id ?? '',
+      String(l.unit_price ?? '').trim(),
+      Number(l.quantity) || 1
+    ])
+  });
+}

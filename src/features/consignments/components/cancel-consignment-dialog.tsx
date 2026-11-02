@@ -86,7 +86,7 @@ export function CancelConsignmentDialog({
               {consignment.consignmentNo} - {consignment.productName}
             </div>
             <div className='text-xs text-muted-foreground'>
-              {t('dukaan.inventory.imeiLabel')} {consignment.imei1} | {consignment.consignorName}
+              {t('inventory.imeiLabel')} {consignment.imei1} | {consignment.consignorName}
             </div>
           </div>
 

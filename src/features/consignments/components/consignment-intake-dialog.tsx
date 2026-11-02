@@ -32,6 +32,7 @@ import { useT } from '@/i18n/use-t';
 import { sanitizePkMobileInput, sanitizePkCnicInput } from '@/lib/validation/pk';
 import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { mapProductToPicker } from '@/lib/api/picker';
+import { isAppleBrandName } from '@/lib/device-family';
 import { listCustomers } from '@/features/customers/api/service';
 import { listProducts } from '@/features/products/api/service';
 import { QuickVariantDialog } from '@/components/variants/quick-variant-dialog';
@@ -58,6 +59,7 @@ export function ConsignmentIntakeDialog({
 
   const [productId, setProductId] = useState('');
   const [productLabel, setProductLabel] = useState('');
+  const [brandName, setBrandName] = useState<string | null>(null);
   const [imei1, setImei1] = useState('');
   const [imei2, setImei2] = useState('');
   const [condition, setCondition] = useState<'NEW' | 'USED'>('USED');
@@ -71,6 +73,9 @@ export function ConsignmentIntakeDialog({
 
   const [quickVariantOpen, setQuickVariantOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const isApple = isAppleBrandName(brandName);
+  const isUsed = condition === 'USED';
 
   const mutation = useMutation({
     ...createConsignmentMutation,
@@ -95,6 +100,7 @@ export function ConsignmentIntakeDialog({
     setConsignorCnic('');
     setProductId('');
     setProductLabel('');
+    setBrandName(null);
     setImei1('');
     setImei2('');
     setCondition('USED');
@@ -118,15 +124,29 @@ export function ConsignmentIntakeDialog({
   const handleProductCreated = (item: ProductPickerItem) => {
     setProductId(item.id);
     setProductLabel(item.name);
+    setBrandName(item.brand_name ?? null);
+    if (!isAppleBrandName(item.brand_name)) {
+      setBatteryHealth('');
+    }
   };
 
   const handleProductChange = (id: string, p?: ProductPickerItem | null) => {
     setProductId(id);
     if (p?.name) setProductLabel(p.name);
+    setBrandName(p?.brand_name ?? null);
+    if (!isAppleBrandName(p?.brand_name)) {
+      setBatteryHealth('');
+    }
   };
 
   const handleConditionChange = (val: string | null) => {
-    if (val === 'NEW' || val === 'USED') setCondition(val);
+    if (val === 'NEW' || val === 'USED') {
+      setCondition(val);
+      if (val === 'NEW') {
+        setBatteryHealth('');
+        setDefectNotes('');
+      }
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -134,7 +154,9 @@ export function ConsignmentIntakeDialog({
 
     const payoutNum = agreedPayoutRupees ? Number(agreedPayoutRupees) : 0;
     const targetNum = targetSellingPriceRupees ? Number(targetSellingPriceRupees) : undefined;
-    const batteryNum = batteryHealth !== '' ? Number(batteryHealth) : undefined;
+    const batteryNum =
+      isApple && isUsed && batteryHealth !== '' ? Number(batteryHealth) : undefined;
+    const defectNotesVal = isUsed ? defectNotes.trim() || undefined : undefined;
 
     const values = {
       customerId: customerId || undefined,
@@ -146,7 +168,7 @@ export function ConsignmentIntakeDialog({
       imei2: imei2.trim() || undefined,
       condition,
       batteryHealth: batteryNum,
-      defectNotes: defectNotes.trim() || undefined,
+      defectNotes: defectNotesVal,
       agreedPayoutRupees: payoutNum,
       targetSellingPriceRupees: targetNum,
       intakeDate,
@@ -181,7 +203,7 @@ export function ConsignmentIntakeDialog({
       imei2: imei2.trim() || undefined,
       condition,
       batteryHealth: typeof batteryNum === 'number' && batteryNum > 0 ? batteryNum : undefined,
-      defectNotes: defectNotes.trim() || undefined,
+      defectNotes: defectNotesVal,
       agreedPayout: toPaisa(Number(payoutNum)),
       targetSellingPrice:
         typeof targetNum === 'number' && targetNum > 0 ? toPaisa(targetNum) : undefined,
@@ -317,7 +339,7 @@ export function ConsignmentIntakeDialog({
 
                 <div className='space-y-1.5'>
                   <Label htmlFor='imei1'>
-                    {t('purchases.imei1')} <span className='text-destructive'>*</span>
+                    {t('dukaan.purchase.imei1')} <span className='text-destructive'>*</span>
                   </Label>
                   <Input
                     id='imei1'
@@ -331,7 +353,7 @@ export function ConsignmentIntakeDialog({
 
                 <div className='space-y-1.5'>
                   <Label htmlFor='imei2'>
-                    {t('purchases.imei2')} ({t('common.optional')})
+                    {t('dukaan.purchase.imei2')} ({t('common.optional')})
                   </Label>
                   <Input
                     id='imei2'
@@ -343,7 +365,7 @@ export function ConsignmentIntakeDialog({
                   <DialogFieldError message={errors.imei2} />
                 </div>
 
-                <div className='space-y-1.5'>
+                <div className={isUsed && isApple ? 'space-y-1.5' : 'sm:col-span-2 space-y-1.5'}>
                   <Label htmlFor='condition'>{t('consignments.condition')}</Label>
                   <Select value={condition} onValueChange={handleConditionChange}>
                     <SelectTrigger id='condition' className='w-full'>
@@ -356,29 +378,33 @@ export function ConsignmentIntakeDialog({
                   </Select>
                 </div>
 
-                <div className='space-y-1.5'>
-                  <Label htmlFor='battery-health'>{t('consignments.batteryHealth')} (%)</Label>
-                  <Input
-                    id='battery-health'
-                    type='number'
-                    min={0}
-                    max={100}
-                    value={batteryHealth}
-                    onChange={(e) => setBatteryHealth(e.target.value)}
-                    placeholder={t('consignments.batteryPlaceholder')}
-                  />
-                  <DialogFieldError message={errors.batteryHealth} />
-                </div>
+                {isUsed && isApple ? (
+                  <div className='space-y-1.5'>
+                    <Label htmlFor='battery-health'>{t('consignments.batteryHealth')} (%)</Label>
+                    <Input
+                      id='battery-health'
+                      type='number'
+                      min={0}
+                      max={100}
+                      value={batteryHealth}
+                      onChange={(e) => setBatteryHealth(e.target.value)}
+                      placeholder={t('consignments.batteryPlaceholder')}
+                    />
+                    <DialogFieldError message={errors.batteryHealth} />
+                  </div>
+                ) : null}
 
-                <div className='sm:col-span-2 space-y-1.5'>
-                  <Label htmlFor='defect-notes'>{t('consignments.defectNotes')}</Label>
-                  <Input
-                    id='defect-notes'
-                    value={defectNotes}
-                    onChange={(e) => setDefectNotes(e.target.value)}
-                    placeholder={t('consignments.defectNotesPlaceholder')}
-                  />
-                </div>
+                {isUsed ? (
+                  <div className='sm:col-span-2 space-y-1.5'>
+                    <Label htmlFor='defect-notes'>{t('consignments.defectNotes')}</Label>
+                    <Input
+                      id='defect-notes'
+                      value={defectNotes}
+                      onChange={(e) => setDefectNotes(e.target.value)}
+                      placeholder={t('consignments.defectNotesPlaceholder')}
+                    />
+                  </div>
+                ) : null}
               </div>
             </div>
 
