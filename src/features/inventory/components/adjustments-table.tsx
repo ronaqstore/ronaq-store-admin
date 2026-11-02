@@ -360,7 +360,12 @@ export function AdjustmentsTable({ toolbarAction, mode = 'adjustments' }: Adjust
     toolbarAction !== undefined ? (
       toolbarAction
     ) : isMovements ? null : (
-      <Button type='button' size='sm' onClick={() => setAdjustOpen(true)}>
+      <Button
+        type='button'
+        size='sm'
+        className='h-8 gap-1.5 text-xs w-full sm:w-auto'
+        onClick={() => setAdjustOpen(true)}
+      >
         <IconPlus className='me-1.5 h-4 w-4' />
         {t('common.adjustStock')}
       </Button>

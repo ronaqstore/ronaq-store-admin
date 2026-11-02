@@ -123,6 +123,9 @@ export function DataTableToolbar<TData>({
             ) : null}
           </Button>
         </div>
+        {children ? (
+          <div className='flex min-w-0 w-full flex-wrap items-center gap-1.5'>{children}</div>
+        ) : null}
         <DataTableFiltersSheet table={table} open={filtersOpen} onOpenChange={setFiltersOpen} />
       </div>
     );

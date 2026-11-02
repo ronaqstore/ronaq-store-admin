@@ -326,49 +326,49 @@ export function CashTable({ toolbarAction }: CashTableProps) {
   });
 
   const toolbarActionButton = (
-    <div className='flex flex-wrap items-center justify-end gap-2'>
+    <div className='flex min-w-0 w-full flex-wrap items-center gap-1.5 sm:w-auto sm:justify-end'>
       {toolbarAction}
       <Button
         type='button'
         size='sm'
-        className='h-8 gap-1.5'
+        className='h-8 min-h-8 gap-1.5 text-xs flex-1 min-w-[calc(50%-0.375rem)] sm:flex-none sm:min-w-0'
         onClick={() => setInvestmentOpen(true)}
         title={hasOpeningCash ? t('dukaan.cash.openingAlreadySetHint') : undefined}
       >
-        <Icons.add className='h-3.5 w-3.5' />
-        <span>{t('common.investCash')}</span>
+        <Icons.add className='h-3.5 w-3.5 shrink-0' />
+        <span className='truncate'>{t('common.investCash')}</span>
       </Button>
       <Button
         type='button'
         size='sm'
         variant='outline'
-        className='h-8 gap-1.5'
+        className='h-8 min-h-8 gap-1.5 text-xs flex-1 min-w-[calc(50%-0.375rem)] sm:flex-none sm:min-w-0'
         onClick={() => setWithdrawalOpen(true)}
         title={hasOpeningCash ? t('dukaan.cash.openingAlreadySetHint') : undefined}
       >
-        <Icons.minus className='h-3.5 w-3.5' />
-        <span>{t('common.withdraw')}</span>
+        <Icons.minus className='h-3.5 w-3.5 shrink-0' />
+        <span className='truncate'>{t('common.withdraw')}</span>
       </Button>
       <Button
         type='button'
         size='sm'
         variant='outline'
-        className='h-8 gap-1.5'
+        className='h-8 min-h-8 gap-1.5 text-xs flex-1 min-w-[calc(50%-0.375rem)] sm:flex-none sm:min-w-0'
         onClick={() => setReconcileOpen(true)}
       >
-        <Icons.adjustments className='h-3.5 w-3.5' />
-        <span>{t('common.reconcileDrawer')}</span>
+        <Icons.adjustments className='h-3.5 w-3.5 shrink-0' />
+        <span className='truncate'>{t('common.reconcileDrawer')}</span>
       </Button>
       {showOpeningButton ? (
         <Button
           type='button'
           size='sm'
           variant='outline'
-          className='h-8 gap-1.5'
+          className='h-8 min-h-8 gap-1.5 text-xs flex-1 min-w-[calc(50%-0.375rem)] sm:flex-none sm:min-w-0'
           onClick={() => setOpeningCashOpen(true)}
         >
-          <Icons.wallet className='h-3.5 w-3.5' />
-          <span>{t('common.openingBalance')}</span>
+          <Icons.wallet className='h-3.5 w-3.5 shrink-0' />
+          <span className='truncate'>{t('common.openingBalance')}</span>
         </Button>
       ) : null}
     </div>

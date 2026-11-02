@@ -318,9 +318,14 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
   };
 
   const recordActionButton = (
-    <div className='flex items-center gap-2'>
+    <div className='flex min-w-0 w-full items-center gap-1.5 sm:w-auto'>
       {toolbarAction}
-      <Button type='button' size='sm' className='h-8 gap-1.5' onClick={handleOpenRecord}>
+      <Button
+        type='button'
+        size='sm'
+        className='h-8 min-h-8 gap-1.5 text-xs w-full sm:w-auto'
+        onClick={handleOpenRecord}
+      >
         <Icons.add className='h-3.5 w-3.5' />
         <span>{t('payments.recordPayment')}</span>
       </Button>
