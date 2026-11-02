@@ -119,8 +119,12 @@ export function ConsignmentSlipDialog({
                 </div>
               )}
               <div>
-                <span className='text-muted-foreground'>{t('table.col.condition')}: </span>
-                <span>{consignment.condition}</span>
+                <span className='text-muted-foreground'>{t('consignments.condition')}: </span>
+                <span>
+                  {consignment.condition === 'NEW'
+                    ? t('consignments.conditionNew')
+                    : t('consignments.conditionUsed')}
+                </span>
               </div>
               {consignment.batteryHealth != null && (
                 <div>
@@ -145,8 +149,8 @@ export function ConsignmentSlipDialog({
               <span className='text-lg font-bold text-primary'>
                 {formatPkr(
                   isIntake
-                    ? consignment.agreedPayout
-                    : (consignment.settledAmount ?? consignment.agreedPayout)
+                    ? (consignment.agreedPayout ?? 0)
+                    : (consignment.settledAmount ?? consignment.agreedPayout ?? 0)
                 )}
               </span>
             </div>

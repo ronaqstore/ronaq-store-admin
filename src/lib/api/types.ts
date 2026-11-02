@@ -602,7 +602,7 @@ export interface ConsignmentDTO {
   productName: string;
   imei1: string;
   imei2: string | null;
-  condition: 'NEW' | 'LIKE_NEW' | 'USED' | 'REFURBISHED';
+  condition: 'NEW' | 'USED';
   batteryHealth: number | null;
   defectNotes: string | null;
   agreedPayout: number;
@@ -635,7 +635,7 @@ export interface CreateConsignmentInput {
   productId: string;
   imei1: string;
   imei2?: string | null;
-  condition: 'NEW' | 'LIKE_NEW' | 'USED' | 'REFURBISHED';
+  condition: 'NEW' | 'USED';
   batteryHealth?: number | null;
   defectNotes?: string | null;
   agreedPayout: number;

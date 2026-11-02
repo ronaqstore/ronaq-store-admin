@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -20,6 +20,8 @@ import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { useT } from '@/i18n/use-t';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { CONSIGNMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { ReturnConsignmentDialogProps } from '@/types/consignments';
 import { returnConsignmentMutation } from '../api/mutations';
 import { returnConsignmentFormSchema } from '../schemas/consignment-schema';
@@ -31,6 +33,7 @@ export function ReturnConsignmentDialog({
   onSuccess
 }: ReturnConsignmentDialogProps) {
   const t = useT();
+  const qc = useQueryClient();
   const [returnReason, setReturnReason] = useState('');
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
@@ -42,6 +45,7 @@ export function ReturnConsignmentDialog({
       setReturnReason('');
       setNotes('');
       setError('');
+      invalidateDomains({ queryClient: qc, domains: CONSIGNMENT_SYNC_DOMAINS });
       toastSuccessAfterClose(
         t('consignments.returnSuccess', {
           consignmentNo: consignment?.consignmentNo ?? ''
@@ -94,7 +98,7 @@ export function ReturnConsignmentDialog({
               <span className='font-medium'>{consignment.productName}</span>
             </div>
             <div className='flex justify-between'>
-              <span className='text-muted-foreground'>{t('dukaan.inventory.imeiLabel')}</span>
+              <span className='text-muted-foreground'>{t('inventory.imeiLabel')}</span>
               <span className='font-mono text-xs'>{consignment.imei1}</span>
             </div>
             <div className='flex justify-between'>

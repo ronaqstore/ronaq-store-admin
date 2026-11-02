@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { CancelPurchaseInput, PurchaseDTO } from '@/lib/api/types';
+import type { CancelPurchaseInput, ProductDTO, PurchaseDTO } from '@/lib/api/types';
 import type { TrackingType } from '@/lib/api/types';
 import type { ProductPickerItem } from '@/types/picker';
 import type { FormNumber } from './common';
@@ -134,4 +134,16 @@ export interface PurchaseSummarySelectorState {
 
 export interface OpeningStockChangeArgs {
   value: boolean;
+}
+
+export interface PurchaseCreateFormProps {
+  initialProduct?: ProductDTO | null;
+  onDone?: () => void;
+  redirectOnSuccess?: boolean;
+}
+
+export interface PurchaseCreateDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  initialProduct?: ProductDTO | null;
 }

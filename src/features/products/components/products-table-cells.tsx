@@ -27,8 +27,33 @@ export function productCoverUrl(row: ProductDTO): string | null {
   return row.imageUrl || row.imageUrls?.[0] || null;
 }
 
-export function ProductCellAction({ data, onSell }: ProductCellActionProps) {
+export function ProductCellAction({ data, onSell, onPurchase }: ProductCellActionProps) {
   const t = useT();
+
+  const extraActions = data.isActive
+    ? [
+        ...(onSell
+          ? [
+              {
+                label: t('dukaan.product.sell'),
+                icon: Icons.receipt,
+                className: 'text-emerald-600 focus:text-emerald-700 dark:text-emerald-400',
+                onClick: () => onSell(data)
+              }
+            ]
+          : []),
+        ...(onPurchase
+          ? [
+              {
+                label: t('dukaan.product.purchase'),
+                icon: Icons.box,
+                className: 'text-sky-600 focus:text-sky-700 dark:text-sky-400',
+                onClick: () => onPurchase(data)
+              }
+            ]
+          : [])
+      ]
+    : undefined;
 
   return (
     <SimpleEntityCellAction
@@ -44,18 +69,7 @@ export function ProductCellAction({ data, onSell }: ProductCellActionProps) {
       onDeactivate={deactivateProduct}
       onActivate={reactivateProduct}
       invalidateQueryKey={productsQueryKeys.all}
-      extraActions={
-        data.isActive && onSell
-          ? [
-              {
-                label: t('dukaan.product.sell'),
-                icon: Icons.receipt,
-                className: 'text-emerald-600 focus:text-emerald-700 dark:text-emerald-400',
-                onClick: () => onSell(data)
-              }
-            ]
-          : undefined
-      }
+      extraActions={extraActions}
     />
   );
 }
@@ -111,6 +125,7 @@ export function buildProductDetail({
   t,
   router,
   onSell,
+  onPurchase,
   onStatusConfirm
 }: BuildProductDetailOptions): DetailConfig<ProductDTO> {
   return {
@@ -177,7 +192,17 @@ export function buildProductDetail({
               className:
                 'text-emerald-600 focus:text-emerald-700 dark:text-emerald-400 font-medium',
               onClick: () => onSell(row)
-            }
+            },
+            ...(onPurchase
+              ? [
+                  {
+                    label: t('dukaan.product.purchase'),
+                    icon: Icons.box,
+                    className: 'text-sky-600 focus:text-sky-700 dark:text-sky-400 font-medium',
+                    onClick: () => onPurchase(row)
+                  }
+                ]
+              : [])
           ]
         : []),
       {

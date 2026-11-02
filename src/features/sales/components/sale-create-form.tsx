@@ -1,7 +1,8 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useStore } from '@tanstack/react-form';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { FormEntitySelect } from '@/components/forms/form-entity-select';
 import { Icons } from '@/components/icons';
@@ -27,6 +28,7 @@ import {
   buildQuickSaleDefaults,
   calcSaleTotals,
   emptySaleLine,
+  getSalePricingFingerprint,
   isPhoneSaleLine,
   selectSaleTotals
 } from '../helpers/sale-create-helpers';
@@ -49,16 +51,21 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
   const [formApiError, setFormApiError] = useState<string | null>(null);
   const [belowCostPrompt, setBelowCostPrompt] = useState<SaleBelowCostPrompt | null>(null);
   const [confirmBelowCost, setConfirmBelowCost] = useState(false);
+  const [promptedFingerprint, setPromptedFingerprint] = useState<string | null>(null);
 
   const save = useMutation({
     ...createSaleMutation,
     onSuccess: (res: CreateSaleResult) => {
       if (res && 'confirmBelowCost' in res && res.confirmBelowCost) {
         setBelowCostPrompt(res);
+        setPromptedFingerprint(
+          getSalePricingFingerprint(form.state.values.lines, form.state.values.discount)
+        );
         return;
       }
       setBelowCostPrompt(null);
       setConfirmBelowCost(false);
+      setPromptedFingerprint(null);
       setClientRequestId(createClientRequestId());
       invalidateDomains({ queryClient: qc, domains: SALE_SYNC_DOMAINS });
       onDone?.();
@@ -84,7 +91,11 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
     validators: { onSubmit: createSaleFormSchema(t) as never },
     onSubmit: ({ value }: SaleFormSubmitContext) => {
       setFormApiError(null);
-      if (belowCostPrompt && !confirmBelowCost) {
+      const isStillPrompted =
+        belowCostPrompt != null &&
+        promptedFingerprint === getSalePricingFingerprint(value.lines, value.discount);
+
+      if (isStillPrompted && !confirmBelowCost) {
         setFormApiError(t('sales.confirmBelowCostRequired'));
         return;
       }
@@ -96,11 +107,24 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
           Number(value.paid_now) || 0,
           value.notes,
           clientRequestId,
-          confirmBelowCost
+          isStillPrompted ? confirmBelowCost : false
         )
       );
     }
   });
+
+  const currentFingerprint = useStore(form.store, (s) =>
+    getSalePricingFingerprint(s.values.lines, s.values.discount)
+  );
+
+  useEffect(() => {
+    if (belowCostPrompt && promptedFingerprint && currentFingerprint !== promptedFingerprint) {
+      setBelowCostPrompt(null);
+      setConfirmBelowCost(false);
+      setFormApiError(null);
+      setPromptedFingerprint(null);
+    }
+  }, [currentFingerprint, promptedFingerprint, belowCostPrompt]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -118,7 +142,10 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
       {belowCostPrompt ? (
         <OverdraftAlert
           checked={confirmBelowCost}
-          onCheckedChange={setConfirmBelowCost}
+          onCheckedChange={(checked) => {
+            setConfirmBelowCost(checked);
+            if (checked) setFormApiError(null);
+          }}
           title={belowCostPrompt.message}
           confirmLabel={t('sales.confirmBelowCost')}
           id='confirm-below-cost'

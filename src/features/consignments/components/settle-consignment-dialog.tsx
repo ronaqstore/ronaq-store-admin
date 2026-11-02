@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -29,6 +29,8 @@ import { createClientRequestId, formatPkr, fromPaisa, toPaisa } from '@/lib/duka
 import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { formatIsoDate } from '@/lib/dates';
 import { useT } from '@/i18n/use-t';
+import { invalidateDomains } from '@/lib/query/invalidate-domains';
+import { CONSIGNMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { ConsignmentDTO } from '@/lib/api/types';
 import type { OverdraftPrompt } from '@/types';
 import type { SettleConsignmentDialogProps, SettleConsignmentResult } from '@/types/consignments';
@@ -42,6 +44,7 @@ export function SettleConsignmentDialog({
   onSuccess
 }: SettleConsignmentDialogProps) {
   const t = useT();
+  const qc = useQueryClient();
 
   const initialAmount = consignment ? String(fromPaisa(consignment.agreedPayout)) : '';
   const [settledAmountRupees, setSettledAmountRupees] = useState(initialAmount);
@@ -73,6 +76,7 @@ export function SettleConsignmentDialog({
 
       onOpenChange(false);
       resetForm();
+      invalidateDomains({ queryClient: qc, domains: CONSIGNMENT_SYNC_DOMAINS });
       toastSuccessAfterClose(
         t('consignments.settleSuccess', {
           consignmentNo: consignment?.consignmentNo ?? ''
@@ -221,7 +225,7 @@ export function SettleConsignmentDialog({
                   if (val) setPayoutMethod(val);
                 }}
               >
-                <SelectTrigger id='payout-method'>
+                <SelectTrigger id='payout-method' className='w-full'>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

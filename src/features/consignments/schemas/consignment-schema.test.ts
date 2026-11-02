@@ -115,6 +115,20 @@ describe('consignment-schema', () => {
       });
       assert.equal(res.success, false);
     });
+
+    it('accepts intake without imei2 (single-SIM phone)', () => {
+      const schema = createConsignmentFormSchema(mockTranslator);
+      const res = schema.safeParse({
+        consignorName: 'Muhammad Ali',
+        consignorPhone: '03001234567',
+        productId: '01924f0a-0000-7000-8000-000000000001',
+        imei1: '356938035643803',
+        condition: 'NEW',
+        agreedPayoutRupees: 50000,
+        intakeDate: '2026-11-01'
+      });
+      assert.equal(res.success, true);
+    });
   });
 
   describe('settleConsignmentFormSchema', () => {

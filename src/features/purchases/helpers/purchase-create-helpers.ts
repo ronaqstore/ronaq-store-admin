@@ -1,17 +1,20 @@
 import { todayIsoDate } from '@/lib/dates';
-import { toPaisa } from '@/lib/dukaan/numbers';
+import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import type {
   CreatePurchaseInput,
   CreatePurchaseItemInput,
-  CreatePurchasePhoneUnitInput
+  CreatePurchasePhoneUnitInput,
+  ProductDTO
 } from '@/lib/api/types';
 import type {
   PurchaseFormValues,
   PurchaseLineDraft,
+  PurchaseLineItem,
   PurchasePhoneUnitDraft,
   PurchaseSummarySelectorState
 } from '@/types/purchases';
 import { EMPTY_FORM_NUMBER } from '@/types/common';
+import { resizePhoneUnits } from '../schemas/purchase-schema';
 
 export function emptyPurchaseLine(): PurchaseLineDraft {
   return {
@@ -99,5 +102,43 @@ export function selectPurchaseSummary(state: PurchaseSummarySelectorState) {
     isOpeningStock: state.values.is_opening_stock,
     lines: state.values.lines,
     paidNow: state.values.paid_now
+  };
+}
+
+export function buildQuickPurchaseDefaults(product?: ProductDTO | null): PurchaseFormValues {
+  if (!product || !product.isActive) {
+    return {
+      supplier_id: '',
+      supplier_invoice_ref: '',
+      is_opening_stock: false,
+      paid_now: EMPTY_FORM_NUMBER,
+      lines: [emptyPurchaseLine()]
+    };
+  }
+
+  const initialCostRs =
+    product.defaultPurchasePrice != null && product.defaultPurchasePrice > 0
+      ? fromPaisa(product.defaultPurchasePrice)
+      : EMPTY_FORM_NUMBER;
+
+  const isPhone = product.trackingType === 'SERIALIZED';
+
+  const initialLine: PurchaseLineItem = {
+    product_id: product.id,
+    product_label: product.name,
+    quantity: 1,
+    unit_cost: initialCostRs,
+    phone_units: isPhone ? resizePhoneUnits([], 1, 'NEW') : [],
+    condition: 'NEW',
+    tracking_type: product.trackingType,
+    brand_name: product.brandName ?? null
+  };
+
+  return {
+    supplier_id: '',
+    supplier_invoice_ref: '',
+    is_opening_stock: false,
+    paid_now: initialCostRs,
+    lines: [initialLine]
   };
 }
