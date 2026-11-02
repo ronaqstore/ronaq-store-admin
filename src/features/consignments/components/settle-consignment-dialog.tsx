@@ -33,10 +33,9 @@ import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { CONSIGNMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { ConsignmentDTO } from '@/lib/api/types';
 import type { OverdraftPrompt } from '@/types';
-import type { SettleConsignmentDialogProps } from '@/types/consignments';
+import type { SettleConsignmentDialogProps, SettleConsignmentResult } from '@/types/consignments';
 import { settleConsignmentMutation } from '../api/mutations';
 import { settleConsignmentFormSchema } from '../schemas/consignment-schema';
-import type { SettleConsignmentResult } from '../api/service';
 
 export function SettleConsignmentDialog({
   consignment,
@@ -159,7 +158,6 @@ export function SettleConsignmentDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className='space-y-4 py-2'>
-          {/* Sale Summary Card */}
           <div className='rounded-md border p-3.5 bg-muted/40 text-sm space-y-2'>
             <div className='flex justify-between'>
               <span className='text-muted-foreground'>{t('consignments.consignmentNo')}:</span>
@@ -202,7 +200,8 @@ export function SettleConsignmentDialog({
           <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
             <div className='space-y-1.5'>
               <Label htmlFor='settled-amount'>
-                {t('consignments.payoutAmount')} (PKR) <span className='text-destructive'>*</span>
+                {t('consignments.payoutAmount')} {t('consignments.pkrSuffix')}{' '}
+                <span className='text-destructive'>*</span>
               </Label>
               <Input
                 id='settled-amount'
@@ -230,10 +229,12 @@ export function SettleConsignmentDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='CASH'>{t('payment.method.cash')}</SelectItem>
-                  <SelectItem value='BANK'>{t('payment.method.bank')}</SelectItem>
-                  <SelectItem value='JAZZCASH'>JazzCash</SelectItem>
-                  <SelectItem value='EASYPAISA'>EasyPaisa</SelectItem>
+                  <SelectItem value='CASH'>{t('consignments.payoutMethodCash')}</SelectItem>
+                  <SelectItem value='BANK'>{t('consignments.payoutMethodBank')}</SelectItem>
+                  <SelectItem value='JAZZCASH'>{t('consignments.payoutMethodJazzcash')}</SelectItem>
+                  <SelectItem value='EASYPAISA'>
+                    {t('consignments.payoutMethodEasypaisa')}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

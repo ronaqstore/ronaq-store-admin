@@ -2,12 +2,12 @@ import { mutationOptions } from '@tanstack/react-query';
 import { getQueryClient } from '@/lib/query-client';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { CONSIGNMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
+import type { CreateConsignmentInput } from '@/lib/api/types';
 import type {
-  CreateConsignmentInput,
-  ReturnConsignmentInput,
-  SettleConsignmentInput,
-  CancelConsignmentInput
-} from '@/lib/api/types';
+  CancelConsignmentMutationVariables,
+  ReturnConsignmentMutationVariables,
+  SettleConsignmentMutationVariables
+} from '@/types/consignments';
 import {
   cancelConsignment,
   createConsignment,
@@ -23,24 +23,21 @@ export const createConsignmentMutation = mutationOptions({
 });
 
 export const returnConsignmentMutation = mutationOptions({
-  mutationFn: ({ id, input }: { id: string; input: ReturnConsignmentInput }) =>
-    returnConsignment(id, input),
+  mutationFn: ({ id, input }: ReturnConsignmentMutationVariables) => returnConsignment(id, input),
   onSuccess: () => {
     invalidateDomains({ queryClient: getQueryClient(), domains: CONSIGNMENT_SYNC_DOMAINS });
   }
 });
 
 export const settleConsignmentMutation = mutationOptions({
-  mutationFn: ({ id, input }: { id: string; input: SettleConsignmentInput }) =>
-    settleConsignment(id, input),
+  mutationFn: ({ id, input }: SettleConsignmentMutationVariables) => settleConsignment(id, input),
   onSuccess: () => {
     invalidateDomains({ queryClient: getQueryClient(), domains: CONSIGNMENT_SYNC_DOMAINS });
   }
 });
 
 export const cancelConsignmentMutation = mutationOptions({
-  mutationFn: ({ id, input }: { id: string; input: CancelConsignmentInput }) =>
-    cancelConsignment(id, input),
+  mutationFn: ({ id, input }: CancelConsignmentMutationVariables) => cancelConsignment(id, input),
   onSuccess: () => {
     invalidateDomains({ queryClient: getQueryClient(), domains: CONSIGNMENT_SYNC_DOMAINS });
   }

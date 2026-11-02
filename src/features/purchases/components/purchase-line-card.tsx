@@ -17,7 +17,7 @@ import type { SubFieldApi } from '@/types/forms';
 import { EMPTY_FORM_NUMBER } from '@/types/common';
 import { isAppleBrandName } from '@/lib/device-family';
 import { resizePhoneUnits } from '../schemas/purchase-schema';
-import { QuickVariantDialog } from './quick-variant-dialog';
+import { QuickVariantDialog } from '@/components/variants/quick-variant-dialog';
 
 const emptyDefaults: PurchaseFormValues = {
   supplier_id: '',

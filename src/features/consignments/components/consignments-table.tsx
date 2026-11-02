@@ -17,7 +17,11 @@ import { useT } from '@/i18n/use-t';
 import { formatIsoDate } from '@/lib/dates';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import type { ConsignmentDTO } from '@/lib/api/types';
-import type { ConsignmentRowActionsProps, ConsignmentsTableProps } from '@/types/consignments';
+import type {
+  ConsignmentRowActionsProps,
+  ConsignmentSlipModalState,
+  ConsignmentsTableProps
+} from '@/types/consignments';
 import { consignmentsQueryOptions } from '../api/queries';
 import { ConsignmentStatusBadge } from './consignment-status-badge';
 import { getConsignmentQuickFilters } from './consignments-table-filters';
@@ -106,11 +110,7 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
   const [settleConsignment, setSettleConsignment] = useState<ConsignmentDTO | null>(null);
   const [cancelConsignment, setCancelConsignment] = useState<ConsignmentDTO | null>(null);
 
-  const [slipModal, setSlipModal] = useState<{
-    open: boolean;
-    consignment: ConsignmentDTO | null;
-    type: 'intake' | 'settlement';
-  }>({
+  const [slipModal, setSlipModal] = useState<ConsignmentSlipModalState>({
     open: false,
     consignment: null,
     type: 'intake'
@@ -157,7 +157,9 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
           <div className='flex flex-col'>
             <span className='font-medium text-foreground'>{row.original.productName}</span>
             <div className='flex items-center gap-1.5 text-xs text-muted-foreground font-mono'>
-              <span>IMEI: {row.original.imei1}</span>
+              <span>
+                {t('dukaan.inventory.imeiLabel')} {row.original.imei1}
+              </span>
               {row.original.batteryHealth != null && (
                 <span className='rounded bg-muted px-1 text-[10px]'>
                   {row.original.batteryHealth}%
@@ -259,7 +261,10 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
           row.status === 'SETTLED' ? 'success' : row.status === 'CANCELLED' ? 'danger' : 'warning'
       }),
       value: (row) => formatPkr(row.agreedPayout),
-      meta: [(row) => `IMEI: ${row.imei1}`, (row) => formatIsoDate(row.intakeDate)],
+      meta: [
+        (row) => `${t('dukaan.inventory.imeiLabel')} ${row.imei1}`,
+        (row) => formatIsoDate(row.intakeDate)
+      ],
       ariaLabel: (row) => `${row.consignmentNo}, ${row.productName}, ${formatPkr(row.agreedPayout)}`
     }),
     [t]
@@ -275,7 +280,6 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
         isLoading={isFetching}
       />
 
-      {/* Intake Dialog */}
       <ConsignmentIntakeDialog
         open={intakeOpen}
         onOpenChange={setIntakeOpen}
@@ -284,7 +288,6 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
         }}
       />
 
-      {/* Return Dialog */}
       <ReturnConsignmentDialog
         consignment={returnConsignment}
         open={!!returnConsignment}
@@ -293,7 +296,6 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
         }}
       />
 
-      {/* Settle Dialog */}
       <SettleConsignmentDialog
         consignment={settleConsignment}
         open={!!settleConsignment}
@@ -305,7 +307,6 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
         }}
       />
 
-      {/* Cancel Dialog */}
       <CancelConsignmentDialog
         consignment={cancelConsignment}
         open={!!cancelConsignment}
@@ -314,7 +315,6 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
         }}
       />
 
-      {/* Printable Slip Dialog */}
       <ConsignmentSlipDialog
         consignment={slipModal.consignment}
         type={slipModal.type}

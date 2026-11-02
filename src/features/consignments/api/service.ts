@@ -9,12 +9,8 @@ import type {
   SettleConsignmentInput,
   CancelConsignmentInput
 } from '@/lib/api/types';
-import type { OverdraftPrompt } from '@/types';
+import type { SettleConsignmentResult } from '@/types/consignments';
 import { buildQueryString } from '@/lib/api/query-params';
-
-export type SettleConsignmentResult =
-  | ConsignmentDTO
-  | (OverdraftPrompt & { confirmOverdraft?: boolean });
 
 export async function listConsignments(
   filters: ConsignmentListFilters = {},

@@ -53,7 +53,7 @@ export default function Header() {
           className='me-2 hidden h-4 data-vertical:self-center sm:block'
         />
         <p className='truncate text-sm font-semibold sm:hidden'>{title}</p>
-        <div className='hidden sm:block'>
+        <div className='hidden min-w-0 sm:block'>
           <Breadcrumbs />
         </div>
       </div>

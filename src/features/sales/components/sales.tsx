@@ -25,7 +25,7 @@ import Image from 'next/image';
 import { storeSettingsQueryOptions } from '@/features/store-settings';
 import dynamic from 'next/dynamic';
 import { SalesTable } from './sales-table';
-import { SaleCreateDialog } from './sale-create-dialog';
+import { SaleCreateDialog } from '@/components/sales/sale-create-dialog';
 import { saleQueryOptions } from '../api/queries';
 
 const CancelSaleDialog = dynamic(

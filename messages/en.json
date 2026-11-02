@@ -2981,6 +2981,18 @@
     "settlementSlipBadge": "Amanat Settlement Voucher",
     "consignorSign": "Depositor / Owner Signature",
     "receiverSign": "Receiver Signature",
-    "shopSign": "Shop Keeper Signature & Stamp"
+    "shopSign": "Shop Keeper Signature & Stamp",
+    "imeiPlaceholder": "15 digits",
+    "batteryPlaceholder": "e.g. 85",
+    "amountPlaceholder50k": "e.g. 50,000",
+    "amountPlaceholder55k": "e.g. 55,000",
+    "pkrSuffix": "(PKR)",
+    "payoutMethodCash": "Cash",
+    "payoutMethodBank": "Bank Transfer",
+    "payoutMethodJazzcash": "JazzCash",
+    "payoutMethodEasypaisa": "EasyPaisa",
+    "cnicLabel": "CNIC:",
+    "imei1Label": "IMEI 1:",
+    "imei2Label": "IMEI 2:"
   }
 }

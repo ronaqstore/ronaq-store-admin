@@ -2981,6 +2981,18 @@
     "settlementSlipBadge": "د تادیې واؤچر",
     "consignorSign": "د امانت سپارونکي لاسلیک",
     "receiverSign": "د ترلاسه کوونکي لاسلیک",
-    "shopSign": "د هټۍ وال لاسلیک او ټاپه"
+    "shopSign": "د هټۍ وال لاسلیک او ټاپه",
+    "imeiPlaceholder": "15 عددونه",
+    "batteryPlaceholder": "مثلاً 85",
+    "amountPlaceholder50k": "مثلاً 50,000",
+    "amountPlaceholder55k": "مثلاً 55,000",
+    "pkrSuffix": "(روپۍ)",
+    "payoutMethodCash": "نغدې",
+    "payoutMethodBank": "بانکي لیږد",
+    "payoutMethodJazzcash": "جاز کیش",
+    "payoutMethodEasypaisa": "ایزی پیسه",
+    "cnicLabel": "شناختی کارډ نمبر:",
+    "imei1Label": "آئی ایم ای آئی 1:",
+    "imei2Label": "آئی ایم ای آئی 2:"
   }
 }

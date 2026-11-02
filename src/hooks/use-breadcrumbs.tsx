@@ -11,7 +11,11 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
   const t = useT();
 
   const breadcrumbs = useMemo(() => {
-    const segments = pathname.split('/').filter(Boolean);
+    const rawSegments = pathname.split('/').filter(Boolean);
+    const segments =
+      rawSegments.length === 2 && rawSegments[0] === 'dashboard' && rawSegments[1] === 'overview'
+        ? ['dashboard']
+        : rawSegments;
 
     const customKey = pageTitleKeyFromPath(pathname);
     const lastTitle = customKey
@@ -24,7 +28,7 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
         })()
       : null;
 
-    return segments.map((segment, index) => {
+    const items = segments.map((segment, index) => {
       const path = `/${segments.slice(0, index + 1).join('/')}`;
       const isLast = index === segments.length - 1;
 
@@ -48,6 +52,11 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
         title: segment.charAt(0).toUpperCase() + segment.slice(1),
         link: path
       };
+    });
+
+    return items.filter((item, idx, arr) => {
+      if (idx === 0) return true;
+      return item.title.trim().toLowerCase() !== arr[idx - 1].title.trim().toLowerCase();
     });
   }, [pathname, t]);
 

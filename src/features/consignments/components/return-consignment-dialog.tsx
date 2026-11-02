@@ -98,7 +98,7 @@ export function ReturnConsignmentDialog({
               <span className='font-medium'>{consignment.productName}</span>
             </div>
             <div className='flex justify-between'>
-              <span className='text-muted-foreground'>IMEI:</span>
+              <span className='text-muted-foreground'>{t('dukaan.inventory.imeiLabel')}</span>
               <span className='font-mono text-xs'>{consignment.imei1}</span>
             </div>
             <div className='flex justify-between'>
