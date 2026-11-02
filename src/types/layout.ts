@@ -19,6 +19,11 @@ export interface MobileBottomNavProps {
   role: SessionRole;
 }
 
+export interface BottomNavItemConfig {
+  url: string;
+  tabletOnly?: boolean;
+}
+
 export interface PageContainerProps {
   children: React.ReactNode;
   isLoading?: boolean;

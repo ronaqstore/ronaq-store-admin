@@ -49,14 +49,11 @@ export default async function PageContainer({
     <div className='flex min-h-0 min-w-0 flex-1 flex-col'>
       {hasHeader ? (
         <div className='mb-3 flex shrink-0 flex-col gap-2 px-3 pt-3 sm:mb-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-4 sm:pt-4 md:px-6 md:pt-6'>
-          <div className='hidden sm:block'>
+          <div className='min-w-0 flex-1'>
             <Heading title={title} description={description} infoContent={infoContent} />
           </div>
-          {description ? (
-            <p className='text-muted-foreground text-xs sm:hidden'>{description}</p>
-          ) : null}
           {pageHeaderAction ? (
-            <div className='hidden w-full shrink-0 sm:block sm:w-auto'>{pageHeaderAction}</div>
+            <div className='w-full shrink-0 sm:w-auto'>{pageHeaderAction}</div>
           ) : null}
         </div>
       ) : null}

@@ -109,8 +109,8 @@ export function SubscriptionBadge() {
         ) : (
           <span className={cn('size-2 shrink-0 rounded-full', dotStyles)} aria-hidden='true' />
         )}
-        <span className='hidden sm:inline'>{fullText}</span>
-        <span className='inline sm:hidden font-semibold'>{compactText}</span>
+        <span className='hidden lg:inline'>{fullText}</span>
+        <span className='inline lg:hidden font-semibold'>{compactText}</span>
       </PopoverTrigger>
 
       <PopoverContent

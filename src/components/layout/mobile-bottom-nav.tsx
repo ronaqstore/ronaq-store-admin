@@ -8,24 +8,28 @@ import { getNavGroupsForRole } from '@/config/nav-config';
 import { useFilteredNavGroups } from '@/hooks/use-nav';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-import type { NavItem, MobileBottomNavProps } from '@/types';
+import type { NavItem, MobileBottomNavProps, BottomNavItemConfig } from '@/types';
 import { useT, translateMaybe } from '@/i18n/use-t';
 import { cn } from '@/lib/utils';
 import { isNavUrlActive } from '@/lib/nav-active';
 
-const SHOP_PRIMARY = [
-  '/dashboard/overview',
-  '/dashboard/sales',
-  '/dashboard/purchases',
-  '/dashboard/customers'
-] as const;
+const SHOP_BOTTOM_NAV: BottomNavItemConfig[] = [
+  { url: '/dashboard/overview' },
+  { url: '/dashboard/sales' },
+  { url: '/dashboard/purchases' },
+  { url: '/dashboard/products', tabletOnly: true },
+  { url: '/dashboard/inventory', tabletOnly: true },
+  { url: '/dashboard/customers' },
+  { url: '/dashboard/expenses', tabletOnly: true }
+];
 
-const PLATFORM_PRIMARY = [
-  '/dashboard/platform',
-  '/dashboard/platform/shops',
-  '/dashboard/platform/subscriptions',
-  '/dashboard/settings/appearance'
-] as const;
+const PLATFORM_BOTTOM_NAV: BottomNavItemConfig[] = [
+  { url: '/dashboard/platform' },
+  { url: '/dashboard/platform/shops' },
+  { url: '/dashboard/platform/subscriptions' },
+  { url: '/dashboard/settings/appearance' },
+  { url: '/dashboard/settings', tabletOnly: true }
+];
 
 function flattenNav(groups: ReturnType<typeof getNavGroupsForRole>): NavItem[] {
   return groups.flatMap((g) =>
@@ -45,13 +49,31 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
   const allItems = React.useMemo(() => flattenNav(groups), [groups]);
   const allUrls = React.useMemo(() => allItems.map((item) => item.url), [allItems]);
 
-  const primaryUrls = role === 'SUPER_ADMIN' ? PLATFORM_PRIMARY : SHOP_PRIMARY;
-  const primary = primaryUrls
-    .map((url) => allItems.find((item) => item.url === url))
-    .filter((item): item is NavItem => Boolean(item));
+  const navConfig = role === 'SUPER_ADMIN' ? PLATFORM_BOTTOM_NAV : SHOP_BOTTOM_NAV;
+  const primary = React.useMemo(
+    () =>
+      navConfig
+        .map((cfg) => {
+          const item = allItems.find((i) => i.url === cfg.url);
+          if (!item) return null;
+          return { item, tabletOnly: Boolean(cfg.tabletOnly) };
+        })
+        .filter((entry): entry is { item: NavItem; tabletOnly: boolean } => entry !== null),
+    [allItems, navConfig]
+  );
 
-  const primarySet = new Set(primary.map((item) => item.url));
-  const moreItems = allItems.filter((item) => item.url && !primarySet.has(item.url));
+  const phonePrimaryUrls = React.useMemo(
+    () => new Set(navConfig.filter((c) => !c.tabletOnly).map((c) => c.url)),
+    [navConfig]
+  );
+  const tabletOnlyUrls = React.useMemo(
+    () => new Set(navConfig.filter((c) => c.tabletOnly).map((c) => c.url)),
+    [navConfig]
+  );
+  const moreItems = React.useMemo(
+    () => allItems.filter((item) => item.url && !phonePrimaryUrls.has(item.url)),
+    [allItems, phonePrimaryUrls]
+  );
 
   if (!isMobile) return null;
 
@@ -64,16 +86,16 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
           'pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden'
         )}
       >
-        <ul className='mx-auto flex h-14 max-w-lg items-stretch justify-around px-1'>
-          {primary.map((item) => {
+        <ul className='mx-auto flex h-14 max-w-lg items-stretch justify-around px-1 md:max-w-4xl md:px-3'>
+          {primary.map(({ item, tabletOnly }) => {
             const Icon = item.icon ? Icons[item.icon] : Icons.circle;
             const active = isNavUrlActive(pathname, item.url, allUrls);
             return (
-              <li key={item.url} className='flex flex-1'>
+              <li key={item.url} className={cn('flex-1', tabletOnly ? 'hidden md:flex' : 'flex')}>
                 <Link
                   href={item.url}
                   className={cn(
-                    'flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-medium',
+                    'flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-medium md:text-xs',
                     active ? 'text-primary' : 'text-muted-foreground'
                   )}
                 >
@@ -87,7 +109,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
             <button
               type='button'
               className={cn(
-                'flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-medium',
+                'flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-medium md:text-xs',
                 moreOpen ? 'text-primary' : 'text-muted-foreground'
               )}
               aria-label={t('nav.more')}
@@ -113,8 +135,9 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
             {moreItems.map((item) => {
               const Icon = item.icon ? Icons[item.icon] : Icons.circle;
               const active = isNavUrlActive(pathname, item.url, allUrls);
+              const isTabletOnly = tabletOnlyUrls.has(item.url);
               return (
-                <li key={item.url}>
+                <li key={item.url} className={isTabletOnly ? 'md:hidden' : undefined}>
                   <Link
                     href={item.url}
                     onClick={() => setMoreOpen(false)}

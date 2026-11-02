@@ -52,7 +52,7 @@ export default function Header() {
           orientation='vertical'
           className='me-2 hidden h-4 data-vertical:self-center sm:block'
         />
-        <p className='truncate text-xs font-semibold sm:text-sm'>{title}</p>
+        <p className='truncate text-xs font-semibold sm:hidden'>{title}</p>
         <div className='hidden min-w-0 sm:block'>
           <Breadcrumbs />
         </div>
@@ -63,19 +63,19 @@ export default function Header() {
           type='button'
           variant='ghost'
           size='icon'
-          className='size-8 sm:hidden'
+          className='size-8 lg:hidden'
           aria-label={t('nav.search')}
           onClick={query.toggle}
         >
           <Icons.search className='size-4' />
         </Button>
-        <div className='hidden md:flex'>
+        <div className='hidden lg:flex'>
           <SearchInput />
         </div>
         <div className='hidden sm:block'>
           <ThemeModeToggle />
         </div>
-        <div className='hidden md:block'>
+        <div className='hidden lg:block'>
           <ThemeSelector />
         </div>
         <SubscriptionBadge />
