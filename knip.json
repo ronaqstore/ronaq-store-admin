@@ -42,7 +42,8 @@
     "@babel/parser",
     "@babel/traverse",
     "lint-staged",
-    "recharts"
+    "recharts",
+    "@tanstack/react-query-devtools"
   ],
 
   "ignoreExportsUsedInFile": true,

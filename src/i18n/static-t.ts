@@ -1,24 +1,27 @@
 import en from '../../messages/en.json';
 import ur from '../../messages/ur.json';
 import ps from '../../messages/ps.json';
+import roman from '../../messages/roman.json';
 
-export type LegacyLocale = 'en' | 'ur' | 'ps';
+export type LegacyLocale = 'en' | 'ur' | 'ps' | 'roman';
 
-const catalogs: Record<LegacyLocale, Record<string, unknown>> = { en, ur, ps };
+const catalogs: Record<LegacyLocale, Record<string, unknown>> = { en, ur, ps, roman };
 let activeLocale: LegacyLocale = 'en';
 
 export function setLocale(locale: string): void {
-  if (locale === 'en' || locale === 'ur' || locale === 'ps') {
+  if (locale === 'en' || locale === 'ur' || locale === 'ps' || locale === 'roman') {
     activeLocale = locale;
   }
 }
 
 export function getLocale(): LegacyLocale {
   if (typeof window !== 'undefined') {
-    const match = window.location.pathname.match(/^\/(en|ur|ps)(\/|$)/);
+    const match = window.location.pathname.match(/^\/(en|ur|ps|roman)(\/|$)/);
     if (match) return match[1] as LegacyLocale;
     const lang = document.documentElement.lang;
-    if (lang === 'ur' || lang === 'ps' || lang === 'en') return lang as LegacyLocale;
+    if (lang === 'ur' || lang === 'ps' || lang === 'en' || lang === 'roman')
+      return lang as LegacyLocale;
+    if (lang === 'ur-Latn') return 'roman';
   }
   return activeLocale;
 }

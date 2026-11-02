@@ -904,3 +904,9 @@ html[lang='ps']
 .pac-container {
   z-index: 10000 !important;
 }
+
+nextjs-portal,
+[data-nextjs-dev-indicator],
+.tsqd-parent-container {
+  display: none !important;
+}

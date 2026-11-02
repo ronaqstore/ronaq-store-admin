@@ -307,11 +307,12 @@ export function AppearanceSettings() {
             <CardDescription>{t('appearance.languageHint')}</CardDescription>
           </CardHeader>
           <CardContent className='space-y-4'>
-            <div className='grid gap-2 sm:grid-cols-3'>
+            <div className='grid gap-2 sm:grid-cols-2 lg:grid-cols-4'>
               {[
                 { value: 'en' as const, label: 'English', badge: 'LTR' },
                 { value: 'ur' as const, label: 'اردو', badge: 'RTL' },
-                { value: 'ps' as const, label: 'پښتو', badge: 'RTL' }
+                { value: 'ps' as const, label: 'پښتو', badge: 'RTL' },
+                { value: 'roman' as const, label: 'Roman Urdu', badge: 'LTR' }
               ].map((lang) => (
                 <button
                   key={lang.value}

@@ -185,7 +185,7 @@ export default function AppSidebar({ role }: AppSidebarProps) {
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarFooter className='group-data-[collapsible=icon]:hidden'>
+      <SidebarFooter className='group-data-[collapsible=icon]:hidden pb-[max(1rem,env(safe-area-inset-bottom))]'>
         <p className='text-muted-foreground px-2 py-1 text-xs'>{t('common.appName')}</p>
       </SidebarFooter>
       <SidebarRail />
