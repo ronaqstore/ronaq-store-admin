@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useT } from '@/i18n/use-t';
-import { SaleCreateForm } from './sale-create-form';
+import { SaleCreateForm } from '@/features/sales/components/sale-create-form';
 import type { SaleCreateDialogProps } from '@/types/sales';
 
 function SaleCreateFormSkeleton() {

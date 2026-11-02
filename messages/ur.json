@@ -2976,6 +2976,18 @@
     "settlementSlipBadge": "ادائیگی واؤچر",
     "consignorSign": "جمع کنندہ / مالک کے دستخط",
     "receiverSign": "وصول کنندہ کے دستخط",
-    "shopSign": "دکاندار کے دستخط و مہر"
+    "shopSign": "دکاندار کے دستخط و مہر",
+    "imeiPlaceholder": "15 ہندسے",
+    "batteryPlaceholder": "مثلاً 85",
+    "amountPlaceholder50k": "مثلاً 50,000",
+    "amountPlaceholder55k": "مثلاً 55,000",
+    "pkrSuffix": "(روپے)",
+    "payoutMethodCash": "نقد",
+    "payoutMethodBank": "بینک ٹرانسفر",
+    "payoutMethodJazzcash": "جاز کیش",
+    "payoutMethodEasypaisa": "ایزی پیسہ",
+    "cnicLabel": "شناختی کارڈ نمبر:",
+    "imei1Label": "آئی ایم ای آئی 1:",
+    "imei2Label": "آئی ایم ای آئی 2:"
   }
 }

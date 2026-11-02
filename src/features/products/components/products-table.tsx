@@ -8,13 +8,7 @@ import { toast } from 'sonner';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { Badge } from '@/components/ui/badge';
 import { PreviewableImage } from '@/components/media/previewable-image';
-import {
-  ResponsiveDataTable,
-  StatusBadge,
-  type DetailConfig,
-  type MobileItemConfig,
-  type QuickFilterChip
-} from '@/components/data-table';
+import { ResponsiveDataTable, type QuickFilterChip } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
 import { Icons } from '@/components/icons';
@@ -37,12 +31,13 @@ import { getActiveStatusQuickFilters } from '@/components/common/party-table-hel
 import type { ProductsTableProps } from '@/types/products';
 import type { EntityStatusConfirm } from '@/types/common';
 import { TruncateText } from '@/components/common/truncate-text';
+import { getProductSpecBadges } from '@/lib/products/product-specs';
 import {
-  formatAuthenticity,
-  formatPtaStatus,
-  getProductSpecBadges
-} from '@/lib/products/product-specs';
-import { ProductCellAction, ProductImagesField } from './products-table-cells';
+  ProductCellAction,
+  buildProductDetail,
+  buildProductMobileItem,
+  productCoverUrl
+} from './products-table-cells';
 import {
   SELLING_PRICE_RANGE_RUPEES,
   brandAsyncFilter,
@@ -52,13 +47,9 @@ import {
   parseRupeePriceRange
 } from './products-table-filters';
 import { Button } from '@/components/ui/button';
-import { SaleCreateDialog } from '@/features/sales/components/sale-create-dialog';
+import { SaleCreateDialog } from '@/components/sales/sale-create-dialog';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { PRODUCT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
-
-function productCoverUrl(row: ProductDTO): string | null {
-  return row.imageUrl || row.imageUrls?.[0] || null;
-}
 
 export function ProductsTable({ toolbarAction }: ProductsTableProps) {
   const t = useT();
@@ -123,6 +114,11 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
     },
     onError: (e: Error) => toast.error(e.message)
   });
+
+  const handleQuickSell = (e: React.MouseEvent, product: ProductDTO) => {
+    e.stopPropagation();
+    setQuickSellProduct(product);
+  };
 
   const productColumns: ColumnDef<ProductDTO>[] = useMemo(
     () => [
@@ -296,26 +292,20 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
           ]
         },
         enableColumnFilter: true,
+        enableSorting: false,
         cell: ({ row }) => (
-          <div className='flex flex-col gap-1'>
-            <Badge variant={row.original.isActive ? 'default' : 'secondary'}>
-              {row.original.isActive ? staticT('status.active') : staticT('status.inactive')}
-            </Badge>
-            <span className='text-[10px] text-muted-foreground'>
-              {row.original.isPublished
-                ? staticT('dukaan.product.published')
-                : staticT('dukaan.product.unpublished')}
-            </span>
-          </div>
+          <Badge variant={row.original.isActive ? 'default' : 'secondary'}>
+            {row.original.isActive ? t('status.active') : t('status.inactive')}
+          </Badge>
         )
       },
       {
         id: 'isPublished',
         accessorKey: 'isPublished',
-        size: 0,
-        enableHiding: true,
-        enableSorting: false,
-        header: () => null,
+        size: 90,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={staticT('dukaan.product.publishStatus')} />
+        ),
         meta: {
           label: 'dukaan.product.publishStatus',
           type: 'boolean',
@@ -344,10 +334,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
                 variant='outline'
                 size='xs'
                 className='h-7 px-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400'
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setQuickSellProduct(row.original);
-                }}
+                onClick={(e) => handleQuickSell(e, row.original)}
               >
                 <Icons.cash className='me-1 h-3.5 w-3.5' />
                 {t('dukaan.product.sell')}
@@ -361,114 +348,15 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
     [t]
   );
 
-  const productMobileItem: MobileItemConfig<ProductDTO> = useMemo(
-    () => ({
-      leading: 'thumbnail',
-      leadingIcon: Icons.product,
-      imageUrl: (row) => productCoverUrl(row),
-      title: (row) => row.name,
-      subtitle: (row) => {
-        const specs = getProductSpecBadges(row);
-        const parts = [row.brandName, ...specs].filter(Boolean);
-        return parts.length > 0
-          ? parts.join(' · ')
-          : row.categoryName || (row.isActive ? t('status.active') : t('status.inactive'));
-      },
-      badge: (row) => ({
-        label: row.isActive ? t('status.active') : t('status.inactive'),
-        status: row.isActive ? 'ACTIVE' : 'INACTIVE'
+  const productMobileItem = useMemo(() => buildProductMobileItem(t), [t]);
+  const productDetail = useMemo(
+    () =>
+      buildProductDetail({
+        t,
+        router,
+        onSell: setQuickSellProduct,
+        onStatusConfirm: setStatusConfirm
       }),
-      value: (row) => formatPkr(row.defaultSellingPrice),
-      ariaLabel: (row) => `${row.name}, ${row.isActive ? t('status.active') : t('status.inactive')}`
-    }),
-    [t]
-  );
-
-  const productDetail: DetailConfig<ProductDTO> = useMemo(
-    () => ({
-      mode: 'sheet',
-      title: (row) => row.name,
-      badge: (row) => ({
-        label: row.isActive ? t('status.active') : t('status.inactive'),
-        status: row.isActive ? 'ACTIVE' : 'INACTIVE'
-      }),
-      value: (row) => formatPkr(row.defaultSellingPrice),
-      sections: (row) => [
-        {
-          title: t('dukaan.product.images'),
-          fields: [{ label: t('dukaan.product.images'), value: <ProductImagesField row={row} /> }]
-        },
-        {
-          title: t('dukaan.product.title'),
-          fields: [
-            { label: t('table.col.name'), value: row.name },
-            ...(row.model ? [{ label: t('dukaan.product.model'), value: row.model }] : []),
-            { label: t('dukaan.product.category'), value: formatEmpty(row.categoryName) },
-            { label: t('dukaan.product.brand'), value: formatEmpty(row.brandName) },
-            ...(row.color ? [{ label: t('dukaan.product.color'), value: row.color }] : []),
-            ...(row.storage ? [{ label: t('dukaan.product.storage'), value: row.storage }] : []),
-            ...(row.ram ? [{ label: t('dukaan.product.ram'), value: row.ram }] : []),
-            ...(row.ptaStatus
-              ? [
-                  {
-                    label: t('dukaan.product.ptaStatus'),
-                    value: formatPtaStatus(row.ptaStatus) ?? row.ptaStatus
-                  }
-                ]
-              : []),
-            ...(row.authenticity
-              ? [
-                  {
-                    label: t('dukaan.product.authenticity'),
-                    value: formatAuthenticity(row.authenticity) ?? row.authenticity
-                  }
-                ]
-              : []),
-            ...(row.sku ? [{ label: t('dukaan.product.sku'), value: row.sku }] : []),
-            ...(row.barcode ? [{ label: t('dukaan.product.barcode'), value: row.barcode }] : []),
-            { label: t('dukaan.product.sellingPrice'), value: formatPkr(row.defaultSellingPrice) },
-            { label: t('dukaan.product.stock'), value: String(row.quantityOnHand ?? 0) },
-            {
-              label: t('table.col.status'),
-              value: (
-                <StatusBadge
-                  status={row.isActive ? 'ACTIVE' : 'INACTIVE'}
-                  label={row.isActive ? t('status.active') : t('status.inactive')}
-                />
-              )
-            }
-          ]
-        }
-      ],
-      actions: (row) => [
-        ...(row.isActive
-          ? [
-              {
-                label: t('dukaan.product.sell'),
-                icon: Icons.cash,
-                className:
-                  'text-emerald-600 focus:text-emerald-700 dark:text-emerald-400 font-medium',
-                onClick: () => setQuickSellProduct(row)
-              }
-            ]
-          : []),
-        {
-          label: t('common.edit'),
-          onClick: () => router.push(`/dashboard/products/${row.id}/edit`)
-        },
-        row.isActive
-          ? {
-              label: t('common.deactivate'),
-              variant: 'destructive' as const,
-              onClick: () => setStatusConfirm({ id: row.id, nextActive: false })
-            }
-          : {
-              label: t('common.activate'),
-              variant: 'secondary' as const,
-              onClick: () => setStatusConfirm({ id: row.id, nextActive: true })
-            }
-      ]
-    }),
     [router, t]
   );
 

@@ -1,17 +1,17 @@
 'use client';
 
-import { StatusBadge, type StatusTone } from '@/components/data-table';
+import { StatusBadge } from '@/components/data-table';
 import { useT } from '@/i18n/use-t';
 import type { ConsignmentStatus } from '@/lib/api/types';
-
-interface ConsignmentStatusBadgeProps {
-  status: ConsignmentStatus;
-}
+import type {
+  ConsignmentStatusBadgeConfig,
+  ConsignmentStatusBadgeProps
+} from '@/types/consignments';
 
 export function ConsignmentStatusBadge({ status }: ConsignmentStatusBadgeProps) {
   const t = useT();
 
-  const config: Record<ConsignmentStatus, { tone: StatusTone; label: string }> = {
+  const config: Record<ConsignmentStatus, ConsignmentStatusBadgeConfig> = {
     IN_CUSTODY: {
       tone: 'warning',
       label: t('consignments.statusInCustody')

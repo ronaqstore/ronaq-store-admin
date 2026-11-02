@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { ProductDTO, ProductImageDTO } from '@/lib/api/types';
+import type { EntityStatusConfirm } from '@/types/common';
 
 export interface ProductImageListResponse {
   items: ProductImageDTO[];
@@ -130,4 +131,11 @@ export interface ProductFormValues {
   publicDescription?: string | null;
   ptaStatus?: 'PTA_APPROVED' | 'NON_PTA' | 'JV' | 'BYPASS' | 'MDM_BYPASS' | null;
   authenticity?: 'ORIGINAL' | 'COPY' | '' | null;
+}
+
+export interface BuildProductDetailOptions {
+  t: (key: string) => string;
+  router: { push: (href: string) => void };
+  onSell: (product: ProductDTO) => void;
+  onStatusConfirm: (confirm: EntityStatusConfirm) => void;
 }

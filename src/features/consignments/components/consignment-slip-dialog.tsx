@@ -1,19 +1,18 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
+  DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
-import { formatPkr } from '@/lib/dukaan/numbers';
-import { formatIsoDate } from '@/lib/dates';
 import { useT } from '@/i18n/use-t';
-import { storeSettingsQueryOptions } from '@/features/store-settings';
+import { formatIsoDate } from '@/lib/dates';
+import { formatPkr } from '@/lib/dukaan/numbers';
 import type { ConsignmentSlipDialogProps } from '@/types/consignments';
 
 export function ConsignmentSlipDialog({
@@ -23,17 +22,20 @@ export function ConsignmentSlipDialog({
   onOpenChange
 }: ConsignmentSlipDialogProps) {
   const t = useT();
-  const { data: storeSettings } = useQuery(storeSettingsQueryOptions());
+  const { data: session } = useSession();
 
   if (!consignment) return null;
 
+  const shopName = session?.user?.shopName ?? 'Dukaan';
+  const shopPhone = '';
+  const shopAddress = '';
+
   const isIntake = type === 'intake';
-  const shopName = storeSettings?.displayName?.trim() || t('common.appName');
-  const shopPhone = storeSettings?.phoneNumber || storeSettings?.whatsappNumber || '';
-  const shopAddress = storeSettings?.address || '';
 
   const handlePrint = () => {
-    window.print();
+    if (typeof window !== 'undefined') {
+      window.print();
+    }
   };
 
   return (
@@ -45,9 +47,7 @@ export function ConsignmentSlipDialog({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Printable Slip Content */}
         <div className='rounded-lg border bg-card p-6 text-card-foreground space-y-5 print:border-none print:p-2'>
-          {/* Header */}
           <div className='border-b pb-4 text-center space-y-1'>
             <h2 className='text-2xl font-bold tracking-tight'>{shopName}</h2>
             {(shopPhone || shopAddress) && (
@@ -60,7 +60,6 @@ export function ConsignmentSlipDialog({
             </div>
           </div>
 
-          {/* Meta Info */}
           <div className='grid grid-cols-2 gap-3 text-xs'>
             <div>
               <span className='text-muted-foreground'>{t('consignments.consignmentNo')}: </span>
@@ -78,7 +77,6 @@ export function ConsignmentSlipDialog({
             </div>
           </div>
 
-          {/* Consignor Details */}
           <div className='rounded border p-3 text-xs space-y-1.5 bg-muted/20'>
             <div className='font-semibold text-foreground mb-1'>
               {t('consignments.sectionConsignor')}
@@ -94,14 +92,13 @@ export function ConsignmentSlipDialog({
               </div>
               {consignment.consignorCnic && (
                 <div className='col-span-2'>
-                  <span className='text-muted-foreground'>CNIC: </span>
+                  <span className='text-muted-foreground'>{t('consignments.cnicLabel')} </span>
                   <span className='font-mono'>{consignment.consignorCnic}</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Device Details */}
           <div className='rounded border p-3 text-xs space-y-1.5 bg-muted/20'>
             <div className='font-semibold text-foreground mb-1'>
               {t('consignments.sectionDevice')}
@@ -112,12 +109,12 @@ export function ConsignmentSlipDialog({
                 <span className='font-semibold text-sm'>{consignment.productName}</span>
               </div>
               <div>
-                <span className='text-muted-foreground'>IMEI 1: </span>
+                <span className='text-muted-foreground'>{t('consignments.imei1Label')} </span>
                 <span className='font-mono font-medium'>{consignment.imei1}</span>
               </div>
               {consignment.imei2 && (
                 <div>
-                  <span className='text-muted-foreground'>IMEI 2: </span>
+                  <span className='text-muted-foreground'>{t('consignments.imei2Label')} </span>
                   <span className='font-mono font-medium'>{consignment.imei2}</span>
                 </div>
               )}
@@ -140,7 +137,6 @@ export function ConsignmentSlipDialog({
             </div>
           </div>
 
-          {/* Financial Breakdown */}
           <div className='rounded border p-3 space-y-2 bg-muted/30'>
             <div className='flex justify-between items-center text-sm font-semibold'>
               <span>
@@ -186,7 +182,6 @@ export function ConsignmentSlipDialog({
             )}
           </div>
 
-          {/* Legal / Amanat Terms Box */}
           <div className='rounded border p-2.5 text-[11px] leading-relaxed text-muted-foreground bg-muted/10'>
             {isIntake ? (
               <p>
@@ -202,7 +197,6 @@ export function ConsignmentSlipDialog({
             )}
           </div>
 
-          {/* Signatures */}
           <div className='grid grid-cols-2 gap-8 pt-8 text-xs text-center'>
             <div className='border-t border-dashed pt-2'>
               <span className='text-muted-foreground'>
@@ -216,10 +210,10 @@ export function ConsignmentSlipDialog({
         </div>
 
         <DialogFooter className='print:hidden gap-2 sm:gap-0'>
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
+          <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
             {t('common.close')}
           </Button>
-          <Button onClick={handlePrint} className='gap-1.5'>
+          <Button type='button' onClick={handlePrint} className='gap-1.5'>
             <Icons.print className='h-4 w-4' />
             {t('common.print')}
           </Button>

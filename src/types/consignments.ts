@@ -1,5 +1,13 @@
 import type { ReactNode } from 'react';
-import type { ConsignmentDTO } from '@/lib/api/types';
+import type {
+  CancelConsignmentInput,
+  ConsignmentDTO,
+  ConsignmentStatus,
+  ReturnConsignmentInput,
+  SettleConsignmentInput
+} from '@/lib/api/types';
+import type { StatusTone } from '@/components/data-table';
+import type { OverdraftPrompt } from '@/types';
 
 export interface ConsignmentsTableProps {
   toolbarAction?: ReactNode;
@@ -51,4 +59,43 @@ export interface ConsignmentSlipDialogProps {
 
 export interface ConsignmentsListClientProps {
   defaultOpenAdd?: boolean;
+}
+
+export interface ReturnConsignmentMutationVariables {
+  id: string;
+  input: ReturnConsignmentInput;
+}
+
+export interface SettleConsignmentMutationVariables {
+  id: string;
+  input: SettleConsignmentInput;
+}
+
+export interface CancelConsignmentMutationVariables {
+  id: string;
+  input: CancelConsignmentInput;
+}
+
+export type SettleConsignmentResult =
+  | ConsignmentDTO
+  | (OverdraftPrompt & { confirmOverdraft?: boolean });
+
+export interface ConsignmentStatusBadgeProps {
+  status: ConsignmentStatus;
+}
+
+export interface ConsignmentStatusBadgeConfig {
+  tone: StatusTone;
+  label: string;
+}
+
+export interface ConsignmentSlipModalState {
+  open: boolean;
+  consignment: ConsignmentDTO | null;
+  type: 'intake' | 'settlement';
+}
+
+export interface ConsignmentsHeaderActionProps {
+  className?: string;
+  onAdd: () => void;
 }

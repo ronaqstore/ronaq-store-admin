@@ -34,7 +34,7 @@ import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { mapProductToPicker } from '@/lib/api/picker';
 import { listCustomers } from '@/features/customers/api/service';
 import { listProducts } from '@/features/products/api/service';
-import { QuickVariantDialog } from '@/features/purchases/components/quick-variant-dialog';
+import { QuickVariantDialog } from '@/components/variants/quick-variant-dialog';
 import type { ConsignmentDTO, CustomerDTO } from '@/lib/api/types';
 import type { ConsignmentIntakeDialogProps } from '@/types/consignments';
 import type { ProductPickerItem } from '@/types/picker';
@@ -55,30 +55,29 @@ export function ConsignmentIntakeDialog({
 
   const [productId, setProductId] = useState('');
   const [productLabel, setProductLabel] = useState('');
-  const [quickVariantOpen, setQuickVariantOpen] = useState(false);
-
   const [imei1, setImei1] = useState('');
   const [imei2, setImei2] = useState('');
   const [condition, setCondition] = useState<'NEW' | 'LIKE_NEW' | 'USED' | 'REFURBISHED'>('USED');
-  const [batteryHealth, setBatteryHealth] = useState('');
+  const [batteryHealth, setBatteryHealth] = useState<string>('');
   const [defectNotes, setDefectNotes] = useState('');
 
   const [agreedPayoutRupees, setAgreedPayoutRupees] = useState('');
   const [targetSellingPriceRupees, setTargetSellingPriceRupees] = useState('');
-  const [intakeDate, setIntakeDate] = useState(todayIsoDate);
+  const [intakeDate, setIntakeDate] = useState<string>(todayIsoDate());
   const [notes, setNotes] = useState('');
 
+  const [quickVariantOpen, setQuickVariantOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const mutation = useMutation({
     ...createConsignmentMutation,
-    onSuccess: (data: ConsignmentDTO) => {
+    onSuccess: (created: ConsignmentDTO) => {
       onOpenChange(false);
       resetForm();
       toastSuccessAfterClose(
-        t('consignments.intakeSuccess', { consignmentNo: data.consignmentNo })
+        t('consignments.intakeSuccess', { consignmentNo: created.consignmentNo })
       );
-      onSuccess?.(data);
+      onSuccess?.(created);
     },
     onError: (err: Error) => {
       toast.error(err.message || t('consignments.intakeFailed'));
@@ -99,48 +98,59 @@ export function ConsignmentIntakeDialog({
     setDefectNotes('');
     setAgreedPayoutRupees('');
     setTargetSellingPriceRupees('');
-    setIntakeDate(todayIsoDate);
+    setIntakeDate(todayIsoDate());
     setNotes('');
     setErrors({});
   };
 
-  const handleCustomerSelect = (id: string, customer: CustomerDTO | null) => {
+  const handleCustomerSelect = (id: string, customer?: CustomerDTO | null) => {
     setCustomerId(id);
     if (customer) {
-      if (customer.name) setConsignorName(customer.name);
-      if (customer.phone) setConsignorPhone(customer.phone);
+      setConsignorName(customer.name ?? '');
+      setConsignorPhone(customer.phone ?? '');
     }
   };
 
-  const handleProductCreated = (product: ProductPickerItem) => {
-    setProductId(product.id);
-    setProductLabel(product.name);
+  const handleProductCreated = (item: ProductPickerItem) => {
+    setProductId(item.id);
+    setProductLabel(item.name);
+  };
+
+  const handleProductChange = (id: string, p?: ProductPickerItem | null) => {
+    setProductId(id);
+    if (p?.name) setProductLabel(p.name);
+  };
+
+  const handleConditionChange = (val: string | null) => {
+    if (val) setCondition(val as 'NEW' | 'LIKE_NEW' | 'USED' | 'REFURBISHED');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payoutNum = agreedPayoutRupees ? Number(agreedPayoutRupees) : '';
-    const targetNum = targetSellingPriceRupees ? Number(targetSellingPriceRupees) : '';
-    const batteryNum = batteryHealth !== '' ? Number(batteryHealth) : '';
+    const payoutNum = agreedPayoutRupees ? Number(agreedPayoutRupees) : 0;
+    const targetNum = targetSellingPriceRupees ? Number(targetSellingPriceRupees) : undefined;
+    const batteryNum = batteryHealth !== '' ? Number(batteryHealth) : undefined;
 
-    const schema = createConsignmentFormSchema(t);
-    const parsed = schema.safeParse({
+    const values = {
       customerId: customerId || undefined,
-      consignorName,
-      consignorPhone,
-      consignorCnic: consignorCnic || undefined,
+      consignorName: consignorName.trim(),
+      consignorPhone: consignorPhone.trim(),
+      consignorCnic: consignorCnic.trim() || undefined,
       productId,
-      imei1,
-      imei2: imei2 || undefined,
+      imei1: imei1.trim(),
+      imei2: imei2.trim() || undefined,
       condition,
       batteryHealth: batteryNum,
-      defectNotes: defectNotes || undefined,
+      defectNotes: defectNotes.trim() || undefined,
       agreedPayoutRupees: payoutNum,
       targetSellingPriceRupees: targetNum,
       intakeDate,
-      notes: notes || undefined
-    });
+      notes: notes.trim() || undefined
+    };
+
+    const schema = createConsignmentFormSchema(t);
+    const parsed = schema.safeParse(values);
 
     if (!parsed.success) {
       const nextErrors: Record<string, string> = {};
@@ -185,7 +195,6 @@ export function ConsignmentIntakeDialog({
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className='space-y-5 py-2'>
-            {/* Section 1: Consignor Details */}
             <div className='rounded-md border p-3.5 space-y-3 bg-muted/20'>
               <div className='font-medium text-sm text-foreground'>
                 {t('consignments.sectionConsignor')}
@@ -193,7 +202,7 @@ export function ConsignmentIntakeDialog({
 
               <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
                 <div className='sm:col-span-2'>
-                  <FormEntitySelect
+                  <FormEntitySelect<CustomerDTO>
                     name='customer_picker'
                     label={t('consignments.pickCustomerOptional')}
                     value={customerId}
@@ -202,7 +211,7 @@ export function ConsignmentIntakeDialog({
                     errors={errors.customerId ? [{ message: errors.customerId }] : []}
                     queryKey={['customers', 'picker']}
                     fetchPage={(filters) =>
-                      listCustomers(filters).then((res) => ({
+                      listCustomers({ ...filters, limit: 20 }).then((res) => ({
                         items: res.items,
                         total: res.total,
                         page: res.page,
@@ -210,7 +219,7 @@ export function ConsignmentIntakeDialog({
                       }))
                     }
                     placeholder={t('consignments.pickCustomerPlaceholder')}
-                    searchPlaceholder={t('dukaan.sale.searchCustomers')}
+                    searchPlaceholder={t('dukaan.customer.search')}
                   />
                 </div>
 
@@ -233,6 +242,7 @@ export function ConsignmentIntakeDialog({
                   </Label>
                   <Input
                     id='consignor-phone'
+                    type='tel'
                     value={consignorPhone}
                     onChange={(e) => setConsignorPhone(sanitizePkMobileInput(e.target.value))}
                     placeholder='03001234567'
@@ -255,7 +265,6 @@ export function ConsignmentIntakeDialog({
               </div>
             </div>
 
-            {/* Section 2: Phone Device Details */}
             <div className='rounded-md border p-3.5 space-y-3 bg-muted/20'>
               <div className='font-medium text-sm text-foreground'>
                 {t('consignments.sectionDevice')}
@@ -270,10 +279,7 @@ export function ConsignmentIntakeDialog({
                         label={t('dukaan.purchase.product')}
                         required
                         value={productId}
-                        onValueChange={(id, p) => {
-                          setProductId(id);
-                          if (p?.name) setProductLabel(p.name);
-                        }}
+                        onValueChange={handleProductChange}
                         isInvalid={!!errors.productId}
                         errors={errors.productId ? [{ message: errors.productId }] : []}
                         queryKey={['products', 'serialized-picker']}
@@ -306,25 +312,27 @@ export function ConsignmentIntakeDialog({
 
                 <div className='space-y-1.5'>
                   <Label htmlFor='imei1'>
-                    IMEI 1 <span className='text-destructive'>*</span>
+                    {t('purchases.imei1')} <span className='text-destructive'>*</span>
                   </Label>
                   <Input
                     id='imei1'
                     value={imei1}
                     onChange={(e) => setImei1(e.target.value.replace(/\D/g, '').slice(0, 15))}
-                    placeholder='15 digits'
+                    placeholder={t('consignments.imeiPlaceholder')}
                     maxLength={15}
                   />
                   <DialogFieldError message={errors.imei1} />
                 </div>
 
                 <div className='space-y-1.5'>
-                  <Label htmlFor='imei2'>IMEI 2 ({t('common.optional')})</Label>
+                  <Label htmlFor='imei2'>
+                    {t('purchases.imei2')} ({t('common.optional')})
+                  </Label>
                   <Input
                     id='imei2'
                     value={imei2}
                     onChange={(e) => setImei2(e.target.value.replace(/\D/g, '').slice(0, 15))}
-                    placeholder='15 digits'
+                    placeholder={t('consignments.imeiPlaceholder')}
                     maxLength={15}
                   />
                   <DialogFieldError message={errors.imei2} />
@@ -332,12 +340,7 @@ export function ConsignmentIntakeDialog({
 
                 <div className='space-y-1.5'>
                   <Label htmlFor='condition'>{t('table.col.condition')}</Label>
-                  <Select
-                    value={condition}
-                    onValueChange={(val) => {
-                      if (val) setCondition(val);
-                    }}
-                  >
+                  <Select value={condition} onValueChange={handleConditionChange}>
                     <SelectTrigger id='condition'>
                       <SelectValue />
                     </SelectTrigger>
@@ -361,7 +364,7 @@ export function ConsignmentIntakeDialog({
                     max={100}
                     value={batteryHealth}
                     onChange={(e) => setBatteryHealth(e.target.value)}
-                    placeholder='e.g. 85'
+                    placeholder={t('consignments.batteryPlaceholder')}
                   />
                   <DialogFieldError message={errors.batteryHealth} />
                 </div>
@@ -378,7 +381,6 @@ export function ConsignmentIntakeDialog({
               </div>
             </div>
 
-            {/* Section 3: Financial Terms & Agreement */}
             <div className='rounded-md border p-3.5 space-y-3 bg-muted/20'>
               <div className='font-medium text-sm text-foreground'>
                 {t('consignments.sectionTerms')}
@@ -387,7 +389,7 @@ export function ConsignmentIntakeDialog({
               <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
                 <div className='space-y-1.5'>
                   <Label htmlFor='agreed-payout'>
-                    {t('consignments.agreedPayout')} (PKR){' '}
+                    {t('consignments.agreedPayout')} {t('consignments.pkrSuffix')}{' '}
                     <span className='text-destructive'>*</span>
                   </Label>
                   <Input
@@ -397,7 +399,7 @@ export function ConsignmentIntakeDialog({
                     value={agreedPayoutRupees}
                     onKeyDown={blockInvalidNumberKeys}
                     onChange={(e) => setAgreedPayoutRupees(sanitizeNumberInput(e.target.value))}
-                    placeholder='e.g. 50,000'
+                    placeholder={t('consignments.amountPlaceholder50k')}
                   />
                   <p className='text-xs text-muted-foreground'>
                     {t('consignments.agreedPayoutHint')}
@@ -406,7 +408,9 @@ export function ConsignmentIntakeDialog({
                 </div>
 
                 <div className='space-y-1.5'>
-                  <Label htmlFor='target-price'>{t('consignments.targetSellingPrice')} (PKR)</Label>
+                  <Label htmlFor='target-price'>
+                    {t('consignments.targetSellingPrice')} {t('consignments.pkrSuffix')}
+                  </Label>
                   <Input
                     id='target-price'
                     type='text'
@@ -416,7 +420,7 @@ export function ConsignmentIntakeDialog({
                     onChange={(e) =>
                       setTargetSellingPriceRupees(sanitizeNumberInput(e.target.value))
                     }
-                    placeholder='e.g. 55,000'
+                    placeholder={t('consignments.amountPlaceholder55k')}
                   />
                   <p className='text-xs text-muted-foreground'>
                     {t('consignments.targetSellingPriceHint')}

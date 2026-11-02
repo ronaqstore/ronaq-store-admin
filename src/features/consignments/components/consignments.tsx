@@ -7,18 +7,15 @@ import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { useT } from '@/i18n/use-t';
 import type { ConsignmentDTO } from '@/lib/api/types';
-import type { ConsignmentsListClientProps } from '@/types/consignments';
+import type {
+  ConsignmentsHeaderActionProps,
+  ConsignmentsListClientProps
+} from '@/types/consignments';
 import { ConsignmentsTable } from './consignments-table';
 import { ConsignmentIntakeDialog } from './consignment-intake-dialog';
 import { ConsignmentSlipDialog } from './consignment-slip-dialog';
 
-export function ConsignmentsHeaderAction({
-  className,
-  onAdd
-}: {
-  className?: string;
-  onAdd: () => void;
-}) {
+export function ConsignmentsHeaderAction({ className, onAdd }: ConsignmentsHeaderActionProps) {
   const t = useT();
   return (
     <Button type='button' className={className ?? 'h-8'} onClick={onAdd}>
