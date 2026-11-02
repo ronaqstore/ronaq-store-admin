@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function SettingsPageSkeleton() {
   return (
-    <div role='status' className='flex min-w-0 flex-col gap-10' aria-busy='true'>
+    <div role='status' className='flex min-w-0 flex-col gap-6 sm:gap-8 lg:gap-10' aria-busy='true'>
       <section className='space-y-4'>
         <div className='flex items-start gap-3'>
           <Skeleton className='h-10 w-10 shrink-0 rounded-xl' />
@@ -11,7 +11,7 @@ export function SettingsPageSkeleton() {
             <Skeleton className='h-4 w-56' />
           </div>
         </div>
-        <div className='grid gap-4 lg:grid-cols-2'>
+        <div className='grid gap-4 md:grid-cols-2'>
           <Skeleton className='h-44 w-full rounded-xl' />
           <Skeleton className='h-44 w-full rounded-xl' />
         </div>
@@ -27,7 +27,7 @@ export function SettingsPageSkeleton() {
             <Skeleton className='h-4 w-64' />
           </div>
         </div>
-        <div className='grid gap-4 lg:grid-cols-2'>
+        <div className='grid gap-4 md:grid-cols-2'>
           <Skeleton className='h-52 w-full rounded-xl' />
           <Skeleton className='h-52 w-full rounded-xl' />
           <Skeleton className='h-72 w-full rounded-xl lg:col-span-2' />
@@ -45,12 +45,12 @@ export function AppearancePageSkeleton() {
       aria-busy='true'
     >
       <div className='min-w-0 space-y-6'>
-        <div className='flex items-start justify-between gap-4'>
+        <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4'>
           <div className='space-y-2'>
             <Skeleton className='h-7 w-40' />
             <Skeleton className='h-4 w-72' />
           </div>
-          <Skeleton className='h-9 w-36' />
+          <Skeleton className='h-9 w-full sm:w-36' />
         </div>
         <Skeleton className='h-36 w-full rounded-xl' />
         <Skeleton className='h-64 w-full rounded-xl' />

@@ -55,14 +55,28 @@ function LivePreview({ mounted }: LivePreviewProps) {
           <span className='text-2xl font-semibold tabular-nums'>{amount}</span>
           <Badge>{t('status.active')}</Badge>
         </div>
-        <div className='flex flex-wrap gap-2'>
-          <Button type='button' size='sm'>
+        <div className='grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:gap-2'>
+          <Button
+            type='button'
+            size='sm'
+            className='w-full sm:w-auto text-xs sm:text-sm px-2 sm:px-3'
+          >
             {t('appearance.previewButtonPrimary')}
           </Button>
-          <Button type='button' size='sm' variant='secondary'>
+          <Button
+            type='button'
+            size='sm'
+            variant='secondary'
+            className='w-full sm:w-auto text-xs sm:text-sm px-2 sm:px-3'
+          >
             {t('appearance.previewButtonSecondary')}
           </Button>
-          <Button type='button' size='sm' variant='outline'>
+          <Button
+            type='button'
+            size='sm'
+            variant='outline'
+            className='w-full sm:w-auto text-xs sm:text-sm px-2 sm:px-3'
+          >
             {t('appearance.previewButtonOutline')}
           </Button>
         </div>
@@ -118,12 +132,20 @@ export function AppearanceSettings() {
   return (
     <div className='grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]'>
       <div className='min-w-0 space-y-6'>
-        <div className='flex items-start justify-between gap-4'>
+        <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4'>
           <div>
-            <h2 className='text-2xl font-semibold tracking-tight'>{t('appearance.title')}</h2>
-            <p className='text-muted-foreground text-sm'>{t('appearance.subtitle')}</p>
+            <h2 className='text-xl sm:text-2xl font-semibold tracking-tight'>
+              {t('appearance.title')}
+            </h2>
+            <p className='text-muted-foreground text-xs sm:text-sm'>{t('appearance.subtitle')}</p>
           </div>
-          <Button type='button' variant='outline' size='sm' onClick={() => prefs.resetAll()}>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            className='w-full sm:w-auto shrink-0'
+            onClick={() => prefs.resetAll()}
+          >
             <Icons.history className='me-2 h-4 w-4' />
             {t('appearance.reset')}
           </Button>
@@ -132,10 +154,12 @@ export function AppearanceSettings() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2 text-base'>
-              <Icons.download className='h-4 w-4' />
-              {t('pwa.installApp')}
+              <Icons.download className='h-4 w-4 shrink-0' />
+              <span>{t('pwa.installApp')}</span>
             </CardTitle>
-            <CardDescription>{t('pwa.installDesktopHint')}</CardDescription>
+            <CardDescription className='text-xs sm:text-sm'>
+              {t('pwa.installDesktopHint')}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <InstallPrompt
@@ -148,15 +172,17 @@ export function AppearanceSettings() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2 text-base'>
-              <Icons.palette className='h-4 w-4' />
-              {t('appearance.theme')}
+              <Icons.palette className='h-4 w-4 shrink-0' />
+              <span>{t('appearance.theme')}</span>
             </CardTitle>
-            <CardDescription>{t('appearance.themeHint')}</CardDescription>
+            <CardDescription className='text-xs sm:text-sm'>
+              {t('appearance.themeHint')}
+            </CardDescription>
           </CardHeader>
           <CardContent className='space-y-4'>
             <div className='space-y-2'>
               <Label>{t('appearance.mode')}</Label>
-              <div className='flex flex-wrap gap-2'>
+              <div className='grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:gap-2'>
                 {[
                   {
                     value: 'system',
@@ -178,35 +204,36 @@ export function AppearanceSettings() {
                     key={mode.value}
                     type='button'
                     size='sm'
+                    className='w-full sm:w-auto px-2 sm:px-3 text-xs sm:text-sm'
                     variant={themeMode === mode.value ? 'default' : 'outline'}
                     onClick={() => setTheme(mode.value)}
                   >
-                    <mode.icon className='me-1 h-4 w-4' />
-                    {mode.label}
+                    <mode.icon className='me-1 h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0' />
+                    <span>{mode.label}</span>
                   </Button>
                 ))}
               </div>
             </div>
             <div className='space-y-2'>
               <Label>{t('appearance.visualTheme')}</Label>
-              <div className='grid grid-cols-2 gap-2 sm:grid-cols-3'>
+              <div className='grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2'>
                 {THEMES.map((th) => (
                   <button
                     key={th.value}
                     type='button'
                     onClick={() => setActiveTheme(th.value)}
                     className={cn(
-                      'flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-start text-sm transition-colors',
+                      'flex items-center justify-between gap-1.5 rounded-lg border px-2.5 py-2 text-start text-xs sm:text-sm sm:px-3 transition-colors',
                       activeTheme === th.value
                         ? 'border-primary bg-primary/5 ring-1 ring-primary'
                         : 'hover:bg-muted/50'
                     )}
                   >
-                    <span className='font-medium'>
+                    <span className='font-medium truncate'>
                       {translateMaybe(`appearance.themeNames.${th.value}`, t)}
                     </span>
                     {activeTheme === th.value ? (
-                      <Icons.check className='text-primary ms-auto h-4 w-4 shrink-0' />
+                      <Icons.check className='text-primary ms-auto h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0' />
                     ) : null}
                   </button>
                 ))}
@@ -218,13 +245,15 @@ export function AppearanceSettings() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2 text-base'>
-              <Icons.sparkles className='h-4 w-4' />
-              {t('appearance.accent')}
+              <Icons.sparkles className='h-4 w-4 shrink-0' />
+              <span>{t('appearance.accent')}</span>
             </CardTitle>
-            <CardDescription>{t('appearance.accentDescription')}</CardDescription>
+            <CardDescription className='text-xs sm:text-sm'>
+              {t('appearance.accentDescription')}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className='flex flex-wrap gap-3'>
+            <div className='flex flex-wrap gap-2.5 sm:gap-3'>
               {ACCENT_OPTIONS.map((accent) => (
                 <button
                   key={accent}
@@ -234,7 +263,7 @@ export function AppearanceSettings() {
                   })}
                   onClick={() => prefs.setAccent(accent)}
                   className={cn(
-                    'relative h-9 w-9 rounded-full border-2 transition-transform hover:scale-105',
+                    'relative h-8 w-8 sm:h-9 sm:w-9 rounded-full border-2 transition-transform hover:scale-105',
                     ACCENT_CLASS[accent],
                     selectedAccent === accent
                       ? 'border-foreground ring-2 ring-offset-2'
@@ -242,7 +271,7 @@ export function AppearanceSettings() {
                   )}
                 >
                   {selectedAccent === accent ? (
-                    <Icons.check className='absolute inset-0 m-auto h-4 w-4 text-white' />
+                    <Icons.check className='absolute inset-0 m-auto h-3.5 w-3.5 sm:h-4 sm:w-4 text-white' />
                   ) : null}
                 </button>
               ))}
@@ -253,20 +282,23 @@ export function AppearanceSettings() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2 text-base'>
-              <Icons.dashboard className='h-4 w-4' />
-              {t('appearance.layout')}
+              <Icons.dashboard className='h-4 w-4 shrink-0' />
+              <span>{t('appearance.layout')}</span>
             </CardTitle>
-            <CardDescription>{t('appearance.layoutDescription')}</CardDescription>
+            <CardDescription className='text-xs sm:text-sm'>
+              {t('appearance.layoutDescription')}
+            </CardDescription>
           </CardHeader>
           <CardContent className='space-y-4'>
             <div className='space-y-2'>
               <Label>{t('appearance.density')}</Label>
-              <div className='flex flex-wrap gap-2'>
+              <div className='grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:gap-2'>
                 {(['comfortable', 'compact'] as const).map((d) => (
                   <Button
                     key={d}
                     type='button'
                     size='sm'
+                    className='w-full sm:w-auto text-xs sm:text-sm'
                     variant={density === d ? 'default' : 'outline'}
                     onClick={() => prefs.setDensity(d)}
                   >
@@ -277,12 +309,13 @@ export function AppearanceSettings() {
             </div>
             <div className='space-y-2'>
               <Label>{t('appearance.radius')}</Label>
-              <div className='flex flex-wrap gap-2'>
+              <div className='grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:gap-2'>
                 {(['sharp', 'medium', 'round'] as const).map((r) => (
                   <Button
                     key={r}
                     type='button'
                     size='sm'
+                    className='w-full sm:w-auto px-2 sm:px-3 text-xs sm:text-sm'
                     variant={radius === r ? 'default' : 'outline'}
                     onClick={() => prefs.setRadius(r)}
                   >
@@ -301,13 +334,15 @@ export function AppearanceSettings() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2 text-base'>
-              <Icons.brightness className='h-4 w-4' />
-              {t('appearance.language')}
+              <Icons.brightness className='h-4 w-4 shrink-0' />
+              <span>{t('appearance.language')}</span>
             </CardTitle>
-            <CardDescription>{t('appearance.languageHint')}</CardDescription>
+            <CardDescription className='text-xs sm:text-sm'>
+              {t('appearance.languageHint')}
+            </CardDescription>
           </CardHeader>
           <CardContent className='space-y-4'>
-            <div className='grid gap-2 sm:grid-cols-2 lg:grid-cols-4'>
+            <div className='grid grid-cols-2 gap-2 lg:grid-cols-4'>
               {[
                 { value: 'en' as const, label: 'English', badge: 'LTR' },
                 { value: 'ur' as const, label: 'اردو', badge: 'RTL' },
@@ -319,13 +354,13 @@ export function AppearanceSettings() {
                   type='button'
                   onClick={() => onSelectLanguage(lang.value)}
                   className={cn(
-                    'rounded-lg border px-3 py-3 text-start',
+                    'rounded-lg border px-2.5 py-2.5 sm:px-3 sm:py-3 text-start transition-colors',
                     currentLocale === lang.value
                       ? 'border-primary ring-1 ring-primary'
                       : 'hover:bg-muted/50'
                   )}
                 >
-                  <p className='font-medium'>{lang.label}</p>
+                  <p className='font-medium text-xs sm:text-sm truncate'>{lang.label}</p>
                   <Badge variant='secondary' className='mt-1 text-[10px]'>
                     {lang.badge}
                   </Badge>
@@ -337,15 +372,25 @@ export function AppearanceSettings() {
               <RadioGroup
                 value={digits}
                 onValueChange={(v) => prefs.setDigits(v as typeof prefs.digits)}
-                className='flex gap-4'
+                className='flex flex-col gap-2.5 sm:flex-row sm:gap-6'
               >
                 <div className='flex items-center gap-2'>
                   <RadioGroupItem value='western' id='digits-western' />
-                  <Label htmlFor='digits-western'>{t('appearance.digitsWestern')}</Label>
+                  <Label
+                    htmlFor='digits-western'
+                    className='cursor-pointer text-xs sm:text-sm font-normal'
+                  >
+                    {t('appearance.digitsWestern')}
+                  </Label>
                 </div>
                 <div className='flex items-center gap-2'>
                   <RadioGroupItem value='eastern' id='digits-eastern' />
-                  <Label htmlFor='digits-eastern'>{t('appearance.digitsEastern')}</Label>
+                  <Label
+                    htmlFor='digits-eastern'
+                    className='cursor-pointer text-xs sm:text-sm font-normal'
+                  >
+                    {t('appearance.digitsEastern')}
+                  </Label>
                 </div>
               </RadioGroup>
             </div>
