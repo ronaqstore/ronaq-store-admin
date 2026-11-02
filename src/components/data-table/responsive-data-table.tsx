@@ -171,7 +171,7 @@ export function ResponsiveDataTable<TData>({
       ) : null}
 
       {isList ? (
-        <div className='min-h-0 flex-1 overflow-y-auto overscroll-y-contain'>
+        <div className='min-h-0 flex-1 overflow-y-auto overscroll-y-contain no-scrollbar'>
           <div className='p-px'>
             {ledger ? (
               <GroupedLedgerList
@@ -260,7 +260,7 @@ function CompactOrFullTable<TData>({
     <div className='relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card'>
       <Table
         className='min-w-full table-fixed'
-        containerClassName='min-h-0 flex-1 overflow-auto overscroll-contain'
+        containerClassName='min-h-0 flex-1 overflow-auto overscroll-contain no-scrollbar'
       >
         <TableHeader className='bg-background sticky top-0 z-20 shadow-[0_1px_0_0_var(--border)]'>
           {table.getHeaderGroups().map((headerGroup) => (

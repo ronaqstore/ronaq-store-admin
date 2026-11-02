@@ -18,10 +18,10 @@ export default async function PlatformAdminLoginPage() {
   const tCommon = await getTranslations('common');
 
   return (
-    <div className='bg-background relative flex min-h-svh flex-col items-center justify-center overflow-hidden p-6'>
+    <div className='bg-background relative flex h-svh max-h-svh w-full flex-col items-center justify-start overflow-y-auto overscroll-contain px-4 py-8 sm:justify-center sm:px-6 sm:py-12 no-scrollbar'>
       <div
         aria-hidden
-        className='pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,oklch(0.6_0.1_20_/_0.1),transparent_55%)]'
+        className='pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top,oklch(0.6_0.1_20_/_0.1),transparent_55%)]'
       />
       <div className='relative z-10 mb-8 text-center'>
         <p className='text-muted-foreground text-sm font-medium tracking-wide uppercase'>

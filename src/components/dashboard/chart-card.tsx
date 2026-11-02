@@ -199,7 +199,7 @@ export function ChartCard({
             actionLabel={emptyActionLabel}
           />
         ) : viewMode === 'table' && tableColumns && tableRows ? (
-          <div className='max-h-96 overflow-auto rounded-md border'>
+          <div className='max-h-96 overflow-auto rounded-md border no-scrollbar'>
             <Table>
               <TableHeader>
                 <TableRow>

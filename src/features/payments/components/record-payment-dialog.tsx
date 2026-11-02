@@ -214,7 +214,7 @@ export function RecordPaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className='max-h-[92vh] overflow-y-auto sm:max-w-lg'>
+      <DialogContent className='max-h-[92vh] overflow-y-auto sm:max-w-lg no-scrollbar'>
         <DialogHeader>
           <DialogTitle>{t('payments.recordPaymentTitle')}</DialogTitle>
           <DialogDescription>{t('payments.recordPaymentDesc')}</DialogDescription>

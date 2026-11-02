@@ -239,7 +239,7 @@ export function RecordSupplierPaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className='max-h-[92vh] overflow-y-auto sm:max-w-lg'>
+      <DialogContent className='max-h-[92vh] overflow-y-auto sm:max-w-lg no-scrollbar'>
         <DialogHeader>
           <DialogTitle>{t('supplierPayments.addPaymentTitle')}</DialogTitle>
           <DialogDescription>{t('supplierPayments.addPaymentDesc')}</DialogDescription>

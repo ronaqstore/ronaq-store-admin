@@ -311,7 +311,7 @@ function Infobar({
         <div
           data-infobar='infobar'
           data-slot='infobar-inner'
-          className='bg-sidebar text-sidebar-foreground flex h-full w-full flex-col overflow-y-auto'
+          className='bg-sidebar text-sidebar-foreground flex h-full w-full flex-col overflow-y-auto no-scrollbar'
         >
           {children}
         </div>
@@ -433,7 +433,7 @@ function InfobarContent({ className, ...props }: React.ComponentProps<'div'>) {
       data-slot='infobar-content'
       data-infobar='content'
       className={cn(
-        'flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden',
+        'flex min-h-0 flex-1 flex-col gap-2 overflow-auto no-scrollbar group-data-[collapsible=icon]:overflow-hidden',
         className
       )}
       {...props}

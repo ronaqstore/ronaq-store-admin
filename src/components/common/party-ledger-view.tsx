@@ -91,7 +91,7 @@ function LedgerRows({ openingBalance, ledger, openingLabel, runningLabel }: Part
         ))}
       </div>
 
-      <div className='hidden overflow-x-auto md:block'>
+      <div className='hidden overflow-x-auto no-scrollbar md:block'>
         <Table>
           <TableHeader>
             <TableRow className='hover:bg-transparent'>

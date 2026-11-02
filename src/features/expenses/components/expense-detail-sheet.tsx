@@ -33,7 +33,7 @@ export function ExpenseDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className='flex flex-col gap-6 sm:max-w-md overflow-y-auto'>
+      <SheetContent className='flex flex-col gap-6 sm:max-w-md overflow-y-auto no-scrollbar'>
         <SheetHeader>
           <div className='flex items-center justify-between pe-6'>
             <SheetTitle className='text-lg font-semibold'>{expense.categoryName}</SheetTitle>

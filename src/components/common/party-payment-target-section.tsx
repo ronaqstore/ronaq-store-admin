@@ -69,7 +69,7 @@ export function PartyPaymentTargetSection({
       </RadioGroup>
 
       {targetType === 'bill' ? (
-        <div className='mt-2 max-h-40 space-y-1.5 overflow-y-auto rounded-lg border border-border/60 bg-muted/20 p-2'>
+        <div className='mt-2 max-h-40 space-y-1.5 overflow-y-auto no-scrollbar rounded-lg border border-border/60 bg-muted/20 p-2'>
           {unpaidBills.length === 0 ? (
             <p className='px-1 py-2 text-xs text-muted-foreground'>{labels.noUnpaidBills}</p>
           ) : (

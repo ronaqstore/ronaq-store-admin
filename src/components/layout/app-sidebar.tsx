@@ -107,7 +107,7 @@ export default function AppSidebar({ role }: AppSidebarProps) {
           ) : null}
         </div>
       </SidebarHeader>
-      <SidebarContent className='overflow-x-hidden'>
+      <SidebarContent className='overflow-y-auto overflow-x-hidden no-scrollbar'>
         {visibleGroups.length === 0 ? (
           <div className='text-muted-foreground px-3 py-6 text-center text-sm group-data-[collapsible=icon]:hidden'>
             {t('nav.noMatchingTabs')}

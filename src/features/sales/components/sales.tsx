@@ -336,7 +336,7 @@ export function SaleReceiptClient({ id }: SaleReceiptClientProps) {
       <div className='text-sm'>
         {t('table.col.customer')}: {data.customerName ?? t('dukaan.sale.walkIn')}
       </div>
-      <div className='-mx-1 overflow-x-auto px-1'>
+      <div className='-mx-1 overflow-x-auto px-1 no-scrollbar'>
         <table className='w-full min-w-[300px] sm:min-w-[360px] text-sm'>
           <thead>
             <tr className='border-b text-start'>

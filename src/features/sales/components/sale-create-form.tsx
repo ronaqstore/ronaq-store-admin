@@ -126,6 +126,11 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
     }
   }, [currentFingerprint, promptedFingerprint, belowCostPrompt]);
 
+  const handleConfirmBelowCostChange = (checked: boolean) => {
+    setConfirmBelowCost(checked);
+    if (checked) setFormApiError(null);
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     void form.handleSubmit();
@@ -142,10 +147,7 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
       {belowCostPrompt ? (
         <OverdraftAlert
           checked={confirmBelowCost}
-          onCheckedChange={(checked) => {
-            setConfirmBelowCost(checked);
-            if (checked) setFormApiError(null);
-          }}
+          onCheckedChange={handleConfirmBelowCostChange}
           title={belowCostPrompt.message}
           confirmLabel={t('sales.confirmBelowCost')}
           id='confirm-below-cost'

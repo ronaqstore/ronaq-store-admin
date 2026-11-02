@@ -118,7 +118,8 @@
       "updatedAt": "Up date ki tareekh",
       "reason": "Wajah",
       "target": "Target",
-      "notes": "Notes"
+      "notes": "Notes",
+      "condition": "Halat"
     }
   },
   "nav": {
@@ -655,7 +656,10 @@
       "barcodePlaceholder": "Barcode",
       "colorPlaceholder": "Rang",
       "descriptionPlaceholder": "Mukhtasir tafseel",
-      "publicDescriptionPlaceholder": "Public tafseel"
+      "publicDescriptionPlaceholder": "Public tafseel",
+      "purchase": "Kharidein",
+      "quickPurchase": "Fauri Kharidari",
+      "restock": "Stock Shamil Karein"
     },
     "category": {
       "editTitle": "Category mein Edit karein",
@@ -2988,6 +2992,7 @@
     "payoutMethodEasypaisa": "Easy paisa",
     "cnicLabel": "Shanakhti card number:",
     "imei1Label": "IMEI 1:",
-    "imei2Label": "IMEI 2:"
+    "imei2Label": "IMEI 2:",
+    "condition": "Halat"
   }
 }

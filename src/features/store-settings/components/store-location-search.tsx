@@ -244,7 +244,7 @@ export function StoreLocationSearch({
           {listOpen && (predictions.length > 0 || searching) ? (
             <div
               id={listId}
-              className='absolute inset-x-0 top-[calc(100%+0.25rem)] z-[10001] max-h-56 overflow-auto rounded-lg border border-border bg-popover p-1 shadow-md'
+              className='absolute inset-x-0 top-[calc(100%+0.25rem)] z-[10001] max-h-56 overflow-auto rounded-lg border border-border bg-popover p-1 shadow-md no-scrollbar'
             >
               {searching && predictions.length === 0 ? (
                 <div className='space-y-1.5 px-2.5 py-2' aria-busy='true'>

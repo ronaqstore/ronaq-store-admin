@@ -245,7 +245,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-xl'>
+      <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-xl no-scrollbar'>
         <DialogHeader>
           <DialogTitle>{t('sales.returnDialog.title', { saleNo: sale.saleNo })}</DialogTitle>
           <DialogDescription>{t('sales.returnDialog.description')}</DialogDescription>

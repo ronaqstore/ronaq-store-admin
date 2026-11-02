@@ -64,7 +64,7 @@ export default async function PageContainer({
           hasHeader ? 'px-3 sm:px-4 md:px-6' : 'px-3 pt-3 sm:px-4 sm:pt-4 md:px-6 md:pt-6',
           'pb-[calc(6rem+max(1rem,env(safe-area-inset-bottom)))] lg:pb-6',
 
-          fill ? 'overflow-hidden' : 'overflow-y-auto overscroll-y-contain'
+          fill ? 'overflow-hidden' : 'overflow-y-auto overscroll-y-contain no-scrollbar'
         )}
       >
         <div
