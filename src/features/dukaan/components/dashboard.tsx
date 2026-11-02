@@ -53,7 +53,7 @@ export function DukaanDashboard() {
 
   return (
     <div className='flex flex-1 flex-col gap-6'>
-      <div className='flex flex-col gap-4 2xl:flex-row 2xl:items-center 2xl:justify-between'>
+      <div className='flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between'>
         <div className='shrink-0'>
           <h1 className='text-2xl font-bold tracking-tight'>{t('pages.dashboard.title')}</h1>
           <p className='text-muted-foreground text-sm'>

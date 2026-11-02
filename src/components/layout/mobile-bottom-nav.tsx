@@ -86,16 +86,16 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
           'pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden'
         )}
       >
-        <ul className='mx-auto flex h-14 max-w-lg items-stretch justify-around px-1 md:max-w-4xl md:px-3'>
+        <ul className='mx-auto flex h-14 w-full max-w-lg items-stretch justify-around px-1 sm:max-w-4xl sm:px-3'>
           {primary.map(({ item, tabletOnly }) => {
             const Icon = item.icon ? Icons[item.icon] : Icons.circle;
             const active = isNavUrlActive(pathname, item.url, allUrls);
             return (
-              <li key={item.url} className={cn('flex-1', tabletOnly ? 'hidden md:flex' : 'flex')}>
+              <li key={item.url} className={cn('flex-1', tabletOnly ? 'hidden sm:flex' : 'flex')}>
                 <Link
                   href={item.url}
                   className={cn(
-                    'flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-medium md:text-xs',
+                    'flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-medium sm:text-xs',
                     active ? 'text-primary' : 'text-muted-foreground'
                   )}
                 >
@@ -109,7 +109,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
             <button
               type='button'
               className={cn(
-                'flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-medium md:text-xs',
+                'flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[10px] font-medium sm:text-xs',
                 moreOpen ? 'text-primary' : 'text-muted-foreground'
               )}
               aria-label={t('nav.more')}
@@ -137,7 +137,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
               const active = isNavUrlActive(pathname, item.url, allUrls);
               const isTabletOnly = tabletOnlyUrls.has(item.url);
               return (
-                <li key={item.url} className={isTabletOnly ? 'md:hidden' : undefined}>
+                <li key={item.url} className={isTabletOnly ? 'sm:hidden' : undefined}>
                   <Link
                     href={item.url}
                     onClick={() => setMoreOpen(false)}

@@ -317,7 +317,7 @@ export function SaleReceiptClient({ id }: SaleReceiptClientProps) {
   const shopName = storeSettings.displayName?.trim() || t('common.appName');
 
   return (
-    <div className='mx-auto max-w-lg space-y-4 rounded-lg border bg-white p-6 text-black print:border-0'>
+    <div className='mx-auto max-w-lg space-y-4 rounded-lg border bg-white p-4 sm:p-6 text-black print:border-0'>
       <div className='text-center'>
         <Image
           src={shopLogoSrc(storeSettings.logoUrl)}
@@ -337,7 +337,7 @@ export function SaleReceiptClient({ id }: SaleReceiptClientProps) {
         {t('table.col.customer')}: {data.customerName ?? t('dukaan.sale.walkIn')}
       </div>
       <div className='-mx-1 overflow-x-auto px-1'>
-        <table className='w-full min-w-[360px] text-sm'>
+        <table className='w-full min-w-[300px] sm:min-w-[360px] text-sm'>
           <thead>
             <tr className='border-b text-start'>
               <th className='py-1'>{t('dukaan.sale.item')}</th>

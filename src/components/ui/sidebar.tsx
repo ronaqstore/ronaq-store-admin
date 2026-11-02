@@ -200,7 +200,9 @@ function Sidebar({
             <SheetTitle>{resolvedSidebarTitle}</SheetTitle>
             <SheetDescription>{resolvedSidebarDescription}</SheetDescription>
           </SheetHeader>
-          <div className='flex h-full w-full flex-col'>{children}</div>
+          <div className='flex h-full w-full flex-col pt-[max(2.5rem,calc(env(safe-area-inset-top)+0.75rem))] pb-[max(1rem,env(safe-area-inset-bottom))]'>
+            {children}
+          </div>
         </SheetContent>
       </Sheet>
     );
