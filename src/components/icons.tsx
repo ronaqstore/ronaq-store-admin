@@ -7,11 +7,15 @@ import {
   IconBell,
   IconBan,
   IconBold,
+  IconBolt,
+  IconBoltOff,
   IconBox,
   IconBrandTwitter,
   IconBrightness,
   IconBuildingStore,
   IconCalendar,
+  IconCamera,
+  IconCameraRotate,
   IconCash,
   IconCheck,
   IconChecks,
@@ -75,6 +79,7 @@ import {
   IconPrinter,
   IconReceipt,
   IconRosetteDiscountCheck,
+  IconScan,
   IconSearch,
   IconSelector,
   IconSend,
@@ -235,5 +240,11 @@ export const Icons = {
   slash: IconSlash,
   calendar: IconCalendar,
   galleryVerticalEnd: IconStack2,
-  moreHorizontal: IconDots
+  moreHorizontal: IconDots,
+
+  camera: IconCamera,
+  cameraRotate: IconCameraRotate,
+  scan: IconScan,
+  flash: IconBolt,
+  flashOff: IconBoltOff
 };

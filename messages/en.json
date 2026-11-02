@@ -2866,7 +2866,9 @@
       "success": "Return recorded successfully",
       "failed": "Failed to record return",
       "selectAtLeastOne": "Please select at least one item to return",
-      "reasonRequired": "Return reason is required"
+      "reasonRequired": "Return reason is required",
+      "walkInNotice": "Walk-in sale — full cash refund is required",
+      "walkInRefundRequired": "Walk-in customer returns require a full cash refund of {amount}"
     }
   },
   "subscription": {
@@ -2994,5 +2996,17 @@
     "cnicLabel": "CNIC:",
     "imei1Label": "IMEI 1:",
     "imei2Label": "IMEI 2:"
+  },
+  "scanner": {
+    "scanWithCamera": "Scan with camera",
+    "scanImeiTitle": "Scan IMEI Barcode",
+    "scanImeiDescription": "Align the IMEI barcode inside the camera frame.",
+    "cameraPermissionDenied": "Camera permission was denied. Please allow camera access in your browser settings.",
+    "cameraNotFound": "No camera detected on this device.",
+    "scanFailed": "Could not start camera scanner. Please try again.",
+    "invalidImeiScanned": "Scanned code is not a valid 15-digit IMEI ({scanned}). Please try scanning again.",
+    "switchCamera": "Switch Camera",
+    "toggleFlash": "Flash",
+    "close": "Close"
   }
 }
