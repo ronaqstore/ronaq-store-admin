@@ -10,6 +10,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { usePathname, useRouter } from '@/i18n/navigation';
+import { useIsPhone } from '@/hooks/use-mobile';
 import { useT } from '@/i18n/use-t';
 import { cn } from '@/lib/utils';
 import type {
@@ -48,6 +49,7 @@ export function DateRangeFilter({
 }: DateRangeFilterProps) {
   const t = useT();
   const router = useRouter();
+  const isPhone = useIsPhone();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -183,7 +185,7 @@ export function DateRangeFilter({
   return (
     <div className={cn('flex flex-col gap-3', className)}>
       <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
-        <div className='bg-muted/70 flex max-w-full items-center gap-1 overflow-x-auto rounded-lg p-1 no-scrollbar'>
+        <div className='bg-muted/70 flex max-w-full shrink-0 items-center gap-1 overflow-x-auto rounded-lg p-1 no-scrollbar'>
           {periods.map((p) => {
             const isSelected = activePeriod === p.key;
             return (
@@ -207,7 +209,7 @@ export function DateRangeFilter({
           })}
         </div>
 
-        <div className='flex h-10 shrink-0 items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3'>
+        <div className='flex min-h-10 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-1.5'>
           <Checkbox
             id='dashboard-compare-toggle'
             checked={isCompareChecked}
@@ -215,7 +217,7 @@ export function DateRangeFilter({
           />
           <label
             htmlFor='dashboard-compare-toggle'
-            className='text-muted-foreground hover:text-foreground cursor-pointer text-xs font-medium select-none whitespace-nowrap'
+            className='text-muted-foreground hover:text-foreground cursor-pointer text-xs font-medium select-none'
           >
             {t('dashboard.compareWithPrevious')}
           </label>
@@ -243,7 +245,7 @@ export function DateRangeFilter({
               <Calendar
                 autoFocus
                 mode='range'
-                numberOfMonths={2}
+                numberOfMonths={isPhone ? 1 : 2}
                 selected={selectedRange}
                 onSelect={handleRangeSelect}
                 defaultMonth={selectedRange?.from}

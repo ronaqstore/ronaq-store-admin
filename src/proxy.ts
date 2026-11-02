@@ -21,7 +21,9 @@ const { auth } = NextAuth(authConfig);
 
 function handleAuthRedirects(req: NextRequest, session: AuthRedirectSession | null) {
   const { pathname } = req.nextUrl;
-  const repeatedLocalePrefix = pathname.match(/^\/(?:en|ur|ps)(?:\/(?:en|ur|ps))+(?=\/|$)/);
+  const repeatedLocalePrefix = pathname.match(
+    /^\/(?:en|ur|ps|roman)(?:\/(?:en|ur|ps|roman))+(?=\/|$)/
+  );
   if (repeatedLocalePrefix) {
     const url = req.nextUrl.clone();
     url.pathname = `/${repeatedLocalePrefix[0].split('/')[1]}${pathname.slice(repeatedLocalePrefix[0].length)}`;
@@ -37,7 +39,7 @@ function handleAuthRedirects(req: NextRequest, session: AuthRedirectSession | nu
   const isRegisterPage = pathname.endsWith('/register');
   const isAnyLoginPage = isOwnerLoginPage || isPlatformAdminLoginPage || isRegisterPage;
 
-  const startsWithDashboard = /^\/(en|ur|ps)\/dashboard(\/|$)/.test(pathname);
+  const startsWithDashboard = /^\/(en|ur|ps|roman)\/dashboard(\/|$)/.test(pathname);
   const isAuthApi = pathname.startsWith('/api/auth');
   const isPwaAsset =
     pathname.startsWith('/serwist') ||
@@ -75,7 +77,7 @@ function handleAuthRedirects(req: NextRequest, session: AuthRedirectSession | nu
     }
   }
 
-  if (pathname === '/' || /^\/(en|ur|ps)\/?$/.test(pathname)) {
+  if (pathname === '/' || /^\/(en|ur|ps|roman)\/?$/.test(pathname)) {
     if (isLoggedIn) {
       const to = req.nextUrl.searchParams.get('to');
       const shortcut = shortcutPathForRole(to, role, locale);
@@ -84,7 +86,7 @@ function handleAuthRedirects(req: NextRequest, session: AuthRedirectSession | nu
     return NextResponse.redirect(new URL(loginPath(locale), req.nextUrl));
   }
 
-  if (/^\/(en|ur|ps)\/dashboard\/?$/.test(pathname) && isLoggedIn) {
+  if (/^\/(en|ur|ps|roman)\/dashboard\/?$/.test(pathname) && isLoggedIn) {
     return NextResponse.redirect(new URL(homePathForRole(role, locale), req.nextUrl));
   }
 
@@ -98,7 +100,7 @@ export const proxy = auth((req) => {
 export const config = {
   matcher: [
     '/',
-    '/(en|ur|ps)/:path*',
+    '/(en|ur|ps|roman)/:path*',
     '/((?!api|_next|_vercel|serwist|monitoring|icons|manifest.webmanifest|sw\\.js|sw\\.js\\.map|favicon\\.ico|~offline|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)'
   ]
 };

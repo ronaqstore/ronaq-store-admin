@@ -99,16 +99,15 @@ export async function generateMetadata(): Promise<Metadata> {
       defaultTitle = APP_NAME;
     }
 
+    const languages: Record<string, string> = {};
+    for (const l of locales) {
+      languages[l] = `/${l}`;
+    }
+
     const alternates: Metadata['alternates'] = {
       canonical: `/${locale}`,
-      languages: {}
+      languages
     };
-
-    for (const l of locales) {
-      if (alternates.languages) {
-        alternates.languages[l] = `/${l}`;
-      }
-    }
 
     return {
       ...defaultMetadata,
@@ -168,7 +167,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
   return (
     <html
-      lang={locale}
+      lang={locale === 'roman' ? 'ur-Latn' : locale}
       dir={dir}
       suppressHydrationWarning
       data-theme={themeToApply}

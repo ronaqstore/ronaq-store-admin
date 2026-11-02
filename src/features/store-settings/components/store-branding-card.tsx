@@ -75,7 +75,7 @@ export function StoreBrandingCard({ settings }: StoreBrandingCardProps) {
           </Badge>
         </div>
         <CardDescription>{t('storeSettings.brandingHint')}</CardDescription>
-        <p className='text-muted-foreground pt-1 text-xs'>
+        <p className='text-muted-foreground pt-1 text-xs break-all'>
           {t('storeSettings.slugLabel')}:{' '}
           <span className='text-foreground font-medium'>{formatEmpty(settings.slug)}</span>
         </p>
@@ -86,7 +86,7 @@ export function StoreBrandingCard({ settings }: StoreBrandingCardProps) {
             <p className='text-sm font-medium'>{t('storeSettings.bannerTitle')}</p>
             <p className='text-muted-foreground text-xs'>{t('storeSettings.bannerHint')}</p>
           </div>
-          <div className='relative h-36 overflow-hidden rounded-xl border bg-muted sm:h-44 md:h-52'>
+          <div className='relative h-32 overflow-hidden rounded-xl border bg-muted min-[380px]:h-36 sm:h-44 md:h-52'>
             {settings.bannerUrl ? (
               <PreviewableImage
                 src={settings.bannerUrl}
@@ -102,7 +102,7 @@ export function StoreBrandingCard({ settings }: StoreBrandingCardProps) {
               <PreviewableImage
                 src={settings.logoUrl}
                 alt={formatEmpty(settings.displayName)}
-                className='relative h-16 w-16 overflow-hidden rounded-full border-4 border-background bg-card shadow-md sm:h-20 sm:w-20'
+                className='relative h-14 w-14 overflow-hidden rounded-full border-2 border-background bg-card shadow-md sm:h-20 sm:w-20 sm:border-4'
                 imageClassName='object-cover'
                 sizes='80px'
                 fallbackSrc={PLACEHOLDER_SHOP_LOGO}
@@ -113,6 +113,7 @@ export function StoreBrandingCard({ settings }: StoreBrandingCardProps) {
             <Button
               type='button'
               variant='outline'
+              className='flex-1 sm:flex-none'
               onClick={() => bannerInputRef.current?.click()}
               isLoading={bannerPreparing || uploadBannerMutation.isPending}
             >
@@ -124,7 +125,8 @@ export function StoreBrandingCard({ settings }: StoreBrandingCardProps) {
             {settings.bannerUrl ? (
               <Button
                 type='button'
-                variant='ghost'
+                variant='outline'
+                className='flex-1 sm:flex-none text-destructive hover:text-destructive'
                 onClick={() => removeBannerMutation.mutate()}
                 isLoading={removeBannerMutation.isPending}
               >
@@ -146,11 +148,11 @@ export function StoreBrandingCard({ settings }: StoreBrandingCardProps) {
             <p className='text-sm font-medium'>{t('storeSettings.logoTitle')}</p>
             <p className='text-muted-foreground text-xs'>{t('storeSettings.logoHint')}</p>
           </div>
-          <div className='flex flex-wrap items-center gap-3'>
+          <div className='flex flex-col gap-3 sm:flex-row sm:items-center'>
             <PreviewableImage
               src={settings.logoUrl}
               alt={formatEmpty(settings.displayName)}
-              className='relative h-20 w-20 shrink-0 overflow-hidden rounded-full border bg-muted shadow-sm'
+              className='relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-full border bg-muted shadow-sm'
               imageClassName='object-cover'
               sizes='80px'
               fallbackSrc={PLACEHOLDER_SHOP_LOGO}
@@ -159,6 +161,7 @@ export function StoreBrandingCard({ settings }: StoreBrandingCardProps) {
               <Button
                 type='button'
                 variant='outline'
+                className='flex-1 sm:flex-none'
                 onClick={() => logoInputRef.current?.click()}
                 isLoading={logoPreparing || uploadLogoMutation.isPending}
               >
@@ -168,7 +171,8 @@ export function StoreBrandingCard({ settings }: StoreBrandingCardProps) {
               {settings.logoUrl ? (
                 <Button
                   type='button'
-                  variant='ghost'
+                  variant='outline'
+                  className='flex-1 sm:flex-none text-destructive hover:text-destructive'
                   onClick={() => removeLogoMutation.mutate()}
                   isLoading={removeLogoMutation.isPending}
                 >

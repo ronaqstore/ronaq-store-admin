@@ -48,15 +48,12 @@ export default async function PageContainer({
   return (
     <div className='flex min-h-0 min-w-0 flex-1 flex-col'>
       {hasHeader ? (
-        <div className='mb-3 flex shrink-0 flex-col gap-2 px-4 pt-4 sm:mb-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4 md:px-6 md:pt-6'>
-          <div className='hidden sm:block'>
+        <div className='mb-3 flex shrink-0 flex-col gap-2 px-3 pt-3 sm:mb-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-4 sm:pt-4 md:px-6 md:pt-6'>
+          <div className='min-w-0 flex-1'>
             <Heading title={title} description={description} infoContent={infoContent} />
           </div>
-          {description ? (
-            <p className='text-muted-foreground text-xs sm:hidden'>{description}</p>
-          ) : null}
           {pageHeaderAction ? (
-            <div className='hidden w-full shrink-0 sm:block sm:w-auto'>{pageHeaderAction}</div>
+            <div className='w-full shrink-0 sm:w-auto'>{pageHeaderAction}</div>
           ) : null}
         </div>
       ) : null}
@@ -64,8 +61,8 @@ export default async function PageContainer({
       <div
         className={cn(
           'flex min-h-0 min-w-0 flex-1 flex-col',
-          hasHeader ? 'px-4 md:px-6' : 'px-4 pt-4 md:px-6 md:pt-6',
-          'pb-[max(1rem,calc(5.5rem+env(safe-area-inset-bottom)))] lg:pb-4',
+          hasHeader ? 'px-3 sm:px-4 md:px-6' : 'px-3 pt-3 sm:px-4 sm:pt-4 md:px-6 md:pt-6',
+          'pb-[calc(6rem+max(1rem,env(safe-area-inset-bottom)))] lg:pb-6',
 
           fill ? 'overflow-hidden' : 'overflow-y-auto overscroll-y-contain'
         )}

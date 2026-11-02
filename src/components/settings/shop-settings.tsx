@@ -10,7 +10,7 @@ import type { SettingsSectionProps } from '@/types';
 
 function StoreSettingsSkeleton() {
   return (
-    <div className='grid gap-4 lg:grid-cols-2'>
+    <div className='grid gap-4 md:grid-cols-2'>
       <Skeleton className='h-52 w-full rounded-xl' />
       <Skeleton className='h-52 w-full rounded-xl' />
       <Skeleton className='h-72 w-full rounded-xl lg:col-span-2' />
@@ -20,14 +20,14 @@ function StoreSettingsSkeleton() {
 
 function SettingsSection({ title, description, icon: Icon, children }: SettingsSectionProps) {
   return (
-    <section className='space-y-4'>
-      <div className='flex items-start gap-3'>
-        <div className='bg-primary/10 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl'>
-          <Icon className='h-5 w-5' />
+    <section className='space-y-3 sm:space-y-4'>
+      <div className='flex items-start gap-2.5 sm:gap-3'>
+        <div className='bg-primary/10 text-primary flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl'>
+          <Icon className='h-4 w-4 sm:h-5 sm:w-5' />
         </div>
         <div className='min-w-0'>
-          <h2 className='text-lg font-semibold tracking-tight'>{title}</h2>
-          <p className='text-muted-foreground text-sm'>{description}</p>
+          <h2 className='text-base sm:text-lg font-semibold tracking-tight'>{title}</h2>
+          <p className='text-muted-foreground text-xs sm:text-sm'>{description}</p>
         </div>
       </div>
       {children}
@@ -39,7 +39,7 @@ export function ShopSettings() {
   const t = useT();
 
   return (
-    <div className='flex min-w-0 flex-col gap-10'>
+    <div className='flex min-w-0 flex-col gap-6 sm:gap-8 lg:gap-10'>
       <SettingsSection
         title={t('nav.account')}
         description={t('account.subtitle')}

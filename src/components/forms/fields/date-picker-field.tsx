@@ -8,6 +8,7 @@ import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import type { DateRange } from 'react-day-picker';
+import { useIsPhone } from '@/hooks/use-mobile';
 import { useFieldContext, useFieldInvalid } from '@/lib/form-context';
 import { useT } from '@/i18n/use-t';
 import type { DatePickerFieldProps, DateRangePickerFieldProps, DateFieldShellProps } from '@/types';
@@ -100,6 +101,7 @@ export function DateRangeField({
   required,
   placeholder
 }: DateRangePickerFieldProps) {
+  const isPhone = useIsPhone();
   const field = useFieldContext<DateRange | undefined>();
   const isInvalid = useFieldInvalid();
   const range = field.state.value;
@@ -133,7 +135,7 @@ export function DateRangeField({
         mode='range'
         selected={range}
         onSelect={field.handleChange}
-        numberOfMonths={2}
+        numberOfMonths={isPhone ? 1 : 2}
         autoFocus
       />
     </DateFieldShell>

@@ -19,10 +19,10 @@ const ResultItem = React.forwardRef(
           active && 'bg-accent text-accent-foreground'
         )}
       >
-        <div className='flex items-center gap-2'>
+        <div className='flex min-w-0 flex-1 items-center gap-2'>
           {action.icon}
-          <div className='flex flex-col'>
-            <div>
+          <div className='flex min-w-0 flex-1 flex-col'>
+            <div className='truncate'>
               {ancestors.length > 0 &&
                 ancestors.map((ancestor) => (
                   <React.Fragment key={ancestor.id}>
@@ -33,12 +33,12 @@ const ResultItem = React.forwardRef(
               <span>{action.name}</span>
             </div>
             {action.subtitle && (
-              <span className='text-muted-foreground text-xs'>{action.subtitle}</span>
+              <span className='text-muted-foreground truncate text-xs'>{action.subtitle}</span>
             )}
           </div>
         </div>
         {action.shortcut?.length ? (
-          <div className='grid grid-flow-col gap-1'>
+          <div className='hidden shrink-0 grid-flow-col gap-1 sm:grid'>
             {action.shortcut.map((sc, i) => (
               <Kbd key={sc + i}>{sc}</Kbd>
             ))}

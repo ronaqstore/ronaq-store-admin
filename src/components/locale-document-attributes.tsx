@@ -9,7 +9,7 @@ export function LocaleDocumentAttributes() {
   const locale = isLocale(requestedLocale) ? requestedLocale : 'en';
 
   useLayoutEffect(() => {
-    document.documentElement.lang = locale;
+    document.documentElement.lang = locale === 'roman' ? 'ur-Latn' : locale;
     document.documentElement.dir = isRtlLocale(locale) ? 'rtl' : 'ltr';
   }, [locale]);
 

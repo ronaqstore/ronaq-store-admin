@@ -82,7 +82,7 @@ export function StoreSettingsForm() {
         }
         confirmVariant={enabledConfirm ? 'default' : 'destructive'}
       />
-      <div className='grid gap-4 lg:grid-cols-2'>
+      <div className='grid gap-4 md:grid-cols-2'>
         <StoreBrandingCard settings={data} />
 
         <Card className='min-w-0 lg:col-span-2'>
@@ -91,7 +91,7 @@ export function StoreSettingsForm() {
             <CardDescription>{t('storeSettings.visibilityDescription')}</CardDescription>
           </CardHeader>
           <CardContent className='space-y-3 sm:grid sm:grid-cols-2 sm:gap-3 sm:space-y-0'>
-            <div className='flex items-center justify-between gap-4 rounded-lg border p-3.5'>
+            <div className='flex items-center justify-between gap-3 rounded-lg border p-3 sm:gap-4 sm:p-3.5'>
               <div className='min-w-0'>
                 <p className='text-sm font-medium'>{t('storeSettings.enableStore')}</p>
                 <p className='text-muted-foreground text-xs'>{t('storeSettings.enableHint')}</p>
@@ -102,7 +102,7 @@ export function StoreSettingsForm() {
                 disabled={updateMutation.isPending}
               />
             </div>
-            <div className='flex items-center justify-between gap-4 rounded-lg border p-3.5'>
+            <div className='flex items-center justify-between gap-3 rounded-lg border p-3 sm:gap-4 sm:p-3.5'>
               <div className='min-w-0'>
                 <p className='text-sm font-medium'>{t('storeSettings.showExactStock')}</p>
                 <p className='text-muted-foreground text-xs'>
@@ -119,27 +119,33 @@ export function StoreSettingsForm() {
         </Card>
 
         <Card className='min-w-0 lg:col-span-2'>
-          <CardHeader className='flex flex-row items-start justify-between gap-4 space-y-0'>
-            <div className='space-y-1'>
+          <CardHeader className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4 space-y-0 pb-3'>
+            <div className='space-y-1 min-w-0'>
               <CardTitle className='flex items-center gap-2 text-base'>
-                <Icons.building className='h-4 w-4' />
+                <Icons.building className='h-4 w-4 shrink-0' />
                 {t('storeSettings.profileTitle')}
               </CardTitle>
               <CardDescription>{t('storeSettings.profileCardDescription')}</CardDescription>
             </div>
-            <Button type='button' variant='outline' size='sm' onClick={() => setProfileOpen(true)}>
+            <Button
+              type='button'
+              variant='outline'
+              size='sm'
+              className='w-full sm:w-auto shrink-0'
+              onClick={() => setProfileOpen(true)}
+            >
               <Icons.edit className='me-2 h-4 w-4' />
               {t('storeSettings.editProfile')}
             </Button>
           </CardHeader>
           <CardContent>
-            <dl className='grid gap-3 sm:grid-cols-2 xl:grid-cols-4'>
+            <dl className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
               {profileRows.map((row) => (
                 <div
                   key={row.label}
                   className='bg-muted/40 rounded-lg border px-3 py-3 xl:[&:nth-last-child(-n+2)]:col-span-2'
                 >
-                  <dt className='text-muted-foreground text-xs font-medium tracking-wide uppercase'>
+                  <dt className='text-muted-foreground text-[11px] sm:text-xs font-medium tracking-wide uppercase'>
                     {row.label}
                   </dt>
                   <dd className='mt-1 break-words text-sm font-medium'>{row.value}</dd>

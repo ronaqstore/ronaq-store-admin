@@ -81,7 +81,7 @@ export const authConfig = {
       const { pathname } = request.nextUrl;
       const isLoggedIn = Boolean(auth?.accessToken && auth?.user?.id);
       const isDashboard =
-        pathname.startsWith('/dashboard') || /\/(en|ur|ps)\/dashboard/.test(pathname);
+        pathname.startsWith('/dashboard') || /\/(en|ur|ps|roman)\/dashboard/.test(pathname);
       const isAuthApi = pathname.startsWith('/api/auth');
 
       if (isAuthApi) return true;

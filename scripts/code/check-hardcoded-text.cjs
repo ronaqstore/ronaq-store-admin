@@ -83,7 +83,7 @@ const IGNORED_EXACT = new Set([
   "submit", "reset", "button", "text", "password", "email", "number", "tel", "search",
   "default", "outline", "destructive", "ghost", "secondary", "link",
   "sm", "lg", "md", "xl", "xs", "icon",
-  "ltr", "rtl", "auto",
+  "ltr", "rtl", "auto", "roman",
   "asc", "desc",
   "horizontal", "vertical",
   "dialog", "sheet", "alert",
