@@ -124,7 +124,9 @@ export function DataTableToolbar<TData>({
           </Button>
         </div>
         {children ? (
-          <div className='flex min-w-0 w-full flex-wrap items-center gap-1.5'>{children}</div>
+          <div className='no-scrollbar flex min-w-0 w-full items-center gap-1.5 overflow-x-auto py-0.5 sm:flex-wrap sm:overflow-visible'>
+            {children}
+          </div>
         ) : null}
         <DataTableFiltersSheet table={table} open={filtersOpen} onOpenChange={setFiltersOpen} />
       </div>

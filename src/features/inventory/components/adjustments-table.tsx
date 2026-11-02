@@ -15,6 +15,7 @@ import {
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
 import { Icons } from '@/components/icons';
+import { FloatingActionButton } from '@/components/common/floating-action-button';
 import { IconPlus } from '@tabler/icons-react';
 import { useT } from '@/i18n/use-t';
 import { DUKAAN_DEFAULT_PAGE_SIZE, useDukaanListParams } from '@/components/data-table/list-params';
@@ -363,11 +364,11 @@ export function AdjustmentsTable({ toolbarAction, mode = 'adjustments' }: Adjust
       <Button
         type='button'
         size='sm'
-        className='h-8 gap-1.5 text-xs w-full sm:w-auto'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs w-full sm:w-auto'
         onClick={() => setAdjustOpen(true)}
       >
-        <IconPlus className='me-1.5 h-4 w-4' />
-        {t('common.adjustStock')}
+        <IconPlus className='me-1.5 h-4 w-4 shrink-0' />
+        <span>{t('common.adjustStock')}</span>
       </Button>
     );
 
@@ -381,6 +382,10 @@ export function AdjustmentsTable({ toolbarAction, mode = 'adjustments' }: Adjust
         quickFilters={quickFilters}
         isLoading={isFetching}
       />
+
+      {!isMovements ? (
+        <FloatingActionButton label={t('common.adjustStock')} onClick={() => setAdjustOpen(true)} />
+      ) : null}
 
       {!isMovements && adjustOpen ? (
         <StockAdjustDialog open={adjustOpen} onOpenChange={setAdjustOpen} />

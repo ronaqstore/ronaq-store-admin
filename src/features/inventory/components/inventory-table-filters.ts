@@ -18,4 +18,14 @@ export function parseInventoryCostRange(value: unknown): InventoryStockValueRang
   };
 }
 
+export const TRACKING_OPTIONS = [
+  { label: 'Quantity', value: 'QUANTITY' },
+  { label: 'Serialized', value: 'SERIALIZED' }
+];
+
+export const LOW_STOCK_OPTIONS = [
+  { label: 'Low Stock', value: 'true' },
+  { label: 'OK', value: 'false' }
+];
+
 export { parseExactNonNegativeInt as parseExactQuantity } from '@/lib/dukaan/money-range-filter';

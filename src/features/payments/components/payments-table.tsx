@@ -6,6 +6,7 @@ import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
 import { useT } from '@/i18n/use-t';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
+import { FloatingActionButton } from '@/components/common/floating-action-button';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
 import {
   ResponsiveDataTable,
@@ -323,10 +324,10 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
       <Button
         type='button'
         size='sm'
-        className='h-8 min-h-8 gap-1.5 text-xs w-full sm:w-auto'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs w-full sm:w-auto'
         onClick={handleOpenRecord}
       >
-        <Icons.add className='h-3.5 w-3.5' />
+        <Icons.add className='h-3.5 w-3.5 shrink-0' />
         <span>{t('payments.recordPayment')}</span>
       </Button>
     </div>
@@ -351,6 +352,8 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
         detail={paymentDetail}
         isLoading={isFetching}
       />
+
+      <FloatingActionButton label={t('payments.recordPayment')} onClick={handleOpenRecord} />
     </>
   );
 }
