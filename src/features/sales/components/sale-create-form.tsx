@@ -34,14 +34,18 @@ import {
 } from '../helpers/sale-create-helpers';
 import { SaleLineCard } from './sale-line-card';
 import { SaleTotalsSummary } from './sale-totals-summary';
+import { SaleScanBar } from './sale-scan-bar';
+import { SaleWhatsAppShareDialog } from './sale-whatsapp-share-dialog';
+import type { WhatsAppReceiptData } from '../helpers/whatsapp-receipt-formatter';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
-import type { SaleDTO } from '@/lib/api/types';
+import type { ResponseResolveScanDto, SaleDTO } from '@/lib/api/types';
 import type {
   SaleFormSubmitContext,
   SaleFormValues,
   SaleCreateFormProps,
   CreateSaleResult,
-  SaleBelowCostPrompt
+  SaleBelowCostPrompt,
+  SaleLineItem
 } from '@/types/sales';
 
 export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) {
@@ -52,6 +56,7 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
   const [belowCostPrompt, setBelowCostPrompt] = useState<SaleBelowCostPrompt | null>(null);
   const [confirmBelowCost, setConfirmBelowCost] = useState(false);
   const [promptedFingerprint, setPromptedFingerprint] = useState<string | null>(null);
+  const [savedReceipt, setSavedReceipt] = useState<WhatsAppReceiptData | null>(null);
 
   const save = useMutation({
     ...createSaleMutation,
@@ -68,12 +73,34 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
       setPromptedFingerprint(null);
       setClientRequestId(createClientRequestId());
       invalidateDomains({ queryClient: qc, domains: SALE_SYNC_DOMAINS });
-      onDone?.();
-      toastSuccessAfterClose(
-        (res as SaleDTO)?.saleNo
-          ? t('dukaan.sale.saved', { saleNo: (res as SaleDTO).saleNo })
-          : (res as { message?: string })?.message || t('dukaan.sale.saved', { saleNo: '' })
-      );
+
+      const saleDto = res as SaleDTO;
+      if (saleDto?.saleNo) {
+        const receiptItems = (saleDto.items || []).map((it) => ({
+          productName: it.productName,
+          quantity: it.quantity,
+          unitPrice: it.unitPrice,
+          total: it.total,
+          imei: it.imei,
+          warrantyDays: it.warrantyDays
+        }));
+        setSavedReceipt({
+          saleNo: saleDto.saleNo,
+          saleDate: saleDto.saleDate ? saleDto.saleDate.slice(0, 10) : undefined,
+          customerName: saleDto.customerName,
+          customerPhone: null,
+          items: receiptItems,
+          totalAmount: saleDto.totalAmount,
+          discount: saleDto.discount,
+          paymentMethod: 'CASH'
+        });
+        toastSuccessAfterClose(t('dukaan.sale.saved', { saleNo: saleDto.saleNo }));
+      } else {
+        onDone?.();
+        toastSuccessAfterClose(
+          (res as { message?: string })?.message || t('dukaan.sale.saved', { saleNo: '' })
+        );
+      }
     },
     onError: (e: Error) => {
       if (isValidationApiError(e)) {
@@ -112,6 +139,90 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
       );
     }
   });
+
+  const handleItemResolved = (result: ResponseResolveScanDto) => {
+    if (!result.found || !result.product) return;
+
+    const lines = form.getFieldValue('lines');
+    const product = result.product;
+
+    if (result.type === 'SERIALIZED' && result.unit) {
+      const unit = result.unit;
+      const alreadyAdded = lines.some((l) => l.inventory_unit_id === unit.id);
+      if (alreadyAdded) {
+        toast.warning(t('scanner.imeiAlreadyInCart', { imei: unit.imei1 }));
+        return;
+      }
+
+      const isFirstLineEmpty =
+        lines.length === 1 && !lines[0]?.product_id && !lines[0]?.inventory_unit_id;
+
+      const newLine: SaleLineItem = {
+        product_id: product.id,
+        product_name: product.name,
+        tracking_type: 'SERIALIZED',
+        inventory_unit_id: unit.id,
+        unit_price: unit.effectivePrice ?? product.defaultSellingPrice,
+        quantity: 1,
+        unit_condition:
+          unit.condition === 'USED' || unit.condition === 'NEW' ? unit.condition : undefined,
+        warranty_days: unit.condition === 'USED' ? '30' : undefined
+      };
+
+      if (isFirstLineEmpty) {
+        form.setFieldValue('lines', [newLine]);
+      } else {
+        form.setFieldValue('lines', [...lines, newLine]);
+      }
+      toast.success(t('scanner.itemAdded', { name: `${product.name} (${unit.imei1})` }));
+    } else if (result.type === 'QUANTITY') {
+      const existingIdx = lines.findIndex(
+        (l) => l.product_id === product.id && l.tracking_type === 'QUANTITY'
+      );
+      if (existingIdx >= 0) {
+        const existing = lines[existingIdx];
+        const nextQty = (existing.quantity || 1) + 1;
+        form.setFieldValue(`lines[${existingIdx}].quantity`, nextQty);
+        toast.success(t('scanner.quantityUpdated', { name: product.name, qty: nextQty }));
+      } else {
+        const isFirstLineEmpty =
+          lines.length === 1 && !lines[0]?.product_id && !lines[0]?.inventory_unit_id;
+
+        const newLine: SaleLineItem = {
+          product_id: product.id,
+          product_name: product.name,
+          tracking_type: 'QUANTITY',
+          inventory_unit_id: '',
+          unit_price: product.defaultSellingPrice,
+          quantity: 1
+        };
+
+        if (isFirstLineEmpty) {
+          form.setFieldValue('lines', [newLine]);
+        } else {
+          form.setFieldValue('lines', [...lines, newLine]);
+        }
+        toast.success(t('scanner.itemAdded', { name: product.name }));
+      }
+    } else if (result.type === 'SERIALIZED_PRODUCT') {
+      toast.info(t('scanner.selectPhoneUnitPrompt', { name: product.name }));
+      const isFirstLineEmpty =
+        lines.length === 1 && !lines[0]?.product_id && !lines[0]?.inventory_unit_id;
+      const newLine: SaleLineItem = {
+        product_id: product.id,
+        product_name: product.name,
+        tracking_type: 'SERIALIZED',
+        inventory_unit_id: '',
+        unit_price: product.defaultSellingPrice,
+        quantity: 1
+      };
+      if (isFirstLineEmpty) {
+        form.setFieldValue('lines', [newLine]);
+      } else {
+        form.setFieldValue('lines', [...lines, newLine]);
+      }
+    }
+  };
 
   const currentFingerprint = useStore(form.store, (s) =>
     getSalePricingFingerprint(s.values.lines, s.values.discount)
@@ -207,6 +318,15 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
         />
       </FieldGroup>
 
+      {/* Universal Quick Scan-to-Sell Bar */}
+      <div className='rounded-xl border border-primary/20 bg-primary/5 p-2.5 sm:p-3'>
+        <p className='mb-1.5 text-xs font-semibold text-primary flex items-center gap-1.5'>
+          <Icons.scan className='h-3.5 w-3.5' />
+          {t('scanner.quickScanSell')}
+        </p>
+        <SaleScanBar onItemResolved={handleItemResolved} />
+      </div>
+
       <div className='space-y-3'>
         <form.AppField
           name='lines'
@@ -295,6 +415,17 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
         {onDone ? <DialogCancelButton onClick={onDone} disabled={save.isPending} /> : null}
         <DialogPrimaryButton mode='add' loading={save.isPending} />
       </DialogFooter>
+
+      <SaleWhatsAppShareDialog
+        open={savedReceipt != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSavedReceipt(null);
+            onDone?.();
+          }
+        }}
+        receiptData={savedReceipt}
+      />
     </form>
   );
 }

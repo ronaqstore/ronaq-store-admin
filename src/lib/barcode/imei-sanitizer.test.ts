@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { sanitizeImei } from './imei-sanitizer.ts';
+import { sanitizeBarcode, sanitizeImei } from './imei-sanitizer.ts';
 
 describe('sanitizeImei', () => {
   describe('Happy Paths', () => {
@@ -73,6 +73,51 @@ describe('sanitizeImei', () => {
       if (!result.success) {
         assert.equal(result.error, 'too_short');
       }
+    });
+  });
+});
+
+describe('sanitizeBarcode', () => {
+  describe('Happy Paths', () => {
+    it('accepts standard EAN-13 and UPC barcode formats', () => {
+      const res = sanitizeBarcode('8901234567890');
+      assert.deepEqual(res, { success: true, barcode: '8901234567890' });
+    });
+
+    it('accepts alphanumeric product SKUs and trimmed barcodes', () => {
+      const res = sanitizeBarcode('  ANKER-C-100W-BLK  ');
+      assert.deepEqual(res, { success: true, barcode: 'ANKER-C-100W-BLK' });
+    });
+
+    it('clamps barcodes exceeding maximum length', () => {
+      const longBarcode = 'A'.repeat(120);
+      const res = sanitizeBarcode(longBarcode, 100);
+      assert.equal(res.success, true);
+      if (res.success) {
+        assert.equal(res.barcode.length, 100);
+      }
+    });
+  });
+
+  describe('Negative & Adversarial Paths', () => {
+    it('Negative 1: returns empty_scan for empty string or whitespace', () => {
+      assert.deepEqual(sanitizeBarcode(''), { success: false, error: 'empty_scan', raw: '' });
+      assert.deepEqual(sanitizeBarcode('     '), { success: false, error: 'empty_scan', raw: '' });
+    });
+
+    it('Negative 2: returns empty_scan for non-string types', () => {
+      assert.deepEqual(sanitizeBarcode(null), { success: false, error: 'empty_scan', raw: '' });
+      assert.deepEqual(sanitizeBarcode(undefined), {
+        success: false,
+        error: 'empty_scan',
+        raw: ''
+      });
+      assert.deepEqual(sanitizeBarcode(12345), { success: false, error: 'empty_scan', raw: '' });
+    });
+
+    it('Negative 3: strips unprintable control characters', () => {
+      const res = sanitizeBarcode('\x00\x1BPROD-999\x7F');
+      assert.deepEqual(res, { success: true, barcode: 'PROD-999' });
     });
   });
 });

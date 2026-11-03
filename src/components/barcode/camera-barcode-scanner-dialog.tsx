@@ -13,12 +13,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
-import { sanitizeImei } from '@/lib/barcode/imei-sanitizer';
+import { sanitizeBarcode, sanitizeImei } from '@/lib/barcode/imei-sanitizer';
 
 export interface CameraBarcodeScannerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onScan: (imei: string) => void;
+  onScan: (code: string) => void;
+  mode?: 'imei' | 'barcode';
   title?: string;
   description?: string;
 }
@@ -49,6 +50,7 @@ export function CameraBarcodeScannerDialog({
   open,
   onOpenChange,
   onScan,
+  mode = 'imei',
   title,
   description
 }: CameraBarcodeScannerDialogProps) {
@@ -65,8 +67,11 @@ export function CameraBarcodeScannerDialog({
   const [warningMessage, setWarningMessage] = React.useState<string | null>(null);
   const [isInitializing, setIsInitializing] = React.useState(false);
 
-  const effTitle = title ?? t('scanner.scanImeiTitle');
-  const effDescription = description ?? t('scanner.scanImeiDescription');
+  const effTitle =
+    title ?? (mode === 'barcode' ? t('scanner.scanBarcodeTitle') : t('scanner.scanImeiTitle'));
+  const effDescription =
+    description ??
+    (mode === 'barcode' ? t('scanner.scanBarcodeDescription') : t('scanner.scanImeiDescription'));
 
   const stopScanner = React.useCallback(async () => {
     const scanner = scannerRef.current;
@@ -132,21 +137,37 @@ export function CameraBarcodeScannerDialog({
             }
           },
           (decodedText) => {
-            const result = sanitizeImei(decodedText);
-            if (result.success) {
-              playScanBeep();
-              if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-                navigator.vibrate(100);
+            if (mode === 'barcode') {
+              const result = sanitizeBarcode(decodedText);
+              if (result.success) {
+                playScanBeep();
+                if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                  navigator.vibrate(100);
+                }
+                void stopScanner();
+                onScan(result.barcode);
+                onOpenChange(false);
+              } else {
+                setWarningMessage(t('scanner.invalidBarcodeScanned'));
               }
-              stopScanner();
-              onScan(result.imei);
-              onOpenChange(false);
             } else {
-              setWarningMessage(
-                t('scanner.invalidImeiScanned', {
-                  scanned: decodedText.length > 18 ? `${decodedText.slice(0, 18)}...` : decodedText
-                })
-              );
+              const result = sanitizeImei(decodedText);
+              if (result.success) {
+                playScanBeep();
+                if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                  navigator.vibrate(100);
+                }
+                void stopScanner();
+                onScan(result.imei);
+                onOpenChange(false);
+              } else {
+                setWarningMessage(
+                  t('scanner.invalidImeiScanned', {
+                    scanned:
+                      decodedText.length > 18 ? `${decodedText.slice(0, 18)}...` : decodedText
+                  })
+                );
+              }
             }
           },
           () => {
@@ -174,7 +195,7 @@ export function CameraBarcodeScannerDialog({
         setIsInitializing(false);
       }
     },
-    [elementId, stopScanner, onScan, onOpenChange, t]
+    [elementId, stopScanner, onScan, onOpenChange, t, mode]
   );
 
   React.useEffect(() => {

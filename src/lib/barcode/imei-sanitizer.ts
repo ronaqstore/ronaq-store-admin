@@ -53,3 +53,29 @@ export function sanitizeImei(raw: unknown): SanitizeImeiResult {
 
   return { success: false, error: 'invalid_format', raw: trimmed };
 }
+
+/**
+ * Result of sanitizing general product barcode text.
+ */
+export type SanitizeBarcodeResult =
+  | { success: true; barcode: string }
+  | { success: false; error: 'empty_scan'; raw: string };
+
+/**
+ * Sanitizes general product barcodes (EAN-13, UPC-A, Code-128, QR, alphanumeric SKUs).
+ * Cleans whitespace and control characters, clamping to specified max length (default 100).
+ */
+export function sanitizeBarcode(raw: unknown, maxLength = 100): SanitizeBarcodeResult {
+  if (typeof raw !== 'string') {
+    return { success: false, error: 'empty_scan', raw: '' };
+  }
+
+  // Remove invisible control characters and trim outer whitespace
+  // eslint-disable-next-line no-control-regex
+  const cleaned = raw.replace(/[\x00-\x1F\x7F]/g, '').trim();
+  if (!cleaned) {
+    return { success: false, error: 'empty_scan', raw: '' };
+  }
+
+  return { success: true, barcode: cleaned.slice(0, maxLength) };
+}

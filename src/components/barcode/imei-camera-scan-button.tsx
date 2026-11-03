@@ -7,7 +7,8 @@ import { useT } from '@/i18n/use-t';
 import { CameraBarcodeScannerDialog } from './camera-barcode-scanner-dialog';
 
 export interface ImeiCameraScanButtonProps {
-  onScan: (imei: string) => void;
+  onScan: (code: string) => void;
+  mode?: 'imei' | 'barcode';
   title?: string;
   className?: string;
   disabled?: boolean;
@@ -15,6 +16,7 @@ export interface ImeiCameraScanButtonProps {
 
 export function ImeiCameraScanButton({
   onScan,
+  mode = 'imei',
   title,
   className,
   disabled
@@ -41,6 +43,7 @@ export function ImeiCameraScanButton({
         open={open}
         onOpenChange={setOpen}
         onScan={onScan}
+        mode={mode}
         title={title}
       />
     </>

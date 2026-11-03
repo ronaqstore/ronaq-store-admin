@@ -15,16 +15,44 @@ const ReturnSaleDialog = dynamic(
   () => import('./return-sale-dialog').then((m) => m.ReturnSaleDialog),
   { loading: () => null }
 );
+const SaleWhatsAppShareDialog = dynamic(
+  () => import('./sale-whatsapp-share-dialog').then((m) => m.SaleWhatsAppShareDialog),
+  { loading: () => null }
+);
 
 export function SaleRowActions({ sale }: SaleRowActionsProps) {
   const [cancelOpen, setCancelOpen] = useState(false);
   const [returnOpen, setReturnOpen] = useState(false);
+  const [whatsAppOpen, setWhatsAppOpen] = useState(false);
+
+  const receiptData = {
+    saleNo: sale.saleNo,
+    saleDate: sale.saleDate ? sale.saleDate.slice(0, 10) : undefined,
+    customerName: sale.customerName,
+    customerPhone: null,
+    items: (sale.items || []).map((it) => ({
+      productName: it.productName,
+      quantity: it.quantity,
+      unitPrice: it.unitPrice,
+      total: it.total,
+      imei: it.imei,
+      warrantyDays: it.warrantyDays
+    })),
+    totalAmount: sale.totalAmount,
+    discount: sale.discount,
+    paymentMethod: 'CASH'
+  };
 
   const actions: RowAction[] = [
     {
       label: 'View',
       icon: Icons.eye,
       onClick: () => window.location.assign(`/dashboard/sales/${sale.id}`)
+    },
+    {
+      label: 'WhatsApp Receipt',
+      icon: Icons.chat,
+      onClick: () => setWhatsAppOpen(true)
     },
     ...(sale.status === 'ACTIVE'
       ? ([
@@ -50,6 +78,13 @@ export function SaleRowActions({ sale }: SaleRowActionsProps) {
       )}
       {returnOpen && (
         <ReturnSaleDialog sale={sale} open={returnOpen} onOpenChange={setReturnOpen} />
+      )}
+      {whatsAppOpen && (
+        <SaleWhatsAppShareDialog
+          open={whatsAppOpen}
+          onOpenChange={setWhatsAppOpen}
+          receiptData={receiptData}
+        />
       )}
 
       <RowActionsMenu actions={actions} />

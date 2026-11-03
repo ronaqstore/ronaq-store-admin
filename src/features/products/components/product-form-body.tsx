@@ -17,6 +17,7 @@ import { toastSuccessAfterClose } from '@/lib/toast-success';
 import type { ProductImageDTO } from '@/lib/api/types';
 import { FormEntitySelect } from '@/components/forms/form-entity-select';
 import { Icons } from '@/components/icons';
+import { ImeiCameraScanButton } from '@/components/barcode';
 
 import { useCreateProduct, useUpdateProduct } from '../api/mutations';
 import { productsQueryKeys, useProductImagesQuery } from '../api/queries';
@@ -283,11 +284,21 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
               <form.AppField
                 name='barcode'
                 children={(field) => (
-                  <field.TextField
-                    label={t('barcode')}
-                    maxLength={INPUT_LIMITS.barcode}
-                    placeholder={t('barcodePlaceholder')}
-                  />
+                  <div className='flex items-end gap-1.5'>
+                    <div className='min-w-0 flex-1'>
+                      <field.TextField
+                        label={t('barcode')}
+                        maxLength={INPUT_LIMITS.barcode}
+                        placeholder={t('barcodePlaceholder')}
+                      />
+                    </div>
+                    <ImeiCameraScanButton
+                      mode='barcode'
+                      onScan={(code) => field.handleChange(code)}
+                      title={t('scanner.scanBarcodeTitle')}
+                      className='mb-[1px] h-9 w-9 shrink-0'
+                    />
+                  </div>
                 )}
               />
             </div>

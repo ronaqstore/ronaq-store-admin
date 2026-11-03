@@ -24,6 +24,7 @@ import {
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { InfiniteEntitySelect } from '@/components/forms/infinite-entity-select';
+import { ImeiCameraScanButton } from '@/components/barcode';
 import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import { cn } from '@/lib/utils';
@@ -262,6 +263,30 @@ export function StockAdjustDialog({
     setErrors((prev) => ({ ...prev, imei: undefined }));
   };
 
+  const handleScanImei = async (scannedImei: string) => {
+    if (!productId) return;
+    try {
+      const res = await listInventoryUnits(productId, 'IN_STOCK', scannedImei, undefined, {
+        page: 1,
+        pageSize: 10
+      });
+      const matched = res.items.find((u) => u.imei1 === scannedImei || u.imei2 === scannedImei);
+
+      if (matched) {
+        const item: NamedEntity = {
+          id: matched.id,
+          name: formatUnitImeiLabel(matched.imei1, matched.imei2)
+        };
+        handleUnitChange(matched.id, item);
+        toast.success(t('scanner.unitSelected', { imei: scannedImei }));
+      } else {
+        toast.warning(t('scanner.unitNotFoundInStock', { imei: scannedImei }));
+      }
+    } catch {
+      toast.error(t('scanner.scanFailed'));
+    }
+  };
+
   const handleCountedQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCountedQuantity(
       Number(sanitizeNumberInput(e.target.value, { min: 0, max: INPUT_LIMITS.quantityMax })) || 0
@@ -374,23 +399,32 @@ export function StockAdjustDialog({
               <div className='min-w-0 space-y-1.5'>
                 <Label htmlFor='adj-imei'>{t('inventory.unitImeiToWriteOff')}</Label>
                 {productId ? (
-                  <InfiniteEntitySelect
-                    value={selectedUnitId}
-                    onValueChange={handleUnitChange}
-                    queryKey={['inventory', 'units-select', productId]}
-                    fetchPage={fetchImeiPage}
-                    selectedLabel={selectedUnitLabel || undefined}
-                    extraItems={
-                      selectedUnitId && selectedUnitLabel
-                        ? [{ id: selectedUnitId, name: selectedUnitLabel }]
-                        : []
-                    }
-                    activeOnly={false}
-                    placeholder={t('inventory.selectImei')}
-                    searchPlaceholder={t('inventory.searchImei')}
-                    emptyMessage={t('inventory.noUnitsFound')}
-                    className='h-9 w-full min-w-0'
-                  />
+                  <div className='flex items-center gap-1.5'>
+                    <div className='min-w-0 flex-1'>
+                      <InfiniteEntitySelect
+                        value={selectedUnitId}
+                        onValueChange={handleUnitChange}
+                        queryKey={['inventory', 'units-select', productId]}
+                        fetchPage={fetchImeiPage}
+                        selectedLabel={selectedUnitLabel || undefined}
+                        extraItems={
+                          selectedUnitId && selectedUnitLabel
+                            ? [{ id: selectedUnitId, name: selectedUnitLabel }]
+                            : []
+                        }
+                        activeOnly={false}
+                        placeholder={t('inventory.selectImei')}
+                        searchPlaceholder={t('inventory.searchImei')}
+                        emptyMessage={t('inventory.noUnitsFound')}
+                        className='h-9 w-full min-w-0'
+                      />
+                    </div>
+                    <ImeiCameraScanButton
+                      onScan={(code) => void handleScanImei(code)}
+                      title={t('scanner.scanImeiTitle')}
+                      className='h-9 w-9 shrink-0'
+                    />
+                  </div>
                 ) : null}
                 <DialogFieldError id='adj-imei-error' message={errors.imei} />
               </div>

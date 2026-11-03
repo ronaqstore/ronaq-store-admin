@@ -1,8 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { InfiniteEntitySelect } from '@/components/forms/infinite-entity-select';
+import { ImeiCameraScanButton } from '@/components/barcode';
 import { useT } from '@/i18n/use-t';
 import { listInventoryUnits } from '@/features/inventory/api/service';
 import { formatUnitImeiLabel } from '@/lib/inventory/format-unit-imei-label';
@@ -89,23 +91,68 @@ export function SaleLineImeiField({
     });
   };
 
+  const handleScanImei = async (scannedImei: string) => {
+    if (!productId) return;
+    try {
+      const res = await listInventoryUnits(productId, 'IN_STOCK', scannedImei, undefined, {
+        page: 1,
+        pageSize: 10
+      });
+      const excluded = new Set(excludedKey ? excludedKey.split(',') : []);
+      const matched = res.items.find(
+        (u) =>
+          (u.imei1 === scannedImei || u.imei2 === scannedImei) &&
+          (u.id === value || !excluded.has(u.id))
+      );
+
+      if (matched) {
+        const condition =
+          matched.condition === 'USED' || matched.condition === 'NEW'
+            ? matched.condition
+            : undefined;
+        const pickerItem: SaleLineImeiPickerItem = {
+          id: matched.id,
+          name: formatSaleUnitOption(matched, t),
+          condition,
+          effectivePrice: matched.effectivePrice ?? matched.askingPrice ?? null,
+          batteryHealth: matched.batteryHealth ?? null,
+          defectNotes: matched.defectNotes ?? null
+        };
+        handleValueChange(matched.id, pickerItem);
+        toast.success(t('scanner.unitSelected', { imei: scannedImei }));
+      } else {
+        toast.warning(t('scanner.unitNotFoundInStock', { imei: scannedImei }));
+      }
+    } catch {
+      toast.error(t('scanner.scanFailed'));
+    }
+  };
+
   return (
     <Field data-invalid={isInvalid}>
       <FieldLabel htmlFor={name}>{t('dukaan.sale.imeiUnit')} *</FieldLabel>
-      <div onBlur={onBlur}>
-        <InfiniteEntitySelect<SaleLineImeiPickerItem>
-          value={value || ''}
-          onValueChange={handleValueChange}
-          queryKey={['inventory', 'sale-units-select', productId, excludedKey]}
-          fetchPage={fetchImeiPage}
-          selectedLabel={selectedLabel || undefined}
-          extraItems={value && selectedLabel ? [{ id: value, name: selectedLabel }] : []}
-          activeOnly={false}
+      <div onBlur={onBlur} className='flex items-center gap-1.5'>
+        <div className='min-w-0 flex-1'>
+          <InfiniteEntitySelect<SaleLineImeiPickerItem>
+            value={value || ''}
+            onValueChange={handleValueChange}
+            queryKey={['inventory', 'sale-units-select', productId, excludedKey]}
+            fetchPage={fetchImeiPage}
+            selectedLabel={selectedLabel || undefined}
+            extraItems={value && selectedLabel ? [{ id: value, name: selectedLabel }] : []}
+            activeOnly={false}
+            disabled={!productId}
+            placeholder={t('dukaan.sale.selectImei')}
+            searchPlaceholder={t('inventory.searchImei')}
+            emptyMessage={t('dukaan.sale.noImeisInStock')}
+            className='h-9 w-full min-w-0'
+          />
+        </div>
+        <ImeiCameraScanButton
+          onScan={(code) => void handleScanImei(code)}
+          title={t('scanner.scanImeiTitle')}
           disabled={!productId}
-          placeholder={t('dukaan.sale.selectImei')}
-          searchPlaceholder={t('inventory.searchImei')}
-          emptyMessage={t('dukaan.sale.noImeisInStock')}
-          className='h-9 w-full min-w-0'
+          className='h-9 w-9 shrink-0'
         />
       </div>
       {isInvalid ? <FieldError id={`${name}-error`} errors={errors} /> : null}

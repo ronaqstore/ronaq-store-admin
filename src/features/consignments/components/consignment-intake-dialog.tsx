@@ -35,6 +35,7 @@ import { isAppleBrandName } from '@/lib/device-family';
 import { listProducts } from '@/features/products/api/service';
 import { QuickVariantDialog } from '@/components/variants/quick-variant-dialog';
 import { ConsignmentIntakeConsignorSection } from './consignment-intake-consignor-section';
+import { ImeiCameraScanButton } from '@/components/barcode';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { CONSIGNMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { ConsignmentDTO, CustomerDTO } from '@/lib/api/types';
@@ -282,13 +283,21 @@ export function ConsignmentIntakeDialog({
                   <Label htmlFor='imei1'>
                     {t('dukaan.purchase.imei1')} <span className='text-destructive'>*</span>
                   </Label>
-                  <Input
-                    id='imei1'
-                    value={imei1}
-                    onChange={(e) => setImei1(e.target.value.replace(/\D/g, '').slice(0, 15))}
-                    placeholder={t('consignments.imeiPlaceholder')}
-                    maxLength={15}
-                  />
+                  <div className='flex items-center gap-1.5'>
+                    <Input
+                      id='imei1'
+                      value={imei1}
+                      onChange={(e) => setImei1(e.target.value.replace(/\D/g, '').slice(0, 15))}
+                      placeholder={t('consignments.imeiPlaceholder')}
+                      maxLength={15}
+                      className='flex-1'
+                    />
+                    <ImeiCameraScanButton
+                      onScan={(code) => setImei1(code)}
+                      title={t('scanner.scanImeiTitle')}
+                      className='h-9 w-9 shrink-0'
+                    />
+                  </div>
                   <DialogFieldError message={errors.imei1} />
                 </div>
 
@@ -296,13 +305,21 @@ export function ConsignmentIntakeDialog({
                   <Label htmlFor='imei2'>
                     {t('dukaan.purchase.imei2')} ({t('common.optional')})
                   </Label>
-                  <Input
-                    id='imei2'
-                    value={imei2}
-                    onChange={(e) => setImei2(e.target.value.replace(/\D/g, '').slice(0, 15))}
-                    placeholder={t('consignments.imeiPlaceholder')}
-                    maxLength={15}
-                  />
+                  <div className='flex items-center gap-1.5'>
+                    <Input
+                      id='imei2'
+                      value={imei2}
+                      onChange={(e) => setImei2(e.target.value.replace(/\D/g, '').slice(0, 15))}
+                      placeholder={t('consignments.imeiPlaceholder')}
+                      maxLength={15}
+                      className='flex-1'
+                    />
+                    <ImeiCameraScanButton
+                      onScan={(code) => setImei2(code)}
+                      title={t('scanner.scanImeiTitle')}
+                      className='h-9 w-9 shrink-0'
+                    />
+                  </div>
                   <DialogFieldError message={errors.imei2} />
                 </div>
 
