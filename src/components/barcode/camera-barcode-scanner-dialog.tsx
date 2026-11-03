@@ -148,6 +148,14 @@ export function CameraBarcodeScannerDialog({
       setWarningMessage(null);
       setOcrCandidates([]);
 
+      if (typeof window !== 'undefined' && window.isSecureContext === false) {
+        setErrorMessage(
+          'Camera access requires a secure connection (HTTPS). Please open this site using HTTPS or localhost.'
+        );
+        setIsInitializing(false);
+        return;
+      }
+
       try {
         const scanner = new Html5Qrcode(elementId, {
           formatsToSupport: [
@@ -157,18 +165,12 @@ export function CameraBarcodeScannerDialog({
             Html5QrcodeSupportedFormats.QR_CODE,
             Html5QrcodeSupportedFormats.DATA_MATRIX
           ],
-          verbose: false
+          verbose: false,
+          experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true
+          }
         });
         scannerRef.current = scanner;
-
-        try {
-          const deviceList = await Html5Qrcode.getCameras();
-          if (deviceList && deviceList.length > 0) {
-            setCameras(deviceList);
-          }
-        } catch {
-          setCameras([]);
-        }
 
         const cameraConfig = cameraId
           ? { deviceId: { exact: cameraId } }
@@ -179,8 +181,8 @@ export function CameraBarcodeScannerDialog({
           {
             fps: 15,
             qrbox: (viewfinderWidth, viewfinderHeight) => {
-              const width = Math.min(Math.floor(viewfinderWidth * 0.85), 320);
-              const height = Math.min(Math.floor(viewfinderHeight * 0.45), 180);
+              const width = Math.min(Math.floor(viewfinderWidth * 0.9), 420);
+              const height = Math.min(Math.floor(viewfinderHeight * 0.55), 240);
               return { width, height };
             }
           },
@@ -189,6 +191,16 @@ export function CameraBarcodeScannerDialog({
           },
           () => undefined
         );
+
+        // Fetch cameras list safely AFTER camera starts and permission is granted
+        try {
+          const deviceList = await Html5Qrcode.getCameras();
+          if (deviceList && deviceList.length > 0) {
+            setCameras(deviceList);
+          }
+        } catch {
+          // Camera listing might fail if single camera or permission-restricted
+        }
 
         try {
           const capabilities = scanner.getRunningTrackCapabilities() as { torch?: boolean } | null;
@@ -391,7 +403,7 @@ export function CameraBarcodeScannerDialog({
                 className='mt-4'
                 onClick={() => void startScanner(selectedCameraId ?? undefined)}
               >
-                {t('table.resetFilters')}
+                {t('common.tryAgain')}
               </Button>
             </div>
           )}
