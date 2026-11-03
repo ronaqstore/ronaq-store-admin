@@ -7,6 +7,7 @@ import type {
   InventoryItemDTO,
   InventoryUnitDTO,
   PaginatedResponse,
+  ResponseResolveScanDto,
   UpdateInventoryUnitInput
 } from '@/lib/api/types';
 import type {
@@ -42,6 +43,14 @@ export async function listInventoryUnits(
     );
   }
   return appFetch<PaginatedResponse<InventoryUnitDTO>>(`/api/inventory/units${qs}`);
+}
+
+export async function resolveScan(code: string, token?: string): Promise<ResponseResolveScanDto> {
+  const qs = buildQueryString({ code: code.trim() });
+  if (token) {
+    return apiRequest<ResponseResolveScanDto>(`/inventory/resolve-scan${qs}`, undefined, token);
+  }
+  return appFetch<ResponseResolveScanDto>(`/api/inventory/resolve-scan${qs}`);
 }
 
 export async function listInventoryStock(

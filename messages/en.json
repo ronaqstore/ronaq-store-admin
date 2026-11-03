@@ -2866,7 +2866,9 @@
       "success": "Return recorded successfully",
       "failed": "Failed to record return",
       "selectAtLeastOne": "Please select at least one item to return",
-      "reasonRequired": "Return reason is required"
+      "reasonRequired": "Return reason is required",
+      "walkInNotice": "Walk-in sale — full cash refund is required",
+      "walkInRefundRequired": "Walk-in customer returns require a full cash refund of {amount}"
     }
   },
   "subscription": {
@@ -2994,5 +2996,41 @@
     "cnicLabel": "CNIC:",
     "imei1Label": "IMEI 1:",
     "imei2Label": "IMEI 2:"
+  },
+  "scanner": {
+    "scanWithCamera": "Scan with camera",
+    "scanImeiTitle": "Scan IMEI Barcode",
+    "scanImeiDescription": "Align the IMEI barcode inside the camera frame.",
+    "scanBarcodeTitle": "Scan Product Barcode",
+    "scanBarcodeDescription": "Align the barcode or QR code inside the camera frame.",
+    "cameraPermissionDenied": "Camera permission was denied. Please allow camera access in your browser settings.",
+    "cameraNotFound": "No camera detected on this device.",
+    "scanFailed": "Could not start camera scanner. Please try again.",
+    "invalidImeiScanned": "Scanned code is not a valid 15-digit IMEI ({scanned}). Please try scanning again.",
+    "invalidBarcodeScanned": "Scanned barcode is empty or invalid. Please try scanning again.",
+    "unitNotFoundInStock": "IMEI {imei} was not found in stock for this product.",
+    "unitSelected": "IMEI {imei} selected.",
+    "switchCamera": "Switch Camera",
+    "toggleFlash": "Flash",
+    "close": "Close",
+    "quickScanSell": "Scan & Sell",
+    "universalScanPlaceholder": "Scan phone IMEI or accessory barcode...",
+    "scanToSellTitle": "Scan to Sell",
+    "scanToSellDesc": "Align any phone IMEI or product barcode inside the frame to add directly to the bill.",
+    "itemAdded": "Added {name} to sale.",
+    "quantityUpdated": "Updated {name} (Qty: {qty})",
+    "imeiAlreadyInCart": "IMEI {imei} is already added in the bill.",
+    "selectPhoneUnitPrompt": "Scanned model {name}. Please select an IMEI unit.",
+    "itemNotFound": "No matching product or in-stock phone found.",
+    "quickSellLoaded": "Loaded {name} for sale.",
+    "whatsappReceiptTitle": "Send WhatsApp Receipt",
+    "whatsappReceiptDesc": "Send an official digital receipt & warranty slip to customer WhatsApp.",
+    "customerWhatsAppNumber": "Customer WhatsApp Number",
+    "customerWhatsAppPlaceholder": "e.g. 03001234567",
+    "receiptPreview": "Receipt Preview",
+    "copyReceipt": "Copy Receipt",
+    "receiptCopied": "Receipt copied to clipboard.",
+    "sendOnWhatsApp": "Send on WhatsApp",
+    "phoneRequiredForWhatsApp": "Please enter a valid phone number."
   }
 }

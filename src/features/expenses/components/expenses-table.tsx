@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
 import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
@@ -74,34 +74,47 @@ const expenseMobileItem: MobileItemConfig<ExpenseDTO> = {
   meta: [(row: ExpenseDTO) => formatIsoDate(row.expenseDate)]
 };
 
-const expenseDetail: DetailConfig<ExpenseDTO> = {
-  mode: 'sheet',
-  title: (row: ExpenseDTO) => row.categoryName,
-  badge: (row: ExpenseDTO) => ({
-    label: row.status === 'ACTIVE' ? 'Active' : 'Cancelled',
-    status: row.status
-  }),
-  value: (row: ExpenseDTO) => formatPkr(row.amount),
-  sections: (row: ExpenseDTO) => [
-    {
-      title: 'Expense Details',
-      fields: [
-        { label: 'Date', value: formatIsoDate(row.expenseDate) },
-        { label: 'Category', value: row.categoryName },
-        { label: 'Amount', value: formatPkr(row.amount) },
-        { label: 'Status', value: row.status === 'ACTIVE' ? 'Active' : 'Cancelled' },
-        { label: 'Description', value: row.description || '—' }
-      ]
-    }
-  ]
-};
-
 export function ExpensesTable({ toolbarAction }: ExpensesTableProps) {
   const t = useT();
 
   const [recordOpen, setRecordOpen] = useState(false);
   const [cancelExpenseTarget, setCancelExpenseTarget] = useState<ExpenseDTO | null>(null);
   const [detailExpense, setDetailExpense] = useState<ExpenseDTO | null>(null);
+
+  const expenseDetail: DetailConfig<ExpenseDTO> = useMemo(
+    () => ({
+      mode: 'sheet',
+      title: (row: ExpenseDTO) => row.categoryName,
+      badge: (row: ExpenseDTO) => ({
+        label: row.status === 'ACTIVE' ? 'Active' : 'Cancelled',
+        status: row.status
+      }),
+      value: (row: ExpenseDTO) => formatPkr(row.amount),
+      sections: (row: ExpenseDTO) => [
+        {
+          title: 'Expense Details',
+          fields: [
+            { label: 'Date', value: formatIsoDate(row.expenseDate) },
+            { label: 'Category', value: row.categoryName },
+            { label: 'Amount', value: formatPkr(row.amount) },
+            { label: 'Status', value: row.status === 'ACTIVE' ? 'Active' : 'Cancelled' },
+            { label: 'Description', value: row.description || '—' }
+          ]
+        }
+      ],
+      actions: (row: ExpenseDTO) =>
+        row.status === 'ACTIVE'
+          ? [
+              {
+                label: t('expenses.cancelAction'),
+                variant: 'destructive' as const,
+                onClick: () => setCancelExpenseTarget(row)
+              }
+            ]
+          : []
+    }),
+    [t]
+  );
 
   const sortableColumnIds = ['expenseDate', 'categoryName', 'amount'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<

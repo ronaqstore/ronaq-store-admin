@@ -2866,7 +2866,9 @@
       "success": "Wapsi kamyabi se record kar li gayi",
       "failed": "Wapsi record karne mein nakami",
       "selectAtLeastOne": "Barah-e-karam Kam az kam ek cheez wapas karne ke liye muntakhib karein",
-      "reasonRequired": "Wapsi ki wajah darkar hai"
+      "reasonRequired": "Wapsi ki wajah darkar hai",
+      "walkInNotice": "Walk-in customer — poori cash wapsi lazmi hai",
+      "walkInRefundRequired": "Walk-in customer ki wapsi ke liye cash {amount} ki poori wapsi lazmi hai"
     }
   },
   "subscription": {
@@ -2994,5 +2996,41 @@
     "imei1Label": "IMEI 1:",
     "imei2Label": "IMEI 2:",
     "condition": "Halat"
+  },
+  "scanner": {
+    "scanWithCamera": "Camera se scan karein",
+    "scanImeiTitle": "IMEI barcode scan karein",
+    "scanImeiDescription": "IMEI barcode ko camera frame ke darmiyan layein.",
+    "scanBarcodeTitle": "Product barcode scan karein",
+    "scanBarcodeDescription": "Barcode ya QR code ko camera frame ke darmiyan layein.",
+    "cameraPermissionDenied": "Camera ki ijazat nahi mili. Barah-e-karam browser settings mein camera allow karein.",
+    "cameraNotFound": "Is device par koi camera nahi mila.",
+    "scanFailed": "Camera scanner shuru nahi ho saka. Barah-e-karam dobara koshish karein.",
+    "invalidImeiScanned": "Scan shuda code theek 15-digit IMEI nahi hai ({scanned}). Barah-e-karam dobara scan karein.",
+    "invalidBarcodeScanned": "Scan shuda barcode khali ya ghalat hai. Barah-e-karam dobara koshish karein.",
+    "unitNotFoundInStock": "Is product ke stock mein IMEI {imei} nahi mila.",
+    "unitSelected": "IMEI {imei} muntakhib ho gaya.",
+    "switchCamera": "Camera badlein",
+    "toggleFlash": "Flash",
+    "close": "Band karein",
+    "quickScanSell": "Scan aur Sale",
+    "universalScanPlaceholder": "Phone ka IMEI ya accessory ka barcode scan karein...",
+    "scanToSellTitle": "Scan kar ke sale karein",
+    "scanToSellDesc": "Bill mein shamil karne ke liye phone IMEI ya barcode ko frame mein layein.",
+    "itemAdded": "{name} sale mein shamil ho gaya.",
+    "quantityUpdated": "{name} update ho gaya (Qty: {qty})",
+    "imeiAlreadyInCart": "IMEI {imei} pehle se bill mein shamil hai.",
+    "selectPhoneUnitPrompt": "Model {name} scan hua. Barah-e-karam IMEI unit muntakhib karein.",
+    "itemNotFound": "Koi mutabiq product ya stock mein phone nahi mila.",
+    "quickSellLoaded": "{name} sale ke liye load ho gaya.",
+    "whatsappReceiptTitle": "WhatsApp receipt bhejein",
+    "whatsappReceiptDesc": "Customer ke WhatsApp par digital raseed aur warranty slip bhejein.",
+    "customerWhatsAppNumber": "Customer ka WhatsApp number",
+    "customerWhatsAppPlaceholder": "Maslan 03001234567",
+    "receiptPreview": "Raseed ka pesh view",
+    "copyReceipt": "Raseed copy karein",
+    "receiptCopied": "Raseed clipboard par copy ho gayi.",
+    "sendOnWhatsApp": "WhatsApp par bhejein",
+    "phoneRequiredForWhatsApp": "Barah-e-karam durust phone number darj karein."
   }
 }

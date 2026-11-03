@@ -97,7 +97,9 @@ export function MobileListItem<TData>({
             )}
           >
             <div className='min-w-0 flex-1'>
-              <p className='truncate text-sm font-semibold'>{title}</p>
+              <p className={cn('truncate text-sm font-semibold', isCard && actionsSlot && 'pe-7')}>
+                {title}
+              </p>
               {subtitle != null ? (
                 <p className='text-muted-foreground truncate text-xs'>{subtitle}</p>
               ) : null}
@@ -148,7 +150,14 @@ export function MobileListItem<TData>({
       </button>
 
       {actionsSlot ? (
-        <div className='flex shrink-0 items-center self-center'>{actionsSlot}</div>
+        <div
+          className={cn(
+            'flex shrink-0 items-center',
+            isCard ? 'absolute top-2 inset-e-2 z-10' : 'self-center'
+          )}
+        >
+          {actionsSlot}
+        </div>
       ) : null}
     </div>
   );

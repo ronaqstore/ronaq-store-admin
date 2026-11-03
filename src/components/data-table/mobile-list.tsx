@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import type { Row } from '@tanstack/react-table';
+import { type Row, flexRender } from '@tanstack/react-table';
 import { MobileListItem } from './mobile-list-item';
 import { RecordDetail } from './record-detail';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -106,23 +106,31 @@ export function MobileList<TData>({
             : 'overflow-hidden rounded-[var(--radius)] border border-border'
         )}
       >
-        {rows.map((row, index) => (
-          <li
-            key={`${row.id}-${index}`}
-            className={cn(
-              isCards
-                ? 'overflow-hidden rounded-[var(--radius)] border border-border bg-card'
-                : 'border-b border-border last:border-b-0'
-            )}
-          >
-            <MobileListItem
-              row={row.original}
-              config={mobileItem}
-              density={isCards ? 'card' : 'list'}
-              onOpen={() => openRow(row)}
-            />
-          </li>
-        ))}
+        {rows.map((row, index) => {
+          const actionCell = row.getAllCells().find((cell) => cell.column.id === 'actions');
+          const actionsSlot = actionCell
+            ? flexRender(actionCell.column.columnDef.cell, actionCell.getContext())
+            : null;
+
+          return (
+            <li
+              key={`${row.id}-${index}`}
+              className={cn(
+                isCards
+                  ? 'overflow-hidden rounded-[var(--radius)] border border-border bg-card'
+                  : 'border-b border-border last:border-b-0'
+              )}
+            >
+              <MobileListItem
+                row={row.original}
+                config={mobileItem}
+                density={isCards ? 'card' : 'list'}
+                actionsSlot={actionsSlot}
+                onOpen={() => openRow(row)}
+              />
+            </li>
+          );
+        })}
       </ul>
 
       <RecordDetail

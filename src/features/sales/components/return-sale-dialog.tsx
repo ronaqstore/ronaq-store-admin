@@ -21,7 +21,7 @@ import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dia
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { cn } from '@/lib/utils';
 import { useT } from '@/i18n/use-t';
-import { createClientRequestId, formatPkr, toPaisa } from '@/lib/dukaan/numbers';
+import { createClientRequestId, formatPkr, fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { INPUT_LIMITS, clampText } from '@/lib/input-limits';
 import type { ReturnPreviewDTO, ReturnItemInput } from '@/lib/api/types';
@@ -49,6 +49,8 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
   const [reasonError, setReasonError] = useState('');
   const [refundError, setRefundError] = useState('');
 
+  const isWalkIn = !sale.customerId;
+
   const [itemStates, setItemStates] = useState<Record<string, ItemReturnState>>(() => {
     const initial: Record<string, ItemReturnState> = {};
     for (const item of sale.items) {
@@ -73,6 +75,9 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
       setPreviewData(data);
       setOverdraftPrompt(null);
       setConfirmOverdraft(false);
+      if (isWalkIn || refundPkr === 0) {
+        setRefundPkr(fromPaisa(data.refundable));
+      }
     },
     onError: (err: Error) => {
       toast.error(err.message || t('sales.returnDialog.previewFailed'));
@@ -190,7 +195,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
       id: sale.id,
       input: {
         items: selectedItems,
-        refundAmount: toPaisa(refundPkr)
+        refundAmount: isWalkIn && refundPkr === 0 ? undefined : toPaisa(refundPkr)
       }
     });
   };
@@ -213,6 +218,14 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
 
     if (toPaisa(refundPkr) > previewData.refundable) {
       setRefundError(t('validation.refundExceedsMax'));
+      return;
+    }
+    if (isWalkIn && toPaisa(refundPkr) !== previewData.refundable) {
+      setRefundError(
+        t('sales.returnDialog.walkInRefundRequired', {
+          amount: formatPkr(previewData.refundable)
+        })
+      );
       return;
     }
     if ((previewData.willCauseOverdraft || !!overdraftPrompt) && !confirmOverdraft) {
@@ -276,7 +289,14 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
             </div>
 
             <div className='space-y-1.5'>
-              <Label htmlFor='refundAmount'>{t('sales.returnDialog.cashRefund')}</Label>
+              <Label htmlFor='refundAmount'>
+                {t('sales.returnDialog.cashRefund')}
+                {isWalkIn ? (
+                  <span className='ms-1 text-xs font-normal text-muted-foreground'>
+                    ({t('sales.returnDialog.walkInNotice')})
+                  </span>
+                ) : null}
+              </Label>
               <Input
                 id='refundAmount'
                 type='number'

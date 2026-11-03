@@ -2866,7 +2866,9 @@
       "success": "بېرته راګرځول په بریالیتوب ثبت شول",
       "failed": "د بېرته راګرځولو ثبت ناکام شو",
       "selectAtLeastOne": "مهرباني وکړئ لږترلږه یو توکی وټاکئ",
-      "reasonRequired": "د بېرته راګرځولو لامل اړین دی"
+      "reasonRequired": "د بېرته راګرځولو لامل اړین دی",
+      "walkInNotice": "عام پیرودونکی — د نغدو پیسو بشپړ بېرته ورکول اړین دي",
+      "walkInRefundRequired": "د عام پیرودونکي د بېرته ورکړې لپاره {amount} نغدې پیسې اړینې دي"
     }
   },
   "subscription": {
@@ -2994,5 +2996,41 @@
     "cnicLabel": "شناختی کارډ نمبر:",
     "imei1Label": "آئی ایم ای آئی 1:",
     "imei2Label": "آئی ایم ای آئی 2:"
+  },
+  "scanner": {
+    "scanWithCamera": "د کمرې سره سکین کړئ",
+    "scanImeiTitle": "د IMEI بارکوډ سکین کړئ",
+    "scanImeiDescription": "د موبایل د کارتن بارکوډ یا QR کوډ د چوکاټ دننه برابر کړئ.",
+    "scanBarcodeTitle": "د محصول بارکوډ سکین کړئ",
+    "scanBarcodeDescription": "د محصول بارکوډ یا QR کوډ د چوکاټ دننه برابر کړئ.",
+    "cameraPermissionDenied": "د کمرې اجازه رد شوه. مهرباني وکړئ په براوزر ترتیباتو کې اجازه ورکړئ.",
+    "cameraNotFound": "په دې وسیله کې کمره ونه موندل شوه.",
+    "scanFailed": "کمره پیل نشوه. مهرباني وکړئ بیا هڅه وکړئ.",
+    "invalidImeiScanned": "سکین شوی کوډ باوري ۱۵ عددي IMEI نه دی ({scanned}). مهرباني وکړئ بیا هڅه وکړئ.",
+    "invalidBarcodeScanned": "سکین شوی بارکوډ خالي یا ناسم دی. مهرباني وکړئ بیا هڅه وکړئ.",
+    "unitNotFoundInStock": "آئی ایم ای آئی {imei} د دې محصول لپاره په سټاک کې شتون نلري.",
+    "unitSelected": "آئی ایم ای آئی {imei} وټاکل شو.",
+    "switchCamera": "کمره بدله کړئ",
+    "toggleFlash": "فلش رڼا",
+    "close": "بندول",
+    "quickScanSell": "سکین او خرڅول",
+    "universalScanPlaceholder": "د ټیلیفون IMEI یا د پرزو بارکوډ سکین کړئ...",
+    "scanToSellTitle": "د خرڅلاو لپاره سکین کړئ",
+    "scanToSellDesc": "د کوم موبایل IMEI یا محصول بارکوډ چوکاټ کې برابر کړئ ترڅو سمدستي بل ته اضافه شي.",
+    "itemAdded": "{name} خرڅلاو ته اضافه شو.",
+    "quantityUpdated": "{name} تازه شو (تعداد: {qty})",
+    "imeiAlreadyInCart": "آئی ایم ای آئی {imei} دمخه بل کې اضافه شوی دی.",
+    "selectPhoneUnitPrompt": "موډل {name} وټاکل شو. مهرباني وکړئ د ټیلیفون IMEI وټاکئ.",
+    "itemNotFound": "هیڅ سمون لرونکی محصول یا شته ټیلیفون ونه موندل شو.",
+    "quickSellLoaded": "{name} د خرڅلاو لپاره چمتو شو.",
+    "whatsappReceiptTitle": "د واټس اپ رسید واستوئ",
+    "whatsappReceiptDesc": "پیرودونکي ته پر واټس اپ رسمي ډیجیټل رسید او د تضمین کارت واستوئ.",
+    "customerWhatsAppNumber": "د پیرودونکي واټس اپ شمیره",
+    "customerWhatsAppPlaceholder": "لکه 03001234567",
+    "receiptPreview": "د رسید مخکتنه",
+    "copyReceipt": "رسید کاپي کړئ",
+    "receiptCopied": "رسید کاپي شو.",
+    "sendOnWhatsApp": "پر واټس اپ واستوئ",
+    "phoneRequiredForWhatsApp": "مهرباني وکړئ باوري ټیلیفون شمیره ولیکئ."
   }
 }

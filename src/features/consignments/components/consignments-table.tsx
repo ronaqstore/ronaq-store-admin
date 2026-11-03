@@ -4,7 +4,11 @@ import { useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { parseAsString, useQueryState } from 'nuqs';
-import { ResponsiveDataTable, type MobileItemConfig } from '@/components/data-table';
+import {
+  ResponsiveDataTable,
+  type DetailConfig,
+  type MobileItemConfig
+} from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
 import { Icons } from '@/components/icons';
@@ -267,11 +271,88 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
     [t]
   );
 
+  const consignmentDetail: DetailConfig<ConsignmentDTO> = useMemo(
+    () => ({
+      mode: 'sheet',
+      title: (row) => `${row.consignmentNo} • ${row.productName}`,
+      badge: (row) => ({
+        label: t(
+          `consignments.status${row.status === 'IN_CUSTODY' ? 'InCustody' : row.status === 'SOLD' ? 'Sold' : row.status === 'SETTLED' ? 'Settled' : row.status === 'RETURNED_TO_OWNER' ? 'Returned' : 'Cancelled'}`
+        ),
+        tone:
+          row.status === 'SETTLED' ? 'success' : row.status === 'CANCELLED' ? 'danger' : 'warning'
+      }),
+      value: (row) => formatPkr(row.agreedPayout),
+      sections: (row) => [
+        {
+          title: t('table.details'),
+          fields: [
+            { label: t('consignments.consignmentNo'), value: row.consignmentNo },
+            { label: t('table.col.date'), value: formatIsoDate(row.intakeDate) },
+            {
+              label: t('consignments.consignor'),
+              value: `${row.consignorName} (${row.consignorPhone})`
+            },
+            { label: t('table.col.product'), value: row.productName },
+            { label: t('inventory.imeiLabel'), value: row.imei1 },
+            { label: t('consignments.agreedPayout'), value: formatPkr(row.agreedPayout) },
+            ...(row.soldPrice != null
+              ? [{ label: t('consignments.soldPrice'), value: formatPkr(row.soldPrice) }]
+              : []),
+            {
+              label: t('table.col.status'),
+              value: <ConsignmentStatusBadge status={row.status} />
+            },
+            ...(row.notes ? [{ label: t('table.col.note'), value: row.notes }] : [])
+          ]
+        }
+      ],
+      actions: (row) => [
+        {
+          label: t('consignments.printIntakeSlip'),
+          onClick: () => setSlipModal({ open: true, consignment: row, type: 'intake' })
+        },
+        ...(row.status === 'SETTLED'
+          ? [
+              {
+                label: t('consignments.printSettlementSlip'),
+                onClick: () => setSlipModal({ open: true, consignment: row, type: 'settlement' })
+              }
+            ]
+          : []),
+        ...(row.status === 'SOLD'
+          ? [
+              {
+                label: t('consignments.settlePayoutAction'),
+                onClick: () => setSettleConsignment(row)
+              }
+            ]
+          : []),
+        ...(row.status === 'IN_CUSTODY'
+          ? [
+              {
+                label: t('consignments.returnAction'),
+                variant: 'secondary' as const,
+                onClick: () => setReturnConsignment(row)
+              },
+              {
+                label: t('common.cancel'),
+                variant: 'destructive' as const,
+                onClick: () => setCancelConsignment(row)
+              }
+            ]
+          : [])
+      ]
+    }),
+    [t]
+  );
+
   return (
     <>
       <ResponsiveDataTable
         table={table}
         mobileItem={mobileItem}
+        detail={consignmentDetail}
         toolbarAction={toolbarAction}
         isLoading={isFetching}
       />

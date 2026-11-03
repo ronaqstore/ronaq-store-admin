@@ -84,6 +84,7 @@ export interface ProductPhotoManagerProps {
 
 export interface ProductsHeaderActionProps {
   onAdd?: () => void;
+  onScanSell?: () => void;
 }
 
 export interface ProductCellActionProps {

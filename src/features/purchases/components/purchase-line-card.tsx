@@ -18,6 +18,7 @@ import { EMPTY_FORM_NUMBER } from '@/types/common';
 import { isAppleBrandName } from '@/lib/device-family';
 import { resizePhoneUnits } from '../schemas/purchase-schema';
 import { QuickVariantDialog } from '@/components/variants/quick-variant-dialog';
+import { ImeiCameraScanButton } from '@/components/barcode';
 
 const emptyDefaults: PurchaseFormValues = {
   supplier_id: '',
@@ -252,23 +253,41 @@ export const PurchaseLineCard = withForm({
                           <form.AppField
                             name={`lines[${index}].phone_units[${unitIdx}].imei1`}
                             children={(subField) => (
-                              <subField.TextField
-                                label={t('dukaan.purchase.imei1')}
-                                maxLength={INPUT_LIMITS.imei}
-                                required
-                                placeholder={t('dukaan.purchase.imei1Placeholder')}
-                              />
+                              <div className='flex items-end gap-1.5'>
+                                <div className='min-w-0 flex-1'>
+                                  <subField.TextField
+                                    label={t('dukaan.purchase.imei1')}
+                                    maxLength={INPUT_LIMITS.imei}
+                                    required
+                                    placeholder={t('dukaan.purchase.imei1Placeholder')}
+                                  />
+                                </div>
+                                <ImeiCameraScanButton
+                                  onScan={(imei) => subField.handleChange(imei)}
+                                  title={t('scanner.scanImeiTitle')}
+                                  className='mb-[1px] h-9 w-9 shrink-0'
+                                />
+                              </div>
                             )}
                           />
                           <form.AppField
                             name={`lines[${index}].phone_units[${unitIdx}].imei2`}
                             children={(subField) => (
-                              <subField.TextField
-                                label={t('dukaan.purchase.imei2')}
-                                maxLength={INPUT_LIMITS.imei}
-                                required
-                                placeholder={t('dukaan.purchase.imei2Placeholder')}
-                              />
+                              <div className='flex items-end gap-1.5'>
+                                <div className='min-w-0 flex-1'>
+                                  <subField.TextField
+                                    label={t('dukaan.purchase.imei2')}
+                                    maxLength={INPUT_LIMITS.imei}
+                                    required
+                                    placeholder={t('dukaan.purchase.imei2Placeholder')}
+                                  />
+                                </div>
+                                <ImeiCameraScanButton
+                                  onScan={(imei) => subField.handleChange(imei)}
+                                  title={t('scanner.scanImeiTitle')}
+                                  className='mb-[1px] h-9 w-9 shrink-0'
+                                />
+                              </div>
                             )}
                           />
                           <form.AppField

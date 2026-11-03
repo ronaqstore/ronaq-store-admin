@@ -395,6 +395,17 @@ export interface InventoryUnitDTO {
   salePrice?: number | null;
 }
 
+export type ScanResolvedType = 'SERIALIZED' | 'QUANTITY' | 'SERIALIZED_PRODUCT';
+
+export interface ResponseResolveScanDto {
+  found: boolean;
+  type?: ScanResolvedType;
+  product?: ProductDTO;
+  unit?: InventoryUnitDTO;
+  reason?: 'NOT_FOUND' | 'NOT_IN_STOCK' | 'INACTIVE';
+  message?: string;
+}
+
 export type InventoryMovementType =
   | 'ADJUSTMENT'
   | 'DAMAGED'
