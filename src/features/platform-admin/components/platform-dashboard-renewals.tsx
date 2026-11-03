@@ -73,7 +73,7 @@ export function PlatformDashboardRenewals() {
         skeletonType='list'
         height={300}
       >
-        <div className='max-h-[260px] space-y-2 overflow-y-auto pe-1'>
+        <div className='max-h-[260px] space-y-2 overflow-y-auto pe-1 no-scrollbar'>
           {(renewals?.nextExpiring ?? []).map((shop) => {
             const phone = shop.ownerPhone;
             return (

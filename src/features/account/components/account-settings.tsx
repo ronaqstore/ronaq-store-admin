@@ -24,7 +24,7 @@ export function AccountSettings() {
 
   return (
     <>
-      <div className='grid gap-4 lg:grid-cols-2'>
+      <div className='grid gap-4 md:grid-cols-2'>
         <Card className='min-w-0'>
           <CardHeader className='flex flex-row items-start gap-3 space-y-0 pb-3'>
             <div className='bg-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-lg'>
@@ -71,9 +71,11 @@ export function AccountSettings() {
             </div>
           </CardHeader>
           <CardContent className='flex h-full flex-col justify-between gap-4'>
-            <p className='text-muted-foreground text-sm'>{t('account.changePasswordHint')}</p>
-            <div className='flex justify-end'>
-              <Button type='button' onClick={openPasswordDialog}>
+            <p className='text-muted-foreground text-xs sm:text-sm'>
+              {t('account.changePasswordHint')}
+            </p>
+            <div className='flex justify-start sm:justify-end'>
+              <Button type='button' className='w-full sm:w-auto' onClick={openPasswordDialog}>
                 <Icons.lock className='me-2 h-4 w-4' />
                 {t('account.changePasswordTitle')}
               </Button>

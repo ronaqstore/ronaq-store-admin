@@ -3,6 +3,7 @@ import type {
   CancelConsignmentInput,
   ConsignmentDTO,
   ConsignmentStatus,
+  CustomerDTO,
   ReturnConsignmentInput,
   SettleConsignmentInput
 } from '@/lib/api/types';
@@ -98,4 +99,16 @@ export interface ConsignmentSlipModalState {
 export interface ConsignmentsHeaderActionProps {
   className?: string;
   onAdd: () => void;
+}
+
+export interface ConsignmentConsignorSectionProps {
+  customerId: string;
+  consignorName: string;
+  consignorPhone: string;
+  consignorCnic: string;
+  errors: Record<string, string>;
+  onCustomerSelect: (id: string, customer?: CustomerDTO | null) => void;
+  onConsignorNameChange: (val: string) => void;
+  onConsignorPhoneChange: (val: string) => void;
+  onConsignorCnicChange: (val: string) => void;
 }

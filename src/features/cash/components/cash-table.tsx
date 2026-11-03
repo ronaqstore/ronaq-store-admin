@@ -8,6 +8,8 @@ import { useT } from '@/i18n/use-t';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { FloatingActionButton } from '@/components/common/floating-action-button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { TruncateText } from '@/components/common/truncate-text';
 import {
   ResponsiveDataTable,
@@ -97,6 +99,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
   const [investmentOpen, setInvestmentOpen] = useState(false);
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
   const [reconcileOpen, setReconcileOpen] = useState(false);
+  const [mobileActionsOpen, setMobileActionsOpen] = useState(false);
 
   const { data: openingStatus } = useQuery(cashOpeningStatusQueryOptions());
   const hasOpeningCash = openingStatus?.hasOpening === true;
@@ -326,37 +329,37 @@ export function CashTable({ toolbarAction }: CashTableProps) {
   });
 
   const toolbarActionButton = (
-    <div className='flex flex-wrap items-center justify-end gap-2'>
+    <div className='no-scrollbar flex min-w-0 w-full items-center gap-1.5 overflow-x-auto py-0.5 flex-nowrap shrink-0 sm:flex-wrap sm:overflow-visible sm:w-auto sm:justify-end'>
       {toolbarAction}
       <Button
         type='button'
         size='sm'
-        className='h-8 gap-1.5'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3'
         onClick={() => setInvestmentOpen(true)}
         title={hasOpeningCash ? t('dukaan.cash.openingAlreadySetHint') : undefined}
       >
-        <Icons.add className='h-3.5 w-3.5' />
+        <Icons.add className='h-3.5 w-3.5 shrink-0' />
         <span>{t('common.investCash')}</span>
       </Button>
       <Button
         type='button'
         size='sm'
         variant='outline'
-        className='h-8 gap-1.5'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3'
         onClick={() => setWithdrawalOpen(true)}
         title={hasOpeningCash ? t('dukaan.cash.openingAlreadySetHint') : undefined}
       >
-        <Icons.minus className='h-3.5 w-3.5' />
+        <Icons.minus className='h-3.5 w-3.5 shrink-0' />
         <span>{t('common.withdraw')}</span>
       </Button>
       <Button
         type='button'
         size='sm'
         variant='outline'
-        className='h-8 gap-1.5'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3'
         onClick={() => setReconcileOpen(true)}
       >
-        <Icons.adjustments className='h-3.5 w-3.5' />
+        <Icons.adjustments className='h-3.5 w-3.5 shrink-0' />
         <span>{t('common.reconcileDrawer')}</span>
       </Button>
       {showOpeningButton ? (
@@ -364,15 +367,35 @@ export function CashTable({ toolbarAction }: CashTableProps) {
           type='button'
           size='sm'
           variant='outline'
-          className='h-8 gap-1.5'
+          className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3'
           onClick={() => setOpeningCashOpen(true)}
         >
-          <Icons.wallet className='h-3.5 w-3.5' />
+          <Icons.wallet className='h-3.5 w-3.5 shrink-0' />
           <span>{t('common.openingBalance')}</span>
         </Button>
       ) : null}
     </div>
   );
+
+  const handleOpenInvestFromMobile = () => {
+    setMobileActionsOpen(false);
+    setInvestmentOpen(true);
+  };
+
+  const handleOpenWithdrawFromMobile = () => {
+    setMobileActionsOpen(false);
+    setWithdrawalOpen(true);
+  };
+
+  const handleOpenReconcileFromMobile = () => {
+    setMobileActionsOpen(false);
+    setReconcileOpen(true);
+  };
+
+  const handleOpenOpeningFromMobile = () => {
+    setMobileActionsOpen(false);
+    setOpeningCashOpen(true);
+  };
 
   return (
     <>
@@ -399,6 +422,58 @@ export function CashTable({ toolbarAction }: CashTableProps) {
         detail={cashDetail}
         isLoading={isFetching}
       />
+
+      <FloatingActionButton
+        label={t('common.cashDrawer')}
+        onClick={() => setMobileActionsOpen(true)}
+      />
+
+      <Sheet open={mobileActionsOpen} onOpenChange={setMobileActionsOpen}>
+        <SheetContent side='bottom' className='p-4 gap-2 rounded-t-2xl sm:hidden no-scrollbar'>
+          <SheetHeader className='pb-2 text-start'>
+            <SheetTitle>{t('common.cashDrawer')}</SheetTitle>
+          </SheetHeader>
+          <div className='flex flex-col gap-2'>
+            <Button
+              type='button'
+              className='h-11 w-full justify-start gap-2.5 text-sm font-medium'
+              onClick={handleOpenInvestFromMobile}
+            >
+              <Icons.add className='size-4 shrink-0' />
+              <span>{t('common.investCash')}</span>
+            </Button>
+            <Button
+              type='button'
+              variant='outline'
+              className='h-11 w-full justify-start gap-2.5 text-sm font-medium'
+              onClick={handleOpenWithdrawFromMobile}
+            >
+              <Icons.minus className='size-4 shrink-0' />
+              <span>{t('common.withdraw')}</span>
+            </Button>
+            <Button
+              type='button'
+              variant='outline'
+              className='h-11 w-full justify-start gap-2.5 text-sm font-medium'
+              onClick={handleOpenReconcileFromMobile}
+            >
+              <Icons.adjustments className='size-4 shrink-0' />
+              <span>{t('common.reconcileDrawer')}</span>
+            </Button>
+            {showOpeningButton ? (
+              <Button
+                type='button'
+                variant='outline'
+                className='h-11 w-full justify-start gap-2.5 text-sm font-medium'
+                onClick={handleOpenOpeningFromMobile}
+              >
+                <Icons.wallet className='size-4 shrink-0' />
+                <span>{t('common.openingBalance')}</span>
+              </Button>
+            ) : null}
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

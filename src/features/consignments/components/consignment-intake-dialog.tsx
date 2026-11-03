@@ -29,13 +29,12 @@ import { createClientRequestId, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
-import { sanitizePkMobileInput, sanitizePkCnicInput } from '@/lib/validation/pk';
 import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
 import { mapProductToPicker } from '@/lib/api/picker';
 import { isAppleBrandName } from '@/lib/device-family';
-import { listCustomers } from '@/features/customers/api/service';
 import { listProducts } from '@/features/products/api/service';
 import { QuickVariantDialog } from '@/components/variants/quick-variant-dialog';
+import { ConsignmentIntakeConsignorSection } from './consignment-intake-consignor-section';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { CONSIGNMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { ConsignmentDTO, CustomerDTO } from '@/lib/api/types';
@@ -215,82 +214,24 @@ export function ConsignmentIntakeDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-2xl'>
+        <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-2xl no-scrollbar'>
           <DialogHeader>
             <DialogTitle>{t('consignments.newConsignment')}</DialogTitle>
             <DialogDescription>{t('consignments.newConsignmentDesc')}</DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className='space-y-5 py-2'>
-            <div className='rounded-md border p-3.5 space-y-3 bg-muted/20'>
-              <div className='font-medium text-sm text-foreground'>
-                {t('consignments.sectionConsignor')}
-              </div>
-
-              <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
-                <div className='sm:col-span-2'>
-                  <FormEntitySelect<CustomerDTO>
-                    name='customer_picker'
-                    label={t('consignments.pickCustomerOptional')}
-                    value={customerId}
-                    onValueChange={handleCustomerSelect}
-                    isInvalid={!!errors.customerId}
-                    errors={errors.customerId ? [{ message: errors.customerId }] : []}
-                    queryKey={['customers', 'picker']}
-                    fetchPage={(filters) =>
-                      listCustomers({ ...filters, limit: 20 }).then((res) => ({
-                        items: res.items,
-                        total: res.total,
-                        page: res.page,
-                        limit: res.pageSize
-                      }))
-                    }
-                    placeholder={t('consignments.pickCustomerPlaceholder')}
-                    searchPlaceholder={t('dukaan.customer.search')}
-                  />
-                </div>
-
-                <div className='space-y-1.5'>
-                  <Label htmlFor='consignor-name'>
-                    {t('consignments.consignorName')} <span className='text-destructive'>*</span>
-                  </Label>
-                  <Input
-                    id='consignor-name'
-                    value={consignorName}
-                    onChange={(e) => setConsignorName(e.target.value)}
-                    placeholder={t('consignments.consignorNamePlaceholder')}
-                  />
-                  <DialogFieldError message={errors.consignorName} />
-                </div>
-
-                <div className='space-y-1.5'>
-                  <Label htmlFor='consignor-phone'>
-                    {t('consignments.consignorPhone')} <span className='text-destructive'>*</span>
-                  </Label>
-                  <Input
-                    id='consignor-phone'
-                    type='tel'
-                    value={consignorPhone}
-                    onChange={(e) => setConsignorPhone(sanitizePkMobileInput(e.target.value))}
-                    placeholder='03001234567'
-                    maxLength={11}
-                  />
-                  <DialogFieldError message={errors.consignorPhone} />
-                </div>
-
-                <div className='sm:col-span-2 space-y-1.5'>
-                  <Label htmlFor='consignor-cnic'>{t('consignments.consignorCnic')}</Label>
-                  <Input
-                    id='consignor-cnic'
-                    value={consignorCnic}
-                    onChange={(e) => setConsignorCnic(sanitizePkCnicInput(e.target.value))}
-                    placeholder='17301-1234567-1'
-                    maxLength={15}
-                  />
-                  <DialogFieldError message={errors.consignorCnic} />
-                </div>
-              </div>
-            </div>
+            <ConsignmentIntakeConsignorSection
+              customerId={customerId}
+              consignorName={consignorName}
+              consignorPhone={consignorPhone}
+              consignorCnic={consignorCnic}
+              errors={errors}
+              onCustomerSelect={handleCustomerSelect}
+              onConsignorNameChange={setConsignorName}
+              onConsignorPhoneChange={setConsignorPhone}
+              onConsignorCnicChange={setConsignorCnic}
+            />
 
             <div className='rounded-md border p-3.5 space-y-3 bg-muted/20'>
               <div className='font-medium text-sm text-foreground'>

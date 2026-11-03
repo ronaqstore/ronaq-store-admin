@@ -32,18 +32,18 @@ export default function Header() {
   const showBack = isDetailPath(pathname);
 
   return (
-    <header className='bg-background/95 z-20 flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center justify-between gap-2 border-b border-border/60 pt-[env(safe-area-inset-top)] backdrop-blur-md'>
-      <div className='flex min-w-0 flex-1 items-center gap-2 px-4'>
+    <header className='bg-background/95 z-20 flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center justify-between gap-1 border-b border-border/60 pt-[env(safe-area-inset-top)] backdrop-blur-md sm:gap-2'>
+      <div className='flex min-w-0 flex-1 items-center gap-1.5 px-2.5 sm:gap-2 sm:px-4'>
         {showBack ? (
           <Button
             type='button'
             variant='ghost'
             size='icon'
-            className='size-11 shrink-0'
+            className='size-8 shrink-0 sm:size-11'
             aria-label={t('nav.back')}
             onClick={() => router.back()}
           >
-            <Icons.chevronLeft className='size-5 rtl:rotate-180' />
+            <Icons.chevronLeft className='size-4 rtl:rotate-180 sm:size-5' />
           </Button>
         ) : (
           <SidebarTrigger className='-ms-1' aria-label={t('nav.menu')} />
@@ -52,30 +52,30 @@ export default function Header() {
           orientation='vertical'
           className='me-2 hidden h-4 data-vertical:self-center sm:block'
         />
-        <p className='truncate text-sm font-semibold sm:hidden'>{title}</p>
+        <p className='truncate text-xs font-semibold sm:hidden'>{title}</p>
         <div className='hidden min-w-0 sm:block'>
           <Breadcrumbs />
         </div>
       </div>
 
-      <div className='flex shrink-0 items-center gap-1 px-4 sm:gap-2'>
+      <div className='flex shrink-0 items-center gap-1 px-2 sm:gap-2 sm:px-4'>
         <Button
           type='button'
           variant='ghost'
           size='icon'
-          className='size-11 sm:hidden'
+          className='size-8 lg:hidden'
           aria-label={t('nav.search')}
           onClick={query.toggle}
         >
-          <Icons.search className='size-5' />
+          <Icons.search className='size-4' />
         </Button>
-        <div className='hidden md:flex'>
+        <div className='hidden lg:flex'>
           <SearchInput />
         </div>
         <div className='hidden sm:block'>
           <ThemeModeToggle />
         </div>
-        <div className='hidden md:block'>
+        <div className='hidden lg:block'>
           <ThemeSelector />
         </div>
         <SubscriptionBadge />

@@ -43,7 +43,7 @@ export function PlatformDashboardAtRisk() {
       height={360}
     >
       <div className='flex h-full min-h-0 flex-col gap-3'>
-        <div className='min-h-0 flex-1 overflow-auto rounded-md border'>
+        <div className='min-h-0 flex-1 overflow-auto rounded-md border no-scrollbar'>
           <Table>
             <TableHeader className='bg-card sticky top-0 z-10'>
               <TableRow>

@@ -45,7 +45,7 @@ export function PlatformDashboardCitiesActivity() {
         }))}
         csvFilename='platform-cities'
       >
-        <div className='max-h-[260px] space-y-2 overflow-y-auto'>
+        <div className='max-h-[260px] space-y-2 overflow-y-auto no-scrollbar'>
           {(cities?.buckets ?? []).map((bucket) => (
             <div key={bucket.city} className='flex items-center justify-between text-sm'>
               <span className='truncate'>{bucket.city}</span>

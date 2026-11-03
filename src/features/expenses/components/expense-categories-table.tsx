@@ -9,6 +9,7 @@ import { useT } from '@/i18n/use-t';
 import { t } from '@/i18n';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
+import { FloatingActionButton } from '@/components/common/floating-action-button';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
 import type { RowAction } from '@/types/dukaan';
 import {
@@ -275,10 +276,15 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
   });
 
   const toolbarActionButton = (
-    <div className='flex items-center gap-2'>
+    <div className='flex min-w-0 w-full items-center gap-1.5 sm:w-auto'>
       {toolbarAction}
-      <Button type='button' size='sm' className='h-8 gap-1.5' onClick={() => setCreateOpen(true)}>
-        <Icons.add className='h-3.5 w-3.5' />
+      <Button
+        type='button'
+        size='sm'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs w-full sm:w-auto'
+        onClick={() => setCreateOpen(true)}
+      >
+        <Icons.add className='h-3.5 w-3.5 shrink-0' />
         <span>{t('expenses.addCategory')}</span>
       </Button>
     </div>
@@ -335,6 +341,8 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
         detail={categoryDetail}
         isLoading={isFetching}
       />
+
+      <FloatingActionButton label={t('expenses.addCategory')} onClick={() => setCreateOpen(true)} />
     </>
   );
 }

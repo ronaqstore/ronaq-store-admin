@@ -97,7 +97,7 @@ export function SubscriptionBadge() {
           <button
             type='button'
             className={cn(
-              'group/sub-badge inline-flex h-8 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer select-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
+              'group/sub-badge inline-flex h-8 items-center gap-1 rounded-full border px-2 py-1 text-xs font-medium transition-colors cursor-pointer select-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:gap-1.5 sm:px-2.5',
               colorStyles
             )}
             aria-label={`${fullText} - ${t('status')}`}
@@ -109,13 +109,17 @@ export function SubscriptionBadge() {
         ) : (
           <span className={cn('size-2 shrink-0 rounded-full', dotStyles)} aria-hidden='true' />
         )}
-        <span className='hidden sm:inline'>{fullText}</span>
-        <span className='inline sm:hidden font-semibold'>{compactText}</span>
+        <span className='hidden lg:inline'>{fullText}</span>
+        <span className='inline lg:hidden font-semibold'>{compactText}</span>
       </PopoverTrigger>
 
-      <PopoverContent align='end' sideOffset={8} className='w-80 p-4'>
+      <PopoverContent
+        align='end'
+        sideOffset={8}
+        className='w-[calc(100vw-1.5rem)] max-w-xs p-3.5 sm:w-80 sm:p-4'
+      >
         <div className='flex flex-col gap-3'>
-          <div className='flex items-center justify-between border-b border-border/60 pb-2.5'>
+          <div className='flex flex-wrap items-center justify-between gap-1.5 border-b border-border/60 pb-2.5'>
             <div className='flex items-center gap-2'>
               <span className={cn('size-2.5 rounded-full', dotStyles)} aria-hidden='true' />
               <span className='text-sm font-semibold tracking-tight'>{currentPlanLabel}</span>
@@ -151,11 +155,11 @@ export function SubscriptionBadge() {
             rel='noopener noreferrer'
             className={cn(
               buttonVariants({ size: 'sm' }),
-              'w-full mt-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-xs flex items-center justify-center gap-2'
+              'w-full mt-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-xs flex items-center justify-center gap-2 text-xs sm:text-sm'
             )}
           >
-            <IconBrandWhatsapp className='size-4' />
-            <span>{t('contactSupport')}</span>
+            <IconBrandWhatsapp className='size-4 shrink-0' />
+            <span className='truncate'>{t('contactSupport')}</span>
           </a>
         </div>
       </PopoverContent>

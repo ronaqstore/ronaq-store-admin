@@ -31,9 +31,12 @@ import type { InventoryItemDTO } from '@/lib/api/types';
 import type { InventoryRowActionsProps, InventoryTableProps } from '@/types/inventory';
 import { inventoryStockQueryOptions } from '../api/queries';
 import { TruncateText } from '@/components/common/truncate-text';
+import { FloatingActionButton } from '@/components/common/floating-action-button';
 import { StockAdjustDialog } from './stock-adjust-dialog';
 import {
   INVENTORY_COST_RANGE_RUPEES,
+  LOW_STOCK_OPTIONS,
+  TRACKING_OPTIONS,
   firstInventoryFilterValue,
   inventoryProductAsyncFilter,
   parseExactQuantity,
@@ -67,27 +70,16 @@ function InventoryRowActions({ item, onAdjust, onViewUnits }: InventoryRowAction
   );
 }
 
-const TRACKING_OPTIONS = [
-  { label: 'Quantity', value: 'QUANTITY' },
-  { label: 'Serialized', value: 'SERIALIZED' }
-];
-
-const LOW_STOCK_OPTIONS = [
-  { label: 'Low Stock', value: 'true' },
-  { label: 'OK', value: 'false' }
-];
-
 export function InventoryTable({ toolbarAction }: InventoryTableProps) {
   const t = useT();
   const router = useRouter();
   const [adjustOpen, setAdjustOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<InventoryItemDTO | null>(null);
 
-  const sortableColumnIds = ['name', 'inStock', 'stockValue'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
     'name' | 'inStock' | 'stockValue'
   >(
-    sortableColumnIds,
+    ['name', 'inStock', 'stockValue'],
     'name',
     ['productId', 'trackingType', 'lowStock', 'stockValue'],
     'name',
@@ -455,9 +447,14 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
         onRowClick={handleRowClick}
         toolbarAction={
           toolbarAction ?? (
-            <Button type='button' size='sm' onClick={handleOpenAdjustStock}>
-              <IconPlus className='me-1.5 h-4 w-4' />
-              {t('common.adjustStock')}
+            <Button
+              type='button'
+              size='sm'
+              className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs w-full sm:w-auto'
+              onClick={handleOpenAdjustStock}
+            >
+              <IconPlus className='me-1.5 h-4 w-4 shrink-0' />
+              <span>{t('common.adjustStock')}</span>
             </Button>
           )
         }
@@ -466,6 +463,8 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
         quickFilters={inventoryQuickFilters}
         isLoading={isFetching}
       />
+
+      <FloatingActionButton label={t('common.adjustStock')} onClick={handleOpenAdjustStock} />
 
       {adjustOpen && (
         <StockAdjustDialog

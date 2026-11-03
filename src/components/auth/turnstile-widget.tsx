@@ -22,7 +22,7 @@ export function getTurnstileSiteKey(): string {
 }
 
 export function isTurnstileEnabled(): boolean {
-  return getTurnstileSiteKey().length > 0;
+  return false;
 }
 
 export function TurnstileWidget({
@@ -102,7 +102,7 @@ export function TurnstileWidget({
     onTokenChangeRef.current(null);
   };
 
-  if (!siteKey) return null;
+  if (!isTurnstileEnabled() || !siteKey) return null;
 
   return (
     <div className={cn('relative w-full min-h-[65px]', className)}>

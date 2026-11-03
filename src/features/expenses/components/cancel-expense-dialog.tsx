@@ -87,7 +87,7 @@ export function CancelExpenseDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-md'>
+      <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-md no-scrollbar'>
         <DialogHeader>
           <DialogTitle>{t('expenses.cancelTitle')}</DialogTitle>
           <DialogDescription>

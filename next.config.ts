@@ -6,6 +6,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const baseConfig: NextConfig = {
+  devIndicators: false,
   output: process.env.BUILD_STANDALONE === 'true' ? 'standalone' : undefined,
   images: {
     formats: ['image/avif', 'image/webp'],
@@ -57,20 +58,16 @@ const baseConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com chrome-extension:",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com chrome-extension:",
               "img-src 'self' data: blob: https: chrome-extension:",
               "font-src 'self' data: https://fonts.gstatic.com chrome-extension:",
               "connect-src 'self' data: https: http://localhost:* http://127.0.0.1:* ws: wss: chrome-extension:",
-              "frame-src https://challenges.cloudflare.com https://www.google.com https://maps.google.com",
-              "img-src 'self' data: blob: https:",
-              "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' data: https: http://localhost:* http://127.0.0.1:* ws: wss:",
-              'frame-src https://challenges.cloudflare.com https://www.google.com https://maps.google.com',
+              "frame-src 'self' https://challenges.cloudflare.com https://www.google.com https://maps.google.com chrome-extension:",
               "worker-src 'self' blob:",
               process.env.NODE_ENV === 'production'
-                ? "frame-ancestors 'self' chrome-extension:*"
-                : "frame-ancestors 'self' http://localhost:* http://127.0.0.1:* chrome-extension:*",
+                ? "frame-ancestors 'self' chrome-extension:"
+                : "frame-ancestors 'self' http://localhost:* http://127.0.0.1:* chrome-extension: chrome-extension://*",
               "base-uri 'self'",
               "form-action 'self'",
               "object-src 'none'"

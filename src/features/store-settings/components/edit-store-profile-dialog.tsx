@@ -277,7 +277,7 @@ function EditStoreProfileDialogBody({ settings, onOpenChange }: EditStoreProfile
   const busy = updateMutation.isPending;
 
   return (
-    <DialogContent className='max-h-[92vh] w-full overflow-y-auto sm:max-w-2xl'>
+    <DialogContent className='max-h-[92vh] w-full overflow-y-auto sm:max-w-2xl no-scrollbar'>
       <DialogHeader>
         <DialogTitle>{t('storeSettings.editProfileTitle')}</DialogTitle>
         <DialogDescription>{t('storeSettings.editProfileDescription')}</DialogDescription>

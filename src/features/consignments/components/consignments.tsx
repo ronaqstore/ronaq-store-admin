@@ -5,6 +5,7 @@ import { FloatingActionButton } from '@/components/common/floating-action-button
 import { TablePageBody } from '@/components/layout/table-page-body';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useT } from '@/i18n/use-t';
 import type { ConsignmentDTO } from '@/lib/api/types';
 import type {
@@ -18,7 +19,11 @@ import { ConsignmentSlipDialog } from './consignment-slip-dialog';
 export function ConsignmentsHeaderAction({ className, onAdd }: ConsignmentsHeaderActionProps) {
   const t = useT();
   return (
-    <Button type='button' className={className ?? 'h-8'} onClick={onAdd}>
+    <Button
+      type='button'
+      className={cn('h-8 gap-1.5 text-xs w-full sm:w-auto', className)}
+      onClick={onAdd}
+    >
       <Icons.add className='me-2 h-4 w-4' />
       {t('consignments.newConsignment')}
     </Button>

@@ -6,7 +6,7 @@ const { Reporter } = require('./lib/reporter.cjs');
 
 const r = new Reporter('Locale Message Sync Audit', { emoji: '🌐' });
 const messagesDir = path.join(__dirname, '../../messages');
-const locales = ['en', 'ur', 'ps'];
+const locales = ['en', 'ur', 'ps', 'roman'];
 
 function flat(obj, prefix = '', out = {}) {
   for (const [k, v] of Object.entries(obj)) {
@@ -55,5 +55,5 @@ if (maps.en) {
 }
 
 r.finish({
-  fixTip: 'Keep messages/en.json, ur.json, and ps.json in sync for every leaf key.'
+  fixTip: 'Keep messages/en.json, ur.json, ps.json, and roman.json in sync for every leaf key.'
 });
