@@ -6,8 +6,7 @@ import {
   StatusBadge,
   type DetailAction,
   type DetailConfig,
-  type MobileItemConfig,
-  type QuickFilterChip
+  type MobileItemConfig
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { formatPkr } from '@/lib/dukaan/numbers';
@@ -399,26 +398,4 @@ export function buildPartyDetail<T extends BasePartyRecord>(
     ],
     actions
   };
-}
-
-export function getActiveStatusQuickFilters(
-  allLabel: string,
-  activeLabel: string,
-  inactiveLabel: string
-): QuickFilterChip[] {
-  return [
-    { id: 'all', label: allLabel },
-    {
-      id: 'active',
-      label: activeLabel,
-      columnId: 'isActive',
-      value: ['true']
-    },
-    {
-      id: 'inactive',
-      label: inactiveLabel,
-      columnId: 'isActive',
-      value: ['false']
-    }
-  ];
 }

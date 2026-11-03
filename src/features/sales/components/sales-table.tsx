@@ -10,8 +10,7 @@ import {
   ResponsiveDataTable,
   StatusBadge,
   type DetailConfig,
-  type MobileItemConfig,
-  type QuickFilterChip
+  type MobileItemConfig
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import {
@@ -277,34 +276,6 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
     }
   });
 
-  const salesQuickFilters: QuickFilterChip[] = [
-    { id: 'all', label: t('table.all') },
-    {
-      id: 'udhar',
-      label: t('status.udhar'),
-      columnId: 'status',
-      value: ['UDHAR']
-    },
-    {
-      id: 'partial',
-      label: t('status.partial'),
-      columnId: 'status',
-      value: ['PARTIAL']
-    },
-    {
-      id: 'paid',
-      label: t('status.paid'),
-      columnId: 'status',
-      value: ['PAID']
-    },
-    {
-      id: 'cancelled',
-      label: t('status.cancelled'),
-      columnId: 'status',
-      value: ['CANCELLED']
-    }
-  ];
-
   const saleDetail: DetailConfig<SaleDTO> = useMemo(
     () => ({
       mode: 'sheet',
@@ -414,7 +385,6 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
         toolbarAction={toolbarAction}
         mobileItem={saleMobileItem}
         detail={saleDetail}
-        quickFilters={salesQuickFilters}
         isLoading={isFetching}
       />
     </>

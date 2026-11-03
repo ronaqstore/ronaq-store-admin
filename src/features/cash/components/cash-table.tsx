@@ -334,7 +334,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
       <Button
         type='button'
         size='sm'
-        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3 hidden lg:inline-flex'
         onClick={() => setInvestmentOpen(true)}
         title={hasOpeningCash ? t('dukaan.cash.openingAlreadySetHint') : undefined}
       >
@@ -345,7 +345,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
         type='button'
         size='sm'
         variant='outline'
-        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3 hidden lg:inline-flex'
         onClick={() => setWithdrawalOpen(true)}
         title={hasOpeningCash ? t('dukaan.cash.openingAlreadySetHint') : undefined}
       >
@@ -356,7 +356,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
         type='button'
         size='sm'
         variant='outline'
-        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3 hidden lg:inline-flex'
         onClick={() => setReconcileOpen(true)}
       >
         <Icons.adjustments className='h-3.5 w-3.5 shrink-0' />
@@ -367,7 +367,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
           type='button'
           size='sm'
           variant='outline'
-          className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3'
+          className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3 hidden lg:inline-flex'
           onClick={() => setOpeningCashOpen(true)}
         >
           <Icons.wallet className='h-3.5 w-3.5 shrink-0' />

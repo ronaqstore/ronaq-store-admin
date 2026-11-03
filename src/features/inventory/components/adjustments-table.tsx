@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button';
 import {
   ResponsiveDataTable,
   type DetailConfig,
-  type MobileItemConfig,
-  type QuickFilterChip
+  type MobileItemConfig
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
@@ -289,62 +288,6 @@ export function AdjustmentsTable({ toolbarAction, mode = 'adjustments' }: Adjust
     ]
   };
 
-  const quickFilters: QuickFilterChip[] = isMovements
-    ? [
-        { id: 'all', label: t('table.all') },
-        {
-          id: 'purchase',
-          label: 'Purchase',
-          columnId: 'type',
-          value: ['PURCHASE']
-        },
-        {
-          id: 'sale',
-          label: 'Sale',
-          columnId: 'type',
-          value: ['SALE']
-        },
-        {
-          id: 'adjustment',
-          label: 'Adjustment',
-          columnId: 'type',
-          value: ['ADJUSTMENT']
-        },
-        {
-          id: 'damaged',
-          label: 'Damaged',
-          columnId: 'type',
-          value: ['DAMAGED']
-        },
-        {
-          id: 'lost',
-          label: 'Lost',
-          columnId: 'type',
-          value: ['LOST']
-        }
-      ]
-    : [
-        { id: 'all', label: t('table.all') },
-        {
-          id: 'adjustment',
-          label: 'Adjustment',
-          columnId: 'type',
-          value: ['ADJUSTMENT']
-        },
-        {
-          id: 'damaged',
-          label: 'Damaged',
-          columnId: 'type',
-          value: ['DAMAGED']
-        },
-        {
-          id: 'lost',
-          label: 'Lost',
-          columnId: 'type',
-          value: ['LOST']
-        }
-      ];
-
   const { table } = useDataTable({
     data: items,
     columns,
@@ -379,7 +322,6 @@ export function AdjustmentsTable({ toolbarAction, mode = 'adjustments' }: Adjust
         toolbarAction={resolvedToolbar}
         mobileItem={mobileItem}
         detail={detail}
-        quickFilters={quickFilters}
         isLoading={isFetching}
       />
 

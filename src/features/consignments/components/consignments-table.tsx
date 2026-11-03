@@ -4,11 +4,7 @@ import { useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { parseAsString, useQueryState } from 'nuqs';
-import {
-  ResponsiveDataTable,
-  type MobileItemConfig,
-  type QuickFilterChip
-} from '@/components/data-table';
+import { ResponsiveDataTable, type MobileItemConfig } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
 import { Icons } from '@/components/icons';
@@ -24,7 +20,6 @@ import type {
 } from '@/types/consignments';
 import { consignmentsQueryOptions } from '../api/queries';
 import { ConsignmentStatusBadge } from './consignment-status-badge';
-import { getConsignmentQuickFilters } from './consignments-table-filters';
 import { ConsignmentIntakeDialog } from './consignment-intake-dialog';
 import { ReturnConsignmentDialog } from './return-consignment-dialog';
 import { SettleConsignmentDialog } from './settle-consignment-dialog';
@@ -128,8 +123,6 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
-
-  const quickFilters: QuickFilterChip[] = useMemo(() => getConsignmentQuickFilters(t), [t]);
 
   const columns: ColumnDef<ConsignmentDTO>[] = useMemo(
     () => [
@@ -280,7 +273,6 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
         table={table}
         mobileItem={mobileItem}
         toolbarAction={toolbarAction}
-        quickFilters={quickFilters}
         isLoading={isFetching}
       />
 

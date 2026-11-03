@@ -302,7 +302,7 @@ export function SupplierPaymentsTable({ toolbarAction }: SupplierPaymentsTablePr
       <Button
         type='button'
         size='sm'
-        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs w-full sm:w-auto'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs hidden lg:inline-flex'
         onClick={() => setRecordOpen(true)}
       >
         <Icons.add className='h-3.5 w-3.5 shrink-0' />

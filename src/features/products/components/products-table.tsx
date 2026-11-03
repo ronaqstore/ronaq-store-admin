@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { Badge } from '@/components/ui/badge';
 import { PreviewableImage } from '@/components/media/previewable-image';
-import { ResponsiveDataTable, type QuickFilterChip } from '@/components/data-table';
+import { ResponsiveDataTable } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
 import { Icons } from '@/components/icons';
@@ -27,7 +27,6 @@ import {
   parseBooleanFacet,
   useDukaanListParams
 } from '@/components/data-table/list-params';
-import { getActiveStatusQuickFilters } from '@/components/common/party-table-helpers';
 import type { ProductsTableProps } from '@/types/products';
 import type { EntityStatusConfirm } from '@/types/common';
 import { TruncateText } from '@/components/common/truncate-text';
@@ -397,12 +396,6 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
     }
   });
 
-  const productQuickFilters: QuickFilterChip[] = getActiveStatusQuickFilters(
-    t('table.all'),
-    t('status.active'),
-    t('status.inactive')
-  );
-
   return (
     <>
       <AlertModal
@@ -428,7 +421,6 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
         toolbarAction={toolbarAction}
         mobileItem={productMobileItem}
         detail={productDetail}
-        quickFilters={productQuickFilters}
         isLoading={isFetching}
       />
       <SaleCreateDialog

@@ -12,8 +12,7 @@ import {
   ResponsiveDataTable,
   StatusBadge,
   type DetailConfig,
-  type MobileItemConfig,
-  type QuickFilterChip
+  type MobileItemConfig
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
@@ -392,28 +391,6 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
     ]
   };
 
-  const inventoryQuickFilters: QuickFilterChip[] = [
-    { id: 'all', label: t('table.all') },
-    {
-      id: 'low',
-      label: t('status.lowStock'),
-      columnId: 'lowStock',
-      value: ['true']
-    },
-    {
-      id: 'serialized',
-      label: 'Serialized',
-      columnId: 'trackingType',
-      value: ['SERIALIZED']
-    },
-    {
-      id: 'quantity',
-      label: 'Quantity',
-      columnId: 'trackingType',
-      value: ['QUANTITY']
-    }
-  ];
-
   const { table } = useDataTable({
     data: items,
     columns,
@@ -460,7 +437,6 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
         }
         mobileItem={inventoryMobileItem}
         detail={inventoryDetail}
-        quickFilters={inventoryQuickFilters}
         isLoading={isFetching}
       />
 
