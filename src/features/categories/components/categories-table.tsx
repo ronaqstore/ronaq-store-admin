@@ -14,7 +14,8 @@ import type { CategoryDTO } from '@/lib/api/types';
 import type { CategoryCellActionProps, CategoriesTableProps } from '@/types';
 import {
   createPartyNameColumn,
-  createPartyIsActiveColumn
+  createPartyIsActiveColumn,
+  getActiveStatusQuickFilters
 } from '@/components/common/party-table-helpers';
 import {
   buildSimpleEntityMobileItem,
@@ -22,6 +23,7 @@ import {
 } from '@/components/common/entity-builders';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
+  parseActiveStatusFacet,
   parseBooleanFacet,
   useDukaanListParams
 } from '@/components/data-table/list-params';
@@ -37,9 +39,11 @@ function CategoryCellAction({ data }: CategoryCellActionProps) {
       isActive={data.isActive}
       deactivateTitle={t('dukaan.category.deactivateTitle')}
       deactivateDescription={t('dukaan.category.deactivateDescription')}
+      deactivateConfirmLabel={t('common.delete')}
       deactivateSuccess={t('dukaan.category.deactivated')}
       activateTitle={t('dukaan.category.activateTitle')}
       activateDescription={t('dukaan.category.activateDescription')}
+      activateConfirmLabel={t('common.activate')}
       activateSuccess={t('dukaan.category.activated')}
       onDeactivate={deactivateCategory}
       onActivate={reactivateCategory}
@@ -72,6 +76,7 @@ const categoryMobileItem = buildSimpleEntityMobileItem<CategoryDTO>(Icons.folder
 const categoryDetail = buildSimpleEntityDetail<CategoryDTO>(t('table.col.category'));
 
 export function CategoriesTable({ toolbarAction }: CategoriesTableProps) {
+  const t = useT();
   const sortableColumnIds = ['name'];
   const { params, filters, sortOrder } = useDukaanListParams(
     sortableColumnIds,
@@ -81,8 +86,14 @@ export function CategoriesTable({ toolbarAction }: CategoriesTableProps) {
     'asc'
   );
   const [isActiveParam] = useQueryState('isActive', parseAsString);
-  const isActiveFilter = parseBooleanFacet(
-    (filters as Record<string, unknown>).isActive ?? isActiveParam
+  const isActiveFilter = parseActiveStatusFacet(
+    (filters as Record<string, unknown>).isActive ?? isActiveParam,
+    true
+  );
+  const categoryQuickFilters = getActiveStatusQuickFilters(
+    t('table.all'),
+    t('status.active'),
+    t('status.inactive')
   );
   const { data, isFetching } = useQuery(
     categoriesQueryOptions({
@@ -115,6 +126,7 @@ export function CategoriesTable({ toolbarAction }: CategoriesTableProps) {
       toolbarAction={toolbarAction}
       mobileItem={categoryMobileItem}
       detail={categoryDetail}
+      quickFilters={categoryQuickFilters}
       isLoading={isFetching}
     />
   );

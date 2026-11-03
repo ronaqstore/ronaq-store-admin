@@ -19,6 +19,14 @@ import type {
   CameraDeviceOption,
   TorchConstraint
 } from '@/types/barcode';
+import {
+  cropVideoToReticle,
+  recognizeNumbersFromCanvas,
+  type OcrCandidate
+} from '@/lib/barcode/ocr-number-extractor';
+import { cn } from '@/lib/utils';
+
+export type { CameraBarcodeScannerDialogProps };
 
 function playScanBeep() {
   if (typeof window === 'undefined') return;
@@ -54,6 +62,7 @@ export function CameraBarcodeScannerDialog({
   const elementId = `scanner-viewfinder-${containerId}`;
 
   const scannerRef = React.useRef<Html5Qrcode | null>(null);
+  const [scanType, setScanType] = React.useState<'barcode' | 'ocr'>('barcode');
   const [cameras, setCameras] = React.useState<CameraDeviceOption[]>([]);
   const [selectedCameraId, setSelectedCameraId] = React.useState<string | null>(null);
   const [isTorchOn, setIsTorchOn] = React.useState(false);
@@ -61,6 +70,8 @@ export function CameraBarcodeScannerDialog({
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [warningMessage, setWarningMessage] = React.useState<string | null>(null);
   const [isInitializing, setIsInitializing] = React.useState(false);
+  const [isOcrScanning, setIsOcrScanning] = React.useState(false);
+  const [ocrCandidates, setOcrCandidates] = React.useState<OcrCandidate[]>([]);
 
   const effTitle =
     title ?? (mode === 'barcode' ? t('scanner.scanBarcodeTitle') : t('scanner.scanImeiTitle'));
@@ -83,6 +94,48 @@ export function CameraBarcodeScannerDialog({
     }
   }, []);
 
+  const handleScanSuccess = React.useCallback(
+    (decodedText: string) => {
+      // Ignore barcode frames while the user is deliberately using OCR mode
+      if (scanType === 'ocr') {
+        return;
+      }
+
+      if (mode === 'barcode') {
+        const result = sanitizeBarcode(decodedText);
+        if (result.success) {
+          playScanBeep();
+          if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+            navigator.vibrate(100);
+          }
+          void stopScanner();
+          onScan(result.barcode);
+          onOpenChange(false);
+        } else {
+          setWarningMessage(t('scanner.invalidBarcodeScanned'));
+        }
+      } else {
+        const result = sanitizeImei(decodedText);
+        if (result.success) {
+          playScanBeep();
+          if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+            navigator.vibrate(100);
+          }
+          void stopScanner();
+          onScan(result.imei);
+          onOpenChange(false);
+        } else {
+          setWarningMessage(
+            t('scanner.invalidImeiScanned', {
+              scanned: decodedText.length > 18 ? `${decodedText.slice(0, 18)}...` : decodedText
+            })
+          );
+        }
+      }
+    },
+    [mode, scanType, onScan, onOpenChange, stopScanner, t]
+  );
+
   const startScanner = React.useCallback(
     async (cameraId?: string) => {
       await stopScanner();
@@ -93,6 +146,7 @@ export function CameraBarcodeScannerDialog({
       setIsInitializing(true);
       setErrorMessage(null);
       setWarningMessage(null);
+      setOcrCandidates([]);
 
       try {
         const scanner = new Html5Qrcode(elementId, {
@@ -131,38 +185,7 @@ export function CameraBarcodeScannerDialog({
             }
           },
           (decodedText) => {
-            if (mode === 'barcode') {
-              const result = sanitizeBarcode(decodedText);
-              if (result.success) {
-                playScanBeep();
-                if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-                  navigator.vibrate(100);
-                }
-                void stopScanner();
-                onScan(result.barcode);
-                onOpenChange(false);
-              } else {
-                setWarningMessage(t('scanner.invalidBarcodeScanned'));
-              }
-            } else {
-              const result = sanitizeImei(decodedText);
-              if (result.success) {
-                playScanBeep();
-                if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-                  navigator.vibrate(100);
-                }
-                void stopScanner();
-                onScan(result.imei);
-                onOpenChange(false);
-              } else {
-                setWarningMessage(
-                  t('scanner.invalidImeiScanned', {
-                    scanned:
-                      decodedText.length > 18 ? `${decodedText.slice(0, 18)}...` : decodedText
-                  })
-                );
-              }
-            }
+            handleScanSuccess(decodedText);
           },
           () => undefined
         );
@@ -186,7 +209,7 @@ export function CameraBarcodeScannerDialog({
         setIsInitializing(false);
       }
     },
-    [elementId, stopScanner, onScan, onOpenChange, t, mode]
+    [elementId, stopScanner, handleScanSuccess, t]
   );
 
   React.useEffect(() => {
@@ -229,6 +252,58 @@ export function CameraBarcodeScannerDialog({
     }
   };
 
+  const handleSelectCandidate = (candidate: OcrCandidate) => {
+    playScanBeep();
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(100);
+    }
+    void stopScanner();
+    onScan(candidate.imei);
+    onOpenChange(false);
+  };
+
+  const handleCaptureOcr = async () => {
+    const container = document.getElementById(elementId);
+    const video = container?.querySelector('video');
+    if (!video) {
+      setWarningMessage(t('scanner.scanFailed'));
+      return;
+    }
+
+    setIsOcrScanning(true);
+    setWarningMessage(null);
+
+    try {
+      // Crop central 80% width by 50% height
+      const canvas = cropVideoToReticle(video, {
+        xRatio: 0.1,
+        yRatio: 0.25,
+        widthRatio: 0.8,
+        heightRatio: 0.5
+      });
+
+      const found = await recognizeNumbersFromCanvas(canvas);
+
+      if (found.length === 0) {
+        setOcrCandidates([]);
+        setWarningMessage(t('scanner.ocrNoNumbersFound'));
+      } else if (found.length === 1 && found[0] && found[0].isLuhnValid) {
+        // Exactly one valid candidate -> Instant auto-fill!
+        handleSelectCandidate(found[0]);
+      } else {
+        // Either multiple candidates or check digit warning
+        setOcrCandidates(found);
+        if (found.some((c) => !c.isLuhnValid)) {
+          setWarningMessage(t('scanner.ocrChecksumWarning'));
+        }
+      }
+    } catch {
+      setWarningMessage(t('scanner.scanFailed'));
+    } finally {
+      setIsOcrScanning(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='max-w-md p-4 sm:p-6'>
@@ -242,11 +317,61 @@ export function CameraBarcodeScannerDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {/* Mode switcher tab (available in IMEI scan mode) */}
+        {mode === 'imei' && (
+          <div className='mt-2 flex rounded-lg bg-muted p-0.5 text-xs font-medium'>
+            <button
+              type='button'
+              onClick={() => {
+                setScanType('barcode');
+                setWarningMessage(null);
+                setOcrCandidates([]);
+              }}
+              className={cn(
+                'flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 transition-colors',
+                scanType === 'barcode'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <Icons.barcode className='h-3.5 w-3.5' />
+              <span>{t('scanner.modeBarcode')}</span>
+            </button>
+            <button
+              type='button'
+              onClick={() => {
+                setScanType('ocr');
+                setWarningMessage(null);
+              }}
+              className={cn(
+                'flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 transition-colors',
+                scanType === 'ocr'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <Icons.text className='h-3.5 w-3.5' />
+              <span>{t('scanner.modeOcr')}</span>
+            </button>
+          </div>
+        )}
+
         <div className='relative mt-3 flex flex-col items-center justify-center overflow-hidden rounded-xl bg-black/90 p-1'>
           <div
             id={elementId}
             className='h-[260px] w-full overflow-hidden rounded-lg [&_video]:h-full [&_video]:w-full [&_video]:object-cover'
           />
+
+          {/* OCR Guide Overlay */}
+          {scanType === 'ocr' && !isInitializing && !errorMessage && (
+            <div className='pointer-events-none absolute inset-0 flex flex-col items-center justify-center p-4'>
+              <div className='relative h-28 w-4/5 rounded-lg border-2 border-dashed border-primary/80 bg-primary/5 shadow-sm'>
+                <div className='absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-background/90 px-2.5 py-0.5 text-[10px] font-medium text-foreground backdrop-blur-sm'>
+                  {t('scanner.ocrGuide')}
+                </div>
+              </div>
+            </div>
+          )}
 
           {isInitializing && (
             <div className='absolute inset-0 flex flex-col items-center justify-center bg-background/80 text-foreground'>
@@ -271,6 +396,7 @@ export function CameraBarcodeScannerDialog({
             </div>
           )}
 
+          {/* Controls Bar */}
           <div className='absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 px-3'>
             {cameras.length > 1 && (
               <Button
@@ -282,6 +408,25 @@ export function CameraBarcodeScannerDialog({
               >
                 <Icons.cameraRotate className='h-3.5 w-3.5' />
                 <span>{t('scanner.switchCamera')}</span>
+              </Button>
+            )}
+
+            {scanType === 'ocr' && (
+              <Button
+                type='button'
+                size='sm'
+                disabled={isOcrScanning || isInitializing}
+                className='h-8 gap-1.5 rounded-full px-4 text-xs font-semibold shadow-lg'
+                onClick={() => void handleCaptureOcr()}
+              >
+                {isOcrScanning ? (
+                  <Icons.spinner className='h-3.5 w-3.5 animate-spin' />
+                ) : (
+                  <Icons.camera className='h-3.5 w-3.5' />
+                )}
+                <span>
+                  {isOcrScanning ? t('scanner.ocrCapturing') : t('scanner.ocrCaptureBtn')}
+                </span>
               </Button>
             )}
 
@@ -303,6 +448,37 @@ export function CameraBarcodeScannerDialog({
             )}
           </div>
         </div>
+
+        {/* OCR Candidate Chips */}
+        {ocrCandidates.length > 0 && (
+          <div className='mt-3 rounded-lg border bg-muted/40 p-3'>
+            <p className='text-xs font-medium text-foreground'>
+              {t('scanner.ocrMultipleFound', { count: ocrCandidates.length })}
+            </p>
+            <div className='mt-2 flex flex-wrap gap-2'>
+              {ocrCandidates.map((candidate) => (
+                <Button
+                  key={candidate.imei}
+                  type='button'
+                  size='sm'
+                  variant={candidate.isLuhnValid ? 'default' : 'outline'}
+                  className='h-8 gap-1.5 text-xs font-mono font-medium'
+                  onClick={() => handleSelectCandidate(candidate)}
+                >
+                  {candidate.isLuhnValid ? (
+                    <Icons.check className='h-3.5 w-3.5 text-emerald-400' />
+                  ) : (
+                    <Icons.warning className='h-3.5 w-3.5 text-amber-500' />
+                  )}
+                  <span>
+                    {candidate.label ? `${candidate.label}: ` : ''}
+                    {candidate.imei}
+                  </span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {warningMessage && (
           <div className='mt-2 rounded-md bg-amber-500/10 p-2.5 text-xs text-amber-600 dark:text-amber-400'>

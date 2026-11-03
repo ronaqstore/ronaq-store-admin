@@ -558,6 +558,7 @@
     },
     "product": {
       "sell": "Sale karein",
+      "consignment": "Amanat",
       "quickSell": "Fori Sale",
       "productCreated": "Product kamyabi se banaya gaya",
       "productUpdated": "Product kamyabi se up date huwa",
@@ -1509,6 +1510,7 @@
     "phonePlaceholder": "03XXXXXXXXX"
   },
   "search": {
+    "consignments": "Amanat number, IMEI ya malik talash karein...",
     "suppliers": "Search...",
     "customers": "Search...",
     "purchases": "Search...",
@@ -2921,6 +2923,7 @@
     "intakeDate": "Wasooli ki tareekh",
     "newConsignment": "Amanat par naya phone",
     "newConsignmentDesc": "Customer ka mobile phone baraye Sale amanat ke taur par Darj karein",
+    "serializedOnly": "Amanat par indraaj sirf mobile phones (IMEI) ke liye dastiyab hai.",
     "sectionConsignor": "1. phone ke malik ki tafseelat",
     "sectionDevice": "2. mobile phone aur aalay ki tafseelat",
     "sectionTerms": "3. mali terms aur agreement",
@@ -2957,6 +2960,7 @@
     "statusCancelled": "Cancel shuda",
     "printIntakeSlip": "Amanat receipt Print karein",
     "printSettlementSlip": "Payment voucher Print karein",
+    "whatsappSlip": "WhatsApp par bhejein",
     "returnAction": "Malik ko wapas karein",
     "returnTitle": "Phone malik ko wapas karein",
     "returnDesc": "Baghair Sale kiye phone malik ke hawalay karein. yeh phone inventory se khatam ho jaye ga.",
@@ -3032,6 +3036,14 @@
     "copyReceipt": "Raseed copy karein",
     "receiptCopied": "Raseed clipboard par copy ho gayi.",
     "sendOnWhatsApp": "WhatsApp par bhejein",
-    "phoneRequiredForWhatsApp": "Barah-e-karam durust phone number darj karein."
+    "phoneRequiredForWhatsApp": "Barah-e-karam durust phone number darj karein.",
+    "modeBarcode": "Barcode / QR",
+    "modeOcr": "Numbers parhein (OCR)",
+    "ocrGuide": "Box ke andar 15 digits ka number layein",
+    "ocrCapturing": "Numbers parhe ja rahe hain...",
+    "ocrCaptureBtn": "Numbers parhein",
+    "ocrNoNumbersFound": "Koi 15 digits ka number nahi mila. Barah-e-karam camera qareeb karein.",
+    "ocrMultipleFound": "{count} numbers mile hain. Select karne ke liye tap karein:",
+    "ocrChecksumWarning": "Number parhte waqt handwriting ki ghalti ho sakti hai. Barah-e-karam tasdeeq karein."
   }
 }

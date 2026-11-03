@@ -41,8 +41,10 @@ export function QuickFilterChips<TData>({ table, chips, className }: QuickFilter
 }
 
 function resolveActiveChip<TData>(table: Table<TData>, chips: QuickFilterChip[]): string {
+  const defaultChip = chips.find((c) => c.isDefault);
+
   for (const chip of chips) {
-    if (chip.id === 'all' || chip.value == null) continue;
+    if ((chip.id === 'all' && chip.value == null) || chip.value == null) continue;
     if (!chip.columnId) continue;
     const current = table.getColumn(chip.columnId)?.getFilterValue();
     if (Array.isArray(chip.value) && Array.isArray(current)) {
@@ -53,13 +55,30 @@ function resolveActiveChip<TData>(table: Table<TData>, chips: QuickFilterChip[])
       return chip.id;
     }
   }
+
+  if (defaultChip) {
+    const current = defaultChip.columnId
+      ? table.getColumn(defaultChip.columnId)?.getFilterValue()
+      : undefined;
+    if (current == null || (Array.isArray(current) && current.length === 0)) {
+      return defaultChip.id;
+    }
+  }
+
   return chips.find((c) => c.id === 'all')?.id ?? chips[0]?.id ?? 'all';
 }
 
 function applyChip<TData>(table: Table<TData>, chips: QuickFilterChip[], chip: QuickFilterChip) {
   const columnIds = new Set(chips.map((c) => c.columnId).filter((id): id is string => Boolean(id)));
 
-  if (chip.id === 'all' || chip.value == null) {
+  if (chip.isDefault) {
+    for (const id of columnIds) {
+      table.getColumn(id)?.setFilterValue(undefined);
+    }
+    return;
+  }
+
+  if (chip.id === 'all' && chip.value == null) {
     for (const id of columnIds) {
       table.getColumn(id)?.setFilterValue(undefined);
     }

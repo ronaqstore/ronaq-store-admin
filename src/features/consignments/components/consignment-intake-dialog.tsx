@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -25,7 +25,7 @@ import { Icons } from '@/components/icons';
 import { FormEntitySelect } from '@/components/forms/form-entity-select';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
-import { createClientRequestId, toPaisa } from '@/lib/dukaan/numbers';
+import { createClientRequestId, fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
@@ -38,7 +38,7 @@ import { ConsignmentIntakeConsignorSection } from './consignment-intake-consigno
 import { ImeiCameraScanButton } from '@/components/barcode';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { CONSIGNMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
-import type { ConsignmentDTO, CustomerDTO } from '@/lib/api/types';
+import type { ConsignmentDTO, CustomerDTO, ProductDTO } from '@/lib/api/types';
 import type { ConsignmentIntakeDialogProps } from '@/types/consignments';
 import type { ProductPickerItem } from '@/types/picker';
 import { createConsignmentMutation } from '../api/mutations';
@@ -47,7 +47,8 @@ import { createConsignmentFormSchema } from '../schemas/consignment-schema';
 export function ConsignmentIntakeDialog({
   open,
   onOpenChange,
-  onSuccess
+  onSuccess,
+  initialProduct
 }: ConsignmentIntakeDialogProps) {
   const t = useT();
   const qc = useQueryClient();
@@ -112,6 +113,21 @@ export function ConsignmentIntakeDialog({
     setNotes('');
     setErrors({});
   };
+
+  useEffect(() => {
+    if (open) {
+      if (initialProduct) {
+        setProductId(initialProduct.id);
+        setProductLabel(initialProduct.name);
+        setBrandName(initialProduct.brandName ?? null);
+        if (initialProduct.defaultSellingPrice) {
+          setTargetSellingPriceRupees(String(fromPaisa(initialProduct.defaultSellingPrice)));
+        }
+      }
+    } else {
+      resetForm();
+    }
+  }, [open, initialProduct]);
 
   const handleCustomerSelect = (id: string, customer?: CustomerDTO | null) => {
     setCustomerId(id);
@@ -253,7 +269,11 @@ export function ConsignmentIntakeDialog({
                         errors={errors.productId ? [{ message: errors.productId }] : []}
                         queryKey={['products', 'serialized-picker']}
                         fetchPage={(filters) =>
-                          listProducts({ ...filters, trackingType: 'SERIALIZED' }).then((res) => ({
+                          listProducts({
+                            ...filters,
+                            trackingType: 'SERIALIZED',
+                            isActive: true
+                          }).then((res) => ({
                             items: res.items.map(mapProductToPicker),
                             total: res.total,
                             page: res.page,

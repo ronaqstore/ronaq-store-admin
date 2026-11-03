@@ -41,11 +41,20 @@ export function DataTableFacetedFilter<TData, TValue>({
   const [open, setOpen] = React.useState(false);
   const isSheet = presentation === 'sheet';
 
+  const defaultValues = React.useMemo(() => {
+    const raw = column?.columnDef.meta?.defaultFilterValue;
+    if (raw == null) return [];
+    return Array.isArray(raw) ? raw : [raw];
+  }, [column?.columnDef.meta?.defaultFilterValue]);
+
   const columnFilterValue = column?.getFilterValue();
-  const selectedValues = React.useMemo(
-    () => new Set(Array.isArray(columnFilterValue) ? columnFilterValue : []),
-    [columnFilterValue]
-  );
+  const selectedValues = React.useMemo(() => {
+    if (columnFilterValue !== undefined && columnFilterValue !== null) {
+      const arr = Array.isArray(columnFilterValue) ? columnFilterValue : [columnFilterValue];
+      if (arr.length > 0) return new Set(arr);
+    }
+    return new Set(defaultValues);
+  }, [columnFilterValue, defaultValues]);
 
   const onItemSelect = React.useCallback(
     (option: Option, isSelected: boolean) => {
@@ -61,11 +70,12 @@ export function DataTableFacetedFilter<TData, TValue>({
         const filterValues = Array.from(newSelectedValues);
         column.setFilterValue(filterValues.length ? filterValues : undefined);
       } else {
-        column.setFilterValue(isSelected ? undefined : [option.value]);
+        const isDefaultOption = defaultValues.includes(option.value);
+        column.setFilterValue(isDefaultOption && isSelected ? undefined : [option.value]);
         setOpen(false);
       }
     },
-    [column, multiple, selectedValues]
+    [column, defaultValues, multiple, selectedValues]
   );
 
   const onReset = React.useCallback(

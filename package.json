@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -p 3006",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --import ./scripts/code/test-loader.mjs --test src/components/data-table/resolve-mobile-item.test.ts src/lib/dashboard/formatters.test.ts src/lib/products/product-form-defaults.test.ts src/lib/products/product-specs.test.ts src/lib/party/party-payload.test.ts src/lib/subscription.test.ts src/lib/form-number.test.ts src/features/platform-admin/api/mutations.test.ts src/features/sales/schemas/sale-schema.test.ts src/features/consignments/schemas/consignment-schema.test.ts src/features/sales/helpers/quick-sell-helpers.test.ts src/features/purchases/helpers/quick-purchase-helpers.test.ts src/lib/barcode/imei-sanitizer.test.ts src/features/sales/helpers/whatsapp-receipt-formatter.test.ts",
+    "test": "node --experimental-strip-types --import ./scripts/code/test-loader.mjs --test src/components/data-table/resolve-mobile-item.test.ts src/lib/dashboard/formatters.test.ts src/lib/products/product-form-defaults.test.ts src/lib/products/product-specs.test.ts src/lib/party/party-payload.test.ts src/lib/subscription.test.ts src/lib/form-number.test.ts src/features/platform-admin/api/mutations.test.ts src/features/sales/schemas/sale-schema.test.ts src/features/consignments/schemas/consignment-schema.test.ts src/features/sales/helpers/quick-sell-helpers.test.ts src/features/purchases/helpers/quick-purchase-helpers.test.ts src/lib/barcode/imei-sanitizer.test.ts src/features/sales/helpers/whatsapp-receipt-formatter.test.ts src/lib/barcode/ocr-number-extractor.test.ts",
     "check": "node scripts/run-checks.mjs",
     "knip": "node scripts/run-knip.mjs",
     "check:hydration": "node scripts/code/check-hydration.cjs",
@@ -74,6 +74,7 @@
     "tailwind-merge": "^3.7.0",
     "tailwindcss": "^4.3.3",
     "tailwindcss-animate": "^1.0.7",
+    "tesseract.js": "^7.0.0",
     "typescript": "7.0.2",
     "zod": "^4.6.5",
     "zustand": "^5.0.15"

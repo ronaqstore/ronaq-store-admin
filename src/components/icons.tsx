@@ -7,6 +7,7 @@ import {
   IconBell,
   IconBan,
   IconBold,
+  IconBarcode,
   IconBolt,
   IconBoltOff,
   IconBox,
@@ -36,6 +37,7 @@ import {
   IconClock,
   IconCode,
   IconCommand,
+  IconCopy,
   IconCreditCard,
   IconDeviceLaptop,
   IconDots,
@@ -236,6 +238,7 @@ export const Icons = {
   workspace: IconFolder,
   forms: IconClipboardText,
   clipboard: IconClipboardText,
+  copy: IconCopy,
   history: IconHistory,
   slash: IconSlash,
   calendar: IconCalendar,
@@ -245,6 +248,7 @@ export const Icons = {
   camera: IconCamera,
   cameraRotate: IconCameraRotate,
   scan: IconScan,
+  barcode: IconBarcode,
   flash: IconBolt,
   flashOff: IconBoltOff
 };

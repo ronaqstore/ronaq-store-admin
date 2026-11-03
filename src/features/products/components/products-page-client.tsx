@@ -93,7 +93,7 @@ export function ProductsPageClient() {
       <CameraBarcodeScannerDialog
         open={scanSellOpen}
         onOpenChange={setScanSellOpen}
-        mode='barcode'
+        mode='imei'
         title={t('scanner.scanToSellTitle')}
         description={t('scanner.scanToSellDesc')}
         onScan={(code) => void handleScan(code)}

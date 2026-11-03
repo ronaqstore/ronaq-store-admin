@@ -1,5 +1,6 @@
 'use client';
 
+import { toast } from 'sonner';
 import { PreviewableImage } from '@/components/media/previewable-image';
 import { SimpleEntityCellAction } from '@/components/common/simple-entity-cell-action';
 import { Icons } from '@/components/icons';
@@ -27,7 +28,12 @@ export function productCoverUrl(row: ProductDTO): string | null {
   return row.imageUrl || row.imageUrls?.[0] || null;
 }
 
-export function ProductCellAction({ data, onSell, onPurchase }: ProductCellActionProps) {
+export function ProductCellAction({
+  data,
+  onSell,
+  onPurchase,
+  onConsignment
+}: ProductCellActionProps) {
   const t = useT();
 
   const extraActions = data.isActive
@@ -51,6 +57,22 @@ export function ProductCellAction({ data, onSell, onPurchase }: ProductCellActio
                 onClick: () => onPurchase(data)
               }
             ]
+          : []),
+        ...(onConsignment
+          ? [
+              {
+                label: t('dukaan.product.consignment'),
+                icon: Icons.phone,
+                className: 'text-amber-600 focus:text-amber-700 dark:text-amber-400',
+                onClick: () => {
+                  if (data.trackingType === 'QUANTITY') {
+                    toast.error(t('consignments.serializedOnly'));
+                    return;
+                  }
+                  onConsignment(data);
+                }
+              }
+            ]
           : [])
       ]
     : undefined;
@@ -62,9 +84,11 @@ export function ProductCellAction({ data, onSell, onPurchase }: ProductCellActio
       editHref={`/dashboard/products/${data.id}/edit`}
       deactivateTitle={t('dukaan.product.deactivateTitle')}
       deactivateDescription={t('dukaan.product.deactivateDescription')}
+      deactivateConfirmLabel={t('common.delete')}
       deactivateSuccess={t('dukaan.product.productDeactivated')}
       activateTitle={t('dukaan.product.activateTitle')}
       activateDescription={t('dukaan.product.activateDescription')}
+      activateConfirmLabel={t('common.activate')}
       activateSuccess={t('dukaan.product.productActivated')}
       onDeactivate={deactivateProduct}
       onActivate={reactivateProduct}
@@ -126,6 +150,7 @@ export function buildProductDetail({
   router,
   onSell,
   onPurchase,
+  onConsignment,
   onStatusConfirm
 }: BuildProductDetailOptions): DetailConfig<ProductDTO> {
   return {
@@ -202,6 +227,23 @@ export function buildProductDetail({
                     onClick: () => onPurchase(row)
                   }
                 ]
+              : []),
+            ...(onConsignment
+              ? [
+                  {
+                    label: t('dukaan.product.consignment'),
+                    icon: Icons.phone,
+                    className:
+                      'text-amber-600 focus:text-amber-700 dark:text-amber-400 font-medium',
+                    onClick: () => {
+                      if (row.trackingType === 'QUANTITY') {
+                        toast.error(t('consignments.serializedOnly'));
+                        return;
+                      }
+                      onConsignment(row);
+                    }
+                  }
+                ]
               : [])
           ]
         : []),
@@ -211,7 +253,7 @@ export function buildProductDetail({
       },
       row.isActive
         ? {
-            label: t('common.deactivate'),
+            label: t('common.delete'),
             variant: 'destructive' as const,
             onClick: () => onStatusConfirm({ id: row.id, nextActive: false })
           }

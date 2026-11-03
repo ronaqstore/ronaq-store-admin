@@ -62,6 +62,23 @@ export function parseBooleanFacet(param: unknown): boolean | undefined {
   return undefined;
 }
 
+export function parseActiveStatusFacet(param: unknown, defaultActive = true): boolean | undefined {
+  if (param === undefined || param === null || param === '') {
+    return defaultActive ? true : undefined;
+  }
+  const items = Array.isArray(param)
+    ? (param as string[])
+    : typeof param === 'string'
+      ? param.split(',')
+      : [];
+  if (items.includes('all')) return undefined;
+  const hasTrue = items.includes('true');
+  const hasFalse = items.includes('false');
+  if (hasTrue && !hasFalse) return true;
+  if (hasFalse && !hasTrue) return false;
+  return defaultActive ? true : undefined;
+}
+
 export function useDukaanListParams<TSort extends string | undefined = string>(
   sortableColumnIds: string[],
   searchKey = 'name',

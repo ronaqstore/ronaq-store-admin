@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   Dialog,
@@ -14,6 +15,7 @@ import { useT } from '@/i18n/use-t';
 import { formatIsoDate } from '@/lib/dates';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import type { ConsignmentSlipDialogProps } from '@/types/consignments';
+import { ConsignmentWhatsAppShareDialog } from './consignment-whatsapp-share-dialog';
 
 export function ConsignmentSlipDialog({
   consignment,
@@ -23,6 +25,7 @@ export function ConsignmentSlipDialog({
 }: ConsignmentSlipDialogProps) {
   const t = useT();
   const { data: session } = useSession();
+  const [whatsappOpen, setWhatsAppOpen] = useState(false);
 
   if (!consignment) return null;
 
@@ -213,9 +216,17 @@ export function ConsignmentSlipDialog({
           </div>
         </div>
 
-        <DialogFooter className='print:hidden gap-2 sm:gap-0'>
+        <DialogFooter className='print:hidden gap-2 sm:gap-2 flex-wrap'>
           <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
             {t('common.close')}
+          </Button>
+          <Button
+            type='button'
+            onClick={() => setWhatsAppOpen(true)}
+            className='gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white'
+          >
+            <Icons.chat className='h-4 w-4' />
+            {t('scanner.sendOnWhatsApp')}
           </Button>
           <Button type='button' onClick={handlePrint} className='gap-1.5'>
             <Icons.print className='h-4 w-4' />
@@ -223,6 +234,13 @@ export function ConsignmentSlipDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <ConsignmentWhatsAppShareDialog
+        open={whatsappOpen}
+        onOpenChange={setWhatsAppOpen}
+        consignment={consignment}
+        type={type}
+      />
     </Dialog>
   );
 }

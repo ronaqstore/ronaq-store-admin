@@ -561,6 +561,7 @@
       "quickSell": "فوري پلور",
       "purchase": "پیرودل",
       "quickPurchase": "فوري پیرود",
+      "consignment": "امانت",
       "restock": "سټاک اضافه کړئ",
       "productCreated": "مصنوعہ کامیابی سے بنایا گیا",
       "productUpdated": "مصنوعہ کامیابی سے اپ ڈیٹ ہوا",
@@ -1509,6 +1510,7 @@
     "phonePlaceholder": "03XXXXXXXXX"
   },
   "search": {
+    "consignments": "د امانت شمېره، IMEI یا مالک وپلټئ...",
     "suppliers": "Search...",
     "customers": "Search...",
     "purchases": "Search...",
@@ -2921,6 +2923,7 @@
     "intakeDate": "د تسلیمۍ نېټه",
     "newConsignment": "په امانت نوی تلیفون",
     "newConsignmentDesc": "د پیرودونکي ګرځنده تلیفون د پلور لپاره په امانت کې ثبت کړئ",
+    "serializedOnly": "امانت یوازې د سریال شوي ګرځنده تلیفونونو (IMEI) لپاره شتون لري.",
     "sectionConsignor": "۱. د تلیفون د مالک معلومات",
     "sectionDevice": "۲. د تلیفون او وسیلې معلومات",
     "sectionTerms": "۳. مالي شرایط او تړون",
@@ -2958,6 +2961,7 @@
     "statusCancelled": "لغوه شوی",
     "printIntakeSlip": "د امانت رسید چاپ کړئ",
     "printSettlementSlip": "د تادیې واؤچر چاپ کړئ",
+    "whatsappSlip": "په واټس اپ واستوئ",
     "returnAction": "مالک ته بېرته وسپارئ",
     "returnTitle": "تلیفون مالک ته بېرته وسپارئ",
     "returnDesc": "له پلورلو پرته تلیفون بېرته مالک ته وسپارئ. دا به له انوینټري څخه لرې شي.",
@@ -3032,6 +3036,14 @@
     "copyReceipt": "رسید کاپي کړئ",
     "receiptCopied": "رسید کاپي شو.",
     "sendOnWhatsApp": "پر واټس اپ واستوئ",
-    "phoneRequiredForWhatsApp": "مهرباني وکړئ باوري ټیلیفون شمیره ولیکئ."
+    "phoneRequiredForWhatsApp": "مهرباني وکړئ باوري ټیلیفون شمیره ولیکئ.",
+    "modeBarcode": "بارکوډ / کیو آر",
+    "modeOcr": "شمیرې ولولئ (او سي آر)",
+    "ocrGuide": "د بکس دننه د 15 عددونو شمیره راوړئ",
+    "ocrCapturing": "شمیرې لوستل کیږي...",
+    "ocrCaptureBtn": "شمیرې ولولئ",
+    "ocrNoNumbersFound": "د 15 عددونو شمیره ونه موندل شوه. مهرباني وکړئ کیمره نږدې کړئ.",
+    "ocrMultipleFound": "{count} شمیرې وموندل شوې. د غوره کولو لپاره ټک وکړئ:",
+    "ocrChecksumWarning": "شمیره د احتمالي لاسي لیک غلطۍ سره لوستل شوې. مهرباني وکړئ تایید کړئ."
   }
 }

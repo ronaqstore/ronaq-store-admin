@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
-import { parseAsString, useQueryState } from 'nuqs';
+import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
 import {
   ResponsiveDataTable,
   type DetailConfig,
@@ -16,6 +16,9 @@ import { useDataTable } from '@/hooks/use-data-table';
 import { useT } from '@/i18n/use-t';
 import { formatIsoDate } from '@/lib/dates';
 import { formatPkr } from '@/lib/dukaan/numbers';
+import { firstFilterValue, parseFacetDateRange } from '@/lib/dukaan/money-range-filter';
+import { customerAsyncFilter } from '@/components/common/customer-filter';
+import { useDukaanListParams } from '@/components/data-table/list-params';
 import type { ConsignmentDTO } from '@/lib/api/types';
 import type {
   ConsignmentRowActionsProps,
@@ -29,11 +32,13 @@ import { ReturnConsignmentDialog } from './return-consignment-dialog';
 import { SettleConsignmentDialog } from './settle-consignment-dialog';
 import { CancelConsignmentDialog } from './cancel-consignment-dialog';
 import { ConsignmentSlipDialog } from './consignment-slip-dialog';
+import { ConsignmentWhatsAppShareDialog } from './consignment-whatsapp-share-dialog';
 
 function ConsignmentRowActions({
   consignment,
   onPrintIntakeSlip,
   onPrintSettlementSlip,
+  onWhatsAppShare,
   onReturn,
   onSettle,
   onCancel
@@ -46,6 +51,19 @@ function ConsignmentRowActions({
       icon: Icons.print,
       onClick: () => onPrintIntakeSlip(consignment)
     },
+    ...(onWhatsAppShare
+      ? [
+          {
+            label: t('consignments.whatsappSlip'),
+            icon: Icons.chat,
+            onClick: () =>
+              onWhatsAppShare(
+                consignment,
+                consignment.status === 'SETTLED' ? 'settlement' : 'intake'
+              )
+          }
+        ]
+      : []),
     ...(consignment.status === 'SETTLED'
       ? [
           {
@@ -96,13 +114,34 @@ function ConsignmentRowActions({
 export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTableProps) {
   const t = useT();
 
+  const sortableColumnIds = ['consignmentNo', 'intakeDate', 'agreedPayout'];
+  const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
+    'intakeDate' | 'consignmentNo'
+  >(
+    sortableColumnIds,
+    'consignmentNo',
+    ['status', 'customerId', 'intakeDate'],
+    'intakeDate',
+    'desc'
+  );
+
+  const [consignmentNoParam] = useQueryState('consignmentNo', parseAsString);
   const [searchParam] = useQueryState('search', parseAsString);
   const [statusParam] = useQueryState('status', parseAsString);
-  const [pageParam] = useQueryState('page', parseAsString);
-  const [pageSizeParam] = useQueryState('pageSize', parseAsString);
+  const [customerIdParam] = useQueryState('customerId', parseAsString);
+  const [intakeDateParam] = useQueryState('intakeDate', parseAsArrayOf(parseAsString, ','));
 
-  const page = pageParam ? Number(pageParam) : 1;
-  const pageSize = pageSizeParam ? Number(pageSizeParam) : 20;
+  const search = searchParam || consignmentNoParam || undefined;
+  const rawStatus =
+    ((filters as Record<string, unknown>).status as string | undefined) ?? statusParam ?? undefined;
+  const statusClean = firstFilterValue(rawStatus);
+  const status = statusClean === 'all' ? undefined : statusClean;
+  const customerId =
+    firstFilterValue((filters as Record<string, unknown>).customerId) ??
+    firstFilterValue(customerIdParam) ??
+    undefined;
+  const dateRaw = (filters as Record<string, unknown>).intakeDate ?? intakeDateParam;
+  const { from: fromDate, to: toDate } = parseFacetDateRange(dateRaw);
 
   const [intakeOpen, setIntakeOpen] = useState(false);
   const [returnConsignment, setReturnConsignment] = useState<ConsignmentDTO | null>(null);
@@ -115,18 +154,32 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
     type: 'intake'
   });
 
+  const [waModal, setWaModal] = useState<{
+    open: boolean;
+    consignment: ConsignmentDTO | null;
+    type: 'intake' | 'settlement';
+  }>({
+    open: false,
+    consignment: null,
+    type: 'intake'
+  });
+
   const { data, isFetching } = useQuery(
     consignmentsQueryOptions({
-      page,
-      pageSize,
-      search: searchParam || undefined,
-      status: statusParam || undefined
+      page: params.page,
+      pageSize: params.perPage,
+      search,
+      status: status || undefined,
+      customerId,
+      fromDate,
+      toDate,
+      sortOrder
     })
   );
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
-  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const pageCount = getPageCount(total);
 
   const columns: ColumnDef<ConsignmentDTO>[] = useMemo(
     () => [
@@ -145,7 +198,18 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
               {formatIsoDate(row.original.intakeDate)}
             </span>
           </div>
-        )
+        ),
+        meta: {
+          label: 'consignments.consignmentNo',
+          placeholderKey: 'search.consignments',
+          variant: 'text',
+          icon: Icons.search,
+          primary: true,
+          priority: 1,
+          mobile: 'title'
+        },
+        enableColumnFilter: true,
+        enableSorting: true
       },
       {
         id: 'device',
@@ -164,17 +228,56 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
               )}
             </div>
           </div>
-        )
+        ),
+        meta: {
+          priority: 2
+        }
       },
       {
-        id: 'consignor',
-        header: t('consignments.consignor'),
+        id: 'customerId',
+        accessorKey: 'customerId',
+        accessorFn: (row) => row.customerId ?? '',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t('consignments.consignor')} />
+        ),
         cell: ({ row }) => (
           <div className='flex flex-col'>
             <span className='font-medium text-foreground'>{row.original.consignorName}</span>
             <span className='text-xs text-muted-foreground'>{row.original.consignorPhone}</span>
           </div>
-        )
+        ),
+        meta: {
+          label: 'table.col.customer',
+          variant: 'select',
+          icon: Icons.user,
+          asyncOptions: customerAsyncFilter,
+          priority: 2,
+          mobile: 'subtitle'
+        },
+        enableColumnFilter: true,
+        enableSorting: false
+      },
+      {
+        id: 'intakeDate',
+        accessorKey: 'intakeDate',
+        accessorFn: (row) => row.intakeDate,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t('consignments.intakeDate')} />
+        ),
+        cell: ({ row }) => (
+          <span className='text-xs text-muted-foreground'>
+            {formatIsoDate(row.original.intakeDate)}
+          </span>
+        ),
+        meta: {
+          label: 'consignments.intakeDate',
+          variant: 'dateRange',
+          icon: Icons.calendar,
+          priority: 3,
+          mobile: 'meta'
+        },
+        enableColumnFilter: true,
+        enableSorting: true
       },
       {
         id: 'agreedPayout',
@@ -191,7 +294,11 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
               </span>
             )}
           </div>
-        )
+        ),
+        meta: {
+          priority: 2,
+          mobile: 'value'
+        }
       },
       {
         id: 'soldPrice',
@@ -213,13 +320,34 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
             );
           }
           return <span className='text-muted-foreground'>—</span>;
+        },
+        meta: {
+          priority: 3
         }
       },
       {
         id: 'status',
         accessorKey: 'status',
-        header: t('table.col.status'),
-        cell: ({ row }) => <ConsignmentStatusBadge status={row.original.status} />
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t('table.col.status')} />
+        ),
+        cell: ({ row }) => <ConsignmentStatusBadge status={row.original.status} />,
+        meta: {
+          label: 'table.col.status',
+          variant: 'select',
+          icon: Icons.status,
+          type: 'status',
+          options: (translate) => [
+            { label: translate('consignments.statusInCustody'), value: 'IN_CUSTODY' },
+            { label: translate('consignments.statusSold'), value: 'SOLD' },
+            { label: translate('consignments.statusSettled'), value: 'SETTLED' },
+            { label: translate('consignments.statusReturned'), value: 'RETURNED_TO_OWNER' },
+            { label: translate('consignments.statusCancelled'), value: 'CANCELLED' }
+          ],
+          priority: 1,
+          mobile: 'badge'
+        },
+        enableColumnFilter: true
       },
       {
         id: 'actions',
@@ -229,6 +357,9 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
             onPrintIntakeSlip={(c) => setSlipModal({ open: true, consignment: c, type: 'intake' })}
             onPrintSettlementSlip={(c) =>
               setSlipModal({ open: true, consignment: c, type: 'settlement' })
+            }
+            onWhatsAppShare={(c, type) =>
+              setWaModal({ open: true, consignment: c, type: type ?? 'intake' })
             }
             onReturn={setReturnConsignment}
             onSettle={setSettleConsignment}
@@ -397,6 +528,13 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
         type={slipModal.type}
         open={slipModal.open}
         onOpenChange={(open) => setSlipModal((prev) => ({ ...prev, open }))}
+      />
+
+      <ConsignmentWhatsAppShareDialog
+        open={waModal.open}
+        onOpenChange={(open) => setWaModal((prev) => ({ ...prev, open }))}
+        consignment={waModal.consignment}
+        type={waModal.type}
       />
     </>
   );

@@ -18,6 +18,7 @@ import { useRouter } from '@/i18n/navigation';
 import { AlertModal } from '@/components/modal/alert-modal';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
+  parseActiveStatusFacet,
   parseBooleanFacet,
   useDukaanListParams
 } from '@/components/data-table/list-params';
@@ -130,8 +131,9 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
   const [isActiveParam] = useQueryState('isActive', parseAsString);
 
   const search = searchParam || nameParam || undefined;
-  const isActiveFilter = parseBooleanFacet(
-    (filters as Record<string, unknown>).isActive ?? isActiveParam
+  const isActiveFilter = parseActiveStatusFacet(
+    (filters as Record<string, unknown>).isActive ?? isActiveParam,
+    true
   );
   const creditRange = parseRupeeMoneyRange((filters as Record<string, unknown>).currentBalance);
   const openingRange = parseRupeeMoneyRange((filters as Record<string, unknown>).openingBalance);

@@ -294,7 +294,7 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
                 errors={field.state.meta.errors}
                 queryKey={['customers', 'picker']}
                 fetchPage={(filters) =>
-                  listCustomers(filters).then((res) => ({
+                  listCustomers({ ...filters, isActive: true }).then((res) => ({
                     items: res.items,
                     total: res.total,
                     page: res.page,

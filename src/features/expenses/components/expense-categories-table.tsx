@@ -20,7 +20,12 @@ import {
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
-import { parseBooleanFacet, useDukaanListParams } from '@/components/data-table/list-params';
+import {
+  parseActiveStatusFacet,
+  parseBooleanFacet,
+  useDukaanListParams
+} from '@/components/data-table/list-params';
+import { getActiveStatusQuickFilters } from '@/components/common/party-table-helpers';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { formatDate } from '@/lib/format';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
@@ -53,7 +58,7 @@ function ExpenseCategoryCellAction({
     ...(category.isActive
       ? [
           {
-            label: t('common.deactivate'),
+            label: t('common.delete'),
             icon: Icons.close,
             variant: 'destructive' as const,
             onClick: () => onDeactivate(category)
@@ -162,7 +167,12 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
   const [isActiveParam] = useQueryState('isActive', parseAsString);
 
   const search = searchParam || nameParam || undefined;
-  const isActiveFilter = parseBooleanFacet(isActiveParam);
+  const isActiveFilter = parseActiveStatusFacet(isActiveParam, true);
+  const expenseCategoryQuickFilters = getActiveStatusQuickFilters(
+    t('table.all'),
+    t('status.active'),
+    t('status.inactive')
+  );
 
   const { data, isFetching } = useQuery(
     expenseCategoriesQueryOptions({
@@ -241,9 +251,10 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
         label: 'table.col.status',
         variant: 'select',
         icon: Icons.status,
+        defaultFilterValue: ['true'],
         options: [
-          { label: 'Active', value: 'true' },
-          { label: 'Inactive', value: 'false' }
+          { label: t('status.active'), value: 'true' },
+          { label: t('status.inactive'), value: 'false' }
         ],
         priority: 2,
         mobile: 'badge'
@@ -340,9 +351,9 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
           onClose={() => setDeactivateTarget(null)}
           onConfirm={() => deactivateMutation.mutate(deactivateTarget.id)}
           loading={deactivateMutation.isPending}
-          title={t('common.deactivate')}
+          title={t('common.delete')}
           description={t('expenses.deactivateDesc', { name: deactivateTarget.name })}
-          confirmLabel={t('common.deactivate')}
+          confirmLabel={t('common.delete')}
         />
       )}
 
@@ -369,6 +380,7 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
         toolbarAction={toolbarActionButton}
         mobileItem={categoryMobileItem}
         detail={categoryDetail}
+        quickFilters={expenseCategoryQuickFilters}
         isLoading={isFetching}
       />
 

@@ -9,9 +9,11 @@ export function SimpleEntityCellAction({
   editHref,
   deactivateTitle,
   deactivateDescription,
+  deactivateConfirmLabel,
   deactivateSuccess,
   activateTitle,
   activateDescription,
+  activateConfirmLabel,
   activateSuccess,
   onDeactivate,
   onActivate,
@@ -26,9 +28,11 @@ export function SimpleEntityCellAction({
       editHref={editHref}
       deactivateTitle={deactivateTitle}
       deactivateDescription={deactivateDescription}
+      deactivateConfirmLabel={deactivateConfirmLabel}
       deactivateSuccess={deactivateSuccess}
       activateTitle={activateTitle}
       activateDescription={activateDescription}
+      activateConfirmLabel={activateConfirmLabel}
       activateSuccess={activateSuccess}
       onDeactivate={onDeactivate}
       onActivate={onActivate}

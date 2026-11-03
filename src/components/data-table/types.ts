@@ -107,6 +107,7 @@ export interface QuickFilterChip {
   label: string;
   value?: string | string[] | null;
   columnId?: string;
+  isDefault?: boolean;
 }
 
 export interface LedgerListConfig<TData> {

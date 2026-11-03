@@ -4,6 +4,7 @@ import type {
   ConsignmentDTO,
   ConsignmentStatus,
   CustomerDTO,
+  ProductDTO,
   ReturnConsignmentInput,
   SettleConsignmentInput
 } from '@/lib/api/types';
@@ -19,6 +20,7 @@ export interface ConsignmentRowActionsProps {
   consignment: ConsignmentDTO;
   onPrintIntakeSlip: (consignment: ConsignmentDTO) => void;
   onPrintSettlementSlip: (consignment: ConsignmentDTO) => void;
+  onWhatsAppShare?: (consignment: ConsignmentDTO, type?: 'intake' | 'settlement') => void;
   onReturn: (consignment: ConsignmentDTO) => void;
   onSettle: (consignment: ConsignmentDTO) => void;
   onCancel: (consignment: ConsignmentDTO) => void;
@@ -28,6 +30,7 @@ export interface ConsignmentIntakeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: (created: ConsignmentDTO) => void;
+  initialProduct?: ProductDTO | null;
 }
 
 export interface ReturnConsignmentDialogProps {

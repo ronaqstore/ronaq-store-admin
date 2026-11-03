@@ -24,6 +24,7 @@ import { formatEmpty } from '@/lib/format-empty';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/constants/placeholders';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
+  parseActiveStatusFacet,
   parseBooleanFacet,
   useDukaanListParams
 } from '@/components/data-table/list-params';
@@ -47,6 +48,7 @@ import {
 } from './products-table-filters';
 import { SaleCreateDialog } from '@/components/sales/sale-create-dialog';
 import { PurchaseCreateDialog } from '@/components/purchases/purchase-create-dialog';
+import { ConsignmentIntakeDialog } from '@/features/consignments/components/consignment-intake-dialog';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { PRODUCT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 
@@ -57,6 +59,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
   const [statusConfirm, setStatusConfirm] = useState<EntityStatusConfirm | null>(null);
   const [quickSellProduct, setQuickSellProduct] = useState<ProductDTO | null>(null);
   const [quickPurchaseProduct, setQuickPurchaseProduct] = useState<ProductDTO | null>(null);
+  const [quickConsignmentProduct, setQuickConsignmentProduct] = useState<ProductDTO | null>(null);
 
   const sortableColumnIds = ['name', 'defaultSellingPrice'];
   const { params, filters, sortBy, sortOrder } = useDukaanListParams(
@@ -71,7 +74,10 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
 
   const categoryId = firstFilterValue((filters as Record<string, unknown>).categoryId);
   const brandId = firstFilterValue((filters as Record<string, unknown>).brandId);
-  const isActiveFilter = parseBooleanFacet((filters as Record<string, unknown>).isActive);
+  const isActiveFilter = parseActiveStatusFacet(
+    (filters as Record<string, unknown>).isActive,
+    true
+  );
   const isPublishedFilter = parseBooleanFacet((filters as Record<string, unknown>).isPublished);
   const priceRange = parseRupeePriceRange((filters as Record<string, unknown>).defaultSellingPrice);
   const stockFilter = parseExactStockQuantity(
@@ -281,6 +287,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
           priority: 2,
           variant: 'select',
           icon: Icons.status,
+          defaultFilterValue: ['true'],
           options: [
             { label: staticT('status.active'), value: 'true' },
             { label: staticT('status.inactive'), value: 'false' }
@@ -327,6 +334,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
               data={row.original}
               onSell={(p) => setQuickSellProduct(p)}
               onPurchase={(p) => setQuickPurchaseProduct(p)}
+              onConsignment={(p) => setQuickConsignmentProduct(p)}
             />
           </div>
         )
@@ -343,6 +351,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
         router,
         onSell: setQuickSellProduct,
         onPurchase: setQuickPurchaseProduct,
+        onConsignment: setQuickConsignmentProduct,
         onStatusConfirm: setStatusConfirm
       }),
     [router, t]
@@ -378,7 +387,7 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
             ? t('dukaan.product.activateDescription')
             : t('dukaan.product.deactivateDescription')
         }
-        confirmLabel={statusConfirm?.nextActive ? t('common.activate') : t('common.deactivate')}
+        confirmLabel={statusConfirm?.nextActive ? t('common.activate') : t('common.delete')}
         confirmVariant={statusConfirm?.nextActive ? 'default' : 'destructive'}
       />
       <ResponsiveDataTable
@@ -401,6 +410,13 @@ export function ProductsTable({ toolbarAction }: ProductsTableProps) {
           if (!open) setQuickPurchaseProduct(null);
         }}
         initialProduct={quickPurchaseProduct}
+      />
+      <ConsignmentIntakeDialog
+        open={quickConsignmentProduct != null}
+        onOpenChange={(open) => {
+          if (!open) setQuickConsignmentProduct(null);
+        }}
+        initialProduct={quickConsignmentProduct}
       />
     </>
   );

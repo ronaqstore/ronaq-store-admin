@@ -561,6 +561,7 @@
       "quickSell": "Quick Sell",
       "purchase": "Buy",
       "quickPurchase": "Quick Buy",
+      "consignment": "Amanat",
       "restock": "Restock",
       "productCreated": "Product created successfully",
       "productUpdated": "Product updated successfully",
@@ -1509,6 +1510,7 @@
     "phonePlaceholder": "03XXXXXXXXX"
   },
   "search": {
+    "consignments": "Search consignment, IMEI, owner...",
     "suppliers": "Search...",
     "customers": "Search...",
     "purchases": "Search...",
@@ -2921,6 +2923,7 @@
     "intakeDate": "Received Date",
     "newConsignment": "New Entry (Sell on Behalf)",
     "newConsignmentDesc": "Receive a customer phone to sell on their behalf (Amanat)",
+    "serializedOnly": "Consignment (Amanat) is only available for serialized mobile phones.",
     "sectionConsignor": "1. Phone Owner Details",
     "sectionDevice": "2. Phone & Device Details",
     "sectionTerms": "3. Financial Terms & Agreement",
@@ -2958,6 +2961,7 @@
     "statusCancelled": "Cancelled",
     "printIntakeSlip": "Print Receiving Slip",
     "printSettlementSlip": "Print Payment Voucher",
+    "whatsappSlip": "Share on WhatsApp",
     "returnAction": "Return to Owner",
     "returnTitle": "Return Phone to Owner",
     "returnDesc": "Return the phone to the customer without selling. This will remove it from inventory.",
@@ -3032,6 +3036,14 @@
     "copyReceipt": "Copy Receipt",
     "receiptCopied": "Receipt copied to clipboard.",
     "sendOnWhatsApp": "Send on WhatsApp",
-    "phoneRequiredForWhatsApp": "Please enter a valid phone number."
+    "phoneRequiredForWhatsApp": "Please enter a valid phone number.",
+    "modeBarcode": "Barcode / QR",
+    "modeOcr": "Read Numbers (OCR)",
+    "ocrGuide": "Align 15-digit number inside the box",
+    "ocrCapturing": "Reading numbers...",
+    "ocrCaptureBtn": "Read Numbers",
+    "ocrNoNumbersFound": "No 15-digit number detected. Please position camera closer.",
+    "ocrMultipleFound": "Detected {count} numbers. Tap to select:",
+    "ocrChecksumWarning": "Number read with possible handwriting error. Please verify."
   }
 }

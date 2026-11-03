@@ -91,6 +91,7 @@ export interface ProductCellActionProps {
   data: ProductDTO;
   onSell?: (product: ProductDTO) => void;
   onPurchase?: (product: ProductDTO) => void;
+  onConsignment?: (product: ProductDTO) => void;
 }
 
 export interface ProductImagesFieldProps {
@@ -140,5 +141,6 @@ export interface BuildProductDetailOptions {
   router: { push: (href: string) => void };
   onSell: (product: ProductDTO) => void;
   onPurchase?: (product: ProductDTO) => void;
+  onConsignment?: (product: ProductDTO) => void;
   onStatusConfirm: (confirm: EntityStatusConfirm) => void;
 }

@@ -13,6 +13,7 @@ declare module '@tanstack/react-table' {
     range?: [number, number];
     unit?: string;
     icon?: React.FC<React.SVGProps<SVGSVGElement>>;
+    defaultFilterValue?: string | string[];
 
     priority?: 1 | 2 | 3 | 4;
 

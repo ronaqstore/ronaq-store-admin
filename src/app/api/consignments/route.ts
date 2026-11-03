@@ -10,8 +10,11 @@ export async function GET(request: NextRequest) {
       'status',
       'customerId',
       'productId',
+      'fromDate',
+      'toDate',
       'startDate',
-      'endDate'
+      'endDate',
+      'sortOrder'
     ]
   });
 }

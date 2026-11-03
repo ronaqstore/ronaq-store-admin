@@ -52,7 +52,7 @@ export function ConsignmentIntakeConsignorSection({
             errors={errors.customerId ? [{ message: errors.customerId }] : []}
             queryKey={['customers', 'picker']}
             fetchPage={(filters) =>
-              listCustomers({ ...filters, limit: 20 }).then((res) => ({
+              listCustomers({ ...filters, limit: 20, isActive: true }).then((res) => ({
                 items: res.items,
                 total: res.total,
                 page: res.page,

@@ -680,8 +680,11 @@ export interface ConsignmentListFilters {
   status?: ConsignmentStatus | string;
   customerId?: string;
   productId?: string;
+  fromDate?: string;
+  toDate?: string;
   startDate?: string;
   endDate?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export * from '@/types/supplier-payment';

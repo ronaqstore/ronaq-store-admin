@@ -561,6 +561,7 @@
       "quickSell": "فوری فروخت",
       "purchase": "خریدیں",
       "quickPurchase": "فوری خریداری",
+      "consignment": "امانت پر رکھیں",
       "restock": "اسٹاک شامل کریں",
       "productCreated": "مصنوعہ کامیابی سے بنایا گیا",
       "productUpdated": "مصنوعہ کامیابی سے اپ ڈیٹ ہوا",
@@ -1509,6 +1510,7 @@
     "phonePlaceholder": "03XXXXXXXXX"
   },
   "search": {
+    "consignments": "امانت نمبر، IMEI یا مالک تلاش کریں...",
     "suppliers": "Search...",
     "customers": "Search...",
     "purchases": "Search...",
@@ -2921,6 +2923,7 @@
     "intakeDate": "وصولی کی تاریخ",
     "newConsignment": "امانت پر نیا فون",
     "newConsignmentDesc": "گاہک کا موبائل فون برائے فروخت امانت کے طور پر درج کریں",
+    "serializedOnly": "امانت پر اندراج صرف موبائل فونز (IMEI) کے لیے دستیاب ہے۔",
     "sectionConsignor": "1. فون کے مالک کی تفصیلات",
     "sectionDevice": "2. موبائل فون اور آلے کی تفصیلات",
     "sectionTerms": "3. مالی شرائط اور معاہدہ",
@@ -2958,6 +2961,7 @@
     "statusCancelled": "منسوخ شدہ",
     "printIntakeSlip": "امانت رسید پرنٹ کریں",
     "printSettlementSlip": "ادائیگی واؤچر پرنٹ کریں",
+    "whatsappSlip": "واٹس ایپ پر بھیجیں",
     "returnAction": "مالک کو واپس کریں",
     "returnTitle": "فون مالک کو واپس کریں",
     "returnDesc": "بغیر فروخت کیے فون مالک کے حوالے کریں۔ یہ فون انوینٹری سے ختم ہو جائے گا۔",
@@ -3032,6 +3036,14 @@
     "copyReceipt": "رسید کاپی کریں",
     "receiptCopied": "رسید کاپی ہو گئی۔",
     "sendOnWhatsApp": "واٹس ایپ پر بھیجیں",
-    "phoneRequiredForWhatsApp": "برائے مہربانی درست فون نمبر درج کریں۔"
+    "phoneRequiredForWhatsApp": "برائے مہربانی درست فون نمبر درج کریں۔",
+    "modeBarcode": "بارکوڈ / کیو آر",
+    "modeOcr": "نمبر پڑھیں (او سی آر)",
+    "ocrGuide": "باکس کے اندر 15 ہندسوں کا نمبر لائیں",
+    "ocrCapturing": "نمبر پڑھے جا رہے ہیں...",
+    "ocrCaptureBtn": "نمبر پڑھیں",
+    "ocrNoNumbersFound": "کوئی 15 ہندسوں کا نمبر نہیں ملا۔ براہ کرم کیمرہ قریب کریں۔",
+    "ocrMultipleFound": "{count} نمبر ملے ہیں۔ منتخب کرنے کے لیے ٹیپ کریں:",
+    "ocrChecksumWarning": "لکھائی میں ممکنہ غلطی کے ساتھ نمبر پڑھا گیا۔ براہ کرم تصدیق کریں۔"
   }
 }

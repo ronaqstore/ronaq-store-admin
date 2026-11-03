@@ -14,7 +14,8 @@ import type { BrandDTO } from '@/lib/api/types';
 import type { BrandCellActionProps, BrandsTableProps } from '@/types';
 import {
   createPartyNameColumn,
-  createPartyIsActiveColumn
+  createPartyIsActiveColumn,
+  getActiveStatusQuickFilters
 } from '@/components/common/party-table-helpers';
 import {
   buildSimpleEntityMobileItem,
@@ -22,6 +23,7 @@ import {
 } from '@/components/common/entity-builders';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
+  parseActiveStatusFacet,
   parseBooleanFacet,
   useDukaanListParams
 } from '@/components/data-table/list-params';
@@ -37,9 +39,11 @@ function BrandCellAction({ data }: BrandCellActionProps) {
       isActive={data.isActive}
       deactivateTitle={t('dukaan.brand.deactivateTitle')}
       deactivateDescription={t('dukaan.brand.deactivateDescription')}
+      deactivateConfirmLabel={t('common.delete')}
       deactivateSuccess={t('dukaan.brand.deactivated')}
       activateTitle={t('dukaan.brand.activateTitle')}
       activateDescription={t('dukaan.brand.activateDescription')}
+      activateConfirmLabel={t('common.activate')}
       activateSuccess={t('dukaan.brand.activated')}
       onDeactivate={deactivateBrand}
       onActivate={reactivateBrand}
@@ -72,6 +76,7 @@ const brandMobileItem = buildSimpleEntityMobileItem<BrandDTO>(Icons.tag);
 const brandDetail = buildSimpleEntityDetail<BrandDTO>(t('table.col.brand'));
 
 export function BrandsTable({ toolbarAction }: BrandsTableProps) {
+  const t = useT();
   const sortableColumnIds = ['name'];
   const { params, filters, sortOrder } = useDukaanListParams(
     sortableColumnIds,
@@ -81,8 +86,14 @@ export function BrandsTable({ toolbarAction }: BrandsTableProps) {
     'asc'
   );
   const [isActiveParam] = useQueryState('isActive', parseAsString);
-  const isActiveFilter = parseBooleanFacet(
-    (filters as Record<string, unknown>).isActive ?? isActiveParam
+  const isActiveFilter = parseActiveStatusFacet(
+    (filters as Record<string, unknown>).isActive ?? isActiveParam,
+    true
+  );
+  const brandQuickFilters = getActiveStatusQuickFilters(
+    t('table.all'),
+    t('status.active'),
+    t('status.inactive')
   );
   const { data, isFetching } = useQuery(
     brandsQueryOptions({
@@ -115,6 +126,7 @@ export function BrandsTable({ toolbarAction }: BrandsTableProps) {
       toolbarAction={toolbarAction}
       mobileItem={brandMobileItem}
       detail={brandDetail}
+      quickFilters={brandQuickFilters}
       isLoading={isFetching}
     />
   );
