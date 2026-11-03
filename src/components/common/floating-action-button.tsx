@@ -16,7 +16,7 @@ export function FloatingActionButton({ label, onClick, className }: FloatingActi
       className={cn(
         'fixed inset-e-4 z-30 size-14 rounded-full shadow-lg',
         'bottom-[calc(4.75rem+max(0.5rem,env(safe-area-inset-bottom)))]',
-        'lg:hidden',
+        'md:hidden',
         className
       )}
     >

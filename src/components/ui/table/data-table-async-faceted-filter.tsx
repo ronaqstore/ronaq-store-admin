@@ -281,10 +281,10 @@ export function DataTableAsyncFacetedFilter<TData, TValue>({
         {selectedValues.size > 0 ? (
           <>
             <Separator orientation='vertical' className='mx-0.5 data-[orientation=vertical]:h-4' />
-            <Badge variant='secondary' className='rounded-sm px-1 font-normal lg:hidden'>
+            <Badge variant='secondary' className='rounded-sm px-1 font-normal md:hidden'>
               {selectedValues.size}
             </Badge>
-            <div className='hidden items-center gap-1 lg:flex'>
+            <div className='hidden items-center gap-1 md:flex'>
               {selectedValues.size > 2 ? (
                 <Badge variant='secondary' className='rounded-sm px-1 font-normal'>
                   {selectedValues.size} {t('common.selected')}

@@ -22,7 +22,7 @@ export function SuppliersHeaderAction({ onAdd }: SuppliersHeaderActionProps) {
       <Button
         type='button'
         size='sm'
-        className='h-8 gap-1.5 text-xs hidden lg:inline-flex'
+        className='h-8 gap-1.5 text-xs hidden md:inline-flex'
         onClick={handleOpen}
       >
         <Icons.add className='me-2 h-4 w-4' />

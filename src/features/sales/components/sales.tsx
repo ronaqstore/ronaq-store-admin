@@ -54,7 +54,7 @@ export function SalesHeaderAction({ className, onAdd }: SalesHeaderActionProps) 
   return (
     <Button
       type='button'
-      className={cn('h-8 gap-1.5 text-xs hidden lg:inline-flex', className)}
+      className={cn('h-8 gap-1.5 text-xs hidden md:inline-flex', className)}
       onClick={onAdd}
     >
       <Icons.add className='me-2 h-4 w-4' />

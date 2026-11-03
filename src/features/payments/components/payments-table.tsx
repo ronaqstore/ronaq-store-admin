@@ -337,7 +337,7 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
       <Button
         type='button'
         size='sm'
-        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs hidden lg:inline-flex'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs hidden md:inline-flex'
         onClick={handleOpenRecord}
       >
         <Icons.add className='h-3.5 w-3.5 shrink-0' />

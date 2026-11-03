@@ -15,7 +15,7 @@ export function CreateShopHeaderAction() {
 
   return (
     <>
-      <Button type='button' className='hidden lg:inline-flex' onClick={() => setOpen(true)}>
+      <Button type='button' className='hidden md:inline-flex' onClick={() => setOpen(true)}>
         <Icons.add className='me-2 h-4 w-4' />
         {t('nav.createNewShop')}
       </Button>
