@@ -1,6 +1,27 @@
 import { formatPkr } from '@/lib/money';
 import { whatsappReminderUrl } from '@/constants/api';
 import type { WhatsAppReceiptData } from '@/types/barcode';
+import type { SaleDTO } from '@/lib/api/types';
+
+export function buildSaleReceiptData(sale: SaleDTO): WhatsAppReceiptData {
+  return {
+    saleNo: sale.saleNo,
+    saleDate: sale.saleDate ? sale.saleDate.slice(0, 10) : undefined,
+    customerName: sale.customerName,
+    customerPhone: null,
+    items: (sale.items || []).map((it) => ({
+      productName: it.productName,
+      quantity: it.quantity,
+      unitPrice: it.unitPrice,
+      total: it.total,
+      imei: it.imei,
+      warrantyDays: it.warrantyDays
+    })),
+    totalAmount: sale.totalAmount,
+    discount: sale.discount,
+    paymentMethod: 'CASH'
+  };
+}
 
 export function buildWhatsAppReceiptText(data: WhatsAppReceiptData): string {
   const shop = data.shopName?.trim() || 'Ronaq Store';

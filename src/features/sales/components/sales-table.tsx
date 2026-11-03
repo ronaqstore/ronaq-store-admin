@@ -41,6 +41,7 @@ import { salesQueryOptions } from '../api/queries';
 import type { SalesListFilters } from '@/types';
 import dynamic from 'next/dynamic';
 import { SaleRowActions } from './sale-row-actions';
+import { buildSaleReceiptData } from '../helpers/whatsapp-receipt-formatter';
 import {
   SALE_MONEY_RANGE_RUPEES,
   customerAsyncFilter,
@@ -65,6 +66,10 @@ const ReturnSaleDialog = dynamic(
   () => import('./return-sale-dialog').then((mod) => mod.ReturnSaleDialog),
   { ssr: false }
 );
+const SaleWhatsAppShareDialog = dynamic(
+  () => import('./sale-whatsapp-share-dialog').then((mod) => mod.SaleWhatsAppShareDialog),
+  { ssr: false }
+);
 
 const saleMobileItem: MobileItemConfig<SaleDTO> = {
   leading: 'icon',
@@ -86,6 +91,7 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
   const router = useRouter();
   const [peekCancelSale, setPeekCancelSale] = useState<SaleDTO | null>(null);
   const [peekReturnSale, setPeekReturnSale] = useState<SaleDTO | null>(null);
+  const [peekWhatsAppSale, setPeekWhatsAppSale] = useState<SaleDTO | null>(null);
 
   const sortableColumnIds = ['saleDate', 'saleNo', 'totalAmount', 'paid', 'outstanding'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
@@ -336,6 +342,11 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
             label: t('common.view'),
             onClick: () => router.push(`/dashboard/sales/${row.id}`)
           },
+          {
+            label: t('common.whatsapp'),
+            variant: 'secondary' as const,
+            onClick: () => setPeekWhatsAppSale(row)
+          },
           ...(!isCancelled
             ? [
                 {
@@ -378,6 +389,15 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
           onOpenChange={(open: boolean) => {
             if (!open) setPeekReturnSale(null);
           }}
+        />
+      ) : null}
+      {peekWhatsAppSale ? (
+        <SaleWhatsAppShareDialog
+          open
+          onOpenChange={(open: boolean) => {
+            if (!open) setPeekWhatsAppSale(null);
+          }}
+          receiptData={buildSaleReceiptData(peekWhatsAppSale)}
         />
       ) : null}
       <ResponsiveDataTable

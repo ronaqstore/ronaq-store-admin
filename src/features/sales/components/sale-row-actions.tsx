@@ -6,6 +6,7 @@ import { Icons } from '@/components/icons';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
 import type { RowAction } from '@/types/dukaan';
 import type { SaleRowActionsProps } from '@/types/sales';
+import { buildSaleReceiptData } from '../helpers/whatsapp-receipt-formatter';
 
 const CancelSaleDialog = dynamic(
   () => import('./cancel-sale-dialog').then((m) => m.CancelSaleDialog),
@@ -25,24 +26,6 @@ export function SaleRowActions({ sale }: SaleRowActionsProps) {
   const [returnOpen, setReturnOpen] = useState(false);
   const [whatsAppOpen, setWhatsAppOpen] = useState(false);
 
-  const receiptData = {
-    saleNo: sale.saleNo,
-    saleDate: sale.saleDate ? sale.saleDate.slice(0, 10) : undefined,
-    customerName: sale.customerName,
-    customerPhone: null,
-    items: (sale.items || []).map((it) => ({
-      productName: it.productName,
-      quantity: it.quantity,
-      unitPrice: it.unitPrice,
-      total: it.total,
-      imei: it.imei,
-      warrantyDays: it.warrantyDays
-    })),
-    totalAmount: sale.totalAmount,
-    discount: sale.discount,
-    paymentMethod: 'CASH'
-  };
-
   const actions: RowAction[] = [
     {
       label: 'View',
@@ -50,7 +33,7 @@ export function SaleRowActions({ sale }: SaleRowActionsProps) {
       onClick: () => window.location.assign(`/dashboard/sales/${sale.id}`)
     },
     {
-      label: 'WhatsApp Receipt',
+      label: 'WhatsApp',
       icon: Icons.chat,
       onClick: () => setWhatsAppOpen(true)
     },
@@ -83,7 +66,7 @@ export function SaleRowActions({ sale }: SaleRowActionsProps) {
         <SaleWhatsAppShareDialog
           open={whatsAppOpen}
           onOpenChange={setWhatsAppOpen}
-          receiptData={receiptData}
+          receiptData={buildSaleReceiptData(sale)}
         />
       )}
 

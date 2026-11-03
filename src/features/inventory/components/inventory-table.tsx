@@ -427,7 +427,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
             <Button
               type='button'
               size='sm'
-              className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs w-full sm:w-auto'
+              className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs hidden lg:inline-flex'
               onClick={handleOpenAdjustStock}
             >
               <IconPlus className='me-1.5 h-4 w-4 shrink-0' />
