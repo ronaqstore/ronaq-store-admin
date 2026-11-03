@@ -188,7 +188,7 @@ export function DataTableSliderFilter<TData>({ column, title }: DataTableSliderF
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger render={<Button variant='outline' size='sm' className='border-dashed' />}>
+      <PopoverTrigger render={<Button variant='outline' size='sm' className='h-8 border-dashed' />}>
         {columnFilterValue ? (
           <DataTableFilterClear title={title} onReset={onReset} />
         ) : (

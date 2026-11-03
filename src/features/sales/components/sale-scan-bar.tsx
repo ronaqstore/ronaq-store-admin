@@ -8,13 +8,7 @@ import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { CameraBarcodeScannerDialog } from '@/components/barcode/camera-barcode-scanner-dialog';
 import { resolveScan } from '@/features/inventory/api/service';
-import type { ResponseResolveScanDto } from '@/lib/api/types';
-
-export interface SaleScanBarProps {
-  onItemResolved: (result: ResponseResolveScanDto) => void;
-  className?: string;
-  placeholder?: string;
-}
+import type { SaleScanBarProps } from '@/types/barcode';
 
 export function SaleScanBar({ onItemResolved, className, placeholder }: SaleScanBarProps) {
   const t = useT();
@@ -80,6 +74,7 @@ export function SaleScanBar({ onItemResolved, className, placeholder }: SaleScan
           disabled={isLoading}
           onClick={() => setIsScanning(true)}
           title={t('scanner.scanWithCamera')}
+          aria-label={t('scanner.scanWithCamera')}
           className='h-10 w-10 shrink-0 border'
         >
           <Icons.camera className='h-4 w-4' />

@@ -40,7 +40,7 @@ export function RowActionsMenu({ actions }: RowActionsMenuProps) {
           <Button
             type='button'
             variant='ghost'
-            className='size-11 min-h-11 min-w-11 p-0 sm:size-8 sm:min-h-8 sm:min-w-8'
+            className='size-9 min-h-9 min-w-9 p-0 text-muted-foreground hover:text-foreground sm:size-8 sm:min-h-8 sm:min-w-8'
           />
         }
       >

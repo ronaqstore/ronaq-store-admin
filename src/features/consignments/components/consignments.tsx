@@ -21,10 +21,10 @@ export function ConsignmentsHeaderAction({ className, onAdd }: ConsignmentsHeade
   return (
     <Button
       type='button'
-      className={cn('h-8 gap-1.5 text-xs w-full sm:w-auto', className)}
+      className={cn('h-8 gap-1.5 text-xs hidden md:inline-flex', className)}
       onClick={onAdd}
     >
-      <Icons.add className='me-2 h-4 w-4' />
+      <Icons.add className='h-4 w-4' />
       {t('consignments.newConsignment')}
     </Button>
   );

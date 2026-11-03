@@ -5,14 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { CameraBarcodeScannerDialog } from './camera-barcode-scanner-dialog';
-
-export interface ImeiCameraScanButtonProps {
-  onScan: (code: string) => void;
-  mode?: 'imei' | 'barcode';
-  title?: string;
-  className?: string;
-  disabled?: boolean;
-}
+import type { ImeiCameraScanButtonProps } from '@/types/barcode';
 
 export function ImeiCameraScanButton({
   onScan,

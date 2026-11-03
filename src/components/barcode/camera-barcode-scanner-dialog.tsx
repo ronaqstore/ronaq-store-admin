@@ -14,21 +14,16 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import { sanitizeBarcode, sanitizeImei } from '@/lib/barcode/imei-sanitizer';
-
-export interface CameraBarcodeScannerDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onScan: (code: string) => void;
-  mode?: 'imei' | 'barcode';
-  title?: string;
-  description?: string;
-}
+import type {
+  CameraBarcodeScannerDialogProps,
+  CameraDeviceOption,
+  TorchConstraint
+} from '@/types/barcode';
 
 function playScanBeep() {
+  if (typeof window === 'undefined') return;
   try {
-    const AudioContextClass =
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const AudioContextClass = window.AudioContext;
     if (!AudioContextClass) return;
     const ctx = new AudioContextClass();
     const osc = ctx.createOscillator();
@@ -42,7 +37,7 @@ function playScanBeep() {
     osc.start();
     osc.stop(ctx.currentTime + 0.12);
   } catch {
-    // Audio autoplay restrictions or unsupported in environment
+    return;
   }
 }
 
@@ -59,7 +54,7 @@ export function CameraBarcodeScannerDialog({
   const elementId = `scanner-viewfinder-${containerId}`;
 
   const scannerRef = React.useRef<Html5Qrcode | null>(null);
-  const [cameras, setCameras] = React.useState<Array<{ id: string; label: string }>>([]);
+  const [cameras, setCameras] = React.useState<CameraDeviceOption[]>([]);
   const [selectedCameraId, setSelectedCameraId] = React.useState<string | null>(null);
   const [isTorchOn, setIsTorchOn] = React.useState(false);
   const [hasTorch, setHasTorch] = React.useState(false);
@@ -82,7 +77,7 @@ export function CameraBarcodeScannerDialog({
       }
       scanner.clear();
     } catch {
-      // Ignore cleanup error on unmount/dialog close
+      scannerRef.current = null;
     } finally {
       scannerRef.current = null;
     }
@@ -112,14 +107,13 @@ export function CameraBarcodeScannerDialog({
         });
         scannerRef.current = scanner;
 
-        // Check cameras list
         try {
           const deviceList = await Html5Qrcode.getCameras();
           if (deviceList && deviceList.length > 0) {
             setCameras(deviceList);
           }
         } catch {
-          // Camera listing might fail if permissions aren't granted yet
+          setCameras([]);
         }
 
         const cameraConfig = cameraId
@@ -170,12 +164,9 @@ export function CameraBarcodeScannerDialog({
               }
             }
           },
-          () => {
-            // Frame failed to detect barcode, normal behavior per frame
-          }
+          () => undefined
         );
 
-        // Check torch capabilities
         try {
           const capabilities = scanner.getRunningTrackCapabilities() as { torch?: boolean } | null;
           setHasTorch(Boolean(capabilities?.torch));
@@ -217,13 +208,13 @@ export function CameraBarcodeScannerDialog({
     if (!scanner || !hasTorch) return;
     try {
       const nextTorch = !isTorchOn;
+      const torchConfig: TorchConstraint = { torch: nextTorch };
       await scanner.applyVideoConstraints({
-        // @ts-expect-error torch is valid in MediaTrackConstraints for supported mobile browsers
-        advanced: [{ torch: nextTorch }]
+        advanced: [torchConfig]
       });
       setIsTorchOn(nextTorch);
     } catch {
-      // Failed to toggle torch
+      setIsTorchOn(false);
     }
   };
 
@@ -269,6 +260,7 @@ export function CameraBarcodeScannerDialog({
               <Icons.alertCircle className='h-10 w-10 text-destructive' />
               <p className='mt-3 text-sm font-semibold'>{errorMessage}</p>
               <Button
+                type='button'
                 variant='outline'
                 size='sm'
                 className='mt-4'
@@ -279,7 +271,6 @@ export function CameraBarcodeScannerDialog({
             </div>
           )}
 
-          {/* Quick controls bar */}
           <div className='absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 px-3'>
             {cameras.length > 1 && (
               <Button

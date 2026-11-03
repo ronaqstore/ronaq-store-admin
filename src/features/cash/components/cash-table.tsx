@@ -334,7 +334,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
       <Button
         type='button'
         size='sm'
-        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3 hidden md:inline-flex'
         onClick={() => setInvestmentOpen(true)}
         title={hasOpeningCash ? t('dukaan.cash.openingAlreadySetHint') : undefined}
       >
@@ -345,7 +345,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
         type='button'
         size='sm'
         variant='outline'
-        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3 hidden md:inline-flex'
         onClick={() => setWithdrawalOpen(true)}
         title={hasOpeningCash ? t('dukaan.cash.openingAlreadySetHint') : undefined}
       >
@@ -356,7 +356,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
         type='button'
         size='sm'
         variant='outline'
-        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3 hidden md:inline-flex'
         onClick={() => setReconcileOpen(true)}
       >
         <Icons.adjustments className='h-3.5 w-3.5 shrink-0' />
@@ -367,7 +367,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
           type='button'
           size='sm'
           variant='outline'
-          className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3'
+          className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs px-3 hidden md:inline-flex'
           onClick={() => setOpeningCashOpen(true)}
         >
           <Icons.wallet className='h-3.5 w-3.5 shrink-0' />
@@ -429,7 +429,7 @@ export function CashTable({ toolbarAction }: CashTableProps) {
       />
 
       <Sheet open={mobileActionsOpen} onOpenChange={setMobileActionsOpen}>
-        <SheetContent side='bottom' className='p-4 gap-2 rounded-t-2xl sm:hidden no-scrollbar'>
+        <SheetContent side='bottom' className='p-4 gap-2 rounded-t-2xl md:hidden no-scrollbar'>
           <SheetHeader className='pb-2 text-start'>
             <SheetTitle>{t('common.cashDrawer')}</SheetTitle>
           </SheetHeader>

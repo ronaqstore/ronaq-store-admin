@@ -40,8 +40,7 @@ import {
   createPartyIsActiveColumn,
   PartyActionsHeader,
   buildPartyMobileItem,
-  buildPartyDetail,
-  getActiveStatusQuickFilters
+  buildPartyDetail
 } from '@/components/common/party-table-helpers';
 import { PartyCellAction } from '@/components/common/party-cell-action';
 import {
@@ -219,12 +218,6 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
     [router, t]
   );
 
-  const customerQuickFilters = getActiveStatusQuickFilters(
-    t('table.all'),
-    t('status.active'),
-    t('status.inactive')
-  );
-
   return (
     <>
       {editCustomer ? (
@@ -259,7 +252,6 @@ export function CustomersTable({ toolbarAction }: CustomersTableProps) {
         toolbarAction={toolbarAction}
         mobileItem={customerMobileItem}
         detail={customerDetail}
-        quickFilters={customerQuickFilters}
         isLoading={isFetching}
       />
     </>

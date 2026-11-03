@@ -32,7 +32,7 @@ export function CustomersHeaderAction({ onAdd }: CustomersHeaderActionProps) {
       <Button
         type='button'
         size='sm'
-        className='h-8 gap-1.5 text-xs w-full sm:w-auto'
+        className='h-8 gap-1.5 text-xs hidden md:inline-flex'
         onClick={handleOpen}
       >
         <Icons.add className='me-2 h-4 w-4' />

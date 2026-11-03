@@ -38,17 +38,16 @@ export function ThemeSelector() {
       >
         <SelectTrigger
           id='theme-selector'
-          className='justify-start *:data-[slot=select-value]:w-24'
+          className='h-8 gap-1.5 px-2 text-xs justify-start *:data-[slot=select-value]:max-w-[90px] sm:*:data-[slot=select-value]:w-32'
         >
-          <span className='text-muted-foreground hidden sm:block'>
-            <Icons.palette />
+          <span className='text-muted-foreground'>
+            <Icons.palette className='size-3.5 shrink-0' />
           </span>
-          <span className='text-muted-foreground block sm:hidden'>{t('appearance.theme')}</span>
           <SelectValue placeholder={t('appearance.selectTheme')} />
-          <Kbd>T</Kbd>
-          <Kbd>T</Kbd>
+          <Kbd className='hidden md:inline-flex'>T</Kbd>
+          <Kbd className='hidden md:inline-flex'>T</Kbd>
         </SelectTrigger>
-        <SelectContent align='end'>
+        <SelectContent align='end' className='min-w-[140px]'>
           {THEMES.length > 0 && (
             <>
               <SelectGroup>

@@ -10,8 +10,7 @@ import {
   ResponsiveDataTable,
   StatusBadge,
   type DetailConfig,
-  type MobileItemConfig,
-  type QuickFilterChip
+  type MobileItemConfig
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import {
@@ -303,34 +302,6 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
     }
   });
 
-  const purchaseQuickFilters: QuickFilterChip[] = [
-    { id: 'all', label: t('table.all') },
-    {
-      id: 'payable',
-      label: t('status.payable'),
-      columnId: 'status',
-      value: ['PAYABLE']
-    },
-    {
-      id: 'partial',
-      label: t('status.partial'),
-      columnId: 'status',
-      value: ['PARTIAL']
-    },
-    {
-      id: 'paid',
-      label: t('status.paid'),
-      columnId: 'status',
-      value: ['PAID']
-    },
-    {
-      id: 'cancelled',
-      label: t('status.cancelled'),
-      columnId: 'status',
-      value: ['CANCELLED']
-    }
-  ];
-
   const purchaseDetail: DetailConfig<PurchaseDTO> = useMemo(
     () => ({
       mode: 'sheet',
@@ -413,7 +384,6 @@ export function PurchasesTable({ toolbarAction }: PurchasesTableProps) {
         toolbarAction={toolbarAction}
         mobileItem={purchaseMobileItem}
         detail={purchaseDetail}
-        quickFilters={purchaseQuickFilters}
         isLoading={isFetching}
       />
     </>

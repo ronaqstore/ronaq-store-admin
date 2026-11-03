@@ -1,31 +1,28 @@
 import { formatPkr } from '@/lib/money';
 import { whatsappReminderUrl } from '@/constants/api';
+import type { WhatsAppReceiptData } from '@/types/barcode';
+import type { SaleDTO } from '@/lib/api/types';
 
-export interface WhatsAppReceiptItem {
-  productName: string;
-  quantity: number;
-  unitPrice: number; // integer paisa
-  total: number; // integer paisa
-  imei?: string | null;
-  warrantyDays?: number | null;
+export function buildSaleReceiptData(sale: SaleDTO): WhatsAppReceiptData {
+  return {
+    saleNo: sale.saleNo,
+    saleDate: sale.saleDate ? sale.saleDate.slice(0, 10) : undefined,
+    customerName: sale.customerName,
+    customerPhone: null,
+    items: (sale.items || []).map((it) => ({
+      productName: it.productName,
+      quantity: it.quantity,
+      unitPrice: it.unitPrice,
+      total: it.total,
+      imei: it.imei,
+      warrantyDays: it.warrantyDays
+    })),
+    totalAmount: sale.totalAmount,
+    discount: sale.discount,
+    paymentMethod: 'CASH'
+  };
 }
 
-export interface WhatsAppReceiptData {
-  shopName?: string;
-  saleNo: string;
-  saleDate?: string;
-  customerName?: string | null;
-  customerPhone?: string | null;
-  items: WhatsAppReceiptItem[];
-  totalAmount: number; // integer paisa
-  discount?: number; // integer paisa
-  paidAmount?: number; // integer paisa
-  paymentMethod?: string;
-}
-
-/**
- * Formats a clean, readable receipt suitable for WhatsApp sharing.
- */
 export function buildWhatsAppReceiptText(data: WhatsAppReceiptData): string {
   const shop = data.shopName?.trim() || 'Ronaq Store';
   const lines: string[] = [];
@@ -43,7 +40,7 @@ export function buildWhatsAppReceiptText(data: WhatsAppReceiptData): string {
   lines.push(`🛍️ *PURCHASED ITEMS:*`);
 
   data.items.forEach((item, idx) => {
-    lines.push(``);
+    lines.push('');
     lines.push(`${idx + 1}. *${item.productName}*`);
     if (item.imei) {
       lines.push(`   IMEI: ${item.imei}`);
@@ -60,7 +57,7 @@ export function buildWhatsAppReceiptText(data: WhatsAppReceiptData): string {
     }
   });
 
-  lines.push(``);
+  lines.push('');
   lines.push(`━━━━━━━━━━━━━━━━━━━━━`);
   if (data.discount && data.discount > 0) {
     lines.push(`Discount: -${formatPkr(data.discount)}`);
@@ -75,9 +72,6 @@ export function buildWhatsAppReceiptText(data: WhatsAppReceiptData): string {
   return lines.join('\n');
 }
 
-/**
- * Generates direct wa.me link with URL-encoded text.
- */
 export function buildWhatsAppReceiptUrl(phone: string, text: string): string {
   return whatsappReminderUrl(phone, text);
 }

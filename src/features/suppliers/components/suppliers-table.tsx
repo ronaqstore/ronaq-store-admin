@@ -39,8 +39,7 @@ import {
   createPartyIsActiveColumn,
   PartyActionsHeader,
   buildPartyMobileItem,
-  buildPartyDetail,
-  getActiveStatusQuickFilters
+  buildPartyDetail
 } from '@/components/common/party-table-helpers';
 import { PartyCellAction } from '@/components/common/party-cell-action';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
@@ -231,12 +230,6 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
     [router, t]
   );
 
-  const supplierQuickFilters = getActiveStatusQuickFilters(
-    t('table.all'),
-    t('status.active'),
-    t('status.inactive')
-  );
-
   return (
     <>
       {editSupplier ? (
@@ -271,7 +264,6 @@ export function SuppliersTable({ toolbarAction }: SuppliersTableProps) {
         toolbarAction={toolbarAction}
         mobileItem={supplierMobileItem}
         detail={supplierDetail}
-        quickFilters={supplierQuickFilters}
         isLoading={isFetching}
       />
     </>

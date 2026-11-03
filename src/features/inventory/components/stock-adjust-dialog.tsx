@@ -44,27 +44,7 @@ import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { INVENTORY_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { CreateInventoryAdjustmentInput } from '@/lib/api/types';
 import { formatUnitImeiLabel } from '@/lib/inventory/format-unit-imei-label';
-
-function toProductOption(item: InventoryItemDTO, inStockDot: string): StockAdjustProductOption {
-  return {
-    id: item.id,
-    productName: item.name,
-    trackingType: item.trackingType,
-    inStock: item.inStock,
-    name: `${item.name} · ${item.inStock} ${inStockDot} · ${item.trackingType}`
-  };
-}
-
-function toInventoryItem(option: StockAdjustProductOption): InventoryItemDTO {
-  return {
-    id: option.id,
-    name: option.productName,
-    trackingType: option.trackingType,
-    inStock: option.inStock,
-    stockValue: 0,
-    lowStock: false
-  };
-}
+import { toInventoryItem, toProductOption } from '@/lib/inventory/stock-adjust-helpers';
 
 export function StockAdjustDialog({
   open,
@@ -273,11 +253,10 @@ export function StockAdjustDialog({
       const matched = res.items.find((u) => u.imei1 === scannedImei || u.imei2 === scannedImei);
 
       if (matched) {
-        const item: NamedEntity = {
+        handleUnitChange(matched.id, {
           id: matched.id,
           name: formatUnitImeiLabel(matched.imei1, matched.imei2)
-        };
-        handleUnitChange(matched.id, item);
+        });
         toast.success(t('scanner.unitSelected', { imei: scannedImei }));
       } else {
         toast.warning(t('scanner.unitNotFoundInStock', { imei: scannedImei }));

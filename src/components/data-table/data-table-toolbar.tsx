@@ -107,24 +107,29 @@ export function DataTableToolbar<TData>({
               className='h-11 min-h-11 min-w-0 flex-1'
             />
           ) : null}
-          <Button
-            type='button'
-            variant='outline'
-            className='relative h-11 shrink-0 gap-1.5 px-3'
-            onClick={() => setFiltersOpen(true)}
-            aria-label={t('table.filters')}
-          >
-            <Icons.filter className='size-4' />
-            <span className='hidden min-[380px]:inline'>{t('table.filters')}</span>
-            {filterCount > 0 ? (
-              <Badge variant='secondary' className='ms-0.5 h-5 min-w-5 px-1'>
-                {filterCount}
-              </Badge>
+          <div className='flex shrink-0 items-center gap-2'>
+            <Button
+              type='button'
+              variant='outline'
+              className='relative h-11 shrink-0 gap-1.5 px-3'
+              onClick={() => setFiltersOpen(true)}
+              aria-label={t('table.filters')}
+            >
+              <Icons.filter className='size-4' />
+              <span className='hidden min-[380px]:inline'>{t('table.filters')}</span>
+              {filterCount > 0 ? (
+                <Badge variant='secondary' className='ms-0.5 h-5 min-w-5 px-1'>
+                  {filterCount}
+                </Badge>
+              ) : null}
+            </Button>
+            {children ? (
+              <div className='hidden sm:flex items-center gap-2 [&_button]:h-11'>{children}</div>
             ) : null}
-          </Button>
+          </div>
         </div>
         {children ? (
-          <div className='no-scrollbar flex min-w-0 w-full items-center gap-1.5 overflow-x-auto py-0.5 sm:flex-wrap sm:overflow-visible'>
+          <div className='no-scrollbar flex min-w-0 w-full items-center gap-1.5 overflow-x-auto py-0.5 sm:hidden [&_button]:h-11'>
             {children}
           </div>
         ) : null}
@@ -153,7 +158,7 @@ export function DataTableToolbar<TData>({
             aria-label={t('table.resetFilters')}
             variant='outline'
             size='sm'
-            className='border-dashed shrink-0'
+            className='h-8 border-dashed shrink-0'
             onClick={onReset}
           >
             <Icons.close />

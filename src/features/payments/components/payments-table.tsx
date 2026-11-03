@@ -29,7 +29,7 @@ import {
   parseRupeeMoneyRange
 } from '@/lib/dukaan/money-range-filter';
 import type { PaymentDTO } from '@/lib/api/types';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { paymentsQueryOptions } from '../api/queries';
 import type { PaymentsListFilters } from '@/types';
 import { CancelPaymentDialog } from './cancel-payment-dialog';
@@ -80,47 +80,60 @@ const paymentMobileItem: MobileItemConfig<PaymentDTO> = {
 
 export { formatPaymentMethod };
 
-const paymentDetail: DetailConfig<PaymentDTO> = {
-  mode: 'sheet',
-  title: (row: PaymentDTO) => `Payment from ${row.customerName || 'Walk-in'}`,
-  badge: (row: PaymentDTO) => ({
-    label: row.status === 'ACTIVE' ? 'Active' : 'Cancelled',
-    tone: row.status === 'ACTIVE' ? 'success' : 'danger'
-  }),
-  value: (row: PaymentDTO) => formatPkr(row.amount),
-  sections: (row: PaymentDTO) => {
-    const method = formatPaymentMethod(row.method, row.notes);
-    let notes = row.notes || '—';
-    const match = row.notes?.match(/\[Method:\s*([^\]]+)\]/i);
-    if (match) {
-      const cleaned = notes.replace(/\[Method:\s*[^\]]+\]\s*/i, '').trim();
-      notes = cleaned || '—';
-    }
-    return [
-      {
-        title: 'Payment Details',
-        fields: [
-          { label: 'Date', value: formatIsoDate(row.paymentDate) },
-          { label: 'Customer', value: row.customerName || 'Walk-in' },
-          {
-            label: 'Applied To',
-            value: row.saleNo ? `Sale #${row.saleNo}` : 'Opening balance'
-          },
-          { label: 'Amount', value: formatPkr(row.amount) },
-          { label: 'Method', value: method },
-          { label: 'Status', value: row.status === 'ACTIVE' ? 'Active' : 'Cancelled' },
-          { label: 'Notes', value: notes }
-        ]
-      }
-    ];
-  }
-};
-
 export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
   const t = useT();
 
   const [recordOpen, setRecordOpen] = useState(false);
   const [cancelPaymentTarget, setCancelPaymentTarget] = useState<PaymentDTO | null>(null);
+
+  const paymentDetail: DetailConfig<PaymentDTO> = useMemo(
+    () => ({
+      mode: 'sheet',
+      title: (row: PaymentDTO) => `Payment from ${row.customerName || 'Walk-in'}`,
+      badge: (row: PaymentDTO) => ({
+        label: row.status === 'ACTIVE' ? 'Active' : 'Cancelled',
+        tone: row.status === 'ACTIVE' ? 'success' : 'danger'
+      }),
+      value: (row: PaymentDTO) => formatPkr(row.amount),
+      sections: (row: PaymentDTO) => {
+        const method = formatPaymentMethod(row.method, row.notes);
+        let notes = row.notes || '—';
+        const match = row.notes?.match(/\[Method:\s*([^\]]+)\]/i);
+        if (match) {
+          const cleaned = notes.replace(/\[Method:\s*[^\]]+\]\s*/i, '').trim();
+          notes = cleaned || '—';
+        }
+        return [
+          {
+            title: 'Payment Details',
+            fields: [
+              { label: 'Date', value: formatIsoDate(row.paymentDate) },
+              { label: 'Customer', value: row.customerName || 'Walk-in' },
+              {
+                label: 'Applied To',
+                value: row.saleNo ? `Sale #${row.saleNo}` : 'Opening balance'
+              },
+              { label: 'Amount', value: formatPkr(row.amount) },
+              { label: 'Method', value: method },
+              { label: 'Status', value: row.status === 'ACTIVE' ? 'Active' : 'Cancelled' },
+              { label: 'Notes', value: notes }
+            ]
+          }
+        ];
+      },
+      actions: (row: PaymentDTO) =>
+        row.status === 'ACTIVE'
+          ? [
+              {
+                label: t('common.cancel'),
+                variant: 'destructive' as const,
+                onClick: () => setCancelPaymentTarget(row)
+              }
+            ]
+          : []
+    }),
+    [t]
+  );
 
   const sortableColumnIds = ['customerName', 'paymentDate', 'amount'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
@@ -324,7 +337,7 @@ export function PaymentsTable({ toolbarAction }: PaymentsTableProps) {
       <Button
         type='button'
         size='sm'
-        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs w-full sm:w-auto'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs hidden md:inline-flex'
         onClick={handleOpenRecord}
       >
         <Icons.add className='h-3.5 w-3.5 shrink-0' />

@@ -63,23 +63,23 @@ export default function Header() {
           type='button'
           variant='ghost'
           size='icon'
-          className='size-8 lg:hidden'
+          className='size-8 md:hidden'
           aria-label={t('nav.search')}
           onClick={query.toggle}
         >
           <Icons.search className='size-4' />
         </Button>
-        <div className='hidden lg:flex'>
+        <div className='hidden md:flex'>
           <SearchInput />
         </div>
         <div className='hidden sm:block'>
           <ThemeModeToggle />
         </div>
-        <div className='hidden lg:block'>
-          <ThemeSelector />
-        </div>
+        <ThemeSelector />
         <SubscriptionBadge />
-        <NotificationCenter />
+        <div className='hidden'>
+          <NotificationCenter />
+        </div>
         <UserNav />
       </div>
     </header>

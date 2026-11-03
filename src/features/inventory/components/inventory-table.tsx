@@ -12,8 +12,7 @@ import {
   ResponsiveDataTable,
   StatusBadge,
   type DetailConfig,
-  type MobileItemConfig,
-  type QuickFilterChip
+  type MobileItemConfig
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
@@ -392,28 +391,6 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
     ]
   };
 
-  const inventoryQuickFilters: QuickFilterChip[] = [
-    { id: 'all', label: t('table.all') },
-    {
-      id: 'low',
-      label: t('status.lowStock'),
-      columnId: 'lowStock',
-      value: ['true']
-    },
-    {
-      id: 'serialized',
-      label: 'Serialized',
-      columnId: 'trackingType',
-      value: ['SERIALIZED']
-    },
-    {
-      id: 'quantity',
-      label: 'Quantity',
-      columnId: 'trackingType',
-      value: ['QUANTITY']
-    }
-  ];
-
   const { table } = useDataTable({
     data: items,
     columns,
@@ -450,7 +427,7 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
             <Button
               type='button'
               size='sm'
-              className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs w-full sm:w-auto'
+              className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs hidden md:inline-flex'
               onClick={handleOpenAdjustStock}
             >
               <IconPlus className='me-1.5 h-4 w-4 shrink-0' />
@@ -460,7 +437,6 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
         }
         mobileItem={inventoryMobileItem}
         detail={inventoryDetail}
-        quickFilters={inventoryQuickFilters}
         isLoading={isFetching}
       />
 

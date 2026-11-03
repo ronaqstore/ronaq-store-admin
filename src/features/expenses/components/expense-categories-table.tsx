@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
 import { parseAsString, useQueryState } from 'nuqs';
@@ -86,29 +86,6 @@ const categoryMobileItem: MobileItemConfig<ExpenseCategoryDTO> = {
   meta: [(row: ExpenseCategoryDTO) => (row.createdAt ? formatDate(row.createdAt) : '—')]
 };
 
-const categoryDetail: DetailConfig<ExpenseCategoryDTO> = {
-  mode: 'sheet',
-  title: (row: ExpenseCategoryDTO) => row.name,
-  badge: (row: ExpenseCategoryDTO) => ({
-    label: row.isActive ? t('status.active') : t('status.inactive'),
-    status: row.isActive ? 'ACTIVE' : 'INACTIVE'
-  }),
-  sections: (row: ExpenseCategoryDTO) => [
-    {
-      title: t('table.col.category'),
-      fields: [
-        { label: t('table.col.name'), value: row.name },
-        {
-          label: t('table.col.status'),
-          value: row.isActive ? t('status.active') : t('status.inactive')
-        },
-        { label: t('table.col.createdAt'), value: row.createdAt ? formatDate(row.createdAt) : '—' },
-        { label: t('table.col.updatedAt'), value: row.updatedAt ? formatDate(row.updatedAt) : '—' }
-      ]
-    }
-  ]
-};
-
 export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTableProps) {
   const t = useT();
   const qc = useQueryClient();
@@ -117,6 +94,59 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
   const [editCategory, setEditCategory] = useState<ExpenseCategoryDTO | null>(null);
   const [deactivateTarget, setDeactivateTarget] = useState<ExpenseCategoryDTO | null>(null);
   const [activateTarget, setActivateTarget] = useState<ExpenseCategoryDTO | null>(null);
+
+  const categoryDetail: DetailConfig<ExpenseCategoryDTO> = useMemo(
+    () => ({
+      mode: 'sheet',
+      title: (row: ExpenseCategoryDTO) => row.name,
+      badge: (row: ExpenseCategoryDTO) => ({
+        label: row.isActive ? t('status.active') : t('status.inactive'),
+        status: row.isActive ? 'ACTIVE' : 'INACTIVE'
+      }),
+      sections: (row: ExpenseCategoryDTO) => [
+        {
+          title: t('table.col.category'),
+          fields: [
+            { label: t('table.col.name'), value: row.name },
+            {
+              label: t('table.col.status'),
+              value: row.isActive ? t('status.active') : t('status.inactive')
+            },
+            {
+              label: t('table.col.createdAt'),
+              value: row.createdAt ? formatDate(row.createdAt) : '—'
+            },
+            {
+              label: t('table.col.updatedAt'),
+              value: row.updatedAt ? formatDate(row.updatedAt) : '—'
+            }
+          ]
+        }
+      ],
+      actions: (row: ExpenseCategoryDTO) => [
+        {
+          label: t('common.edit'),
+          onClick: () => setEditCategory(row)
+        },
+        ...(row.isActive
+          ? [
+              {
+                label: t('common.deactivate'),
+                variant: 'destructive' as const,
+                onClick: () => setDeactivateTarget(row)
+              }
+            ]
+          : [
+              {
+                label: t('common.activate'),
+                variant: 'secondary' as const,
+                onClick: () => setActivateTarget(row)
+              }
+            ])
+      ]
+    }),
+    [t]
+  );
 
   const sortableColumnIds = ['name', 'createdAt'];
   const { params, sortBy, sortOrder, getPageCount } = useDukaanListParams<ExpenseCategorySortField>(
@@ -281,7 +311,7 @@ export function ExpenseCategoriesTable({ toolbarAction }: ExpenseCategoriesTable
       <Button
         type='button'
         size='sm'
-        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs w-full sm:w-auto'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs hidden md:inline-flex'
         onClick={() => setCreateOpen(true)}
       >
         <Icons.add className='h-3.5 w-3.5 shrink-0' />

@@ -9,8 +9,7 @@ import { toastSuccessAfterClose } from '@/lib/toast-success';
 import {
   ResponsiveDataTable,
   type DetailConfig,
-  type MobileItemConfig,
-  type QuickFilterChip
+  type MobileItemConfig
 } from '@/components/data-table';
 import { DUKAAN_DEFAULT_PAGE_SIZE, useDukaanListParams } from '@/components/data-table/list-params';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
@@ -37,7 +36,6 @@ import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { PLATFORM_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import {
   PLATFORM_ACCESS_STATUS_LABEL_KEY,
-  PLATFORM_ACCESS_STATUS_VALUES,
   platformAccessStatusOptions
 } from '../constants/filters';
 import { ShopStatusBadge } from './shop-status-badge';
@@ -427,22 +425,11 @@ export function PlatformShopsTable() {
     }
   });
 
-  const shopQuickFilters: QuickFilterChip[] = [
-    { id: 'all', label: t('table.all') },
-    ...PLATFORM_ACCESS_STATUS_VALUES.map((value) => ({
-      id: value,
-      label: t(PLATFORM_ACCESS_STATUS_LABEL_KEY[value]),
-      columnId: 'accessStatus',
-      value: [value]
-    }))
-  ];
-
   return (
     <ResponsiveDataTable
       table={table}
       mobileItem={shopMobileItem}
       detail={shopDetail}
-      quickFilters={shopQuickFilters}
       isLoading={isFetching}
     />
   );

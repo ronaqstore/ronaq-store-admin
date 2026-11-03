@@ -36,7 +36,7 @@ import { SaleLineCard } from './sale-line-card';
 import { SaleTotalsSummary } from './sale-totals-summary';
 import { SaleScanBar } from './sale-scan-bar';
 import { SaleWhatsAppShareDialog } from './sale-whatsapp-share-dialog';
-import type { WhatsAppReceiptData } from '../helpers/whatsapp-receipt-formatter';
+import type { WhatsAppReceiptData } from '@/types/barcode';
 import { OverdraftAlert } from '@/components/common/overdraft-alert';
 import type { ResponseResolveScanDto, SaleDTO } from '@/lib/api/types';
 import type {
@@ -317,8 +317,6 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
           }}
         />
       </FieldGroup>
-
-      {/* Universal Quick Scan-to-Sell Bar */}
       <div className='rounded-xl border border-primary/20 bg-primary/5 p-2.5 sm:p-3'>
         <p className='mb-1.5 text-xs font-semibold text-primary flex items-center gap-1.5'>
           <Icons.scan className='h-3.5 w-3.5' />

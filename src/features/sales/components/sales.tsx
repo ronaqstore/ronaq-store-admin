@@ -37,6 +37,11 @@ const ReturnSaleDialog = dynamic(
   () => import('./return-sale-dialog').then((mod) => mod.ReturnSaleDialog),
   { ssr: false }
 );
+const SaleWhatsAppShareDialog = dynamic(
+  () => import('./sale-whatsapp-share-dialog').then((mod) => mod.SaleWhatsAppShareDialog),
+  { ssr: false }
+);
+import { buildSaleReceiptData } from '../helpers/whatsapp-receipt-formatter';
 import type {
   SalesHeaderActionProps,
   SalesListClientProps,
@@ -49,7 +54,7 @@ export function SalesHeaderAction({ className, onAdd }: SalesHeaderActionProps) 
   return (
     <Button
       type='button'
-      className={cn('h-8 gap-1.5 text-xs w-full sm:w-auto', className)}
+      className={cn('h-8 gap-1.5 text-xs hidden md:inline-flex', className)}
       onClick={onAdd}
     >
       <Icons.add className='me-2 h-4 w-4' />
@@ -79,6 +84,7 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
 
   const [cancelOpen, setCancelOpen] = useState(false);
   const [returnOpen, setReturnOpen] = useState(false);
+  const [whatsAppOpen, setWhatsAppOpen] = useState(false);
 
   const activePayments = (data.payments ?? []).filter((p) => p.status === 'ACTIVE');
   const totalPaid = activePayments.reduce((acc, p) => acc + p.amount, 0);
@@ -93,6 +99,13 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
       )}
       {returnOpen && (
         <ReturnSaleDialog sale={data} open={returnOpen} onOpenChange={setReturnOpen} />
+      )}
+      {whatsAppOpen && (
+        <SaleWhatsAppShareDialog
+          open={whatsAppOpen}
+          onOpenChange={setWhatsAppOpen}
+          receiptData={buildSaleReceiptData(data)}
+        />
       )}
 
       <div className='flex flex-wrap items-start justify-between gap-3'>
@@ -128,6 +141,17 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
             <Icons.page className='me-1.5 h-4 w-4' />
             {t('dukaan.sale.printReceipt')}
           </Link>
+
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            className='h-8'
+            onClick={() => setWhatsAppOpen(true)}
+          >
+            <Icons.chat className='me-1.5 h-3.5 w-3.5 text-emerald-500' />
+            {t('common.whatsapp')}
+          </Button>
 
           {!isCancelled && (
             <Button

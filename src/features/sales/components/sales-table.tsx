@@ -10,8 +10,7 @@ import {
   ResponsiveDataTable,
   StatusBadge,
   type DetailConfig,
-  type MobileItemConfig,
-  type QuickFilterChip
+  type MobileItemConfig
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import {
@@ -42,6 +41,7 @@ import { salesQueryOptions } from '../api/queries';
 import type { SalesListFilters } from '@/types';
 import dynamic from 'next/dynamic';
 import { SaleRowActions } from './sale-row-actions';
+import { buildSaleReceiptData } from '../helpers/whatsapp-receipt-formatter';
 import {
   SALE_MONEY_RANGE_RUPEES,
   customerAsyncFilter,
@@ -66,6 +66,10 @@ const ReturnSaleDialog = dynamic(
   () => import('./return-sale-dialog').then((mod) => mod.ReturnSaleDialog),
   { ssr: false }
 );
+const SaleWhatsAppShareDialog = dynamic(
+  () => import('./sale-whatsapp-share-dialog').then((mod) => mod.SaleWhatsAppShareDialog),
+  { ssr: false }
+);
 
 const saleMobileItem: MobileItemConfig<SaleDTO> = {
   leading: 'icon',
@@ -87,6 +91,7 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
   const router = useRouter();
   const [peekCancelSale, setPeekCancelSale] = useState<SaleDTO | null>(null);
   const [peekReturnSale, setPeekReturnSale] = useState<SaleDTO | null>(null);
+  const [peekWhatsAppSale, setPeekWhatsAppSale] = useState<SaleDTO | null>(null);
 
   const sortableColumnIds = ['saleDate', 'saleNo', 'totalAmount', 'paid', 'outstanding'];
   const { params, filters, sortBy, sortOrder, getPageCount } = useDukaanListParams<
@@ -277,34 +282,6 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
     }
   });
 
-  const salesQuickFilters: QuickFilterChip[] = [
-    { id: 'all', label: t('table.all') },
-    {
-      id: 'udhar',
-      label: t('status.udhar'),
-      columnId: 'status',
-      value: ['UDHAR']
-    },
-    {
-      id: 'partial',
-      label: t('status.partial'),
-      columnId: 'status',
-      value: ['PARTIAL']
-    },
-    {
-      id: 'paid',
-      label: t('status.paid'),
-      columnId: 'status',
-      value: ['PAID']
-    },
-    {
-      id: 'cancelled',
-      label: t('status.cancelled'),
-      columnId: 'status',
-      value: ['CANCELLED']
-    }
-  ];
-
   const saleDetail: DetailConfig<SaleDTO> = useMemo(
     () => ({
       mode: 'sheet',
@@ -365,6 +342,11 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
             label: t('common.view'),
             onClick: () => router.push(`/dashboard/sales/${row.id}`)
           },
+          {
+            label: t('common.whatsapp'),
+            variant: 'secondary' as const,
+            onClick: () => setPeekWhatsAppSale(row)
+          },
           ...(!isCancelled
             ? [
                 {
@@ -409,12 +391,20 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
           }}
         />
       ) : null}
+      {peekWhatsAppSale ? (
+        <SaleWhatsAppShareDialog
+          open
+          onOpenChange={(open: boolean) => {
+            if (!open) setPeekWhatsAppSale(null);
+          }}
+          receiptData={buildSaleReceiptData(peekWhatsAppSale)}
+        />
+      ) : null}
       <ResponsiveDataTable
         table={table}
         toolbarAction={toolbarAction}
         mobileItem={saleMobileItem}
         detail={saleDetail}
-        quickFilters={salesQuickFilters}
         isLoading={isFetching}
       />
     </>

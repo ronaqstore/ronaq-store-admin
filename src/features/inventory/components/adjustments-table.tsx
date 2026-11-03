@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button';
 import {
   ResponsiveDataTable,
   type DetailConfig,
-  type MobileItemConfig,
-  type QuickFilterChip
+  type MobileItemConfig
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
@@ -289,62 +288,6 @@ export function AdjustmentsTable({ toolbarAction, mode = 'adjustments' }: Adjust
     ]
   };
 
-  const quickFilters: QuickFilterChip[] = isMovements
-    ? [
-        { id: 'all', label: t('table.all') },
-        {
-          id: 'purchase',
-          label: 'Purchase',
-          columnId: 'type',
-          value: ['PURCHASE']
-        },
-        {
-          id: 'sale',
-          label: 'Sale',
-          columnId: 'type',
-          value: ['SALE']
-        },
-        {
-          id: 'adjustment',
-          label: 'Adjustment',
-          columnId: 'type',
-          value: ['ADJUSTMENT']
-        },
-        {
-          id: 'damaged',
-          label: 'Damaged',
-          columnId: 'type',
-          value: ['DAMAGED']
-        },
-        {
-          id: 'lost',
-          label: 'Lost',
-          columnId: 'type',
-          value: ['LOST']
-        }
-      ]
-    : [
-        { id: 'all', label: t('table.all') },
-        {
-          id: 'adjustment',
-          label: 'Adjustment',
-          columnId: 'type',
-          value: ['ADJUSTMENT']
-        },
-        {
-          id: 'damaged',
-          label: 'Damaged',
-          columnId: 'type',
-          value: ['DAMAGED']
-        },
-        {
-          id: 'lost',
-          label: 'Lost',
-          columnId: 'type',
-          value: ['LOST']
-        }
-      ];
-
   const { table } = useDataTable({
     data: items,
     columns,
@@ -364,7 +307,7 @@ export function AdjustmentsTable({ toolbarAction, mode = 'adjustments' }: Adjust
       <Button
         type='button'
         size='sm'
-        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs w-full sm:w-auto'
+        className='h-8 min-h-8 shrink-0 whitespace-nowrap gap-1.5 text-xs hidden md:inline-flex'
         onClick={() => setAdjustOpen(true)}
       >
         <IconPlus className='me-1.5 h-4 w-4 shrink-0' />
@@ -379,7 +322,6 @@ export function AdjustmentsTable({ toolbarAction, mode = 'adjustments' }: Adjust
         toolbarAction={resolvedToolbar}
         mobileItem={mobileItem}
         detail={detail}
-        quickFilters={quickFilters}
         isLoading={isFetching}
       />
 

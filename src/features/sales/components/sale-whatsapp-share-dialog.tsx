@@ -17,15 +17,9 @@ import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
 import {
   buildWhatsAppReceiptText,
-  buildWhatsAppReceiptUrl,
-  type WhatsAppReceiptData
+  buildWhatsAppReceiptUrl
 } from '../helpers/whatsapp-receipt-formatter';
-
-export interface SaleWhatsAppShareDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  receiptData: WhatsAppReceiptData | null;
-}
+import type { SaleWhatsAppShareDialogProps } from '@/types/barcode';
 
 export function SaleWhatsAppShareDialog({
   open,
