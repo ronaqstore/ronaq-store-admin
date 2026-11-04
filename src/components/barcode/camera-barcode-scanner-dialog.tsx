@@ -21,6 +21,8 @@ import type {
 } from '@/types/barcode';
 import {
   cropVideoToReticle,
+  preloadOcrWorker,
+  preprocessForOcr,
   recognizeNumbersFromCanvas,
   type OcrCandidate
 } from '@/lib/barcode/ocr-number-extractor';
@@ -238,6 +240,13 @@ export function CameraBarcodeScannerDialog({
     }
   }, [open, selectedCameraId, startScanner, stopScanner]);
 
+  // Warm up the OCR engine as soon as the user switches to "Read Numbers"
+  React.useEffect(() => {
+    if (open && scanType === 'ocr') {
+      preloadOcrWorker();
+    }
+  }, [open, scanType]);
+
   const handleToggleTorch = async () => {
     const scanner = scannerRef.current;
     if (!scanner || !hasTorch) return;
@@ -286,25 +295,30 @@ export function CameraBarcodeScannerDialog({
     setWarningMessage(null);
 
     try {
-      // 1. Try cropped central area first (fastest)
-      const canvas = cropVideoToReticle(video, {
-        xRatio: 0.1,
+      const centerCrop = cropVideoToReticle(video, {
+        xRatio: 0.05,
         yRatio: 0.2,
-        widthRatio: 0.8,
+        widthRatio: 0.9,
         heightRatio: 0.6
       });
+      const fullFrame = cropVideoToReticle(video, {
+        xRatio: 0,
+        yRatio: 0,
+        widthRatio: 1,
+        heightRatio: 1
+      });
 
-      let found = await recognizeNumbersFromCanvas(canvas);
+      // Try progressively wider / rawer inputs until a 15-digit number is found
+      const attempts: HTMLCanvasElement[] = [
+        preprocessForOcr(centerCrop),
+        centerCrop,
+        preprocessForOcr(fullFrame)
+      ];
 
-      // 2. Fallback to full frame if tight crop missed the number
-      if (found.length === 0) {
-        const fullCanvas = cropVideoToReticle(video, {
-          xRatio: 0,
-          yRatio: 0,
-          widthRatio: 1,
-          heightRatio: 1
-        });
-        found = await recognizeNumbersFromCanvas(fullCanvas);
+      let found: OcrCandidate[] = [];
+      for (const attempt of attempts) {
+        found = await recognizeNumbersFromCanvas(attempt);
+        if (found.some((c) => c.isLuhnValid)) break;
       }
 
       if (found.length === 0) {
@@ -322,7 +336,7 @@ export function CameraBarcodeScannerDialog({
       }
     } catch (err) {
       console.error('[OCR Error]', err);
-      setWarningMessage(t('scanner.ocrNoNumbersFound'));
+      setWarningMessage(t('scanner.scanFailed'));
     } finally {
       setIsOcrScanning(false);
     }

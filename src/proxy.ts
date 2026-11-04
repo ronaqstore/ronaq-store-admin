@@ -47,6 +47,7 @@ function handleAuthRedirects(req: NextRequest, session: AuthRedirectSession | nu
     pathname === '/manifest.webmanifest' ||
     pathname.startsWith('/icons/') ||
     pathname.startsWith('/screenshots/') ||
+    pathname.startsWith('/tesseract/') ||
     pathname === '/favicon.ico' ||
     pathname.endsWith('.js') ||
     pathname.endsWith('.map') ||
@@ -101,6 +102,6 @@ export const config = {
   matcher: [
     '/',
     '/(en|ur|ps|roman)/:path*',
-    '/((?!api|_next|_vercel|serwist|monitoring|icons|manifest.webmanifest|sw\\.js|sw\\.js\\.map|favicon\\.ico|~offline|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)'
+    '/((?!api|_next|_vercel|serwist|monitoring|icons|tesseract|manifest.webmanifest|sw\\.js|sw\\.js\\.map|favicon\\.ico|~offline|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|wasm|gz)).*)'
   ]
 };
