@@ -24,6 +24,17 @@ import { shopProfitWaterfallQueryOptions, shopSalesTrendQueryOptions } from '../
 import { useT } from '@/i18n/use-t';
 import type { DashboardRow2Props } from '@/types/dashboard';
 
+function formatWaterfallStepLabel(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes('cogs') || lower.includes('cost of goods')) return 'COGS';
+  if (lower.includes('operating') || lower.includes('expense')) return 'Expenses';
+  if (lower.includes('gross') || lower.includes('sale')) return 'Sales';
+  if (lower.includes('refund') || lower.includes('return')) return 'Returns';
+  if (lower.includes('net') || lower.includes('profit')) return 'Net Profit';
+  if (name.length > 12) return name.slice(0, 10) + '…';
+  return name;
+}
+
 export function DashboardRow2SalesProfit({ params, compare = false }: DashboardRow2Props) {
   const t = useT();
 
@@ -80,6 +91,7 @@ export function DashboardRow2SalesProfit({ params, compare = false }: DashboardR
   const waterfallSteps = waterfall?.steps ?? [];
   const waterfallChartData = waterfallSteps.map((step) => ({
     name: step.name,
+    shortName: formatWaterfallStepLabel(step.name),
     amount: Math.abs(step.amount),
     signedAmount: step.amount,
     displayAmount: formatPkrCompact(step.amount),
@@ -224,10 +236,15 @@ export function DashboardRow2SalesProfit({ params, compare = false }: DashboardR
           <ResponsiveContainer width='100%' height={320}>
             <ComposedChart
               data={waterfallChartData}
-              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+              margin={{ top: 10, right: 10, left: -10, bottom: 6 }}
             >
               <CartesianGrid strokeDasharray='3 3' className='stroke-muted/40' />
-              <XAxis dataKey='name' className='text-[10px]' tickLine={false} interval={0} />
+              <XAxis
+                dataKey='shortName'
+                className='text-[10px] sm:text-xs'
+                tickLine={false}
+                interval={0}
+              />
               <YAxis
                 tickFormatter={(val: number) => formatPkrCompact(val)}
                 className='text-xs'
