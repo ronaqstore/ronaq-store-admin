@@ -157,7 +157,7 @@ export async function getOcrWorker(): Promise<any> {
   }
 
   workerInitPromise = (async () => {
-    const { createWorker } = await import('tesseract.js');
+    const { createWorker, PSM } = await import('tesseract.js');
     const isBrowser = typeof window !== 'undefined';
 
     try {
@@ -176,7 +176,7 @@ export async function getOcrWorker(): Promise<any> {
 
       await worker.setParameters({
         tessedit_char_whitelist: '0123456789 -:IMEIimeiSlotSLOTSimSIM',
-        tessedit_pageseg_mode: '6'
+        tessedit_pageseg_mode: PSM.SINGLE_BLOCK
       });
 
       cachedWorker = worker;
