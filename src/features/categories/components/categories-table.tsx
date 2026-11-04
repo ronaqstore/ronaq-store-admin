@@ -24,7 +24,6 @@ import {
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
   parseActiveStatusFacet,
-  parseBooleanFacet,
   useDukaanListParams
 } from '@/components/data-table/list-params';
 import { useQueryState, parseAsString } from 'nuqs';

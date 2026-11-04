@@ -104,7 +104,7 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
   };
 
   return (
-    <DialogContent className='max-h-[92vh] overflow-y-auto w-full sm:max-w-lg no-scrollbar'>
+    <DialogContent className='max-h-[92dvh] overflow-y-auto w-full sm:max-w-lg no-scrollbar'>
       <DialogHeader>
         <DialogTitle>{t('platform.createShopTitle')}</DialogTitle>
         <DialogDescription>{t('platform.createShopDescription')}</DialogDescription>

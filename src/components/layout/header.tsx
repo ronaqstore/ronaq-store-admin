@@ -46,7 +46,7 @@ export default function Header() {
             <Icons.chevronLeft className='size-4 rtl:rotate-180 sm:size-5' />
           </Button>
         ) : (
-          <SidebarTrigger className='-ms-1' aria-label={t('nav.menu')} />
+          <SidebarTrigger className='-ms-1 size-9 sm:size-8' aria-label={t('nav.menu')} />
         )}
         <Separator
           orientation='vertical'

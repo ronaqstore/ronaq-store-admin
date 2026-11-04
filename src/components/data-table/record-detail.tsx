@@ -85,7 +85,7 @@ export function RecordDetail<TData>({
         className={cn(
           'flex flex-col gap-0',
           presentation === 'sheet' &&
-            'max-h-[85dvh] rounded-t-[var(--radius)] pb-[max(0.5rem,env(safe-area-inset-bottom))]',
+            'max-h-[85dvh] sm:max-w-xl md:max-w-2xl sm:mx-auto sm:inset-x-auto sm:border-x sm:border-t rounded-t-2xl pb-[max(0.5rem,calc(env(safe-area-inset-bottom)-14px))]',
           presentation === 'side' && 'w-full sm:max-w-md'
         )}
       >
@@ -138,7 +138,7 @@ export function RecordDetail<TData>({
           <SheetFooter
             className={cn(
               'sticky bottom-0 z-10 border-t border-border bg-background px-3 py-2.5 sm:px-4 sm:py-3',
-              'pb-[max(0.75rem,env(safe-area-inset-bottom))]'
+              'pb-[max(0.75rem,calc(env(safe-area-inset-bottom)-14px))]'
             )}
           >
             <div className='flex w-full items-center gap-1.5 sm:gap-2'>

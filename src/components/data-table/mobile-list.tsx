@@ -69,7 +69,7 @@ export function MobileList<TData>({
 
     if (isCards) {
       return (
-        <div className='grid grid-cols-2 gap-3' aria-busy>
+        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3' aria-busy>
           {Array.from({ length: count }).map((_, i) => (
             <CardItemSkeleton key={i} />
           ))}
@@ -102,7 +102,7 @@ export function MobileList<TData>({
       <ul
         className={cn(
           isCards
-            ? 'grid grid-cols-2 gap-3'
+            ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3'
             : 'overflow-hidden rounded-[var(--radius)] border border-border'
         )}
       >

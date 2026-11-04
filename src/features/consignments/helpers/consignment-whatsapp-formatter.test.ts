@@ -2,8 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   buildConsignmentWhatsAppText,
-  buildConsignmentWhatsAppUrl,
-  type ConsignmentWhatsAppOptions
+  buildConsignmentWhatsAppUrl
 } from './consignment-whatsapp-formatter.ts';
 import type { ConsignmentDTO } from '@/lib/api/types';
 

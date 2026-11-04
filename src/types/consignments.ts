@@ -99,6 +99,12 @@ export interface ConsignmentSlipModalState {
   type: 'intake' | 'settlement';
 }
 
+export interface ConsignmentWhatsAppModalState {
+  open: boolean;
+  consignment: ConsignmentDTO | null;
+  type: 'intake' | 'settlement';
+}
+
 export interface ConsignmentsHeaderActionProps {
   className?: string;
   onAdd: () => void;
@@ -116,4 +122,27 @@ export interface ConsignmentConsignorSectionProps {
   onConsignorCnicChange: (val: string) => void;
   onAddNewCustomerClick?: () => void;
   extraCustomers?: CustomerDTO[];
+}
+
+export interface ConsignmentWhatsAppShareDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  consignment: ConsignmentDTO | null;
+  type?: 'intake' | 'settlement';
+}
+
+export interface ConsignmentWhatsAppOptions {
+  consignment: ConsignmentDTO;
+  shopName?: string;
+  shopPhone?: string;
+  type: 'intake' | 'settlement';
+}
+
+export interface BuildConsignmentDetailOptions {
+  t: (key: string) => string;
+  onPrintIntakeSlip: (consignment: ConsignmentDTO) => void;
+  onPrintSettlementSlip: (consignment: ConsignmentDTO) => void;
+  onSettle: (consignment: ConsignmentDTO) => void;
+  onReturn: (consignment: ConsignmentDTO) => void;
+  onCancel: (consignment: ConsignmentDTO) => void;
 }

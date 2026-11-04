@@ -182,7 +182,7 @@ export function RecordExpenseDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className='max-h-[92vh] overflow-y-auto w-full sm:max-w-lg no-scrollbar'>
+        <DialogContent className='max-h-[92dvh] overflow-y-auto w-full sm:max-w-lg no-scrollbar'>
           <DialogHeader>
             <DialogTitle>{t('expenses.recordExpenseTitle')}</DialogTitle>
             <DialogDescription>{t('expenses.recordExpenseDesc')}</DialogDescription>

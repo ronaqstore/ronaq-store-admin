@@ -41,14 +41,14 @@ export function PurchaseCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='flex max-h-[90vh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl'>
+      <DialogContent className='flex max-h-[90dvh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl'>
         <DialogHeader className='shrink-0 px-4 pt-4 pe-12'>
           <DialogTitle>{t('dukaan.purchase.newTitle')}</DialogTitle>
           <DialogDescription className='sr-only'>
             {t('dukaan.purchase.newDescription')}
           </DialogDescription>
         </DialogHeader>
-        <div className='no-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-4'>
+        <div className='no-scrollbar min-h-0 flex-1 overflow-y-auto touch-pan-y overscroll-y-contain [webkit-overflow-scrolling:touch] px-4 py-4'>
           <Suspense fallback={<PurchaseCreateFormSkeleton />}>
             <PurchaseCreateForm
               onDone={() => onOpenChange(false)}

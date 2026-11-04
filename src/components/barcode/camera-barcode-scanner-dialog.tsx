@@ -17,73 +17,21 @@ import { sanitizeBarcode, sanitizeImei } from '@/lib/barcode/imei-sanitizer';
 import type {
   CameraBarcodeScannerDialogProps,
   CameraDeviceOption,
+  OcrCandidate,
   TorchConstraint
 } from '@/types/barcode';
 import {
   cropVideoToReticle,
   preloadOcrWorker,
   preprocessForOcr,
-  recognizeNumbersFromCanvas,
-  type OcrCandidate
+  recognizeNumbersFromCanvas
 } from '@/lib/barcode/ocr-number-extractor';
+import { getAudioContext, playScanBeep } from '@/lib/barcode/scanner-audio';
+import { ScannerControlsBar } from './scanner-controls-bar';
+import { ScannerOcrCandidates } from './scanner-ocr-candidates';
 import { cn } from '@/lib/utils';
 
 export type { CameraBarcodeScannerDialogProps };
-
-let sharedAudioCtx: AudioContext | null = null;
-
-function getAudioContext(): AudioContext | null {
-  if (typeof window === 'undefined') return null;
-  if (!sharedAudioCtx) {
-    const AudioCtx =
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (AudioCtx) {
-      sharedAudioCtx = new AudioCtx();
-    }
-  }
-  if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
-    void sharedAudioCtx.resume();
-  }
-  return sharedAudioCtx;
-}
-
-function playScanBeep() {
-  try {
-    const ctx = getAudioContext();
-    if (!ctx) return;
-
-    const play = () => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      // Sharp retail-scanner double-tone or crisp high beep (1800 Hz)
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(1800, ctx.currentTime);
-
-      // Audible gain on mobile speakers with fast decay
-      gain.gain.setValueAtTime(0.35, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.12);
-    };
-
-    if (ctx.state === 'suspended') {
-      ctx
-        .resume()
-        .then(play)
-        .catch(() => undefined);
-    } else {
-      play();
-    }
-  } catch {
-    // Autoplay restrictions or unsupported environment
-  }
-}
 
 export function CameraBarcodeScannerDialog({
   open,
@@ -133,7 +81,6 @@ export function CameraBarcodeScannerDialog({
 
   const handleScanSuccess = React.useCallback(
     (decodedText: string) => {
-      // Ignore barcode frames while the user is deliberately using OCR mode
       if (scanType === 'ocr') {
         return;
       }
@@ -229,10 +176,6 @@ export function CameraBarcodeScannerDialog({
           () => undefined
         );
 
-        // IMPORTANT: never call Html5Qrcode.getCameras() here. It opens a temporary
-        // getUserMedia({ video: true }) stream (the default/front camera), and Safari on
-        // iPad only allows one active camera, so it mutes the back camera we just started
-        // (black video). enumerateDevices() only lists devices and opens no stream.
         try {
           const settings = scanner.getRunningTrackSettings();
           activeCameraIdRef.current = settings.deviceId ?? cameraId ?? null;
@@ -246,7 +189,7 @@ export function CameraBarcodeScannerDialog({
             }));
           setCameras(videoInputs);
         } catch {
-          // Listing is optional; scanning keeps working without the switch button
+          setCameras([]);
         }
 
         try {
@@ -286,7 +229,6 @@ export function CameraBarcodeScannerDialog({
     }
   }, [open, selectedCameraId, startScanner, stopScanner]);
 
-  // Warm up the OCR engine as soon as the user switches to "Read Numbers"
   React.useEffect(() => {
     if (open && scanType === 'ocr') {
       preloadOcrWorker();
@@ -310,14 +252,10 @@ export function CameraBarcodeScannerDialog({
 
   const handleSwitchCamera = () => {
     if (cameras.length <= 1) return;
-    // Use the camera that is actually running (not selectedCameraId, which is empty
-    // on the first start) so the first tap really moves to the *other* camera.
     const currentId = activeCameraIdRef.current ?? selectedCameraId;
     const currentIndex = cameras.findIndex((c) => c.id === currentId);
     const nextCamera = cameras[(currentIndex + 1) % cameras.length];
     if (nextCamera) {
-      // Changing selectedCameraId restarts the scanner via the effect above.
-      // Do NOT also call startScanner() here: two concurrent starts race on iPad.
       setSelectedCameraId(nextCamera.id);
     }
   };
@@ -357,7 +295,6 @@ export function CameraBarcodeScannerDialog({
         heightRatio: 1
       });
 
-      // Try progressively wider / rawer inputs until a 15-digit number is found
       const attempts: HTMLCanvasElement[] = [
         preprocessForOcr(centerCrop),
         centerCrop,
@@ -374,21 +311,29 @@ export function CameraBarcodeScannerDialog({
         setOcrCandidates([]);
         setWarningMessage(t('scanner.ocrNoNumbersFound'));
       } else if (found.length === 1 && found[0] && found[0].isLuhnValid) {
-        // Exactly one valid candidate -> Instant auto-fill!
         handleSelectCandidate(found[0]);
       } else {
-        // Either multiple candidates or check digit warning
         setOcrCandidates(found);
         if (found.some((c) => !c.isLuhnValid)) {
           setWarningMessage(t('scanner.ocrChecksumWarning'));
         }
       }
-    } catch (err) {
-      console.error('[OCR Error]', err);
+    } catch {
       setWarningMessage(t('scanner.scanFailed'));
     } finally {
       setIsOcrScanning(false);
     }
+  };
+
+  const handleSelectBarcodeMode = () => {
+    setScanType('barcode');
+    setWarningMessage(null);
+    setOcrCandidates([]);
+  };
+
+  const handleSelectOcrMode = () => {
+    setScanType('ocr');
+    setWarningMessage(null);
   };
 
   return (
@@ -404,16 +349,11 @@ export function CameraBarcodeScannerDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Mode switcher tab (available in IMEI scan mode) */}
         {mode === 'imei' && (
           <div className='mt-2 flex rounded-lg bg-muted p-0.5 text-xs font-medium'>
             <button
               type='button'
-              onClick={() => {
-                setScanType('barcode');
-                setWarningMessage(null);
-                setOcrCandidates([]);
-              }}
+              onClick={handleSelectBarcodeMode}
               className={cn(
                 'flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 transition-colors',
                 scanType === 'barcode'
@@ -426,10 +366,7 @@ export function CameraBarcodeScannerDialog({
             </button>
             <button
               type='button'
-              onClick={() => {
-                setScanType('ocr');
-                setWarningMessage(null);
-              }}
+              onClick={handleSelectOcrMode}
               className={cn(
                 'flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 transition-colors',
                 scanType === 'ocr'
@@ -449,7 +386,6 @@ export function CameraBarcodeScannerDialog({
             className='h-[260px] w-full overflow-hidden rounded-lg [&_video]:h-full [&_video]:w-full [&_video]:object-cover'
           />
 
-          {/* OCR Guide Overlay */}
           {scanType === 'ocr' && !isInitializing && !errorMessage && (
             <div className='pointer-events-none absolute inset-0 flex flex-col items-center justify-center p-4'>
               <div className='relative h-28 w-4/5 rounded-lg border-2 border-dashed border-primary/80 bg-primary/5 shadow-sm'>
@@ -483,89 +419,23 @@ export function CameraBarcodeScannerDialog({
             </div>
           )}
 
-          {/* Controls Bar */}
-          <div className='absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 px-3'>
-            {cameras.length > 1 && (
-              <Button
-                type='button'
-                variant='secondary'
-                size='sm'
-                className='h-8 gap-1.5 rounded-full bg-background/80 text-xs shadow-md backdrop-blur-sm'
-                onClick={handleSwitchCamera}
-              >
-                <Icons.cameraRotate className='h-3.5 w-3.5' />
-                <span>{t('scanner.switchCamera')}</span>
-              </Button>
-            )}
-
-            {scanType === 'ocr' && (
-              <Button
-                type='button'
-                size='sm'
-                disabled={isOcrScanning || isInitializing}
-                className='h-8 gap-1.5 rounded-full px-4 text-xs font-semibold shadow-lg'
-                onClick={() => void handleCaptureOcr()}
-              >
-                {isOcrScanning ? (
-                  <Icons.spinner className='h-3.5 w-3.5 animate-spin' />
-                ) : (
-                  <Icons.camera className='h-3.5 w-3.5' />
-                )}
-                <span>
-                  {isOcrScanning ? t('scanner.ocrCapturing') : t('scanner.ocrCaptureBtn')}
-                </span>
-              </Button>
-            )}
-
-            {hasTorch && (
-              <Button
-                type='button'
-                variant={isTorchOn ? 'default' : 'secondary'}
-                size='sm'
-                className='h-8 gap-1.5 rounded-full bg-background/80 text-xs shadow-md backdrop-blur-sm'
-                onClick={() => void handleToggleTorch()}
-              >
-                {isTorchOn ? (
-                  <Icons.flash className='h-3.5 w-3.5 text-amber-400' />
-                ) : (
-                  <Icons.flashOff className='h-3.5 w-3.5' />
-                )}
-                <span>{t('scanner.toggleFlash')}</span>
-              </Button>
-            )}
-          </div>
+          <ScannerControlsBar
+            hasMultipleCameras={cameras.length > 1}
+            scanType={scanType}
+            isOcrScanning={isOcrScanning}
+            isInitializing={isInitializing}
+            hasTorch={hasTorch}
+            isTorchOn={isTorchOn}
+            onSwitchCamera={handleSwitchCamera}
+            onCaptureOcr={() => void handleCaptureOcr()}
+            onToggleTorch={() => void handleToggleTorch()}
+          />
         </div>
 
-        {/* OCR Candidate Chips */}
-        {ocrCandidates.length > 0 && (
-          <div className='mt-3 rounded-lg border bg-muted/40 p-3'>
-            <p className='text-xs font-medium text-foreground'>
-              {t('scanner.ocrMultipleFound', { count: ocrCandidates.length })}
-            </p>
-            <div className='mt-2 flex flex-wrap gap-2'>
-              {ocrCandidates.map((candidate) => (
-                <Button
-                  key={candidate.imei}
-                  type='button'
-                  size='sm'
-                  variant={candidate.isLuhnValid ? 'default' : 'outline'}
-                  className='h-8 gap-1.5 text-xs font-mono font-medium'
-                  onClick={() => handleSelectCandidate(candidate)}
-                >
-                  {candidate.isLuhnValid ? (
-                    <Icons.check className='h-3.5 w-3.5 text-emerald-400' />
-                  ) : (
-                    <Icons.warning className='h-3.5 w-3.5 text-amber-500' />
-                  )}
-                  <span>
-                    {candidate.label ? `${candidate.label}: ` : ''}
-                    {candidate.imei}
-                  </span>
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
+        <ScannerOcrCandidates
+          candidates={ocrCandidates}
+          onSelectCandidate={handleSelectCandidate}
+        />
 
         {warningMessage && (
           <div className='mt-2 rounded-md bg-amber-500/10 p-2.5 text-xs text-amber-600 dark:text-amber-400'>

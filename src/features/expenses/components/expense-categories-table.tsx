@@ -20,11 +20,7 @@ import {
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { useDataTable } from '@/hooks/use-data-table';
-import {
-  parseActiveStatusFacet,
-  parseBooleanFacet,
-  useDukaanListParams
-} from '@/components/data-table/list-params';
+import { parseActiveStatusFacet, useDukaanListParams } from '@/components/data-table/list-params';
 import { getActiveStatusQuickFilters } from '@/components/common/party-table-helpers';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { formatDate } from '@/lib/format';

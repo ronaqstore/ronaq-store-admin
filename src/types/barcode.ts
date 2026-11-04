@@ -65,3 +65,38 @@ export type SanitizeImeiResult =
 export type SanitizeBarcodeResult =
   | { success: true; barcode: string }
   | { success: false; error: 'empty_scan'; raw: string };
+
+export interface WindowWithWebkitAudio {
+  webkitAudioContext?: typeof AudioContext;
+}
+
+export interface OcrCandidate {
+  imei: string;
+  isLuhnValid: boolean;
+  label: string;
+  rawContext?: string;
+}
+
+export interface CropRatioArea {
+  xRatio: number;
+  yRatio: number;
+  widthRatio: number;
+  heightRatio: number;
+}
+
+export interface ScannerControlsBarProps {
+  hasMultipleCameras: boolean;
+  scanType: 'barcode' | 'ocr';
+  isOcrScanning: boolean;
+  isInitializing: boolean;
+  hasTorch: boolean;
+  isTorchOn: boolean;
+  onSwitchCamera: () => void;
+  onCaptureOcr: () => void;
+  onToggleTorch: () => void;
+}
+
+export interface ScannerOcrCandidatesProps {
+  candidates: OcrCandidate[];
+  onSelectCandidate: (candidate: OcrCandidate) => void;
+}
