@@ -1,7 +1,17 @@
 import { todayIsoDate } from '@/lib/dates';
 import { fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
-import type { CreateSaleInput, CreateSaleItemInput, ProductDTO } from '@/lib/api/types';
-import type { SaleFormValues, SaleLineItem, SaleTotalsSelectorState } from '@/types/sales';
+import type {
+  CreateSaleInput,
+  CreateSaleItemInput,
+  ProductDTO,
+  ResponseResolveScanDto
+} from '@/lib/api/types';
+import type {
+  ResolvedScanCartResult,
+  SaleFormValues,
+  SaleLineItem,
+  SaleTotalsSelectorState
+} from '@/types/sales';
 import { EMPTY_FORM_NUMBER, type FormNumber } from '@/types/common';
 
 export const emptySaleLine: SaleLineItem = {
@@ -126,4 +136,101 @@ export function getSalePricingFingerprint(
       Number(l.quantity) || 1
     ])
   });
+}
+
+export function resolveScanToCart(
+  result: ResponseResolveScanDto,
+  currentLines: SaleLineItem[]
+): ResolvedScanCartResult | null {
+  if (!result.found || !result.product) return null;
+  const product = result.product;
+
+  if (result.type === 'SERIALIZED' && result.unit) {
+    const unit = result.unit;
+    const alreadyAdded = currentLines.some((l) => l.inventory_unit_id === unit.id);
+    if (alreadyAdded) {
+      return { action: 'already_added', imei: unit.imei1 };
+    }
+
+    const isFirstLineEmpty =
+      currentLines.length === 1 &&
+      !currentLines[0]?.product_id &&
+      !currentLines[0]?.inventory_unit_id;
+
+    const newLine: SaleLineItem = {
+      product_id: product.id,
+      product_name: product.name,
+      tracking_type: 'SERIALIZED',
+      inventory_unit_id: unit.id,
+      unit_price: fromPaisa(unit.effectivePrice ?? product.defaultSellingPrice ?? 0),
+      quantity: 1,
+      unit_condition:
+        unit.condition === 'USED' || unit.condition === 'NEW' ? unit.condition : undefined,
+      warranty_days: unit.condition === 'USED' ? '30' : undefined
+    };
+
+    return {
+      action: 'set_lines',
+      lines: isFirstLineEmpty ? [newLine] : [...currentLines, newLine],
+      itemName: `${product.name} (${unit.imei1})`
+    };
+  }
+
+  if (result.type === 'QUANTITY') {
+    const existingIdx = currentLines.findIndex(
+      (l) => l.product_id === product.id && l.tracking_type === 'QUANTITY'
+    );
+    if (existingIdx >= 0) {
+      const existing = currentLines[existingIdx];
+      const nextQty = (existing.quantity || 1) + 1;
+      return {
+        action: 'update_quantity',
+        lineIndex: existingIdx,
+        nextQty,
+        productName: product.name
+      };
+    }
+
+    const isFirstLineEmpty =
+      currentLines.length === 1 &&
+      !currentLines[0]?.product_id &&
+      !currentLines[0]?.inventory_unit_id;
+
+    const newLine: SaleLineItem = {
+      product_id: product.id,
+      product_name: product.name,
+      tracking_type: 'QUANTITY',
+      inventory_unit_id: '',
+      unit_price: fromPaisa(product.defaultSellingPrice ?? 0),
+      quantity: 1
+    };
+
+    return {
+      action: 'set_lines',
+      lines: isFirstLineEmpty ? [newLine] : [...currentLines, newLine],
+      itemName: product.name
+    };
+  }
+
+  if (result.type === 'SERIALIZED_PRODUCT') {
+    const isFirstLineEmpty =
+      currentLines.length === 1 &&
+      !currentLines[0]?.product_id &&
+      !currentLines[0]?.inventory_unit_id;
+    const newLine: SaleLineItem = {
+      product_id: product.id,
+      product_name: product.name,
+      tracking_type: 'SERIALIZED',
+      inventory_unit_id: '',
+      unit_price: fromPaisa(product.defaultSellingPrice ?? 0),
+      quantity: 1
+    };
+    return {
+      action: 'select_unit_prompt',
+      lines: isFirstLineEmpty ? [newLine] : [...currentLines, newLine],
+      productName: product.name
+    };
+  }
+
+  return null;
 }

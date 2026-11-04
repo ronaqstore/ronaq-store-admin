@@ -56,3 +56,4 @@ export * from './picker';
 export * from './media';
 export * from './query-sync';
 export * from './marketplace';
+export * from './barcode';

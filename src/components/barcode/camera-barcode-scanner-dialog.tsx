@@ -169,7 +169,6 @@ export function CameraBarcodeScannerDialog({
           cameraConfig,
           {
             fps: 15,
-            // Spec R3: wide-and-short reticle shared with the on-screen OCR guide
             qrbox: (viewfinderWidth, viewfinderHeight) =>
               getReticleSize(viewfinderWidth, viewfinderHeight)
           },
@@ -285,7 +284,6 @@ export function CameraBarcodeScannerDialog({
     setWarningMessage(null);
 
     try {
-      // Spec R5: crop only the reticle (+10% tolerance), mapped through object-cover
       const viewRect = video.getBoundingClientRect();
       const viewSize = { width: viewRect.width, height: viewRect.height };
       const centerCrop = cropVideoToReticle(
