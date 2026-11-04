@@ -14,7 +14,7 @@ import { useT } from '@/i18n/use-t';
 import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
 import { isFieldMetaInvalid } from '@/lib/form-context';
-import { createClientRequestId, fromPaisa } from '@/lib/dukaan/numbers';
+import { createClientRequestId } from '@/lib/dukaan/numbers';
 import { isValidationApiError } from '@/lib/api/is-validation-error';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { listCustomers } from '@/features/customers/api/service';
@@ -33,6 +33,7 @@ import {
   emptySaleLine,
   getSalePricingFingerprint,
   isPhoneSaleLine,
+  resolveScanToCart,
   selectSaleTotals
 } from '../helpers/sale-create-helpers';
 import { SaleLineCard } from './sale-line-card';
@@ -47,8 +48,7 @@ import type {
   SaleFormValues,
   SaleCreateFormProps,
   CreateSaleResult,
-  SaleBelowCostPrompt,
-  SaleLineItem
+  SaleBelowCostPrompt
 } from '@/types/sales';
 
 export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) {
@@ -151,86 +151,29 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
   });
 
   const handleItemResolved = (result: ResponseResolveScanDto) => {
-    if (!result.found || !result.product) return;
-
     const lines = form.getFieldValue('lines');
-    const product = result.product;
+    const resolved = resolveScanToCart(result, lines);
+    if (!resolved) return;
 
-    if (result.type === 'SERIALIZED' && result.unit) {
-      const unit = result.unit;
-      const alreadyAdded = lines.some((l) => l.inventory_unit_id === unit.id);
-      if (alreadyAdded) {
-        toast.warning(t('scanner.imeiAlreadyInCart', { imei: unit.imei1 }));
-        return;
-      }
-
-      const isFirstLineEmpty =
-        lines.length === 1 && !lines[0]?.product_id && !lines[0]?.inventory_unit_id;
-
-      const newLine: SaleLineItem = {
-        product_id: product.id,
-        product_name: product.name,
-        tracking_type: 'SERIALIZED',
-        inventory_unit_id: unit.id,
-        unit_price: fromPaisa(unit.effectivePrice ?? product.defaultSellingPrice ?? 0),
-        quantity: 1,
-        unit_condition:
-          unit.condition === 'USED' || unit.condition === 'NEW' ? unit.condition : undefined,
-        warranty_days: unit.condition === 'USED' ? '30' : undefined
-      };
-
-      if (isFirstLineEmpty) {
-        form.setFieldValue('lines', [newLine]);
-      } else {
-        form.setFieldValue('lines', [...lines, newLine]);
-      }
-      toast.success(t('scanner.itemAdded', { name: `${product.name} (${unit.imei1})` }));
-    } else if (result.type === 'QUANTITY') {
-      const existingIdx = lines.findIndex(
-        (l) => l.product_id === product.id && l.tracking_type === 'QUANTITY'
+    if (resolved.action === 'already_added') {
+      toast.warning(t('scanner.imeiAlreadyInCart', { imei: resolved.imei }));
+      return;
+    }
+    if (resolved.action === 'set_lines') {
+      form.setFieldValue('lines', resolved.lines);
+      toast.success(t('scanner.itemAdded', { name: resolved.itemName }));
+      return;
+    }
+    if (resolved.action === 'update_quantity') {
+      form.setFieldValue(`lines[${resolved.lineIndex}].quantity`, resolved.nextQty);
+      toast.success(
+        t('scanner.quantityUpdated', { name: resolved.productName, qty: resolved.nextQty })
       );
-      if (existingIdx >= 0) {
-        const existing = lines[existingIdx];
-        const nextQty = (existing.quantity || 1) + 1;
-        form.setFieldValue(`lines[${existingIdx}].quantity`, nextQty);
-        toast.success(t('scanner.quantityUpdated', { name: product.name, qty: nextQty }));
-      } else {
-        const isFirstLineEmpty =
-          lines.length === 1 && !lines[0]?.product_id && !lines[0]?.inventory_unit_id;
-
-        const newLine: SaleLineItem = {
-          product_id: product.id,
-          product_name: product.name,
-          tracking_type: 'QUANTITY',
-          inventory_unit_id: '',
-          unit_price: fromPaisa(product.defaultSellingPrice ?? 0),
-          quantity: 1
-        };
-
-        if (isFirstLineEmpty) {
-          form.setFieldValue('lines', [newLine]);
-        } else {
-          form.setFieldValue('lines', [...lines, newLine]);
-        }
-        toast.success(t('scanner.itemAdded', { name: product.name }));
-      }
-    } else if (result.type === 'SERIALIZED_PRODUCT') {
-      toast.info(t('scanner.selectPhoneUnitPrompt', { name: product.name }));
-      const isFirstLineEmpty =
-        lines.length === 1 && !lines[0]?.product_id && !lines[0]?.inventory_unit_id;
-      const newLine: SaleLineItem = {
-        product_id: product.id,
-        product_name: product.name,
-        tracking_type: 'SERIALIZED',
-        inventory_unit_id: '',
-        unit_price: fromPaisa(product.defaultSellingPrice ?? 0),
-        quantity: 1
-      };
-      if (isFirstLineEmpty) {
-        form.setFieldValue('lines', [newLine]);
-      } else {
-        form.setFieldValue('lines', [...lines, newLine]);
-      }
+      return;
+    }
+    if (resolved.action === 'select_unit_prompt') {
+      toast.info(t('scanner.selectPhoneUnitPrompt', { name: resolved.productName }));
+      form.setFieldValue('lines', resolved.lines);
     }
   };
 
@@ -251,7 +194,6 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
     isSyncingPaidNowRef.current = false;
   };
 
-  // Auto-sync paid_now with total amount when discount, items, prices, or quantities change
   useEffect(() => {
     const isWalkIn = !pricingState.customerId || pricingState.customerId === '__walkin__';
     const totalRs = pricingState.totals.totalRs;
@@ -271,7 +213,6 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
           setPaidNowSafe(nextVal);
         }
       } else if (currentPaidNow > totalRs) {
-        // Clamp down custom payment if discount or item removal reduced total below paidNow
         setPaidNowSafe(totalRs > 0 ? totalRs : '');
       }
     }
@@ -292,6 +233,16 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
       setPromptedFingerprint(null);
     }
   }, [currentFingerprint, promptedFingerprint, belowCostPrompt]);
+
+  const handleResetPaidNowToTotal = () => {
+    setIsPaidNowCustom(false);
+    const { totalRs, subtotalRs } = calcSaleTotals(
+      form.getFieldValue('lines'),
+      form.getFieldValue('discount'),
+      0
+    );
+    setPaidNowSafe(subtotalRs > 0 ? totalRs : '');
+  };
 
   const handleConfirmBelowCostChange = (checked: boolean) => {
     setConfirmBelowCost(checked);
@@ -464,15 +415,7 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
                     variant='outline'
                     size='sm'
                     className='mb-[1px] h-9 shrink-0 text-xs'
-                    onClick={() => {
-                      setIsPaidNowCustom(false);
-                      const { totalRs, subtotalRs } = calcSaleTotals(
-                        form.getFieldValue('lines'),
-                        form.getFieldValue('discount'),
-                        0
-                      );
-                      setPaidNowSafe(subtotalRs > 0 ? totalRs : '');
-                    }}
+                    onClick={handleResetPaidNowToTotal}
                     title={t('common.total')}
                   >
                     {t('common.total')}

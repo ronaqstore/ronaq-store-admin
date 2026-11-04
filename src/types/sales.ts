@@ -210,3 +210,9 @@ export interface SaleTotalsSummaryProps {
   totalRs: number;
   udharRs: number;
 }
+
+export type ResolvedScanCartResult =
+  | { action: 'already_added'; imei: string }
+  | { action: 'set_lines'; lines: SaleLineItem[]; itemName: string }
+  | { action: 'update_quantity'; lineIndex: number; nextQty: number; productName: string }
+  | { action: 'select_unit_prompt'; lines: SaleLineItem[]; productName: string };

@@ -100,3 +100,22 @@ export interface ScannerOcrCandidatesProps {
   candidates: OcrCandidate[];
   onSelectCandidate: (candidate: OcrCandidate) => void;
 }
+
+export interface ViewfinderSize {
+  width: number;
+  height: number;
+}
+
+export interface CropRatios {
+  xRatio: number;
+  yRatio: number;
+  widthRatio: number;
+  heightRatio: number;
+}
+
+export interface ComputeOcrCropRatiosParams {
+  video: ViewfinderSize;
+  view: ViewfinderSize;
+  reticle: ViewfinderSize;
+  padding: number;
+}

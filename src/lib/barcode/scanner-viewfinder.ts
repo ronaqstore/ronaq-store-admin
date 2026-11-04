@@ -1,34 +1,16 @@
-/**
- * Pure geometry for the narrow scanner viewfinder.
- * Spec: docs/specs/scanner-narrow-viewfinder.md (R1-R5, R8). No DOM access here.
- */
+import type { ComputeOcrCropRatiosParams, CropRatios, ViewfinderSize } from '@/types/barcode';
 
-/** R1: the camera preview is a short horizontal strip. */
 export const VIEWFINDER_HEIGHT_PX = 140;
 
 const RETICLE_WIDTH_RATIO = 0.9;
 const RETICLE_MAX_WIDTH_PX = 460;
 const RETICLE_HEIGHT_RATIO = 0.5;
-/** html5-qrcode rejects a qrbox smaller than 50px. */
 const RETICLE_MIN_SIDE_PX = 50;
 const RETICLE_MAX_HEIGHT_PX = 90;
 
-export interface Size {
-  width: number;
-  height: number;
-}
-
-export interface CropRatios {
-  xRatio: number;
-  yRatio: number;
-  widthRatio: number;
-  heightRatio: number;
-}
-
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
-/** R2/R3/R4: wide-and-short scan box shared by the decoder and the on-screen guide. */
-export function getReticleSize(viewWidth: number, viewHeight: number): Size {
+export function getReticleSize(viewWidth: number, viewHeight: number): ViewfinderSize {
   const width = Math.max(
     RETICLE_MIN_SIDE_PX,
     Math.min(Math.floor(viewWidth * RETICLE_WIDTH_RATIO), RETICLE_MAX_WIDTH_PX)
@@ -43,18 +25,7 @@ export function getReticleSize(viewWidth: number, viewHeight: number): Size {
 
 const FULL_FRAME: CropRatios = { xRatio: 0, yRatio: 0, widthRatio: 1, heightRatio: 1 };
 
-/**
- * R5: crop ratios (0..1, relative to the real video frame) for the centered reticle.
- * The visible video uses `object-cover`: it is scaled by max(viewW/videoW, viewH/videoH)
- * and centered, so the reticle must be mapped through that scale and offset.
- */
-export function computeOcrCropRatios(params: {
-  video: Size;
-  view: Size;
-  reticle: Size;
-  /** Extra tolerance around the reticle, as a fraction of its own size. */
-  padding: number;
-}): CropRatios {
+export function computeOcrCropRatios(params: ComputeOcrCropRatiosParams): CropRatios {
   const { video, view, reticle, padding } = params;
   if (video.width <= 0 || video.height <= 0 || view.width <= 0 || view.height <= 0) {
     return FULL_FRAME;
