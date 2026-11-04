@@ -9,16 +9,18 @@ import {
   SheetTitle
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { Icons } from '@/components/icons';
 import { StatusBadge } from './status-badge';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import type { DetailAction, RecordDetailProps } from './types';
-
-function actionSortWeight(variant: DetailAction['variant']): number {
-  if (variant === 'destructive') return 2;
-  if (variant === 'outline' || variant === 'secondary') return 1;
-  return 0;
-}
 
 export function RecordDetail<TData>({
   open,
@@ -40,9 +42,24 @@ export function RecordDetail<TData>({
   const badge = detail.badge?.(data);
   const value = detail.value?.(data);
   const sections = detail.sections(data);
-  const actions = [...(detail.actions?.(data) ?? [])].sort(
-    (a, b) => actionSortWeight(a.variant) - actionSortWeight(b.variant)
-  );
+  const allActions = detail.actions?.(data) ?? [];
+  const barActions: DetailAction[] = [];
+  const overflowActions: DetailAction[] = [];
+
+  for (const action of allActions) {
+    if (action.placement === 'more') {
+      overflowActions.push(action);
+    } else if (action.placement === 'bar') {
+      barActions.push(action);
+    } else if (allActions.length > 3 && action.variant === 'destructive') {
+      overflowActions.push(action);
+    } else if (barActions.length < 3) {
+      barActions.push(action);
+    } else {
+      overflowActions.push(action);
+    }
+  }
+
   const side = presentation === 'side' ? 'right' : 'bottom';
 
   const handleActionClick = (action: DetailAction) => {
@@ -117,24 +134,69 @@ export function RecordDetail<TData>({
           ))}
         </div>
 
-        {actions.length > 0 ? (
+        {barActions.length > 0 || overflowActions.length > 0 ? (
           <SheetFooter
             className={cn(
-              'sticky bottom-0 z-10 gap-2 border-t border-border bg-background px-4 py-3',
+              'sticky bottom-0 z-10 border-t border-border bg-background px-3 py-2.5 sm:px-4 sm:py-3',
               'pb-[max(0.75rem,env(safe-area-inset-bottom))]'
             )}
           >
-            {actions.map((action) => (
-              <Button
-                key={action.label}
-                type='button'
-                variant={action.variant ?? 'default'}
-                className='h-11 w-full'
-                onClick={() => handleActionClick(action)}
-              >
-                {action.label}
-              </Button>
-            ))}
+            <div className='flex w-full items-center gap-1.5 sm:gap-2'>
+              {barActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <Button
+                    key={action.label}
+                    type='button'
+                    variant={action.variant ?? 'default'}
+                    className={cn(
+                      'h-10 flex-1 min-w-0 px-2 text-xs sm:text-sm font-medium',
+                      action.className
+                    )}
+                    onClick={() => handleActionClick(action)}
+                  >
+                    {Icon ? <Icon className='me-1.5 size-4 shrink-0' /> : null}
+                    <span className='truncate'>{action.label}</span>
+                  </Button>
+                );
+              })}
+              {overflowActions.length > 0 ? (
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='icon'
+                        className='h-10 w-10 shrink-0'
+                        aria-label={t('common.actions')}
+                      >
+                        <Icons.ellipsis className='size-4' />
+                      </Button>
+                    }
+                  />
+                  <DropdownMenuContent align='end' side='top' className='min-w-40'>
+                    <DropdownMenuGroup>
+                      {overflowActions.map((action) => {
+                        const Icon = action.icon;
+                        const isDestructive = action.variant === 'destructive';
+                        return (
+                          <DropdownMenuItem
+                            key={action.label}
+                            variant={isDestructive ? 'destructive' : 'default'}
+                            onClick={() => handleActionClick(action)}
+                            className='cursor-pointer py-2'
+                          >
+                            {Icon ? <Icon className='me-2 size-4 shrink-0' /> : null}
+                            <span className='truncate'>{action.label}</span>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
+            </div>
           </SheetFooter>
         ) : null}
       </SheetContent>

@@ -90,6 +90,9 @@ export interface DetailAction {
   label: string;
   onClick: () => void;
   variant?: 'default' | 'secondary' | 'destructive' | 'outline';
+  icon?: Icon;
+  className?: string;
+  placement?: 'bar' | 'more';
 }
 
 export interface DetailConfig<TData> {

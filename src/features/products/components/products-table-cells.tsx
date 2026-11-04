@@ -214,8 +214,8 @@ export function buildProductDetail({
             {
               label: t('dukaan.product.sell'),
               icon: Icons.cash,
-              className:
-                'text-emerald-600 focus:text-emerald-700 dark:text-emerald-400 font-medium',
+              variant: 'default' as const,
+              placement: 'bar' as const,
               onClick: () => onSell(row)
             },
             ...(onPurchase
@@ -223,7 +223,8 @@ export function buildProductDetail({
                   {
                     label: t('dukaan.product.purchase'),
                     icon: Icons.box,
-                    className: 'text-sky-600 focus:text-sky-700 dark:text-sky-400 font-medium',
+                    variant: 'outline' as const,
+                    placement: 'bar' as const,
                     onClick: () => onPurchase(row)
                   }
                 ]
@@ -233,8 +234,8 @@ export function buildProductDetail({
                   {
                     label: t('dukaan.product.consignment'),
                     icon: Icons.phone,
-                    className:
-                      'text-amber-600 focus:text-amber-700 dark:text-amber-400 font-medium',
+                    variant: 'outline' as const,
+                    placement: 'bar' as const,
                     onClick: () => {
                       if (row.trackingType === 'QUANTITY') {
                         toast.error(t('consignments.serializedOnly'));
@@ -249,17 +250,24 @@ export function buildProductDetail({
         : []),
       {
         label: t('common.edit'),
+        icon: Icons.edit,
+        variant: 'outline' as const,
+        placement: 'more' as const,
         onClick: () => router.push(`/dashboard/products/${row.id}/edit`)
       },
       row.isActive
         ? {
             label: t('common.delete'),
+            icon: Icons.trash,
             variant: 'destructive' as const,
+            placement: 'more' as const,
             onClick: () => onStatusConfirm({ id: row.id, nextActive: false })
           }
         : {
             label: t('common.activate'),
+            icon: Icons.check,
             variant: 'secondary' as const,
+            placement: 'bar' as const,
             onClick: () => onStatusConfirm({ id: row.id, nextActive: true })
           }
     ]
