@@ -46,6 +46,7 @@ export function CameraBarcodeScannerDialog({
   const elementId = `scanner-viewfinder-${containerId}`;
 
   const scannerRef = React.useRef<Html5Qrcode | null>(null);
+  const activeCameraIdRef = React.useRef<string | null>(null);
   const [scanType, setScanType] = React.useState<'barcode' | 'ocr'>('barcode');
   const [cameras, setCameras] = React.useState<CameraDeviceOption[]>([]);
   const [selectedCameraId, setSelectedCameraId] = React.useState<string | null>(null);
@@ -176,10 +177,17 @@ export function CameraBarcodeScannerDialog({
         );
 
         try {
-          const deviceList = await Html5Qrcode.getCameras();
-          if (deviceList && deviceList.length > 0) {
-            setCameras(deviceList);
-          }
+          const settings = scanner.getRunningTrackSettings();
+          activeCameraIdRef.current = settings.deviceId ?? cameraId ?? null;
+
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const videoInputs = devices
+            .filter((d) => d.kind === 'videoinput' && d.deviceId)
+            .map((d, index) => ({
+              id: d.deviceId,
+              label: d.label || `Camera ${index + 1}`
+            }));
+          setCameras(videoInputs);
         } catch {
           setCameras([]);
         }
@@ -244,12 +252,11 @@ export function CameraBarcodeScannerDialog({
 
   const handleSwitchCamera = () => {
     if (cameras.length <= 1) return;
-    const currentIndex = cameras.findIndex((c) => c.id === selectedCameraId);
-    const nextIndex = (currentIndex + 1) % cameras.length;
-    const nextCamera = cameras[nextIndex];
+    const currentId = activeCameraIdRef.current ?? selectedCameraId;
+    const currentIndex = cameras.findIndex((c) => c.id === currentId);
+    const nextCamera = cameras[(currentIndex + 1) % cameras.length];
     if (nextCamera) {
       setSelectedCameraId(nextCamera.id);
-      void startScanner(nextCamera.id);
     }
   };
 
