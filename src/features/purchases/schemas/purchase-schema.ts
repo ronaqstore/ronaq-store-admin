@@ -15,8 +15,9 @@ const phoneUnitSchema = (t: Translator) =>
       .regex(IMEI_PATTERN, t('validation.imeiInvalidFormat')),
     imei2: z
       .string()
-      .min(1, t('validation.imei2Required'))
-      .regex(IMEI_PATTERN, t('validation.imeiInvalidFormat')),
+      .regex(IMEI_PATTERN, t('validation.imeiInvalidFormat'))
+      .or(z.literal(''))
+      .optional(),
     condition: z.enum(['NEW', 'USED']),
     battery_health: z.union([z.number(), z.literal('')]).optional(),
     asking_price: z.union([z.number(), z.literal('')]).optional(),

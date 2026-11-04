@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { buildQuickSaleDefaults, getSalePricingFingerprint } from './sale-create-helpers.ts';
+import {
+  buildQuickSaleDefaults,
+  calcSaleTotals,
+  getSalePricingFingerprint
+} from './sale-create-helpers.ts';
 import { EMPTY_FORM_NUMBER } from '../../../types/common.ts';
 import type { ProductDTO } from '../../../lib/api/types.ts';
 
@@ -150,5 +154,49 @@ describe('getSalePricingFingerprint', () => {
     const fpUnit = getSalePricingFingerprint([{ ...lineItem, inventory_unit_id: 'unit-2' }], 0);
     assert.notEqual(fp1, fpQty);
     assert.notEqual(fp1, fpUnit);
+  });
+});
+
+describe('calcSaleTotals', () => {
+  const lines = [
+    {
+      product_id: 'p1',
+      product_name: 'Item 1',
+      quantity: 2,
+      unit_price: 1000,
+      tracking_type: 'QUANTITY' as const,
+      inventory_unit_id: ''
+    },
+    {
+      product_id: 'p2',
+      product_name: 'Item 2',
+      quantity: 1,
+      unit_price: 3000,
+      tracking_type: 'SERIALIZED' as const,
+      inventory_unit_id: 'u1'
+    }
+  ];
+
+  it('computes subtotal, total, and zero udhar on full payment', () => {
+    // subtotal = 2*1000 + 1*3000 = 5000
+    const totals = calcSaleTotals(lines, 0, 5000);
+    assert.equal(totals.subtotalRs, 5000);
+    assert.equal(totals.totalRs, 5000);
+    assert.equal(totals.udharRs, 0);
+  });
+
+  it('reduces total by discount and reflects udhar when paidNow is partial', () => {
+    // subtotal = 5000, discount = 500 => total = 4500. paidNow = 3000 => udhar = 1500
+    const totals = calcSaleTotals(lines, 500, 3000);
+    assert.equal(totals.subtotalRs, 5000);
+    assert.equal(totals.totalRs, 4500);
+    assert.equal(totals.udharRs, 1500);
+  });
+
+  it('floors total at zero when discount exceeds subtotal', () => {
+    const totals = calcSaleTotals(lines, 6000, 0);
+    assert.equal(totals.subtotalRs, 5000);
+    assert.equal(totals.totalRs, 0);
+    assert.equal(totals.udharRs, 0);
   });
 });
