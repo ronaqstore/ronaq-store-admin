@@ -51,49 +51,57 @@ export const createConsignmentFormSchema = (t: Translator) =>
         z.literal('')
       ]),
       targetSellingPriceRupees: z
-        .union([z.number().positive(t('consignments.targetPositive')), z.literal('')])
+        .union([z.number().positive(), z.literal('')])
         .optional()
         .nullable(),
       intakeDate: z.string().min(1, t('validation.dateRequired')),
       notes: z.string().trim().optional().nullable()
     })
     .superRefine((val, ctx) => {
-      if (typeof val.agreedPayoutRupees !== 'number' || val.agreedPayoutRupees <= 0) {
+      if (val.imei2 && val.imei2.length > 0) {
+        if (!IMEI_PATTERN.test(val.imei2)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('validation.imeiInvalidFormat'),
+            path: ['imei2']
+          });
+        }
+        if (val.imei1 === val.imei2) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('validation.imeiDuplicate'),
+            path: ['imei2']
+          });
+        }
+      }
+
+      if (typeof val.agreedPayoutRupees === 'number' && val.agreedPayoutRupees <= 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ['agreedPayoutRupees'],
-          message: t('consignments.payoutPositive')
+          message: t('consignments.payoutPositive'),
+          path: ['agreedPayoutRupees']
         });
       }
 
-      const imei2Trimmed = val.imei2?.trim();
-      if (imei2Trimmed) {
-        if (!IMEI_PATTERN.test(imei2Trimmed)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['imei2'],
-            message: t('validation.imeiInvalidFormat')
-          });
-        }
-        if (imei2Trimmed === val.imei1?.trim()) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['imei2'],
-            message: t('consignments.imeiDifferent')
-          });
-        }
+      if (val.agreedPayoutRupees === '') {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t('consignments.payoutPositive'),
+          path: ['agreedPayoutRupees']
+        });
       }
 
       if (
         typeof val.targetSellingPriceRupees === 'number' &&
-        typeof val.agreedPayoutRupees === 'number' &&
-        val.targetSellingPriceRupees < val.agreedPayoutRupees
+        typeof val.agreedPayoutRupees === 'number'
       ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['targetSellingPriceRupees'],
-          message: t('consignments.targetMinAgreed')
-        });
+        if (val.targetSellingPriceRupees < val.agreedPayoutRupees) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('consignments.targetLesserThanPayout'),
+            path: ['targetSellingPriceRupees']
+          });
+        }
       }
     });
 
@@ -103,8 +111,7 @@ export const returnConsignmentFormSchema = (t: Translator) =>
       .string()
       .trim()
       .min(1, t('validation.reasonRequired'))
-      .max(500, t('consignments.reasonTooLong')),
-    notes: z.string().trim().optional().nullable()
+      .max(500, t('consignments.reasonTooLong'))
   });
 
 export const settleConsignmentFormSchema = (t: Translator) =>
@@ -123,3 +130,14 @@ export const cancelConsignmentFormSchema = (t: Translator) =>
       .min(1, t('validation.reasonRequired'))
       .max(500, t('consignments.reasonTooLong'))
   });
+
+export function mapZodIssuesToErrors(error: z.ZodError): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const issue of error.issues) {
+    const key = issue.path[0];
+    if (key && typeof key === 'string' && !result[key]) {
+      result[key] = issue.message;
+    }
+  }
+  return result;
+}

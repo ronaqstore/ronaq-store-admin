@@ -235,7 +235,7 @@ export function buildProductDetail({
                     label: t('dukaan.product.consignment'),
                     icon: Icons.phone,
                     variant: 'outline' as const,
-                    placement: 'bar' as const,
+                    placement: 'more' as const,
                     onClick: () => {
                       if (row.trackingType === 'QUANTITY') {
                         toast.error(t('consignments.serializedOnly'));

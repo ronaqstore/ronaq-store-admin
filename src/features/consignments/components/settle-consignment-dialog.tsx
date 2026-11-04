@@ -35,7 +35,7 @@ import type { ConsignmentDTO } from '@/lib/api/types';
 import type { OverdraftPrompt } from '@/types';
 import type { SettleConsignmentDialogProps, SettleConsignmentResult } from '@/types/consignments';
 import { settleConsignmentMutation } from '../api/mutations';
-import { settleConsignmentFormSchema } from '../schemas/consignment-schema';
+import { settleConsignmentFormSchema, mapZodIssuesToErrors } from '../schemas/consignment-schema';
 
 export function SettleConsignmentDialog({
   consignment,
@@ -119,14 +119,7 @@ export function SettleConsignmentDialog({
     });
 
     if (!parsed.success) {
-      const nextErrors: Record<string, string> = {};
-      for (const issue of parsed.error.issues) {
-        const key = issue.path[0];
-        if (key && typeof key === 'string' && !nextErrors[key]) {
-          nextErrors[key] = issue.message;
-        }
-      }
-      setErrors(nextErrors);
+      setErrors(mapZodIssuesToErrors(parsed.error));
       return;
     }
 

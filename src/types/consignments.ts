@@ -146,3 +146,15 @@ export interface BuildConsignmentDetailOptions {
   onReturn: (consignment: ConsignmentDTO) => void;
   onCancel: (consignment: ConsignmentDTO) => void;
 }
+
+export interface ConsignmentTermsSectionProps {
+  agreedPayoutRupees: string;
+  targetSellingPriceRupees: string;
+  intakeDate: string;
+  notes: string;
+  errors: Record<string, string>;
+  onAgreedPayoutChange: (val: string) => void;
+  onTargetSellingPriceChange: (val: string) => void;
+  onIntakeDateChange: (val: string) => void;
+  onNotesChange: (val: string) => void;
+}

@@ -11,39 +11,24 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Icons } from '@/components/icons';
-import { FormEntitySelect } from '@/components/forms/form-entity-select';
+import {} from '@/components/ui/select';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
-import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { createClientRequestId, fromPaisa, toPaisa } from '@/lib/dukaan/numbers';
 import { todayIsoDate } from '@/lib/dates';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { useT } from '@/i18n/use-t';
-import { blockInvalidNumberKeys, sanitizeNumberInput } from '@/lib/form-number';
-import { mapProductToPicker } from '@/lib/api/picker';
 import { isAppleBrandName } from '@/lib/device-family';
-import { listProducts } from '@/features/products/api/service';
 import { QuickVariantDialog } from '@/components/variants/quick-variant-dialog';
 import { CustomerDialog } from '@/components/dialogs/customer-dialog';
 import { ConsignmentIntakeConsignorSection } from './consignment-intake-consignor-section';
-import { ImeiCameraScanButton } from '@/components/barcode';
+import { ConsignmentIntakeTermsSection } from './consignment-intake-terms-section';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { CONSIGNMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 import type { ConsignmentDTO, CustomerDTO } from '@/lib/api/types';
 import type { ConsignmentIntakeDialogProps } from '@/types/consignments';
 import type { ProductPickerItem } from '@/types/picker';
 import { createConsignmentMutation } from '../api/mutations';
-import { createConsignmentFormSchema } from '../schemas/consignment-schema';
+import { createConsignmentFormSchema, mapZodIssuesToErrors } from '../schemas/consignment-schema';
 
 export function ConsignmentIntakeDialog({
   open,
@@ -203,14 +188,7 @@ export function ConsignmentIntakeDialog({
     const parsed = schema.safeParse(values);
 
     if (!parsed.success) {
-      const nextErrors: Record<string, string> = {};
-      for (const issue of parsed.error.issues) {
-        const key = issue.path[0];
-        if (key && typeof key === 'string' && !nextErrors[key]) {
-          nextErrors[key] = issue.message;
-        }
-      }
-      setErrors(nextErrors);
+      setErrors(mapZodIssuesToErrors(parsed.error));
       return;
     }
 
@@ -260,213 +238,17 @@ export function ConsignmentIntakeDialog({
               extraCustomers={extraCustomers}
             />
 
-            <div className='rounded-md border p-3.5 space-y-3 bg-muted/20'>
-              <div className='font-medium text-sm text-foreground'>
-                {t('consignments.sectionDevice')}
-              </div>
-
-              <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
-                <div className='sm:col-span-2'>
-                  <div className='flex flex-col gap-2 sm:flex-row sm:items-end'>
-                    <div className='min-w-0 flex-1'>
-                      <FormEntitySelect<ProductPickerItem>
-                        name='product_id'
-                        label={t('dukaan.purchase.product')}
-                        required
-                        value={productId}
-                        onValueChange={handleProductChange}
-                        isInvalid={!!errors.productId}
-                        errors={errors.productId ? [{ message: errors.productId }] : []}
-                        queryKey={['products', 'serialized-picker']}
-                        fetchPage={(filters) =>
-                          listProducts({
-                            ...filters,
-                            trackingType: 'SERIALIZED',
-                            isActive: true
-                          }).then((res) => ({
-                            items: res.items.map(mapProductToPicker),
-                            total: res.total,
-                            page: res.page,
-                            limit: res.pageSize
-                          }))
-                        }
-                        placeholder={t('dukaan.purchase.pickProductFirst')}
-                        searchPlaceholder={t('dukaan.purchase.searchProducts')}
-                        selectedLabel={productLabel || undefined}
-                      />
-                    </div>
-                    <Button
-                      type='button'
-                      variant='outline'
-                      size='sm'
-                      className='shrink-0'
-                      onClick={() => setQuickVariantOpen(true)}
-                    >
-                      <Icons.add className='me-1.5 size-3.5' />
-                      {t('dukaan.purchase.quickVariant')}
-                    </Button>
-                  </div>
-                  <DialogFieldError message={errors.productId} />
-                </div>
-
-                <div className='space-y-1.5'>
-                  <Label htmlFor='imei1'>
-                    {t('dukaan.purchase.imei1')} <span className='text-destructive'>*</span>
-                  </Label>
-                  <div className='flex items-center gap-1.5'>
-                    <Input
-                      id='imei1'
-                      value={imei1}
-                      onChange={(e) => setImei1(e.target.value.replace(/\D/g, '').slice(0, 15))}
-                      placeholder={t('consignments.imeiPlaceholder')}
-                      maxLength={15}
-                      className='flex-1'
-                    />
-                    <ImeiCameraScanButton
-                      onScan={(code) => setImei1(code)}
-                      title={t('scanner.scanImeiTitle')}
-                      className='h-9 w-9 shrink-0'
-                    />
-                  </div>
-                  <DialogFieldError message={errors.imei1} />
-                </div>
-
-                <div className='space-y-1.5'>
-                  <Label htmlFor='imei2'>
-                    {t('dukaan.purchase.imei2')} ({t('common.optional')})
-                  </Label>
-                  <div className='flex items-center gap-1.5'>
-                    <Input
-                      id='imei2'
-                      value={imei2}
-                      onChange={(e) => setImei2(e.target.value.replace(/\D/g, '').slice(0, 15))}
-                      placeholder={t('consignments.imeiPlaceholder')}
-                      maxLength={15}
-                      className='flex-1'
-                    />
-                    <ImeiCameraScanButton
-                      onScan={(code) => setImei2(code)}
-                      title={t('scanner.scanImeiTitle')}
-                      className='h-9 w-9 shrink-0'
-                    />
-                  </div>
-                  <DialogFieldError message={errors.imei2} />
-                </div>
-
-                <div className={isUsed && isApple ? 'space-y-1.5' : 'sm:col-span-2 space-y-1.5'}>
-                  <Label htmlFor='condition'>{t('consignments.condition')}</Label>
-                  <Select value={condition} onValueChange={handleConditionChange}>
-                    <SelectTrigger id='condition' className='w-full'>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='USED'>{t('consignments.conditionUsed')}</SelectItem>
-                      <SelectItem value='NEW'>{t('consignments.conditionNew')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {isUsed && isApple ? (
-                  <div className='space-y-1.5'>
-                    <Label htmlFor='battery-health'>{t('consignments.batteryHealth')} (%)</Label>
-                    <Input
-                      id='battery-health'
-                      type='number'
-                      min={0}
-                      max={100}
-                      value={batteryHealth}
-                      onChange={(e) => setBatteryHealth(e.target.value)}
-                      placeholder={t('consignments.batteryPlaceholder')}
-                    />
-                    <DialogFieldError message={errors.batteryHealth} />
-                  </div>
-                ) : null}
-
-                {isUsed ? (
-                  <div className='sm:col-span-2 space-y-1.5'>
-                    <Label htmlFor='defect-notes'>{t('consignments.defectNotes')}</Label>
-                    <Input
-                      id='defect-notes'
-                      value={defectNotes}
-                      onChange={(e) => setDefectNotes(e.target.value)}
-                      placeholder={t('consignments.defectNotesPlaceholder')}
-                    />
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            <div className='rounded-md border p-3.5 space-y-3 bg-muted/20'>
-              <div className='font-medium text-sm text-foreground'>
-                {t('consignments.sectionTerms')}
-              </div>
-
-              <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
-                <div className='space-y-1.5'>
-                  <Label htmlFor='agreed-payout'>
-                    {t('consignments.agreedPayout')} {t('consignments.pkrSuffix')}{' '}
-                    <span className='text-destructive'>*</span>
-                  </Label>
-                  <Input
-                    id='agreed-payout'
-                    type='text'
-                    inputMode='decimal'
-                    value={agreedPayoutRupees}
-                    onKeyDown={blockInvalidNumberKeys}
-                    onChange={(e) => setAgreedPayoutRupees(sanitizeNumberInput(e.target.value))}
-                    placeholder={t('consignments.amountPlaceholder50k')}
-                  />
-                  <p className='text-xs text-muted-foreground'>
-                    {t('consignments.agreedPayoutHint')}
-                  </p>
-                  <DialogFieldError message={errors.agreedPayoutRupees} />
-                </div>
-
-                <div className='space-y-1.5'>
-                  <Label htmlFor='target-price'>
-                    {t('consignments.targetSellingPrice')} {t('consignments.pkrSuffix')}
-                  </Label>
-                  <Input
-                    id='target-price'
-                    type='text'
-                    inputMode='decimal'
-                    value={targetSellingPriceRupees}
-                    onKeyDown={blockInvalidNumberKeys}
-                    onChange={(e) =>
-                      setTargetSellingPriceRupees(sanitizeNumberInput(e.target.value))
-                    }
-                    placeholder={t('consignments.amountPlaceholder55k')}
-                  />
-                  <p className='text-xs text-muted-foreground'>
-                    {t('consignments.targetSellingPriceHint')}
-                  </p>
-                  <DialogFieldError message={errors.targetSellingPriceRupees} />
-                </div>
-
-                <div className='space-y-1.5'>
-                  <Label htmlFor='intake-date'>
-                    {t('consignments.intakeDate')} <span className='text-destructive'>*</span>
-                  </Label>
-                  <Input
-                    id='intake-date'
-                    type='date'
-                    value={intakeDate}
-                    onChange={(e) => setIntakeDate(e.target.value)}
-                  />
-                  <DialogFieldError message={errors.intakeDate} />
-                </div>
-
-                <div className='space-y-1.5'>
-                  <Label htmlFor='notes'>{t('common.notes')}</Label>
-                  <Input
-                    id='notes'
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder={t('consignments.notesPlaceholder')}
-                  />
-                </div>
-              </div>
-            </div>
+            <ConsignmentIntakeTermsSection
+              agreedPayoutRupees={agreedPayoutRupees}
+              targetSellingPriceRupees={targetSellingPriceRupees}
+              intakeDate={intakeDate}
+              notes={notes}
+              errors={errors}
+              onAgreedPayoutChange={setAgreedPayoutRupees}
+              onTargetSellingPriceChange={setTargetSellingPriceRupees}
+              onIntakeDateChange={setIntakeDate}
+              onNotesChange={setNotes}
+            />
 
             <DialogFooter className='gap-2 sm:gap-0'>
               <DialogCancelButton onClick={() => onOpenChange(false)} />

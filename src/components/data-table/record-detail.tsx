@@ -46,14 +46,19 @@ export function RecordDetail<TData>({
   const barActions: DetailAction[] = [];
   const overflowActions: DetailAction[] = [];
 
+  const maxBarCount = presentation === 'sheet' ? 2 : 3;
   for (const action of allActions) {
     if (action.placement === 'more') {
       overflowActions.push(action);
     } else if (action.placement === 'bar') {
-      barActions.push(action);
-    } else if (allActions.length > 3 && action.variant === 'destructive') {
+      if (barActions.length < maxBarCount) {
+        barActions.push(action);
+      } else {
+        overflowActions.push(action);
+      }
+    } else if (allActions.length > maxBarCount && action.variant === 'destructive') {
       overflowActions.push(action);
-    } else if (barActions.length < 3) {
+    } else if (barActions.length < maxBarCount) {
       barActions.push(action);
     } else {
       overflowActions.push(action);
@@ -110,7 +115,7 @@ export function RecordDetail<TData>({
           </div>
         </SheetHeader>
 
-        <div className='no-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4'>
+        <div className='no-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4 touch-pan-y overscroll-y-contain [webkit-overflow-scrolling:touch]'>
           {sections.map((section, si) => (
             <section key={si} className='space-y-2'>
               {section.title ? (
@@ -175,7 +180,7 @@ export function RecordDetail<TData>({
                       </Button>
                     }
                   />
-                  <DropdownMenuContent align='end' side='top' className='min-w-40'>
+                  <DropdownMenuContent align='end' side='top' className='min-w-44 z-[60]'>
                     <DropdownMenuGroup>
                       {overflowActions.map((action) => {
                         const Icon = action.icon;
