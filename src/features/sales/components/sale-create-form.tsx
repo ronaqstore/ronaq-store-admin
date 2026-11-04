@@ -18,6 +18,9 @@ import { createClientRequestId } from '@/lib/dukaan/numbers';
 import { isValidationApiError } from '@/lib/api/is-validation-error';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { listCustomers } from '@/features/customers/api/service';
+import { CustomerDialog } from '@/components/dialogs/customer-dialog';
+import type { CustomerDTO } from '@/lib/api/types';
+import type { NamedEntity } from '@/types';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { createSaleMutation } from '../api/mutations';
 import { createSaleFormSchema } from '../schemas/sale-schema';
@@ -57,6 +60,13 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
   const [confirmBelowCost, setConfirmBelowCost] = useState(false);
   const [promptedFingerprint, setPromptedFingerprint] = useState<string | null>(null);
   const [savedReceipt, setSavedReceipt] = useState<WhatsAppReceiptData | null>(null);
+  const [addCustomerOpen, setAddCustomerOpen] = useState(false);
+  const [extraCustomers, setExtraCustomers] = useState<NamedEntity[]>([]);
+
+  const handleCustomerCreated = (newCust: CustomerDTO) => {
+    setExtraCustomers((prev) => [{ id: newCust.id, name: newCust.name }, ...prev]);
+    form.setFieldValue('customer_id', newCust.id);
+  };
 
   const save = useMutation({
     ...createSaleMutation,
@@ -244,186 +254,197 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     void form.handleSubmit();
   };
 
   return (
-    <form className='space-y-4' onSubmit={handleSubmit}>
-      {formApiError ? (
-        <Alert variant='destructive'>
-          <Icons.warning />
-          <AlertDescription>{formApiError}</AlertDescription>
-        </Alert>
-      ) : null}
-      {belowCostPrompt ? (
-        <OverdraftAlert
-          checked={confirmBelowCost}
-          onCheckedChange={handleConfirmBelowCostChange}
-          title={belowCostPrompt.message}
-          confirmLabel={t('sales.confirmBelowCost')}
-          id='confirm-below-cost'
-          variant='banner'
+    <>
+      <form className='space-y-4' onSubmit={handleSubmit}>
+        {formApiError ? (
+          <Alert variant='destructive'>
+            <Icons.warning />
+            <AlertDescription>{formApiError}</AlertDescription>
+          </Alert>
+        ) : null}
+        {belowCostPrompt ? (
+          <OverdraftAlert
+            checked={confirmBelowCost}
+            onCheckedChange={handleConfirmBelowCostChange}
+            title={belowCostPrompt.message}
+            confirmLabel={t('sales.confirmBelowCost')}
+            id='confirm-below-cost'
+            variant='banner'
+          />
+        ) : null}
+        <form.Subscribe
+          selector={(s) => s.values.lines.some((l) => isPhoneSaleLine(l))}
+          children={(hasPhone) =>
+            hasPhone ? (
+              <Alert>
+                <Icons.warning />
+                <AlertTitle>{t('dukaan.sale.noWarrantyAlertTitle')}</AlertTitle>
+                <AlertDescription>{t('dukaan.sale.noWarrantyAlert')}</AlertDescription>
+              </Alert>
+            ) : null
+          }
         />
-      ) : null}
-      <form.Subscribe
-        selector={(s) => s.values.lines.some((l) => isPhoneSaleLine(l))}
-        children={(hasPhone) =>
-          hasPhone ? (
-            <Alert>
-              <Icons.warning />
-              <AlertTitle>{t('dukaan.sale.noWarrantyAlertTitle')}</AlertTitle>
-              <AlertDescription>{t('dukaan.sale.noWarrantyAlert')}</AlertDescription>
-            </Alert>
-          ) : null
-        }
-      />
 
-      <FieldGroup className='max-w-md gap-3'>
-        <form.Field
-          name='customer_id'
-          children={(field) => {
-            const isInvalid = isFieldMetaInvalid(field.state.meta);
-            return (
-              <FormEntitySelect
-                name={field.name}
-                label={t('dukaan.sale.customerRequiredUdhar')}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onValueChange={(id) => field.handleChange(id || '__walkin__')}
-                isInvalid={isInvalid}
-                errors={field.state.meta.errors}
-                queryKey={['customers', 'picker']}
-                fetchPage={(filters) =>
-                  listCustomers({ ...filters, isActive: true }).then((res) => ({
-                    items: res.items,
-                    total: res.total,
-                    page: res.page,
-                    limit: res.pageSize
-                  }))
-                }
-                placeholder={t('dukaan.sale.walkInOrCustomer')}
-                searchPlaceholder={t('dukaan.sale.searchCustomers')}
-                selectedLabel={
-                  field.state.value === '__walkin__' ? t('dukaan.sale.walkIn') : undefined
-                }
-                extraItems={[
-                  {
-                    id: '__walkin__',
-                    name: t('dukaan.sale.walkInCashOnly')
+        <FieldGroup className='max-w-md gap-3'>
+          <form.Field
+            name='customer_id'
+            children={(field) => {
+              const isInvalid = isFieldMetaInvalid(field.state.meta);
+              return (
+                <FormEntitySelect
+                  name={field.name}
+                  label={t('dukaan.sale.customerRequiredUdhar')}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onValueChange={(id) => field.handleChange(id || '__walkin__')}
+                  isInvalid={isInvalid}
+                  errors={field.state.meta.errors}
+                  queryKey={['customers', 'picker']}
+                  fetchPage={(filters) =>
+                    listCustomers({ ...filters, isActive: true }).then((res) => ({
+                      items: res.items,
+                      total: res.total,
+                      page: res.page,
+                      limit: res.pageSize
+                    }))
                   }
-                ]}
-              />
-            );
-          }}
-        />
-      </FieldGroup>
-      <div className='rounded-xl border border-primary/20 bg-primary/5 p-2.5 sm:p-3'>
-        <p className='mb-1.5 text-xs font-semibold text-primary flex items-center gap-1.5'>
-          <Icons.scan className='h-3.5 w-3.5' />
-          {t('scanner.quickScanSell')}
-        </p>
-        <SaleScanBar onItemResolved={handleItemResolved} />
-      </div>
+                  placeholder={t('dukaan.sale.walkInOrCustomer')}
+                  searchPlaceholder={t('dukaan.sale.searchCustomers')}
+                  selectedLabel={
+                    field.state.value === '__walkin__' ? t('dukaan.sale.walkIn') : undefined
+                  }
+                  onAddNewClick={() => setAddCustomerOpen(true)}
+                  addNewLabel={t('dukaan.party.customerAddTitle')}
+                  extraItems={[
+                    {
+                      id: '__walkin__',
+                      name: t('dukaan.sale.walkInCashOnly')
+                    },
+                    ...extraCustomers
+                  ]}
+                />
+              );
+            }}
+          />
+        </FieldGroup>
+        <div className='rounded-xl border border-primary/20 bg-primary/5 p-2.5 sm:p-3'>
+          <p className='mb-1.5 text-xs font-semibold text-primary flex items-center gap-1.5'>
+            <Icons.scan className='h-3.5 w-3.5' />
+            {t('scanner.quickScanSell')}
+          </p>
+          <SaleScanBar onItemResolved={handleItemResolved} />
+        </div>
 
-      <div className='space-y-3'>
-        <form.AppField
-          name='lines'
-          mode='array'
-          children={(field) => (
-            <>
-              {field.state.value.map((_line, idx) => {
-                const excludedUnitIds = field.state.value
-                  .map((other, otherIdx) =>
-                    otherIdx !== idx ? other.inventory_unit_id : undefined
-                  )
-                  .filter((id): id is string => !!id);
-                return (
-                  <SaleLineCard
-                    key={idx}
-                    form={form as never}
-                    index={idx}
-                    canRemove={field.state.value.length > 1}
-                    onRemove={() => field.removeValue(idx)}
-                    excludedUnitIds={excludedUnitIds}
-                  />
-                );
-              })}
-              <div className='flex justify-end'>
-                <Button
-                  type='button'
-                  variant='outline'
-                  onClick={() => field.pushValue({ ...emptySaleLine })}
-                >
-                  <Icons.add className='me-2 h-4 w-4' />
-                  {t('dukaan.sale.addItem')}
-                </Button>
-              </div>
-            </>
-          )}
-        />
-      </div>
-
-      <div className='grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-2'>
-        <form.AppField
-          name='discount'
-          children={(field) => (
-            <field.TextField
-              label={t('dukaan.sale.discount')}
-              type='number'
-              min={0}
-              max={INPUT_LIMITS.amountRupeesMax}
-              placeholder={t('dukaan.sale.discountPlaceholder')}
-            />
-          )}
-        />
-        <form.AppField
-          name='paid_now'
-          children={(field) => (
-            <field.TextField
-              label={t('dukaan.sale.paidNow')}
-              type='number'
-              min={0}
-              max={INPUT_LIMITS.amountRupeesMax}
-              required
-              placeholder={t('dukaan.sale.paidNowPlaceholder')}
-            />
-          )}
-        />
-        <div className='sm:col-span-2'>
+        <div className='space-y-3'>
           <form.AppField
-            name='notes'
+            name='lines'
+            mode='array'
             children={(field) => (
-              <field.TextField
-                label={t('dukaan.sale.notes')}
-                maxLength={INPUT_LIMITS.notes}
-                placeholder={t('dukaan.sale.notesPlaceholder')}
-              />
+              <>
+                {field.state.value.map((_line, idx) => {
+                  const excludedUnitIds = field.state.value
+                    .map((other, otherIdx) =>
+                      otherIdx !== idx ? other.inventory_unit_id : undefined
+                    )
+                    .filter((id): id is string => !!id);
+                  return (
+                    <SaleLineCard
+                      key={idx}
+                      form={form as never}
+                      index={idx}
+                      canRemove={field.state.value.length > 1}
+                      onRemove={() => field.removeValue(idx)}
+                      excludedUnitIds={excludedUnitIds}
+                    />
+                  );
+                })}
+                <div className='flex justify-end'>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    onClick={() => field.pushValue({ ...emptySaleLine })}
+                  >
+                    <Icons.add className='me-2 h-4 w-4' />
+                    {t('dukaan.sale.addItem')}
+                  </Button>
+                </div>
+              </>
             )}
           />
         </div>
-        <form.Subscribe
-          selector={selectSaleTotals}
-          children={({ lines, discount, paidNow }) => (
-            <SaleTotalsSummary {...calcSaleTotals(lines, discount, paidNow)} />
-          )}
+
+        <div className='grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-2'>
+          <form.AppField
+            name='discount'
+            children={(field) => (
+              <field.TextField
+                label={t('dukaan.sale.discount')}
+                type='number'
+                min={0}
+                max={INPUT_LIMITS.amountRupeesMax}
+                placeholder={t('dukaan.sale.discountPlaceholder')}
+              />
+            )}
+          />
+          <form.AppField
+            name='paid_now'
+            children={(field) => (
+              <field.TextField
+                label={t('dukaan.sale.paidNow')}
+                type='number'
+                min={0}
+                max={INPUT_LIMITS.amountRupeesMax}
+                required
+                placeholder={t('dukaan.sale.paidNowPlaceholder')}
+              />
+            )}
+          />
+          <div className='sm:col-span-2'>
+            <form.AppField
+              name='notes'
+              children={(field) => (
+                <field.TextField
+                  label={t('dukaan.sale.notes')}
+                  maxLength={INPUT_LIMITS.notes}
+                  placeholder={t('dukaan.sale.notesPlaceholder')}
+                />
+              )}
+            />
+          </div>
+          <form.Subscribe
+            selector={selectSaleTotals}
+            children={({ lines, discount, paidNow }) => (
+              <SaleTotalsSummary {...calcSaleTotals(lines, discount, paidNow)} />
+            )}
+          />
+        </div>
+
+        <DialogFooter className='mx-0 mb-0 px-0 gap-2 sm:gap-2.5'>
+          {onDone ? <DialogCancelButton onClick={onDone} disabled={save.isPending} /> : null}
+          <DialogPrimaryButton mode='add' loading={save.isPending} />
+        </DialogFooter>
+
+        <SaleWhatsAppShareDialog
+          open={savedReceipt != null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSavedReceipt(null);
+              onDone?.();
+            }
+          }}
+          receiptData={savedReceipt}
         />
-      </div>
-
-      <DialogFooter className='mx-0 mb-0 px-0 gap-2 sm:gap-2.5'>
-        {onDone ? <DialogCancelButton onClick={onDone} disabled={save.isPending} /> : null}
-        <DialogPrimaryButton mode='add' loading={save.isPending} />
-      </DialogFooter>
-
-      <SaleWhatsAppShareDialog
-        open={savedReceipt != null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSavedReceipt(null);
-            onDone?.();
-          }
-        }}
-        receiptData={savedReceipt}
+      </form>
+      <CustomerDialog
+        open={addCustomerOpen}
+        onOpenChange={setAddCustomerOpen}
+        onSuccess={handleCustomerCreated}
       />
-    </form>
+    </>
   );
 }

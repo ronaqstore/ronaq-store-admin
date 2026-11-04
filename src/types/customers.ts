@@ -42,6 +42,7 @@ export interface CustomerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   customer?: CustomerDTO | null;
+  onSuccess?: (customer: CustomerDTO) => void;
 }
 
 export interface CustomerCellActionProps {

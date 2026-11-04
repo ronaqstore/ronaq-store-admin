@@ -45,6 +45,7 @@ export interface CustomerSelectComboboxProps {
   selectedCustomer?: CustomerDTO | null;
   placeholder?: string;
   disabled?: boolean;
+  onAddNewCustomerClick?: () => void;
 }
 
 export interface RecordPaymentDialogProps {

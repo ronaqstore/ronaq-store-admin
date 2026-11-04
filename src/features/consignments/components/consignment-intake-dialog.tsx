@@ -34,6 +34,7 @@ import { mapProductToPicker } from '@/lib/api/picker';
 import { isAppleBrandName } from '@/lib/device-family';
 import { listProducts } from '@/features/products/api/service';
 import { QuickVariantDialog } from '@/components/variants/quick-variant-dialog';
+import { CustomerDialog } from '@/components/dialogs/customer-dialog';
 import { ConsignmentIntakeConsignorSection } from './consignment-intake-consignor-section';
 import { ImeiCameraScanButton } from '@/components/barcode';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
@@ -57,6 +58,8 @@ export function ConsignmentIntakeDialog({
   const [consignorName, setConsignorName] = useState('');
   const [consignorPhone, setConsignorPhone] = useState('');
   const [consignorCnic, setConsignorCnic] = useState('');
+  const [addCustomerOpen, setAddCustomerOpen] = useState(false);
+  const [extraCustomers, setExtraCustomers] = useState<CustomerDTO[]>([]);
 
   const [productId, setProductId] = useState('');
   const [productLabel, setProductLabel] = useState('');
@@ -129,6 +132,11 @@ export function ConsignmentIntakeDialog({
     }
   }, [open, initialProduct]);
 
+  const handleCustomerCreated = (created: CustomerDTO) => {
+    setExtraCustomers((prev) => [created, ...prev]);
+    handleCustomerSelect(created.id, created);
+  };
+
   const handleCustomerSelect = (id: string, customer?: CustomerDTO | null) => {
     setCustomerId(id);
     if (customer) {
@@ -167,6 +175,7 @@ export function ConsignmentIntakeDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
     const payoutNum = agreedPayoutRupees ? Number(agreedPayoutRupees) : 0;
     const targetNum = targetSellingPriceRupees ? Number(targetSellingPriceRupees) : undefined;
@@ -248,6 +257,8 @@ export function ConsignmentIntakeDialog({
               onConsignorNameChange={setConsignorName}
               onConsignorPhoneChange={setConsignorPhone}
               onConsignorCnicChange={setConsignorCnic}
+              onAddNewCustomerClick={() => setAddCustomerOpen(true)}
+              extraCustomers={extraCustomers}
             />
 
             <div className='rounded-md border p-3.5 space-y-3 bg-muted/20'>
@@ -478,6 +489,11 @@ export function ConsignmentIntakeDialog({
           onCreated={handleProductCreated}
         />
       )}
+      <CustomerDialog
+        open={addCustomerOpen}
+        onOpenChange={setAddCustomerOpen}
+        onSuccess={handleCustomerCreated}
+      />
     </>
   );
 }

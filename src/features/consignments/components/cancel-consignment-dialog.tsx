@@ -58,6 +58,7 @@ export function CancelConsignmentDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const schema = cancelConsignmentFormSchema(t);
     const parsed = schema.safeParse({ cancelReason });
     if (!parsed.success) {

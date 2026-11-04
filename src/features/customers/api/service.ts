@@ -6,7 +6,8 @@ import type {
   UpdateCustomerInput,
   CustomerMutationResult,
   CustomerLedgerDTO,
-  CustomerLedgerView
+  CustomerLedgerView,
+  EntityCreationApiResponse
 } from '@/types';
 import { appFetch } from '@/lib/api/app-fetch';
 
@@ -82,11 +83,24 @@ export async function getCustomerLedgerView(
 }
 
 export async function createCustomer(input: CreateCustomerInput): Promise<CustomerDTO> {
-  return appFetch<CustomerDTO>('/api/customers', {
+  const res = await appFetch<EntityCreationApiResponse>('/api/customers', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input)
   });
+  const id = res.data?.id || res.id || '';
+  return {
+    id,
+    name: input.name.trim(),
+    phone: input.phone || null,
+    address: input.address || null,
+    notes: input.notes || null,
+    openingBalance: input.openingBalance ?? 0,
+    currentBalance: input.openingBalance ?? 0,
+    isActive: input.isActive ?? true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  } as CustomerDTO;
 }
 
 export async function updateCustomer(

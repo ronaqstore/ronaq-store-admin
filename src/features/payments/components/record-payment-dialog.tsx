@@ -42,6 +42,7 @@ import {
 import { createPaymentMutation } from '../api/mutations';
 import { customerReceivableQueryOptions } from '../api/queries';
 import { CustomerSelectCombobox } from './customer-select';
+import { CustomerDialog } from '@/components/dialogs/customer-dialog';
 import { PaymentTargetSection } from './payment-target-section';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
@@ -62,6 +63,7 @@ export function RecordPaymentDialog({
   const [clientRequestId, setClientRequestId] = useState(() => createClientRequestId());
   const [customerId, setCustomerId] = useState(defaultCustomerId ?? '');
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerDTO | null>(null);
+  const [addCustomerOpen, setAddCustomerOpen] = useState(false);
   const [targetType, setTargetType] = useState<'opening' | 'sale'>('opening');
   const [selectedSaleId, setSelectedSaleId] = useState('');
   const [amountStr, setAmountStr] = useState('');
@@ -126,6 +128,8 @@ export function RecordPaymentDialog({
     }
   });
 
+  const handleCustomerCreated = (created: CustomerDTO) => handleSelectCustomer(created);
+
   const handleSelectCustomer = (cust: CustomerDTO | null) => {
     setCustomerId(cust ? cust.id : '');
     setSelectedCustomer(cust);
@@ -141,6 +145,7 @@ export function RecordPaymentDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const nextErrors: RecordPaymentFormErrors = {};
     if (!customerId) nextErrors.customerId = t('payments.selectCustomer');
 
@@ -213,242 +218,250 @@ export function RecordPaymentDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className='max-h-[92vh] overflow-y-auto sm:max-w-lg no-scrollbar'>
-        <DialogHeader>
-          <DialogTitle>{t('payments.recordPaymentTitle')}</DialogTitle>
-          <DialogDescription>{t('payments.recordPaymentDesc')}</DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className='max-h-[92vh] overflow-y-auto sm:max-w-lg no-scrollbar'>
+          <DialogHeader>
+            <DialogTitle>{t('payments.recordPaymentTitle')}</DialogTitle>
+            <DialogDescription>{t('payments.recordPaymentDesc')}</DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit} className='space-y-4 pt-2'>
-          <div className='space-y-1.5'>
-            <Label className='text-sm font-normal text-foreground'>
-              {t('payments.customer')} <span className='text-destructive'>*</span>
-            </Label>
-            <CustomerSelectCombobox
-              value={customerId}
-              selectedCustomer={selectedCustomer}
-              onSelectCustomer={handleSelectCustomer}
-            />
-            <DialogFieldError message={errors.customerId} />
-          </div>
+          <form onSubmit={handleSubmit} className='space-y-4 pt-2'>
+            <div className='space-y-1.5'>
+              <Label className='text-sm font-normal text-foreground'>
+                {t('payments.customer')} <span className='text-destructive'>*</span>
+              </Label>
+              <CustomerSelectCombobox
+                value={customerId}
+                selectedCustomer={selectedCustomer}
+                onSelectCustomer={handleSelectCustomer}
+                onAddNewCustomerClick={() => setAddCustomerOpen(true)}
+              />
+              <DialogFieldError message={errors.customerId} />
+            </div>
 
-          {customerId ? (
-            <div className='rounded-xl border border-border/70 bg-muted/40 p-3.5 text-sm'>
-              {receivableLoading ? (
-                <div className='space-y-2' aria-busy='true'>
-                  <div className='flex items-center justify-between gap-3'>
-                    <Skeleton className='h-4 w-28' />
-                    <Skeleton className='h-4 w-20' />
+            {customerId ? (
+              <div className='rounded-xl border border-border/70 bg-muted/40 p-3.5 text-sm'>
+                {receivableLoading ? (
+                  <div className='space-y-2' aria-busy='true'>
+                    <div className='flex items-center justify-between gap-3'>
+                      <Skeleton className='h-4 w-28' />
+                      <Skeleton className='h-4 w-20' />
+                    </div>
+                    <div className='flex items-center justify-between gap-3'>
+                      <Skeleton className='h-3 w-36' />
+                      <Skeleton className='h-3 w-16' />
+                    </div>
+                    <div className='flex items-center justify-between gap-3'>
+                      <Skeleton className='h-3 w-24' />
+                      <Skeleton className='h-3 w-14' />
+                    </div>
                   </div>
-                  <div className='flex items-center justify-between gap-3'>
-                    <Skeleton className='h-3 w-36' />
-                    <Skeleton className='h-3 w-16' />
+                ) : receivableData ? (
+                  <div className='space-y-2'>
+                    <div className='flex items-center justify-between'>
+                      <span className='font-normal text-muted-foreground'>
+                        {t('payments.totalUdhar')}
+                      </span>
+                      <span className='font-semibold text-foreground'>
+                        {formatPkr(totalReceivable)}
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between text-xs'>
+                      <span className='text-muted-foreground'>
+                        {t('payments.openingUdharRemaining')}
+                      </span>
+                      <span className='font-medium text-foreground'>
+                        {formatPkr(openingRemaining)}
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between text-xs'>
+                      <span className='text-muted-foreground'>{t('payments.unpaidSales')}</span>
+                      <span className='font-medium text-foreground'>
+                        {unpaidSales.length} {t('payments.billsCount')}
+                      </span>
+                    </div>
                   </div>
-                  <div className='flex items-center justify-between gap-3'>
-                    <Skeleton className='h-3 w-24' />
-                    <Skeleton className='h-3 w-14' />
-                  </div>
-                </div>
-              ) : receivableData ? (
-                <div className='space-y-2'>
+                ) : null}
+              </div>
+            ) : null}
+
+            {noDebt ? (
+              <div className='rounded-xl border border-primary/30 bg-primary/5 px-3.5 py-3 text-sm text-foreground'>
+                <p className='font-medium'>{t('payments.noDebtTitle')}</p>
+                <p className='mt-1 text-muted-foreground'>{t('payments.noDebtToPay')}</p>
+              </div>
+            ) : null}
+
+            {customerId && receivableData && hasDebt ? (
+              <PaymentTargetSection
+                targetType={targetType}
+                openingRemaining={openingRemaining}
+                unpaidSales={unpaidSales}
+                selectedSaleId={selectedSaleId}
+                saleIdError={errors.saleId}
+                onTargetTypeChange={handleTargetTypeChange}
+                onSelectSale={handleSelectSale}
+                onChooseSaleTarget={handleChooseSaleTarget}
+                labels={{
+                  paymentTarget: t('payments.paymentTarget'),
+                  openingBalance: t('payments.openingUdharTarget'),
+                  specificBill: t('payments.specificBill'),
+                  billsCount: t('payments.billsCount'),
+                  noUnpaidBills: t('payments.noUnpaidBills'),
+                  saleNo: (saleNo) => saleNo,
+                  date: t('payments.billDate'),
+                  total: t('payments.billTotal'),
+                  remaining: t('payments.remaining')
+                }}
+              />
+            ) : null}
+
+            {hasDebt ? (
+              <>
+                <div className='space-y-1.5'>
                   <div className='flex items-center justify-between'>
-                    <span className='font-normal text-muted-foreground'>
-                      {t('payments.totalUdhar')}
-                    </span>
-                    <span className='font-semibold text-foreground'>
-                      {formatPkr(totalReceivable)}
-                    </span>
+                    <Label htmlFor='payment-amount' className='text-sm font-normal text-foreground'>
+                      {t('payments.amountReceivedPkr')} <span className='text-destructive'>*</span>
+                    </Label>
+                    {maxRemainingRupees > 0 ? (
+                      <button
+                        type='button'
+                        onClick={handlePayFull}
+                        className='text-xs font-medium text-primary hover:underline'
+                      >
+                        {t('payments.payFull', { amount: formatPkr(maxRemainingPaisa) })}
+                      </button>
+                    ) : null}
                   </div>
-                  <div className='flex items-center justify-between text-xs'>
-                    <span className='text-muted-foreground'>
-                      {t('payments.openingUdharRemaining')}
+                  <div className='relative'>
+                    <span className='absolute inset-s-3 top-1/2 -translate-y-1/2 text-sm font-normal text-foreground'>
+                      {t('common.currency')}
                     </span>
-                    <span className='font-medium text-foreground'>
-                      {formatPkr(openingRemaining)}
-                    </span>
+                    <Input
+                      id='payment-amount'
+                      type='number'
+                      min={1}
+                      max={INPUT_LIMITS.amountRupeesMax}
+                      step='any'
+                      placeholder={t('common.amountPlaceholder')}
+                      className={cn(
+                        'ps-9 text-sm font-normal text-foreground',
+                        errors.amount && 'border-destructive'
+                      )}
+                      value={amountStr}
+                      onChange={handleAmountChange}
+                      onKeyDown={(e) => blockInvalidNumberKeys(e)}
+                      aria-invalid={!!errors.amount}
+                      required
+                    />
                   </div>
-                  <div className='flex items-center justify-between text-xs'>
-                    <span className='text-muted-foreground'>{t('payments.unpaidSales')}</span>
-                    <span className='font-medium text-foreground'>
-                      {unpaidSales.length} {t('payments.billsCount')}
-                    </span>
-                  </div>
+                  <DialogFieldError id='payment-amount-error' message={errors.amount} />
                 </div>
-              ) : null}
-            </div>
-          ) : null}
 
-          {noDebt ? (
-            <div className='rounded-xl border border-primary/30 bg-primary/5 px-3.5 py-3 text-sm text-foreground'>
-              <p className='font-medium'>{t('payments.noDebtTitle')}</p>
-              <p className='mt-1 text-muted-foreground'>{t('payments.noDebtToPay')}</p>
-            </div>
-          ) : null}
-
-          {customerId && receivableData && hasDebt ? (
-            <PaymentTargetSection
-              targetType={targetType}
-              openingRemaining={openingRemaining}
-              unpaidSales={unpaidSales}
-              selectedSaleId={selectedSaleId}
-              saleIdError={errors.saleId}
-              onTargetTypeChange={handleTargetTypeChange}
-              onSelectSale={handleSelectSale}
-              onChooseSaleTarget={handleChooseSaleTarget}
-              labels={{
-                paymentTarget: t('payments.paymentTarget'),
-                openingBalance: t('payments.openingUdharTarget'),
-                specificBill: t('payments.specificBill'),
-                billsCount: t('payments.billsCount'),
-                noUnpaidBills: t('payments.noUnpaidBills'),
-                saleNo: (saleNo) => saleNo,
-                date: t('payments.billDate'),
-                total: t('payments.billTotal'),
-                remaining: t('payments.remaining')
-              }}
-            />
-          ) : null}
-
-          {hasDebt ? (
-            <>
-              <div className='space-y-1.5'>
-                <div className='flex items-center justify-between'>
-                  <Label htmlFor='payment-amount' className='text-sm font-normal text-foreground'>
-                    {t('payments.amountReceivedPkr')} <span className='text-destructive'>*</span>
+                <div className='space-y-1.5'>
+                  <Label htmlFor='payment-date' className='text-sm font-normal text-foreground'>
+                    {t('payments.paymentDate')} <span className='text-destructive'>*</span>
                   </Label>
-                  {maxRemainingRupees > 0 ? (
-                    <button
-                      type='button'
-                      onClick={handlePayFull}
-                      className='text-xs font-medium text-primary hover:underline'
-                    >
-                      {t('payments.payFull', { amount: formatPkr(maxRemainingPaisa) })}
-                    </button>
-                  ) : null}
-                </div>
-                <div className='relative'>
-                  <span className='absolute inset-s-3 top-1/2 -translate-y-1/2 text-sm font-normal text-foreground'>
-                    {t('common.currency')}
-                  </span>
                   <Input
-                    id='payment-amount'
-                    type='number'
-                    min={1}
-                    max={INPUT_LIMITS.amountRupeesMax}
-                    step='any'
-                    placeholder={t('common.amountPlaceholder')}
-                    className={cn(
-                      'ps-9 text-sm font-normal text-foreground',
-                      errors.amount && 'border-destructive'
-                    )}
-                    value={amountStr}
-                    onChange={handleAmountChange}
-                    onKeyDown={(e) => blockInvalidNumberKeys(e)}
-                    aria-invalid={!!errors.amount}
+                    id='payment-date'
+                    type='date'
+                    value={paymentDate}
+                    onChange={(e) => setPaymentDate(e.target.value)}
                     required
+                    className='cursor-pointer text-sm font-normal text-foreground'
                   />
                 </div>
-                <DialogFieldError id='payment-amount-error' message={errors.amount} />
-              </div>
 
-              <div className='space-y-1.5'>
-                <Label htmlFor='payment-date' className='text-sm font-normal text-foreground'>
-                  {t('payments.paymentDate')} <span className='text-destructive'>*</span>
-                </Label>
-                <Input
-                  id='payment-date'
-                  type='date'
-                  value={paymentDate}
-                  onChange={(e) => setPaymentDate(e.target.value)}
-                  required
-                  className='cursor-pointer text-sm font-normal text-foreground'
-                />
-              </div>
-
-              <div className='space-y-1.5'>
-                <Label htmlFor='payment-method' className='text-sm font-normal text-foreground'>
-                  {t('payments.paymentMethod')}
-                </Label>
-                <Select
-                  value={paymentMethod}
-                  onValueChange={(val) => {
-                    if (isStoredPaymentMethod(val)) setPaymentMethod(val);
-                  }}
-                  items={PAYMENT_METHOD_OPTIONS.map((opt) => ({
-                    value: opt.value,
-                    label: opt.label
-                  }))}
-                >
-                  <SelectTrigger
-                    id='payment-method'
-                    className='h-9 w-full justify-between text-sm font-normal text-foreground'
+                <div className='space-y-1.5'>
+                  <Label htmlFor='payment-method' className='text-sm font-normal text-foreground'>
+                    {t('payments.paymentMethod')}
+                  </Label>
+                  <Select
+                    value={paymentMethod}
+                    onValueChange={(val) => {
+                      if (isStoredPaymentMethod(val)) setPaymentMethod(val);
+                    }}
+                    items={PAYMENT_METHOD_OPTIONS.map((opt) => ({
+                      value: opt.value,
+                      label: opt.label
+                    }))}
                   >
-                    <SelectValue
-                      placeholder={t('payments.selectPaymentMethod')}
-                      className='text-sm font-normal text-foreground'
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {PAYMENT_METHOD_OPTIONS.map((opt) => (
-                        <SelectItem
-                          key={opt.value}
-                          value={opt.value}
-                          className='text-sm font-normal text-foreground'
-                        >
-                          <div className='flex items-center gap-2'>
-                            {opt.value === 'CASH' ? (
-                              <Icons.cash className='h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400' />
-                            ) : null}
-                            {opt.value === 'JAZZCASH' ? (
-                              <Icons.wallet className='h-3.5 w-3.5 text-amber-500' />
-                            ) : null}
-                            {opt.value === 'EASYPAISA' ? (
-                              <Icons.wallet className='h-3.5 w-3.5 text-emerald-500' />
-                            ) : null}
-                            {opt.value === 'BANK' ? (
-                              <Icons.creditCard className='h-3.5 w-3.5 text-blue-500' />
-                            ) : null}
-                            <span>{opt.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
+                    <SelectTrigger
+                      id='payment-method'
+                      className='h-9 w-full justify-between text-sm font-normal text-foreground'
+                    >
+                      <SelectValue
+                        placeholder={t('payments.selectPaymentMethod')}
+                        className='text-sm font-normal text-foreground'
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {PAYMENT_METHOD_OPTIONS.map((opt) => (
+                          <SelectItem
+                            key={opt.value}
+                            value={opt.value}
+                            className='text-sm font-normal text-foreground'
+                          >
+                            <div className='flex items-center gap-2'>
+                              {opt.value === 'CASH' ? (
+                                <Icons.cash className='h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400' />
+                              ) : null}
+                              {opt.value === 'JAZZCASH' ? (
+                                <Icons.wallet className='h-3.5 w-3.5 text-amber-500' />
+                              ) : null}
+                              {opt.value === 'EASYPAISA' ? (
+                                <Icons.wallet className='h-3.5 w-3.5 text-emerald-500' />
+                              ) : null}
+                              {opt.value === 'BANK' ? (
+                                <Icons.creditCard className='h-3.5 w-3.5 text-blue-500' />
+                              ) : null}
+                              <span>{opt.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className='space-y-1.5'>
-                <Label htmlFor='payment-notes' className='text-sm font-normal text-foreground'>
-                  {t('payments.notesOptional')}
-                </Label>
-                <Textarea
-                  id='payment-notes'
-                  placeholder={t('payments.notesPlaceholder')}
-                  value={notes}
-                  onChange={handleNotesChange}
-                  maxLength={INPUT_LIMITS.notes}
-                  rows={2}
-                  className='text-sm font-normal text-foreground'
-                />
-              </div>
-            </>
-          ) : null}
+                <div className='space-y-1.5'>
+                  <Label htmlFor='payment-notes' className='text-sm font-normal text-foreground'>
+                    {t('payments.notesOptional')}
+                  </Label>
+                  <Textarea
+                    id='payment-notes'
+                    placeholder={t('payments.notesPlaceholder')}
+                    value={notes}
+                    onChange={handleNotesChange}
+                    maxLength={INPUT_LIMITS.notes}
+                    rows={2}
+                    className='text-sm font-normal text-foreground'
+                  />
+                </div>
+              </>
+            ) : null}
 
-          <DialogFooter className='gap-2 pt-2 sm:gap-2.5'>
-            <DialogCancelButton
-              onClick={() => handleOpenChange(false)}
-              disabled={recordMutation.isPending}
-            />
-            <DialogPrimaryButton
-              mode='add'
-              disabled={recordMutation.isPending || !canSubmitPayment}
-              loading={recordMutation.isPending}
-            />
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <DialogFooter className='gap-2 pt-2 sm:gap-2.5'>
+              <DialogCancelButton
+                onClick={() => handleOpenChange(false)}
+                disabled={recordMutation.isPending}
+              />
+              <DialogPrimaryButton
+                mode='add'
+                disabled={recordMutation.isPending || !canSubmitPayment}
+                loading={recordMutation.isPending}
+              />
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <CustomerDialog
+        open={addCustomerOpen}
+        onOpenChange={setAddCustomerOpen}
+        onSuccess={handleCustomerCreated}
+      />
+    </>
   );
 }

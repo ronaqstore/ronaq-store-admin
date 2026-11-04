@@ -17,7 +17,8 @@ export function CustomerSelectCombobox({
   onSelectCustomer,
   selectedCustomer,
   placeholder,
-  disabled
+  disabled,
+  onAddNewCustomerClick
 }: CustomerSelectComboboxProps) {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -90,6 +91,8 @@ export function CustomerSelectCombobox({
       emptyText={t('payments.noCustomersFound')}
       clearSelectionTitle={t('payments.clearCustomer')}
       disabled={disabled}
+      onAddNewClick={onAddNewCustomerClick}
+      addNewLabel={t('dukaan.party.customerAddTitle')}
       onOpenChange={setOpen}
     />
   );

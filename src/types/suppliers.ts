@@ -19,6 +19,7 @@ export interface SupplierDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   supplier?: SupplierDTO | null;
+  onSuccess?: (supplier: SupplierDTO) => void;
 }
 
 export interface SuppliersHeaderActionProps {

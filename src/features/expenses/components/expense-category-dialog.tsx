@@ -89,6 +89,7 @@ function ExpenseCategoryDialogBody({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const trimmed = name.trim();
     if (!trimmed) {
       setNameError(t('expenses.nameRequired'));

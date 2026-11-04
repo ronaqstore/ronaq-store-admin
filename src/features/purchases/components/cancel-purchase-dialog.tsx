@@ -63,6 +63,7 @@ export function CancelPurchaseDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!reason.trim()) {
       setReasonError(t('purchases.cancelDialog.reasonRequired'));
       return;

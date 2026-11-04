@@ -18,7 +18,8 @@ export function SupplierSelectCombobox({
   onSelectSupplier,
   selectedSupplier,
   placeholder,
-  disabled
+  disabled,
+  onAddNewSupplierClick
 }: SupplierSelectComboboxProps) {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -84,6 +85,8 @@ export function SupplierSelectCombobox({
       emptyText={t('supplierPayments.noSuppliersFound')}
       clearSelectionTitle={t('supplierPayments.clearSelection')}
       disabled={disabled}
+      onAddNewClick={onAddNewSupplierClick}
+      addNewLabel={t('dukaan.supplier.addTitle')}
       onOpenChange={setOpen}
     />
   );

@@ -118,6 +118,8 @@ export interface InfiniteEntitySelectProps<T extends NamedEntity> {
   disabled?: boolean;
   className?: string;
   extraItems?: NamedEntity[];
+  onAddNewClick?: () => void;
+  addNewLabel?: string;
 }
 
 export interface FormEntitySelectProps<T extends NamedEntity> extends InfiniteEntitySelectProps<T> {

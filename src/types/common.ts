@@ -271,6 +271,7 @@ export interface SimpleEntityDialogProps {
   onSave: (id: string | undefined, name: string) => Promise<unknown>;
   invalidateQueryKey: readonly unknown[];
   schema?: unknown;
+  onSuccess?: (entity: NamedEntityItem) => void;
 }
 
 export interface SimpleEntityDialogBodyProps extends SimpleEntityDialogProps {}
@@ -323,4 +324,14 @@ export interface TruncateTextProps {
   className?: string;
   title?: string;
   lines?: 1 | 2 | 3;
+}
+export interface EntityCreationResultData {
+  id?: string;
+}
+
+export interface EntityCreationApiResponse {
+  success?: boolean;
+  message?: string;
+  id?: string;
+  data?: EntityCreationResultData;
 }

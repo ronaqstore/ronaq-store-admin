@@ -61,6 +61,7 @@ export function CancelExpenseDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!reason.trim()) {
       setReasonError(t('expenses.cancelReasonRequired'));
       return;

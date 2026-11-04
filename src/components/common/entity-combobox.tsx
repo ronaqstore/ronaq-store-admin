@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Icons } from '@/components/icons';
 import { ComboboxListSkeleton } from '@/components/common/combobox-list-skeleton';
 import { cn } from '@/lib/utils';
+import { useT } from '@/i18n/use-t';
 import type { EntityComboboxItem, EntityComboboxProps } from '@/types';
 
 export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem>({
@@ -28,6 +29,7 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
   addNewLabel,
   onOpenChange
 }: EntityComboboxProps<T>) {
+  const t = useT();
   const [open, setOpen] = useState(false);
 
   const currentItem = selectedItem ?? items.find((item) => item.id === value) ?? null;
@@ -180,7 +182,7 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
           )}
         </div>
 
-        {onAddNewClick && addNewLabel ? (
+        {onAddNewClick ? (
           <div className='border-t border-border/60 p-1'>
             <Button
               type='button'
@@ -190,7 +192,7 @@ export function EntityCombobox<T extends EntityComboboxItem = EntityComboboxItem
               className='w-full justify-start text-xs font-normal text-primary hover:bg-primary/10'
             >
               <Icons.add className='size-3.5 me-1.5' />
-              <span>{addNewLabel}</span>
+              <span>{addNewLabel || t('common.add')}</span>
             </Button>
           </div>
         ) : null}

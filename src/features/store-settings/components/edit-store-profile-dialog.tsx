@@ -132,6 +132,7 @@ function EditStoreProfileDialogBody({ settings, onOpenChange }: EditStoreProfile
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!displayName.trim()) {
       setDisplayNameError(t('validation.nameRequired'));
       return;

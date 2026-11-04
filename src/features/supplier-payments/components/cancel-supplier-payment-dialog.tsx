@@ -52,6 +52,7 @@ export function CancelSupplierPaymentDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!reason.trim()) {
       setReasonError(t('supplierPayments.reasonRequired'));
       return;

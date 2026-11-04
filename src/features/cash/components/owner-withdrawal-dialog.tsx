@@ -103,6 +103,7 @@ export function OwnerWithdrawalDialog({ open, onOpenChange }: OwnerWithdrawalDia
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const parsedAmount = parseFloat(amountStr);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       setAmountError(t('common.invalidAmount'));

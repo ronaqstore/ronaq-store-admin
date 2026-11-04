@@ -84,6 +84,7 @@ export function ReconcileCashDialog({ open, onOpenChange }: ReconcileCashDialogP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
     if (!isValidCount || countedCashPaisa === null) {
       setCountedCashError(t('common.invalidCashCount'));

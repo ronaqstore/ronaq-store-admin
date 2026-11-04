@@ -21,6 +21,7 @@ export interface CategoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   category?: CategoryDTO | null;
+  onSuccess?: (category: CategoryDTO) => void;
 }
 
 export interface CategoriesHeaderActionProps {

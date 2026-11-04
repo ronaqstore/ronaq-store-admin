@@ -19,7 +19,9 @@ export function ConsignmentIntakeConsignorSection({
   onCustomerSelect,
   onConsignorNameChange,
   onConsignorPhoneChange,
-  onConsignorCnicChange
+  onConsignorCnicChange,
+  onAddNewCustomerClick,
+  extraCustomers
 }: ConsignmentConsignorSectionProps) {
   const t = useT();
 
@@ -61,6 +63,9 @@ export function ConsignmentIntakeConsignorSection({
             }
             placeholder={t('consignments.pickCustomerPlaceholder')}
             searchPlaceholder={t('dukaan.customer.search')}
+            onAddNewClick={onAddNewCustomerClick}
+            addNewLabel={t('dukaan.party.customerAddTitle')}
+            extraItems={extraCustomers ?? []}
           />
         </div>
 

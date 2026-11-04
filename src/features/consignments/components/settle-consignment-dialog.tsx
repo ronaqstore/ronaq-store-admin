@@ -107,6 +107,7 @@ export function SettleConsignmentDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
     const amountNum = settledAmountRupees ? Number(settledAmountRupees) : 0;
     const schema = settleConsignmentFormSchema(t);

@@ -23,6 +23,8 @@ import type { OverdraftPrompt, PickerFetchFilters, SupplierPickerItem } from '@/
 import { DialogFieldError } from '@/components/forms/dialog-field-error';
 import { FormEntitySelect } from '@/components/forms/form-entity-select';
 import { listSuppliers } from '@/features/suppliers/api/service';
+import { SupplierDialog } from '@/components/dialogs/supplier-dialog';
+import type { SupplierDTO } from '@/lib/api/types';
 import { mapSupplierToPicker, toPickerPage } from '@/lib/api/picker';
 import { createPurchaseMutation } from '../api/mutations';
 import { createPurchaseFormSchema } from '../schemas/purchase-schema';
@@ -48,6 +50,14 @@ export function PurchaseCreateForm({
   const [clientRequestId, setClientRequestId] = useState(() => createClientRequestId());
   const [warning, setWarning] = useState<OverdraftPrompt | null>(null);
   const [supplierCnic, setSupplierCnic] = useState<string | null>(null);
+  const [addSupplierOpen, setAddSupplierOpen] = useState(false);
+  const [extraSuppliers, setExtraSuppliers] = useState<SupplierPickerItem[]>([]);
+
+  const handleSupplierCreated = (newSup: SupplierDTO) => {
+    const pickerItem = mapSupplierToPicker(newSup);
+    setExtraSuppliers((prev) => [pickerItem, ...prev]);
+    handleSupplierChange(newSup.id, pickerItem);
+  };
 
   const save = useMutation({
     ...createPurchaseMutation,
@@ -96,6 +106,7 @@ export function PurchaseCreateForm({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     void form.handleSubmit();
   };
 
@@ -138,136 +149,146 @@ export function PurchaseCreateForm({
     );
 
   return (
-    <form className='w-full' onSubmit={handleSubmit}>
-      <div className='grid grid-cols-1 gap-6 lg:grid-cols-3'>
-        <div className='space-y-8 lg:col-span-2'>
-          <section className='space-y-4'>
-            <h2 className='text-base font-semibold'>{t('dukaan.purchase.supplier')}</h2>
-            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
-              <form.Field
-                name='supplier_id'
+    <>
+      <form className='w-full' onSubmit={handleSubmit}>
+        <div className='grid grid-cols-1 gap-6 lg:grid-cols-3'>
+          <div className='space-y-8 lg:col-span-2'>
+            <section className='space-y-4'>
+              <h2 className='text-base font-semibold'>{t('dukaan.purchase.supplier')}</h2>
+              <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+                <form.Field
+                  name='supplier_id'
+                  children={(field) => {
+                    const isInvalid = isFieldMetaInvalid(field.state.meta);
+                    return (
+                      <div className='space-y-1.5'>
+                        <FormEntitySelect
+                          name={field.name}
+                          label={t('dukaan.purchase.supplier')}
+                          required
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onValueChange={handleSupplierChange}
+                          isInvalid={isInvalid}
+                          errors={field.state.meta.errors}
+                          queryKey={['suppliers', 'picker']}
+                          fetchPage={fetchSupplierPage}
+                          placeholder={t('dukaan.purchase.pickSupplier')}
+                          searchPlaceholder={t('dukaan.purchase.searchSuppliers')}
+                          onAddNewClick={() => setAddSupplierOpen(true)}
+                          addNewLabel={t('dukaan.supplier.addTitle')}
+                          extraItems={extraSuppliers}
+                        />
+                        {field.state.value ? (
+                          <p className='text-muted-foreground text-xs'>
+                            {supplierCnic
+                              ? t('dukaan.purchase.supplierCnic', { cnic: supplierCnic })
+                              : t('dukaan.purchase.supplierCnicMissing')}
+                          </p>
+                        ) : null}
+                      </div>
+                    );
+                  }}
+                />
+                <form.AppField
+                  name='supplier_invoice_ref'
+                  children={(field) => (
+                    <field.TextField
+                      label={t('dukaan.purchase.invoiceRef')}
+                      maxLength={INPUT_LIMITS.invoiceRef}
+                      placeholder={t('dukaan.purchase.invoiceRefPlaceholder')}
+                    />
+                  )}
+                />
+              </div>
+              <form.AppField
+                name='is_opening_stock'
+                listeners={{ onChange: handleOpeningStockChange }}
+                children={(field) => (
+                  <field.CheckboxField label={t('dukaan.purchase.openingStock')} />
+                )}
+              />
+            </section>
+
+            <section className='space-y-5 border-t border-border/60 pt-6'>
+              <h2 className='text-lg font-semibold'>{t('dukaan.purchase.items')}</h2>
+              <form.AppField
+                name='lines'
+                mode='array'
                 children={(field) => {
-                  const isInvalid = isFieldMetaInvalid(field.state.meta);
+                  const linesInvalid = isFieldMetaInvalid(field.state.meta);
                   return (
-                    <div className='space-y-1.5'>
-                      <FormEntitySelect
-                        name={field.name}
-                        label={t('dukaan.purchase.supplier')}
-                        required
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onValueChange={handleSupplierChange}
-                        isInvalid={isInvalid}
-                        errors={field.state.meta.errors}
-                        queryKey={['suppliers', 'picker']}
-                        fetchPage={fetchSupplierPage}
-                        placeholder={t('dukaan.purchase.pickSupplier')}
-                        searchPlaceholder={t('dukaan.purchase.searchSuppliers')}
-                      />
-                      {field.state.value ? (
-                        <p className='text-muted-foreground text-xs'>
-                          {supplierCnic
-                            ? t('dukaan.purchase.supplierCnic', { cnic: supplierCnic })
-                            : t('dukaan.purchase.supplierCnicMissing')}
-                        </p>
+                    <div className='space-y-6'>
+                      {field.state.value.map((_, idx) => (
+                        <PurchaseLineCard
+                          key={idx}
+                          form={form as never}
+                          index={idx}
+                          canRemove={field.state.value.length > 1}
+                          onRemove={() => field.removeValue(idx)}
+                        />
+                      ))}
+                      {linesInvalid ? (
+                        <DialogFieldError message={joinFieldErrors(field.state.meta.errors)} />
                       ) : null}
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='sm'
+                        className='w-full'
+                        onClick={() => field.pushValue(emptyPurchaseLine())}
+                      >
+                        <Icons.add className='me-1.5 size-3.5' />
+                        {t('dukaan.purchase.addLine')}
+                      </Button>
                     </div>
                   );
                 }}
               />
-              <form.AppField
-                name='supplier_invoice_ref'
-                children={(field) => (
-                  <field.TextField
-                    label={t('dukaan.purchase.invoiceRef')}
-                    maxLength={INPUT_LIMITS.invoiceRef}
-                    placeholder={t('dukaan.purchase.invoiceRefPlaceholder')}
+            </section>
+          </div>
+
+          <aside className='lg:col-span-1'>
+            <div className='lg:sticky lg:top-3 lg:z-10'>
+              <form.Subscribe
+                selector={selectPurchaseSummary}
+                children={(summary) => (
+                  <PurchaseSummaryCard
+                    isOpeningStock={summary.isOpeningStock}
+                    lines={summary.lines}
+                    paidNow={summary.paidNow}
+                    warning={warning}
+                    saving={save.isPending}
+                    onConfirmOverdraft={handleConfirmOverdraft}
+                    onCancel={handleCancel}
+                    paidNowField={
+                      <form.AppField
+                        name='paid_now'
+                        listeners={{ onChange: clearOverdraftWarning }}
+                        children={(subField) => (
+                          <subField.TextField
+                            label={t('dukaan.purchase.paidNow')}
+                            type='number'
+                            min={0}
+                            max={INPUT_LIMITS.amountRupeesMax}
+                            required
+                            placeholder={t('dukaan.purchase.paidNowPlaceholder')}
+                          />
+                        )}
+                      />
+                    }
                   />
                 )}
               />
             </div>
-            <form.AppField
-              name='is_opening_stock'
-              listeners={{ onChange: handleOpeningStockChange }}
-              children={(field) => (
-                <field.CheckboxField label={t('dukaan.purchase.openingStock')} />
-              )}
-            />
-          </section>
-
-          <section className='space-y-5 border-t border-border/60 pt-6'>
-            <h2 className='text-lg font-semibold'>{t('dukaan.purchase.items')}</h2>
-            <form.AppField
-              name='lines'
-              mode='array'
-              children={(field) => {
-                const linesInvalid = isFieldMetaInvalid(field.state.meta);
-                return (
-                  <div className='space-y-6'>
-                    {field.state.value.map((_, idx) => (
-                      <PurchaseLineCard
-                        key={idx}
-                        form={form as never}
-                        index={idx}
-                        canRemove={field.state.value.length > 1}
-                        onRemove={() => field.removeValue(idx)}
-                      />
-                    ))}
-                    {linesInvalid ? (
-                      <DialogFieldError message={joinFieldErrors(field.state.meta.errors)} />
-                    ) : null}
-                    <Button
-                      type='button'
-                      variant='outline'
-                      size='sm'
-                      className='w-full'
-                      onClick={() => field.pushValue(emptyPurchaseLine())}
-                    >
-                      <Icons.add className='me-1.5 size-3.5' />
-                      {t('dukaan.purchase.addLine')}
-                    </Button>
-                  </div>
-                );
-              }}
-            />
-          </section>
+          </aside>
         </div>
-
-        <aside className='lg:col-span-1'>
-          <div className='lg:sticky lg:top-3 lg:z-10'>
-            <form.Subscribe
-              selector={selectPurchaseSummary}
-              children={(summary) => (
-                <PurchaseSummaryCard
-                  isOpeningStock={summary.isOpeningStock}
-                  lines={summary.lines}
-                  paidNow={summary.paidNow}
-                  warning={warning}
-                  saving={save.isPending}
-                  onConfirmOverdraft={handleConfirmOverdraft}
-                  onCancel={handleCancel}
-                  paidNowField={
-                    <form.AppField
-                      name='paid_now'
-                      listeners={{ onChange: clearOverdraftWarning }}
-                      children={(subField) => (
-                        <subField.TextField
-                          label={t('dukaan.purchase.paidNow')}
-                          type='number'
-                          min={0}
-                          max={INPUT_LIMITS.amountRupeesMax}
-                          required
-                          placeholder={t('dukaan.purchase.paidNowPlaceholder')}
-                        />
-                      )}
-                    />
-                  }
-                />
-              )}
-            />
-          </div>
-        </aside>
-      </div>
-    </form>
+      </form>
+      <SupplierDialog
+        open={addSupplierOpen}
+        onOpenChange={setAddSupplierOpen}
+        onSuccess={handleSupplierCreated}
+      />
+    </>
   );
 }

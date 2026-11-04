@@ -111,6 +111,7 @@ export function RecordExpenseDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
     const nextErrors: RecordExpenseFormErrors = {};
     if (!categoryId) {

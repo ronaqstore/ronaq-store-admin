@@ -106,6 +106,7 @@ export interface BasePartyDialogProps {
   onSave: (payload: BasePartyPayload, id?: string) => Promise<unknown>;
   invalidateQueryKey: readonly unknown[];
   schema?: unknown;
+  onSuccess?: (party: unknown) => void;
 }
 
 export interface BasePartyDialogBodyProps extends BasePartyDialogProps {}

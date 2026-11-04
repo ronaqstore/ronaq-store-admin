@@ -73,6 +73,7 @@ export function CancelPaymentDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!reason.trim()) {
       setReasonError(t('payments.reasonRequired'));
       return;

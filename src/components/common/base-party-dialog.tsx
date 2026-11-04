@@ -43,7 +43,8 @@ export function BasePartyDialog({
   showCnic,
   onSave,
   invalidateQueryKey,
-  schema
+  schema,
+  onSuccess
 }: BasePartyDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -66,6 +67,7 @@ export function BasePartyDialog({
           onSave={onSave}
           invalidateQueryKey={invalidateQueryKey}
           schema={schema}
+          onSuccess={onSuccess}
         />
       ) : null}
     </Dialog>
@@ -87,7 +89,8 @@ function BasePartyDialogBody({
   showCnic,
   onSave,
   invalidateQueryKey,
-  schema
+  schema,
+  onSuccess
 }: BasePartyDialogBodyProps) {
   const qc = useQueryClient();
   const t = useT();
@@ -111,10 +114,13 @@ function BasePartyDialogBody({
       }
       return onSave(payload, party?.id);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       onOpenChange(false);
       void qc.invalidateQueries({ queryKey: invalidateQueryKey });
       toastSuccessAfterClose(isEdit ? successUpdated : successCreated);
+      if (!isEdit && onSuccess && data) {
+        onSuccess(data);
+      }
     }
   });
 
@@ -155,6 +161,7 @@ function BasePartyDialogBody({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     void form.handleSubmit();
   };
 

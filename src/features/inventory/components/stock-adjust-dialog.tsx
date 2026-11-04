@@ -196,6 +196,7 @@ export function StockAdjustDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
     const nextErrors: StockAdjustFormErrors = {};
     if (!productId) {

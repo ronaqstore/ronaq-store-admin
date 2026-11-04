@@ -21,6 +21,7 @@ export interface BrandDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   brand?: BrandDTO | null;
+  onSuccess?: (brand: BrandDTO) => void;
 }
 
 export interface BrandsHeaderActionProps {

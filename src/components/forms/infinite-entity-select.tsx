@@ -36,7 +36,9 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
   activeOnly = true,
   disabled,
   className,
-  extraItems = EMPTY_EXTRA_ITEMS
+  extraItems = EMPTY_EXTRA_ITEMS,
+  onAddNewClick,
+  addNewLabel
 }: InfiniteEntitySelectProps<T>) {
   const t = useT();
   const [open, setOpen] = React.useState(false);
@@ -92,11 +94,9 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
     return unique;
   }, [query.data, extraItems, debouncedSearch]);
 
+  const itemMatch = items.find((item) => item.id === value);
   const displayLabel = value
-    ? (selectedLabel ??
-      labelCache[value] ??
-      items.find((item) => item.id === value)?.name ??
-      t('common.selected'))
+    ? (itemMatch?.name ?? labelCache[value] ?? selectedLabel ?? t('common.selected'))
     : effPlaceholder;
 
   const onListScroll = (event: React.UIEvent<HTMLDivElement>) => {
@@ -110,6 +110,11 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
     if (!next) setSearch('');
+  };
+
+  const handleAddNew = () => {
+    setOpen(false);
+    onAddNewClick?.();
   };
 
   const handleSelectItem = (item: T) => {
@@ -187,6 +192,20 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
               </>
             )}
           </CommandList>
+          {onAddNewClick ? (
+            <div className='border-t border-border/60 p-1'>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={handleAddNew}
+                className='w-full justify-start text-xs font-normal text-primary hover:bg-primary/10'
+              >
+                <Icons.add className='me-1.5 size-3.5' />
+                <span>{addNewLabel || t('common.add')}</span>
+              </Button>
+            </div>
+          ) : null}
         </Command>
       </PopoverContent>
     </Popover>

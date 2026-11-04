@@ -5,7 +5,12 @@ import type {
   CreateSupplierInput,
   UpdateSupplierInput
 } from '@/lib/api/types';
-import type { SupplierListFilters, SupplierLedgerDTO, SupplierLedgerView } from '@/types';
+import type {
+  SupplierListFilters,
+  SupplierLedgerDTO,
+  SupplierLedgerView,
+  EntityCreationApiResponse
+} from '@/types';
 import { appFetch } from '@/lib/api/app-fetch';
 
 import { buildQueryString } from '@/lib/api/query-params';
@@ -27,11 +32,25 @@ export async function listSuppliers(
 }
 
 export async function createSupplier(data: CreateSupplierInput): Promise<SupplierDTO> {
-  return appFetch<SupplierDTO>('/api/suppliers', {
+  const res = await appFetch<EntityCreationApiResponse>('/api/suppliers', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   });
+  const id = res.data?.id || res.id || '';
+  return {
+    id,
+    name: data.name.trim(),
+    phone: data.phone || null,
+    cnic: data.cnic || null,
+    address: data.address || null,
+    notes: data.notes || null,
+    openingBalance: data.openingBalance ?? 0,
+    currentBalance: data.openingBalance ?? 0,
+    isActive: data.isActive ?? true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  } as SupplierDTO;
 }
 
 export async function updateSupplier(id: string, data: UpdateSupplierInput): Promise<SupplierDTO> {

@@ -1,6 +1,6 @@
 import { apiRequest } from '@/lib/api/client';
 import type { PaginatedResponse, CategoryDTO } from '@/lib/api/types';
-import type { CategoryListFilters, UpdateCategoryArg } from '@/types';
+import type { CategoryListFilters, UpdateCategoryArg, EntityCreationApiResponse } from '@/types';
 import { appFetch } from '@/lib/api/app-fetch';
 
 import { buildQueryString } from '@/lib/api/query-params';
@@ -19,11 +19,18 @@ export async function listCategories(
 }
 
 export async function createCategory(name: string): Promise<CategoryDTO> {
-  return appFetch<CategoryDTO>('/api/categories', {
+  const res = await appFetch<EntityCreationApiResponse>('/api/categories', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name })
   });
+  return {
+    id: res.data?.id || res.id || '',
+    name: name.trim(),
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  } as CategoryDTO;
 }
 
 export async function updateCategory(id: string, input: UpdateCategoryArg): Promise<CategoryDTO> {

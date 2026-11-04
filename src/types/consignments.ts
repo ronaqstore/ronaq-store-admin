@@ -114,4 +114,6 @@ export interface ConsignmentConsignorSectionProps {
   onConsignorNameChange: (val: string) => void;
   onConsignorPhoneChange: (val: string) => void;
   onConsignorCnicChange: (val: string) => void;
+  onAddNewCustomerClick?: () => void;
+  extraCustomers?: CustomerDTO[];
 }

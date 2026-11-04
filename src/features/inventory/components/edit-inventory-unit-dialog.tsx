@@ -115,6 +115,7 @@ export function EditInventoryUnitDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const nextErrors: Record<string, string> = {};
 
     if (askingPricePkr.trim()) {

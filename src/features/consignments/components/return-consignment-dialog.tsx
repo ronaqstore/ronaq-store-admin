@@ -62,6 +62,7 @@ export function ReturnConsignmentDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const schema = returnConsignmentFormSchema(t);
     const parsed = schema.safeParse({ returnReason, notes });
     if (!parsed.success) {

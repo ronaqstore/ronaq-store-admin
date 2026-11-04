@@ -1,6 +1,6 @@
 import { apiRequest } from '@/lib/api/client';
 import type { PaginatedResponse, BrandDTO } from '@/lib/api/types';
-import type { BrandListFilters, UpdateBrandArg } from '@/types';
+import type { BrandListFilters, UpdateBrandArg, EntityCreationApiResponse } from '@/types';
 import { appFetch } from '@/lib/api/app-fetch';
 
 import { buildQueryString } from '@/lib/api/query-params';
@@ -19,11 +19,18 @@ export async function listBrands(
 }
 
 export async function createBrand(name: string): Promise<BrandDTO> {
-  return appFetch<BrandDTO>('/api/brands', {
+  const res = await appFetch<EntityCreationApiResponse>('/api/brands', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name })
   });
+  return {
+    id: res.data?.id || res.id || '',
+    name: name.trim(),
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  } as BrandDTO;
 }
 
 export async function updateBrand(id: string, input: UpdateBrandArg): Promise<BrandDTO> {

@@ -89,6 +89,7 @@ function CreateShopDialogBody({ onOpenChange }: CreateShopDialogBodyProps) {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     void form.handleSubmit();
   };
 

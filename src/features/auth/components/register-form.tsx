@@ -111,6 +111,7 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     form.handleSubmit();
   };
 

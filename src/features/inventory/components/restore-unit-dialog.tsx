@@ -59,6 +59,7 @@ export function RestoreUnitDialog({ open, onOpenChange, productId, unit }: Resto
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!reason.trim()) {
       setError(t('validation.reasonRequired'));
       return;

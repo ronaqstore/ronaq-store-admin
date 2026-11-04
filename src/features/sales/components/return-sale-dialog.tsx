@@ -202,6 +202,7 @@ export function ReturnSaleDialog({ sale, open, onOpenChange, onSuccess }: Return
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!reason.trim()) {
       setReasonError(t('sales.returnDialog.reasonRequired'));
       return;

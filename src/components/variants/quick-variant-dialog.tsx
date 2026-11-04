@@ -15,6 +15,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FieldGroup } from '@/components/ui/field';
 import { Icons } from '@/components/icons';
 import { FormEntitySelect } from '@/components/forms/form-entity-select';
+import { CategoryDialog } from '@/components/dialogs/category-dialog';
+import { BrandDialog } from '@/components/dialogs/brand-dialog';
+import type { BrandDTO, CategoryDTO } from '@/lib/api/types';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { useAppForm } from '@/lib/form';
 import { isFieldMetaInvalid } from '@/lib/form-context';
@@ -65,6 +68,20 @@ function QuickVariantDialogBody({ onOpenChange, onCreated }: QuickVariantDialogB
   const qc = useQueryClient();
   const [formApiError, setFormApiError] = useState<string | null>(null);
   const [brandLabel, setBrandLabel] = useState('');
+  const [addCategoryOpen, setAddCategoryOpen] = useState(false);
+  const [addBrandOpen, setAddBrandOpen] = useState(false);
+  const [extraCategories, setExtraCategories] = useState<NamedEntity[]>([]);
+  const [extraBrands, setExtraBrands] = useState<NamedEntity[]>([]);
+
+  const handleCategoryCreated = (cat: CategoryDTO) => {
+    setExtraCategories((existing) => [{ id: cat.id, name: cat.name }, ...existing]);
+    form.setFieldValue('categoryId', cat.id);
+  };
+
+  const handleBrandCreated = (brand: BrandDTO) => {
+    setExtraBrands((existing) => [{ id: brand.id, name: brand.name }, ...existing]);
+    handleBrandChange(brand.id, { id: brand.id, name: brand.name });
+  };
   const [nameTouched, setNameTouched] = useState(false);
 
   const create = useMutation({
@@ -192,47 +209,47 @@ function QuickVariantDialogBody({ onOpenChange, onCreated }: QuickVariantDialogB
             />
             <form.Field
               name='categoryId'
-              children={(field) => {
-                const isInvalid = isFieldMetaInvalid(field.state.meta);
-                return (
-                  <FormEntitySelect
-                    name={field.name}
-                    label={t('category')}
-                    required
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onValueChange={(id) => field.handleChange(id)}
-                    isInvalid={isInvalid}
-                    errors={field.state.meta.errors}
-                    queryKey={['categories', 'picker']}
-                    fetchPage={fetchCategorySelectPage}
-                    placeholder={t('selectCategory')}
-                    searchPlaceholder={t('searchCategories')}
-                  />
-                );
-              }}
+              children={(field) => (
+                <FormEntitySelect
+                  name={field.name}
+                  label={t('category')}
+                  required
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onValueChange={field.handleChange}
+                  isInvalid={isFieldMetaInvalid(field.state.meta)}
+                  errors={field.state.meta.errors}
+                  queryKey={['categories', 'picker']}
+                  fetchPage={fetchCategorySelectPage}
+                  placeholder={t('selectCategory')}
+                  searchPlaceholder={t('searchCategories')}
+                  onAddNewClick={() => setAddCategoryOpen(true)}
+                  addNewLabel={tRoot('dukaan.category.addTitle')}
+                  extraItems={extraCategories}
+                />
+              )}
             />
             <form.Field
               name='brandId'
-              children={(field) => {
-                const isInvalid = isFieldMetaInvalid(field.state.meta);
-                return (
-                  <FormEntitySelect
-                    name={field.name}
-                    label={t('brand')}
-                    required
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onValueChange={handleBrandChange}
-                    isInvalid={isInvalid}
-                    errors={field.state.meta.errors}
-                    queryKey={['brands', 'picker']}
-                    fetchPage={fetchBrandSelectPage}
-                    placeholder={t('selectBrand')}
-                    searchPlaceholder={t('searchBrands')}
-                  />
-                );
-              }}
+              children={(field) => (
+                <FormEntitySelect
+                  name={field.name}
+                  label={t('brand')}
+                  required
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onValueChange={handleBrandChange}
+                  isInvalid={isFieldMetaInvalid(field.state.meta)}
+                  errors={field.state.meta.errors}
+                  queryKey={['brands', 'picker']}
+                  fetchPage={fetchBrandSelectPage}
+                  placeholder={t('selectBrand')}
+                  searchPlaceholder={t('searchBrands')}
+                  onAddNewClick={() => setAddBrandOpen(true)}
+                  addNewLabel={tRoot('dukaan.brand.addTitle')}
+                  extraItems={extraBrands}
+                />
+              )}
             />
             <form.AppField
               name='model'
@@ -345,6 +362,16 @@ function QuickVariantDialogBody({ onOpenChange, onCreated }: QuickVariantDialogB
           <DialogPrimaryButton mode='add' loading={create.isPending} />
         </DialogFooter>
       </form>
+      <CategoryDialog
+        open={addCategoryOpen}
+        onOpenChange={setAddCategoryOpen}
+        onSuccess={handleCategoryCreated}
+      />
+      <BrandDialog
+        open={addBrandOpen}
+        onOpenChange={setAddBrandOpen}
+        onSuccess={handleBrandCreated}
+      />
     </DialogContent>
   );
 }

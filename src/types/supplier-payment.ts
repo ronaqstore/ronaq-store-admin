@@ -174,4 +174,5 @@ export interface SupplierSelectComboboxProps {
   onSelectSupplier: (supplier: SupplierDTO | null) => void;
   placeholder?: string;
   disabled?: boolean;
+  onAddNewSupplierClick?: () => void;
 }

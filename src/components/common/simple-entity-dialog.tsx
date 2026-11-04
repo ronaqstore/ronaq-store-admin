@@ -16,7 +16,11 @@ import { useAppForm } from '@/lib/form';
 import { useT } from '@/i18n/use-t';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
-import type { SimpleEntityDialogProps, SimpleEntityDialogBodyProps } from '@/types';
+import type {
+  SimpleEntityDialogProps,
+  SimpleEntityDialogBodyProps,
+  NamedEntityItem
+} from '@/types';
 
 export function SimpleEntityDialog({
   open,
@@ -32,7 +36,8 @@ export function SimpleEntityDialog({
   successUpdated,
   onSave,
   invalidateQueryKey,
-  schema
+  schema,
+  onSuccess
 }: SimpleEntityDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -53,6 +58,7 @@ export function SimpleEntityDialog({
           onSave={onSave}
           invalidateQueryKey={invalidateQueryKey}
           schema={schema}
+          onSuccess={onSuccess}
         />
       ) : null}
     </Dialog>
@@ -72,7 +78,8 @@ function SimpleEntityDialogBody({
   successUpdated,
   onSave,
   invalidateQueryKey,
-  schema
+  schema,
+  onSuccess
 }: SimpleEntityDialogBodyProps) {
   const qc = useQueryClient();
   const isEdit = Boolean(entity);
@@ -80,10 +87,13 @@ function SimpleEntityDialogBody({
 
   const save = useMutation({
     mutationFn: async (name: string) => onSave(entity?.id, name),
-    onSuccess: () => {
+    onSuccess: (data) => {
       onOpenChange(false);
       void qc.invalidateQueries({ queryKey: invalidateQueryKey });
       toastSuccessAfterClose(isEdit ? successUpdated : successCreated);
+      if (!isEdit && onSuccess && data) {
+        onSuccess(data as NamedEntityItem);
+      }
     },
     onError: (e: Error) => toast.error(e.message)
   });
@@ -106,6 +116,7 @@ function SimpleEntityDialogBody({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     void form.handleSubmit();
   };
 

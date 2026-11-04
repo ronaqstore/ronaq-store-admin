@@ -59,6 +59,7 @@ function ChangePasswordDialogBody({ onOpenChange }: ChangePasswordDialogBodyProp
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     void form.handleSubmit();
   };
 
