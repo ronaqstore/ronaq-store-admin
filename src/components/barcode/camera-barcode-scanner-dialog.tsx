@@ -27,6 +27,11 @@ import {
   recognizeNumbersFromCanvas
 } from '@/lib/barcode/ocr-number-extractor';
 import { getAudioContext, playScanBeep } from '@/lib/barcode/scanner-audio';
+import {
+  VIEWFINDER_HEIGHT_PX,
+  computeOcrCropRatios,
+  getReticleSize
+} from '@/lib/barcode/scanner-viewfinder';
 import { ScannerControlsBar } from './scanner-controls-bar';
 import { ScannerOcrCandidates } from './scanner-ocr-candidates';
 import { cn } from '@/lib/utils';
@@ -164,11 +169,9 @@ export function CameraBarcodeScannerDialog({
           cameraConfig,
           {
             fps: 15,
-            qrbox: (viewfinderWidth, viewfinderHeight) => {
-              const width = Math.min(Math.floor(viewfinderWidth * 0.9), 420);
-              const height = Math.min(Math.floor(viewfinderHeight * 0.55), 240);
-              return { width, height };
-            }
+            // Spec R3: wide-and-short reticle shared with the on-screen OCR guide
+            qrbox: (viewfinderWidth, viewfinderHeight) =>
+              getReticleSize(viewfinderWidth, viewfinderHeight)
           },
           (decodedText) => {
             handleScanSuccess(decodedText);
@@ -282,12 +285,18 @@ export function CameraBarcodeScannerDialog({
     setWarningMessage(null);
 
     try {
-      const centerCrop = cropVideoToReticle(video, {
-        xRatio: 0.05,
-        yRatio: 0.2,
-        widthRatio: 0.9,
-        heightRatio: 0.6
-      });
+      // Spec R5: crop only the reticle (+10% tolerance), mapped through object-cover
+      const viewRect = video.getBoundingClientRect();
+      const viewSize = { width: viewRect.width, height: viewRect.height };
+      const centerCrop = cropVideoToReticle(
+        video,
+        computeOcrCropRatios({
+          video: { width: video.videoWidth, height: video.videoHeight },
+          view: viewSize,
+          reticle: getReticleSize(viewSize.width, viewSize.height),
+          padding: 0.1
+        })
+      );
       const fullFrame = cropVideoToReticle(video, {
         xRatio: 0,
         yRatio: 0,
@@ -383,12 +392,19 @@ export function CameraBarcodeScannerDialog({
         <div className='relative mt-3 flex flex-col items-center justify-center overflow-hidden rounded-xl bg-black/90 p-1'>
           <div
             id={elementId}
-            className='h-[260px] w-full overflow-hidden rounded-lg [&_video]:h-full [&_video]:w-full [&_video]:object-cover'
+            style={{ height: VIEWFINDER_HEIGHT_PX }}
+            className='w-full overflow-hidden rounded-lg [&_video]:h-full [&_video]:w-full [&_video]:object-cover'
           />
 
           {scanType === 'ocr' && !isInitializing && !errorMessage && (
-            <div className='pointer-events-none absolute inset-0 flex flex-col items-center justify-center p-4'>
-              <div className='relative h-28 w-4/5 rounded-lg border-2 border-dashed border-primary/80 bg-primary/5 shadow-sm'>
+            <div
+              className='pointer-events-none absolute inset-x-0 top-1 flex items-center justify-center'
+              style={{ height: VIEWFINDER_HEIGHT_PX }}
+            >
+              <div
+                className='relative w-[90%] max-w-[460px] rounded-lg border-2 border-dashed border-primary/80 bg-primary/5 shadow-sm'
+                style={{ height: getReticleSize(1000, VIEWFINDER_HEIGHT_PX).height }}
+              >
                 <div className='absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-background/90 px-2.5 py-0.5 text-[10px] font-medium text-foreground backdrop-blur-sm'>
                   {t('scanner.ocrGuide')}
                 </div>
@@ -418,19 +434,19 @@ export function CameraBarcodeScannerDialog({
               </Button>
             </div>
           )}
-
-          <ScannerControlsBar
-            hasMultipleCameras={cameras.length > 1}
-            scanType={scanType}
-            isOcrScanning={isOcrScanning}
-            isInitializing={isInitializing}
-            hasTorch={hasTorch}
-            isTorchOn={isTorchOn}
-            onSwitchCamera={handleSwitchCamera}
-            onCaptureOcr={() => void handleCaptureOcr()}
-            onToggleTorch={() => void handleToggleTorch()}
-          />
         </div>
+
+        <ScannerControlsBar
+          hasMultipleCameras={cameras.length > 1}
+          scanType={scanType}
+          isOcrScanning={isOcrScanning}
+          isInitializing={isInitializing}
+          hasTorch={hasTorch}
+          isTorchOn={isTorchOn}
+          onSwitchCamera={handleSwitchCamera}
+          onCaptureOcr={() => void handleCaptureOcr()}
+          onToggleTorch={() => void handleToggleTorch()}
+        />
 
         <ScannerOcrCandidates
           candidates={ocrCandidates}

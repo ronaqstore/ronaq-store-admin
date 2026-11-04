@@ -110,6 +110,47 @@ describe('createSaleFormSchema', () => {
     }
   });
 
+  it('allows walk-in sale when discount is applied and paid_now equals discounted total', () => {
+    const result = schema.safeParse({
+      customer_id: '__walkin__',
+      discount: 5000,
+      paid_now: 45000,
+      notes: '',
+      lines: [baseLinePhone]
+    });
+
+    assert.equal(result.success, true);
+  });
+
+  it('rejects walk-in sale when discount is applied but paid_now remains at original subtotal', () => {
+    const result = schema.safeParse({
+      customer_id: '__walkin__',
+      discount: 5000,
+      paid_now: 50000,
+      notes: '',
+      lines: [baseLinePhone]
+    });
+
+    assert.equal(result.success, false);
+    if (!result.success) {
+      const issue = result.error.issues.find((i) => i.path.includes('paid_now'));
+      assert.ok(issue);
+      assert.equal(issue.message, 'validation.paidExceedsTotal');
+    }
+  });
+
+  it('allows named customer sale with discount and partial udhar payment', () => {
+    const result = schema.safeParse({
+      customer_id: 'cust-uuid-1',
+      discount: 5000,
+      paid_now: 20000,
+      notes: '',
+      lines: [baseLinePhone]
+    });
+
+    assert.equal(result.success, true);
+  });
+
   it('rejects paid_now exceeding total', () => {
     const result = schema.safeParse({
       customer_id: '__walkin__',

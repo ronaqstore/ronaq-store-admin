@@ -68,7 +68,7 @@ export interface CancelPurchaseDialogProps {
 
 export type PurchasePhoneUnitDraft = {
   imei1: string;
-  imei2: string;
+  imei2?: string;
   condition: 'NEW' | 'USED';
   battery_health?: number | '';
   asking_price?: number | '';

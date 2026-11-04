@@ -40,9 +40,11 @@ function mapPhoneUnit(unit: PurchasePhoneUnitDraft): CreatePurchasePhoneUnitInpu
   const askingRs = optionalNumber(unit.asking_price);
   const defectNotes = unit.defect_notes?.trim() || undefined;
 
+  const imei2 = unit.imei2?.trim() || undefined;
+
   return {
     imei1: unit.imei1.trim(),
-    imei2: unit.imei2.trim(),
+    ...(imei2 ? { imei2 } : {}),
     condition: unit.condition,
     ...(batteryHealth != null ? { batteryHealth } : {}),
     ...(askingRs != null ? { askingPrice: toPaisa(askingRs) } : {}),

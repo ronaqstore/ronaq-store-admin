@@ -19,7 +19,7 @@ export function ScannerControlsBar({
   const t = useT();
 
   return (
-    <div className='absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 px-3'>
+    <div className='mt-2 flex flex-wrap items-center justify-center gap-2'>
       {hasMultipleCameras && (
         <Button
           type='button'

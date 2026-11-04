@@ -278,7 +278,6 @@ export const PurchaseLineCard = withForm({
                                   <subField.TextField
                                     label={t('dukaan.purchase.imei2')}
                                     maxLength={INPUT_LIMITS.imei}
-                                    required
                                     placeholder={t('dukaan.purchase.imei2Placeholder')}
                                   />
                                 </div>

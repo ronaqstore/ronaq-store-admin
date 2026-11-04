@@ -315,7 +315,7 @@ export interface PurchaseDTO {
 
 export interface CreatePurchasePhoneUnitInput {
   imei1: string;
-  imei2: string;
+  imei2?: string;
   condition?: 'NEW' | 'USED';
   batteryHealth?: number;
   askingPrice?: number;

@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useStore } from '@tanstack/react-form';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { FormEntitySelect } from '@/components/forms/form-entity-select';
 import { Icons } from '@/components/icons';
@@ -14,13 +14,13 @@ import { useT } from '@/i18n/use-t';
 import { useAppForm } from '@/lib/form';
 import { INPUT_LIMITS } from '@/lib/input-limits';
 import { isFieldMetaInvalid } from '@/lib/form-context';
-import { createClientRequestId } from '@/lib/dukaan/numbers';
+import { createClientRequestId, fromPaisa } from '@/lib/dukaan/numbers';
 import { isValidationApiError } from '@/lib/api/is-validation-error';
 import { toastSuccessAfterClose } from '@/lib/toast-success';
 import { listCustomers } from '@/features/customers/api/service';
 import { CustomerDialog } from '@/components/dialogs/customer-dialog';
 import type { CustomerDTO } from '@/lib/api/types';
-import type { NamedEntity } from '@/types';
+import type { FormNumber, NamedEntity } from '@/types';
 import { DialogCancelButton, DialogPrimaryButton } from '@/components/common/dialog-actions';
 import { createSaleMutation } from '../api/mutations';
 import { createSaleFormSchema } from '../schemas/sale-schema';
@@ -172,7 +172,7 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
         product_name: product.name,
         tracking_type: 'SERIALIZED',
         inventory_unit_id: unit.id,
-        unit_price: unit.effectivePrice ?? product.defaultSellingPrice,
+        unit_price: fromPaisa(unit.effectivePrice ?? product.defaultSellingPrice ?? 0),
         quantity: 1,
         unit_condition:
           unit.condition === 'USED' || unit.condition === 'NEW' ? unit.condition : undefined,
@@ -203,7 +203,7 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
           product_name: product.name,
           tracking_type: 'QUANTITY',
           inventory_unit_id: '',
-          unit_price: product.defaultSellingPrice,
+          unit_price: fromPaisa(product.defaultSellingPrice ?? 0),
           quantity: 1
         };
 
@@ -223,7 +223,7 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
         product_name: product.name,
         tracking_type: 'SERIALIZED',
         inventory_unit_id: '',
-        unit_price: product.defaultSellingPrice,
+        unit_price: fromPaisa(product.defaultSellingPrice ?? 0),
         quantity: 1
       };
       if (isFirstLineEmpty) {
@@ -234,9 +234,55 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
     }
   };
 
-  const currentFingerprint = useStore(form.store, (s) =>
-    getSalePricingFingerprint(s.values.lines, s.values.discount)
-  );
+  const [isPaidNowCustom, setIsPaidNowCustom] = useState(false);
+  const isSyncingPaidNowRef = useRef(false);
+
+  const pricingState = useStore(form.store, (s) => ({
+    customerId: s.values.customer_id,
+    fingerprint: getSalePricingFingerprint(s.values.lines, s.values.discount),
+    totals: calcSaleTotals(s.values.lines, s.values.discount, s.values.paid_now)
+  }));
+
+  const currentFingerprint = pricingState.fingerprint;
+
+  const setPaidNowSafe = (val: FormNumber) => {
+    isSyncingPaidNowRef.current = true;
+    form.setFieldValue('paid_now', val);
+    isSyncingPaidNowRef.current = false;
+  };
+
+  // Auto-sync paid_now with total amount when discount, items, prices, or quantities change
+  useEffect(() => {
+    const isWalkIn = !pricingState.customerId || pricingState.customerId === '__walkin__';
+    const totalRs = pricingState.totals.totalRs;
+    const currentPaidNow = Number(form.getFieldValue('paid_now')) || 0;
+    const hasItems = pricingState.totals.subtotalRs > 0;
+
+    if (isWalkIn) {
+      if (isPaidNowCustom) setIsPaidNowCustom(false);
+      const nextVal = hasItems ? totalRs : '';
+      if (form.getFieldValue('paid_now') !== nextVal) {
+        setPaidNowSafe(nextVal);
+      }
+    } else {
+      if (!isPaidNowCustom) {
+        const nextVal = hasItems ? totalRs : '';
+        if (form.getFieldValue('paid_now') !== nextVal) {
+          setPaidNowSafe(nextVal);
+        }
+      } else if (currentPaidNow > totalRs) {
+        // Clamp down custom payment if discount or item removal reduced total below paidNow
+        setPaidNowSafe(totalRs > 0 ? totalRs : '');
+      }
+    }
+  }, [
+    pricingState.fingerprint,
+    pricingState.customerId,
+    isPaidNowCustom,
+    pricingState.totals.totalRs,
+    pricingState.totals.subtotalRs,
+    form
+  ]);
 
   useEffect(() => {
     if (belowCostPrompt && promptedFingerprint && currentFingerprint !== promptedFingerprint) {
@@ -393,15 +439,46 @@ export function SaleCreateForm({ onDone, initialProduct }: SaleCreateFormProps) 
           />
           <form.AppField
             name='paid_now'
+            listeners={{
+              onChange: () => {
+                if (!isSyncingPaidNowRef.current) {
+                  setIsPaidNowCustom(true);
+                }
+              }
+            }}
             children={(field) => (
-              <field.TextField
-                label={t('dukaan.sale.paidNow')}
-                type='number'
-                min={0}
-                max={INPUT_LIMITS.amountRupeesMax}
-                required
-                placeholder={t('dukaan.sale.paidNowPlaceholder')}
-              />
+              <div className='flex items-end gap-1.5'>
+                <div className='min-w-0 flex-1'>
+                  <field.TextField
+                    label={t('dukaan.sale.paidNow')}
+                    type='number'
+                    min={0}
+                    max={INPUT_LIMITS.amountRupeesMax}
+                    required
+                    placeholder={t('dukaan.sale.paidNowPlaceholder')}
+                  />
+                </div>
+                {isPaidNowCustom ? (
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='sm'
+                    className='mb-[1px] h-9 shrink-0 text-xs'
+                    onClick={() => {
+                      setIsPaidNowCustom(false);
+                      const { totalRs, subtotalRs } = calcSaleTotals(
+                        form.getFieldValue('lines'),
+                        form.getFieldValue('discount'),
+                        0
+                      );
+                      setPaidNowSafe(subtotalRs > 0 ? totalRs : '');
+                    }}
+                    title={t('common.total')}
+                  >
+                    {t('common.total')}
+                  </Button>
+                ) : null}
+              </div>
             )}
           />
           <div className='sm:col-span-2'>
