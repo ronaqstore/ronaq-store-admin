@@ -90,7 +90,7 @@ export function RecordDetail<TData>({
         className={cn(
           'flex flex-col gap-0',
           presentation === 'sheet' &&
-            'max-h-[85dvh] sm:max-w-xl md:max-w-2xl sm:mx-auto sm:inset-x-auto sm:border-x sm:border-t rounded-t-2xl pb-[max(0.5rem,calc(env(safe-area-inset-bottom)-14px))]',
+            'max-h-[85dvh] rounded-t-2xl pb-[max(0.5rem,calc(env(safe-area-inset-bottom)-14px))]',
           presentation === 'side' && 'w-full sm:max-w-md'
         )}
       >
