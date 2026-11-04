@@ -30,24 +30,58 @@ import { cn } from '@/lib/utils';
 
 export type { CameraBarcodeScannerDialogProps };
 
+let sharedAudioCtx: AudioContext | null = null;
+
+function getAudioContext(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  if (!sharedAudioCtx) {
+    const AudioCtx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (AudioCtx) {
+      sharedAudioCtx = new AudioCtx();
+    }
+  }
+  if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+    void sharedAudioCtx.resume();
+  }
+  return sharedAudioCtx;
+}
+
 function playScanBeep() {
-  if (typeof window === 'undefined') return;
   try {
-    const AudioContextClass = window.AudioContext;
-    if (!AudioContextClass) return;
-    const ctx = new AudioContextClass();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, ctx.currentTime);
-    gain.gain.setValueAtTime(0.15, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.12);
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const play = () => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      // Sharp retail-scanner double-tone or crisp high beep (1800 Hz)
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1800, ctx.currentTime);
+
+      // Audible gain on mobile speakers with fast decay
+      gain.gain.setValueAtTime(0.35, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.12);
+    };
+
+    if (ctx.state === 'suspended') {
+      ctx
+        .resume()
+        .then(play)
+        .catch(() => undefined);
+    } else {
+      play();
+    }
   } catch {
-    return;
+    // Autoplay restrictions or unsupported environment
   }
 }
 
@@ -228,6 +262,7 @@ export function CameraBarcodeScannerDialog({
 
   React.useEffect(() => {
     if (open) {
+      getAudioContext();
       const timer = window.setTimeout(() => {
         void startScanner(selectedCameraId ?? undefined);
       }, 100);
