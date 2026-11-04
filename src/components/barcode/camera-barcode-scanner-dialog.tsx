@@ -98,6 +98,7 @@ export function CameraBarcodeScannerDialog({
   const elementId = `scanner-viewfinder-${containerId}`;
 
   const scannerRef = React.useRef<Html5Qrcode | null>(null);
+  const activeCameraIdRef = React.useRef<string | null>(null);
   const [scanType, setScanType] = React.useState<'barcode' | 'ocr'>('barcode');
   const [cameras, setCameras] = React.useState<CameraDeviceOption[]>([]);
   const [selectedCameraId, setSelectedCameraId] = React.useState<string | null>(null);
@@ -228,14 +229,24 @@ export function CameraBarcodeScannerDialog({
           () => undefined
         );
 
-        // Fetch cameras list safely AFTER camera starts and permission is granted
+        // IMPORTANT: never call Html5Qrcode.getCameras() here. It opens a temporary
+        // getUserMedia({ video: true }) stream (the default/front camera), and Safari on
+        // iPad only allows one active camera, so it mutes the back camera we just started
+        // (black video). enumerateDevices() only lists devices and opens no stream.
         try {
-          const deviceList = await Html5Qrcode.getCameras();
-          if (deviceList && deviceList.length > 0) {
-            setCameras(deviceList);
-          }
+          const settings = scanner.getRunningTrackSettings();
+          activeCameraIdRef.current = settings.deviceId ?? cameraId ?? null;
+
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const videoInputs = devices
+            .filter((d) => d.kind === 'videoinput' && d.deviceId)
+            .map((d, index) => ({
+              id: d.deviceId,
+              label: d.label || `Camera ${index + 1}`
+            }));
+          setCameras(videoInputs);
         } catch {
-          // Camera listing might fail if single camera or permission-restricted
+          // Listing is optional; scanning keeps working without the switch button
         }
 
         try {
@@ -299,12 +310,15 @@ export function CameraBarcodeScannerDialog({
 
   const handleSwitchCamera = () => {
     if (cameras.length <= 1) return;
-    const currentIndex = cameras.findIndex((c) => c.id === selectedCameraId);
-    const nextIndex = (currentIndex + 1) % cameras.length;
-    const nextCamera = cameras[nextIndex];
+    // Use the camera that is actually running (not selectedCameraId, which is empty
+    // on the first start) so the first tap really moves to the *other* camera.
+    const currentId = activeCameraIdRef.current ?? selectedCameraId;
+    const currentIndex = cameras.findIndex((c) => c.id === currentId);
+    const nextCamera = cameras[(currentIndex + 1) % cameras.length];
     if (nextCamera) {
+      // Changing selectedCameraId restarts the scanner via the effect above.
+      // Do NOT also call startScanner() here: two concurrent starts race on iPad.
       setSelectedCameraId(nextCamera.id);
-      void startScanner(nextCamera.id);
     }
   };
 
