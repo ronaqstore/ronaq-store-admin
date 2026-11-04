@@ -4,11 +4,11 @@
  */
 
 /** R1: the camera preview is a short horizontal strip. */
-export const VIEWFINDER_HEIGHT_PX = 140;
+export const VIEWFINDER_HEIGHT_PX = 100;
 
 const RETICLE_WIDTH_RATIO = 0.9;
 const RETICLE_MAX_WIDTH_PX = 460;
-const RETICLE_HEIGHT_RATIO = 0.5;
+const RETICLE_HEIGHT_RATIO = 0.6;
 /** html5-qrcode rejects a qrbox smaller than 50px. */
 const RETICLE_MIN_SIDE_PX = 50;
 const RETICLE_MAX_HEIGHT_PX = 90;

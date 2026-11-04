@@ -8,10 +8,10 @@ import {
 
 describe('scanner-viewfinder', () => {
   describe('getReticleSize (R2, R3)', () => {
-    it('is wide and short: 90% width, 50% height of the strip', () => {
+    it('is wide and short: 90% width, 60% height of the strip', () => {
       const r = getReticleSize(400, VIEWFINDER_HEIGHT_PX);
       assert.equal(r.width, 360);
-      assert.equal(r.height, 70);
+      assert.equal(r.height, 60);
       assert.ok(r.width > r.height * 3);
     });
 

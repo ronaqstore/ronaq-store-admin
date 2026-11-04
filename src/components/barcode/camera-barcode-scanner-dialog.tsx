@@ -347,7 +347,7 @@ export function CameraBarcodeScannerDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='max-w-md p-4 sm:p-6'>
+      <DialogContent className='max-w-md gap-2 p-4'>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2 text-lg font-semibold'>
             <Icons.scan className='h-5 w-5 text-primary' />
@@ -389,7 +389,7 @@ export function CameraBarcodeScannerDialog({
           </div>
         )}
 
-        <div className='relative mt-3 flex flex-col items-center justify-center overflow-hidden rounded-xl bg-black/90 p-1'>
+        <div className='relative flex flex-col items-center justify-center overflow-hidden rounded-xl bg-black/90 p-1'>
           <div
             id={elementId}
             style={{ height: VIEWFINDER_HEIGHT_PX }}
@@ -459,7 +459,7 @@ export function CameraBarcodeScannerDialog({
           </div>
         )}
 
-        <DialogFooter className='mt-4 flex sm:justify-end'>
+        <DialogFooter className='flex p-3 pb-3 sm:justify-end'>
           <Button
             type='button'
             variant='outline'
