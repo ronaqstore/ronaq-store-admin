@@ -104,7 +104,7 @@ export function SaleWhatsAppShareDialog({
             variant='outline'
             size='sm'
             onClick={handleCopy}
-            className='gap-1.5'
+            className='gap-1.5 max-sm:h-10 max-sm:w-full'
           >
             {copied ? <Icons.check className='h-4 w-4' /> : <Icons.clipboard className='h-4 w-4' />}
             {copied ? t('common.copied') : t('scanner.copyReceipt')}
@@ -114,7 +114,7 @@ export function SaleWhatsAppShareDialog({
             type='button'
             size='sm'
             onClick={handleOpenWhatsApp}
-            className='gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white'
+            className='gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white max-sm:h-10 max-sm:w-full'
           >
             <Icons.send className='h-4 w-4' />
             {t('scanner.sendOnWhatsApp')}

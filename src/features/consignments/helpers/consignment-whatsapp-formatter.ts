@@ -1,19 +1,8 @@
 import { formatIsoDate } from '@/lib/dates';
 import { formatPkr } from '@/lib/dukaan/numbers';
 import { whatsappReminderUrl } from '@/constants/api';
-import type { ConsignmentDTO } from '@/lib/api/types';
+import type { ConsignmentWhatsAppOptions } from '@/types/consignments';
 
-export interface ConsignmentWhatsAppOptions {
-  consignment: ConsignmentDTO;
-  shopName?: string;
-  shopPhone?: string;
-  type: 'intake' | 'settlement';
-}
-
-/**
- * Builds a clean, beautifully formatted WhatsApp message text
- * for Amanat (Consignment) intake and settlement receipts.
- */
 export function buildConsignmentWhatsAppText(options: ConsignmentWhatsAppOptions): string {
   const { consignment, shopName, shopPhone, type } = options;
   const shop = shopName?.trim() || 'Ronaq Store';
@@ -90,9 +79,6 @@ export function buildConsignmentWhatsAppText(options: ConsignmentWhatsAppOptions
   return lines.join('\n');
 }
 
-/**
- * Builds direct WhatsApp URL (wa.me) for sending the message.
- */
 export function buildConsignmentWhatsAppUrl(phone: string, text: string): string {
   return whatsappReminderUrl(phone, text);
 }

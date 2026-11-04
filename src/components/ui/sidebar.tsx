@@ -188,7 +188,7 @@ function Sidebar({
           data-sidebar='sidebar'
           data-slot='sidebar'
           data-mobile='true'
-          className='w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden'
+          className='w-(--sidebar-width) gap-0 bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden pt-[env(safe-area-inset-top)] pb-[max(0.75rem,calc(env(safe-area-inset-bottom)-14px))]'
           style={
             {
               '--sidebar-width': SIDEBAR_WIDTH_MOBILE
@@ -200,9 +200,7 @@ function Sidebar({
             <SheetTitle>{resolvedSidebarTitle}</SheetTitle>
             <SheetDescription>{resolvedSidebarDescription}</SheetDescription>
           </SheetHeader>
-          <div className='flex h-full w-full flex-col overflow-y-auto overflow-x-hidden no-scrollbar pt-[max(2.5rem,calc(env(safe-area-inset-top)+0.75rem))] pb-[max(1rem,env(safe-area-inset-bottom))]'>
-            {children}
-          </div>
+          <div className='flex h-full w-full flex-col overflow-hidden'>{children}</div>
         </SheetContent>
       </Sheet>
     );
@@ -371,7 +369,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<'div'>) {
       data-slot='sidebar-content'
       data-sidebar='content'
       className={cn(
-        'no-scrollbar flex min-h-0 flex-1 flex-col gap-0 overflow-auto group-data-[collapsible=icon]:overflow-hidden',
+        'no-scrollbar flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain [webkit-overflow-scrolling:touch] group-data-[collapsible=icon]:overflow-hidden',
         className
       )}
       {...props}

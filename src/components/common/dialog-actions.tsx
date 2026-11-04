@@ -8,7 +8,13 @@ import type { DialogCancelButtonProps, DialogPrimaryButtonProps } from '@/types'
 export function DialogCancelButton({ onClick, disabled }: DialogCancelButtonProps) {
   const t = useT();
   return (
-    <Button type='button' variant='outline' disabled={disabled} onClick={onClick}>
+    <Button
+      type='button'
+      variant='outline'
+      disabled={disabled}
+      onClick={onClick}
+      className='max-sm:h-10 max-sm:w-full'
+    >
       <Icons.close className='me-2 h-4 w-4' />
       {t('common.cancel')}
     </Button>
@@ -33,7 +39,14 @@ export function DialogPrimaryButton({
   const t = useT();
   const Icon = PRIMARY_ICON[mode];
   return (
-    <Button type={type} variant={variant} disabled={disabled} isLoading={loading} onClick={onClick}>
+    <Button
+      type={type}
+      variant={variant}
+      disabled={disabled}
+      isLoading={loading}
+      onClick={onClick}
+      className='max-sm:h-10 max-sm:w-full'
+    >
       <Icon className='me-2 h-4 w-4' />
       {label ?? t(`common.${mode}` as const)}
     </Button>

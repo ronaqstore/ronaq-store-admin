@@ -49,14 +49,14 @@ export function SaleCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className='flex max-h-[90vh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl'>
+      <DialogContent className='flex max-h-[90dvh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl'>
         <DialogHeader className='shrink-0 px-4 pt-4 pe-12'>
           <DialogTitle>{t('dukaan.sale.newTitle')}</DialogTitle>
           <DialogDescription className='sr-only'>
             {t('dukaan.sale.newDescription')}
           </DialogDescription>
         </DialogHeader>
-        <div className='no-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-4'>
+        <div className='no-scrollbar min-h-0 flex-1 overflow-y-auto touch-pan-y overscroll-y-contain [webkit-overflow-scrolling:touch] px-4 py-4'>
           <Suspense fallback={<SaleCreateFormSkeleton />}>
             <SaleCreateForm onDone={() => onOpenChange(false)} initialProduct={initialProduct} />
           </Suspense>

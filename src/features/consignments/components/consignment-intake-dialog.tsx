@@ -39,7 +39,7 @@ import { ConsignmentIntakeConsignorSection } from './consignment-intake-consigno
 import { ImeiCameraScanButton } from '@/components/barcode';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { CONSIGNMENT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
-import type { ConsignmentDTO, CustomerDTO, ProductDTO } from '@/lib/api/types';
+import type { ConsignmentDTO, CustomerDTO } from '@/lib/api/types';
 import type { ConsignmentIntakeDialogProps } from '@/types/consignments';
 import type { ProductPickerItem } from '@/types/picker';
 import { createConsignmentMutation } from '../api/mutations';
@@ -123,9 +123,8 @@ export function ConsignmentIntakeDialog({
         setProductId(initialProduct.id);
         setProductLabel(initialProduct.name);
         setBrandName(initialProduct.brandName ?? null);
-        if (initialProduct.defaultSellingPrice) {
+        if (initialProduct.defaultSellingPrice)
           setTargetSellingPriceRupees(String(fromPaisa(initialProduct.defaultSellingPrice)));
-        }
       }
     } else {
       resetForm();
@@ -240,7 +239,7 @@ export function ConsignmentIntakeDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-2xl no-scrollbar'>
+        <DialogContent className='max-h-[90dvh] overflow-y-auto touch-pan-y overscroll-y-contain [webkit-overflow-scrolling:touch] sm:max-w-2xl no-scrollbar'>
           <DialogHeader>
             <DialogTitle>{t('consignments.newConsignment')}</DialogTitle>
             <DialogDescription>{t('consignments.newConsignmentDesc')}</DialogDescription>

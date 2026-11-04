@@ -12,6 +12,7 @@
     "build/**",
     "next-env.d.ts",
     "scripts/**",
+    "public/**",
     "src/components/ui/**"
   ],
   "settings": {

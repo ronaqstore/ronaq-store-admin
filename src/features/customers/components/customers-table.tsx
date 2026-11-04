@@ -19,7 +19,6 @@ import { AlertModal } from '@/components/modal/alert-modal';
 import {
   DUKAAN_DEFAULT_PAGE_SIZE,
   parseActiveStatusFacet,
-  parseBooleanFacet,
   useDukaanListParams
 } from '@/components/data-table/list-params';
 import type { CustomerDTO } from '@/lib/api/types';

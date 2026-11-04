@@ -10,7 +10,6 @@ import {
   type MobileItemConfig
 } from '@/components/data-table';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
-import { RowActionsMenu } from '@/components/common/row-actions-menu';
 import { Icons } from '@/components/icons';
 import { useDataTable } from '@/hooks/use-data-table';
 import { useT } from '@/i18n/use-t';
@@ -21,97 +20,23 @@ import { customerAsyncFilter } from '@/components/common/customer-filter';
 import { useDukaanListParams } from '@/components/data-table/list-params';
 import type { ConsignmentDTO } from '@/lib/api/types';
 import type {
-  ConsignmentRowActionsProps,
   ConsignmentSlipModalState,
+  ConsignmentWhatsAppModalState,
   ConsignmentsTableProps
 } from '@/types/consignments';
 import { consignmentsQueryOptions } from '../api/queries';
 import { ConsignmentStatusBadge } from './consignment-status-badge';
+import { ConsignmentRowActions } from './consignment-row-actions';
 import { ConsignmentIntakeDialog } from './consignment-intake-dialog';
 import { ReturnConsignmentDialog } from './return-consignment-dialog';
 import { SettleConsignmentDialog } from './settle-consignment-dialog';
 import { CancelConsignmentDialog } from './cancel-consignment-dialog';
 import { ConsignmentSlipDialog } from './consignment-slip-dialog';
 import { ConsignmentWhatsAppShareDialog } from './consignment-whatsapp-share-dialog';
+import { getConsignmentQuickFilters } from './consignments-table-filters';
+import { buildConsignmentDetail } from './consignment-table-detail';
 
-function ConsignmentRowActions({
-  consignment,
-  onPrintIntakeSlip,
-  onPrintSettlementSlip,
-  onWhatsAppShare,
-  onReturn,
-  onSettle,
-  onCancel
-}: ConsignmentRowActionsProps) {
-  const t = useT();
-
-  const actions = [
-    {
-      label: t('consignments.printIntakeSlip'),
-      icon: Icons.print,
-      onClick: () => onPrintIntakeSlip(consignment)
-    },
-    ...(onWhatsAppShare
-      ? [
-          {
-            label: t('consignments.whatsappSlip'),
-            icon: Icons.chat,
-            onClick: () =>
-              onWhatsAppShare(
-                consignment,
-                consignment.status === 'SETTLED' ? 'settlement' : 'intake'
-              )
-          }
-        ]
-      : []),
-    ...(consignment.status === 'SETTLED'
-      ? [
-          {
-            label: t('consignments.printSettlementSlip'),
-            icon: Icons.receipt,
-            onClick: () => onPrintSettlementSlip(consignment)
-          }
-        ]
-      : []),
-    ...(consignment.status === 'SOLD'
-      ? [
-          {
-            label: t('consignments.settlePayoutAction'),
-            icon: Icons.cash,
-            onClick: () => onSettle(consignment)
-          }
-        ]
-      : []),
-    ...(consignment.status === 'IN_CUSTODY'
-      ? [
-          {
-            label: t('consignments.returnAction'),
-            icon: Icons.history,
-            onClick: () => onReturn(consignment)
-          },
-          {
-            label: t('common.cancel'),
-            icon: Icons.close,
-            variant: 'destructive' as const,
-            onClick: () => onCancel(consignment)
-          }
-        ]
-      : [])
-  ];
-
-  return (
-    <div
-      onClick={(e) => e.stopPropagation()}
-      onKeyDown={(e) => e.stopPropagation()}
-      role='presentation'
-      data-slot='action-cell'
-    >
-      <RowActionsMenu actions={actions} />
-    </div>
-  );
-}
-
-export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTableProps) {
+export function ConsignmentsTable({ toolbarAction }: ConsignmentsTableProps) {
   const t = useT();
 
   const sortableColumnIds = ['consignmentNo', 'intakeDate', 'agreedPayout'];
@@ -154,11 +79,7 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
     type: 'intake'
   });
 
-  const [waModal, setWaModal] = useState<{
-    open: boolean;
-    consignment: ConsignmentDTO | null;
-    type: 'intake' | 'settlement';
-  }>({
+  const [waModal, setWaModal] = useState<ConsignmentWhatsAppModalState>({
     open: false,
     consignment: null,
     type: 'intake'
@@ -368,7 +289,7 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
         )
       }
     ],
-    [t]
+    [t, setSlipModal, setWaModal, setReturnConsignment, setSettleConsignment, setCancelConsignment]
   );
 
   const { table } = useDataTable({
@@ -403,80 +324,21 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
   );
 
   const consignmentDetail: DetailConfig<ConsignmentDTO> = useMemo(
-    () => ({
-      mode: 'sheet',
-      title: (row) => `${row.consignmentNo} • ${row.productName}`,
-      badge: (row) => ({
-        label: t(
-          `consignments.status${row.status === 'IN_CUSTODY' ? 'InCustody' : row.status === 'SOLD' ? 'Sold' : row.status === 'SETTLED' ? 'Settled' : row.status === 'RETURNED_TO_OWNER' ? 'Returned' : 'Cancelled'}`
-        ),
-        tone:
-          row.status === 'SETTLED' ? 'success' : row.status === 'CANCELLED' ? 'danger' : 'warning'
+    () =>
+      buildConsignmentDetail({
+        t,
+        onPrintIntakeSlip: (consignment) =>
+          setSlipModal({ open: true, consignment, type: 'intake' }),
+        onPrintSettlementSlip: (consignment) =>
+          setSlipModal({ open: true, consignment, type: 'settlement' }),
+        onSettle: setSettleConsignment,
+        onReturn: setReturnConsignment,
+        onCancel: setCancelConsignment
       }),
-      value: (row) => formatPkr(row.agreedPayout),
-      sections: (row) => [
-        {
-          title: t('table.details'),
-          fields: [
-            { label: t('consignments.consignmentNo'), value: row.consignmentNo },
-            { label: t('table.col.date'), value: formatIsoDate(row.intakeDate) },
-            {
-              label: t('consignments.consignor'),
-              value: `${row.consignorName} (${row.consignorPhone})`
-            },
-            { label: t('table.col.product'), value: row.productName },
-            { label: t('inventory.imeiLabel'), value: row.imei1 },
-            { label: t('consignments.agreedPayout'), value: formatPkr(row.agreedPayout) },
-            ...(row.soldPrice != null
-              ? [{ label: t('consignments.soldPrice'), value: formatPkr(row.soldPrice) }]
-              : []),
-            {
-              label: t('table.col.status'),
-              value: <ConsignmentStatusBadge status={row.status} />
-            },
-            ...(row.notes ? [{ label: t('table.col.note'), value: row.notes }] : [])
-          ]
-        }
-      ],
-      actions: (row) => [
-        {
-          label: t('consignments.printIntakeSlip'),
-          onClick: () => setSlipModal({ open: true, consignment: row, type: 'intake' })
-        },
-        ...(row.status === 'SETTLED'
-          ? [
-              {
-                label: t('consignments.printSettlementSlip'),
-                onClick: () => setSlipModal({ open: true, consignment: row, type: 'settlement' })
-              }
-            ]
-          : []),
-        ...(row.status === 'SOLD'
-          ? [
-              {
-                label: t('consignments.settlePayoutAction'),
-                onClick: () => setSettleConsignment(row)
-              }
-            ]
-          : []),
-        ...(row.status === 'IN_CUSTODY'
-          ? [
-              {
-                label: t('consignments.returnAction'),
-                variant: 'secondary' as const,
-                onClick: () => setReturnConsignment(row)
-              },
-              {
-                label: t('common.cancel'),
-                variant: 'destructive' as const,
-                onClick: () => setCancelConsignment(row)
-              }
-            ]
-          : [])
-      ]
-    }),
-    [t]
+    [t, setSlipModal, setSettleConsignment, setReturnConsignment, setCancelConsignment]
   );
+
+  const quickFilters = useMemo(() => getConsignmentQuickFilters(t), [t]);
 
   return (
     <>
@@ -484,6 +346,7 @@ export function ConsignmentsTable({ toolbarAction, onOpenAdd }: ConsignmentsTabl
         table={table}
         mobileItem={mobileItem}
         detail={consignmentDetail}
+        quickFilters={quickFilters}
         toolbarAction={toolbarAction}
         isLoading={isFetching}
       />

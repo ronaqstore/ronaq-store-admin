@@ -16,18 +16,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Icons } from '@/components/icons';
 import { useT } from '@/i18n/use-t';
-import type { ConsignmentDTO } from '@/lib/api/types';
+import type { ConsignmentWhatsAppShareDialogProps } from '@/types/consignments';
 import {
   buildConsignmentWhatsAppText,
   buildConsignmentWhatsAppUrl
 } from '../helpers/consignment-whatsapp-formatter';
-
-export interface ConsignmentWhatsAppShareDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  consignment: ConsignmentDTO | null;
-  type?: 'intake' | 'settlement';
-}
 
 export function ConsignmentWhatsAppShareDialog({
   open,

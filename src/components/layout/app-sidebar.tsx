@@ -107,7 +107,7 @@ export default function AppSidebar({ role }: AppSidebarProps) {
           ) : null}
         </div>
       </SidebarHeader>
-      <SidebarContent className='overflow-y-auto overflow-x-hidden no-scrollbar'>
+      <SidebarContent className='overflow-y-auto overflow-x-hidden no-scrollbar touch-pan-y overscroll-y-contain [webkit-overflow-scrolling:touch]'>
         {visibleGroups.length === 0 ? (
           <div className='text-muted-foreground px-3 py-6 text-center text-sm group-data-[collapsible=icon]:hidden'>
             {t('nav.noMatchingTabs')}
@@ -185,7 +185,7 @@ export default function AppSidebar({ role }: AppSidebarProps) {
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarFooter className='group-data-[collapsible=icon]:hidden pb-[max(1rem,env(safe-area-inset-bottom))]'>
+      <SidebarFooter className='group-data-[collapsible=icon]:hidden'>
         <p className='text-muted-foreground px-2 py-1 text-xs'>{t('common.appName')}</p>
       </SidebarFooter>
       <SidebarRail />

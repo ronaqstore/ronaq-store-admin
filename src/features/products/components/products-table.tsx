@@ -48,7 +48,7 @@ import {
 } from './products-table-filters';
 import { SaleCreateDialog } from '@/components/sales/sale-create-dialog';
 import { PurchaseCreateDialog } from '@/components/purchases/purchase-create-dialog';
-import { ConsignmentIntakeDialog } from '@/features/consignments/components/consignment-intake-dialog';
+import { ConsignmentIntakeDialog } from '@/components/dialogs/consignment-intake-dialog';
 import { invalidateDomains } from '@/lib/query/invalidate-domains';
 import { PRODUCT_SYNC_DOMAINS } from '@/lib/query/sync-domains';
 

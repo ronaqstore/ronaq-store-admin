@@ -107,17 +107,17 @@ export const SaleLineCard = withForm({
           };
         }}
         children={({ isPhone, productId, authenticity, unitCondition, warrantyDays }) => (
-          <div className='relative grid gap-2 rounded-lg border p-3 pe-24 md:grid-cols-4'>
+          <div className='relative grid gap-2 rounded-lg border p-3 sm:pe-24 md:grid-cols-4'>
             {canRemove && (
               <Button
                 type='button'
                 variant='ghost'
                 size='sm'
-                className='absolute inset-e-2 top-2 h-7 text-muted-foreground hover:text-destructive'
+                className='absolute inset-e-2 top-2 h-7 text-muted-foreground hover:text-destructive max-sm:h-8 max-sm:px-2'
                 onClick={onRemove}
               >
-                <Icons.trash className='me-1 h-4 w-4' />
-                {t('common.remove')}
+                <Icons.trash className='size-4 sm:me-1' />
+                <span className='hidden sm:inline'>{t('common.remove')}</span>
               </Button>
             )}
             <div className='md:col-span-2'>

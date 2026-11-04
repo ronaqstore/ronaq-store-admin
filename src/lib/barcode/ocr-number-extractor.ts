@@ -1,7 +1,5 @@
-/**
- * Validates a numeric string against the standard Luhn checksum algorithm (Mod 10).
- * Standard for 15-digit GSM/3GPP IMEI numbers.
- */
+import type { CropRatioArea, OcrCandidate } from '@/types/barcode';
+
 export function isLuhnValid(digits: string): boolean {
   if (!/^\d{15}$/.test(digits)) {
     return false;
@@ -25,17 +23,6 @@ export function isLuhnValid(digits: string): boolean {
   return sum % 10 === 0;
 }
 
-export interface OcrCandidate {
-  imei: string;
-  isLuhnValid: boolean;
-  label: string;
-  rawContext?: string;
-}
-
-/**
- * Extracts 15-digit IMEI candidate numbers from messy OCR text.
- * Handles spaces, hyphens, colons, "IMEI1:", "IMEI 2", and multi-line phone screens.
- */
 export function extractImeiCandidates(rawText: unknown): OcrCandidate[] {
   if (typeof rawText !== 'string' || !rawText.trim()) {
     return [];
@@ -48,7 +35,6 @@ export function extractImeiCandidates(rawText: unknown): OcrCandidate[] {
   const candidates: OcrCandidate[] = [];
   const seenImeis = new Set<string>();
 
-  // Helper to add candidate
   const addCandidate = (imei: string, label: string, context?: string) => {
     if (/^\d{15}$/.test(imei) && !seenImeis.has(imei)) {
       seenImeis.add(imei);
@@ -65,7 +51,6 @@ export function extractImeiCandidates(rawText: unknown): OcrCandidate[] {
     const line = lines[i];
     const prevLine = i > 0 ? lines[i - 1] : '';
 
-    // Determine likely label from line or previous line (e.g. "IMEI 1", "IMEI 2", "SIM 1")
     const combinedContext = `${prevLine} ${line}`.toLowerCase();
     let detectedLabel = '';
     if (
@@ -84,10 +69,8 @@ export function extractImeiCandidates(rawText: unknown): OcrCandidate[] {
       detectedLabel = 'IMEI 2';
     }
 
-    // 1. Check for hyphen/space-separated digits within line (e.g. 354892-10-284759-1 or 354892 10 284759 1)
     const normalizedLine = line.replace(/[\s\-_]/g, '');
 
-    // Find all digit chunks with 15+ digits
     const digitChunks = normalizedLine.match(/\d{15,17}/g);
     if (digitChunks) {
       for (const chunk of digitChunks) {
@@ -99,9 +82,7 @@ export function extractImeiCandidates(rawText: unknown): OcrCandidate[] {
     }
   }
 
-  // 2. Global fallback across the whole text if line-by-line missed fragmented strings
   if (candidates.length === 0) {
-    // Remove all non-digits
     const allDigits = rawText.replace(/\D/g, '');
     const matches = allDigits.match(/\d{15}/g);
     if (matches) {
@@ -115,13 +96,9 @@ export function extractImeiCandidates(rawText: unknown): OcrCandidate[] {
   return candidates;
 }
 
-/**
- * Crops a video element's current frame down to the central viewfinder reticle
- * to optimize OCR speed and eliminate surrounding visual noise.
- */
 export function cropVideoToReticle(
   video: HTMLVideoElement,
-  cropArea: { xRatio: number; yRatio: number; widthRatio: number; heightRatio: number }
+  cropArea: CropRatioArea
 ): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   const vw = video.videoWidth || 640;
@@ -143,7 +120,6 @@ export function cropVideoToReticle(
   return canvas;
 }
 
-// Shared worker cache for rapid OCR responses without repeatedly redownloading
 type OcrWorker = import('tesseract.js').Worker;
 
 let cachedWorker: OcrWorker | null = null;
@@ -153,10 +129,6 @@ const OCR_WHITELIST = '0123456789 -:/IMEIimeiSlotSLOTSimSIM';
 const WORKER_INIT_TIMEOUT_MS = 30_000;
 const RECOGNIZE_TIMEOUT_MS = 20_000;
 
-/**
- * Rejects if the given promise does not settle within `ms`.
- * Tesseract can hang silently when an asset fails to load, so every call is guarded.
- */
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error(`[OCR] ${label} timed out after ${ms}ms`)), ms);
@@ -211,10 +183,8 @@ export async function getOcrWorker(): Promise<OcrWorker> {
   workerInitPromise = (async () => {
     const isBrowser = typeof window !== 'undefined';
     try {
-      // Prefer self-hosted local assets (served from /public/tesseract)
       cachedWorker = await createConfiguredWorker(isBrowser);
-    } catch (localErr) {
-      console.warn('[OCR] Local assets worker init failed, attempting CDN fallback:', localErr);
+    } catch {
       cachedWorker = await createConfiguredWorker(false);
     }
     return cachedWorker;
@@ -227,12 +197,9 @@ export async function getOcrWorker(): Promise<OcrWorker> {
   }
 }
 
-/**
- * Starts loading the OCR engine in the background so the first "Read Numbers" tap is fast.
- */
 export function preloadOcrWorker(): void {
-  void getOcrWorker().catch((err: unknown) => {
-    console.warn('[OCR] Preload failed:', err);
+  void getOcrWorker().catch(() => {
+    cachedWorker = null;
   });
 }
 
@@ -243,15 +210,11 @@ async function resetOcrWorker(): Promise<void> {
     try {
       await worker.terminate();
     } catch {
-      // Worker already dead
+      cachedWorker = null;
     }
   }
 }
 
-/**
- * Converts a camera frame into a high-contrast, upscaled grayscale image.
- * Tesseract reads digits far more reliably from black-on-white, larger text.
- */
 export function preprocessForOcr(source: HTMLCanvasElement): HTMLCanvasElement {
   const minWidth = 1200;
   const scale = source.width < minWidth ? Math.min(3, minWidth / Math.max(1, source.width)) : 1;
@@ -270,7 +233,6 @@ export function preprocessForOcr(source: HTMLCanvasElement): HTMLCanvasElement {
   const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const data = image.data;
 
-  // Grayscale + compute average brightness
   let total = 0;
   for (let i = 0; i < data.length; i += 4) {
     const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
@@ -279,10 +241,8 @@ export function preprocessForOcr(source: HTMLCanvasElement): HTMLCanvasElement {
   }
   const avg = total / (data.length / 4);
 
-  // Light text on dark background (e.g. phone screens) -> invert so text becomes dark
   const invert = avg < 110;
 
-  // Stretch contrast around the average brightness
   const contrast = 1.8;
   for (let i = 0; i < data.length; i += 4) {
     let v = data[i];
@@ -297,10 +257,6 @@ export function preprocessForOcr(source: HTMLCanvasElement): HTMLCanvasElement {
   return canvas;
 }
 
-/**
- * Runs client-side OCR on a canvas using cached tesseract.js worker.
- * Processes the cropped canvas to extract 15-digit IMEI candidates.
- */
 export async function recognizeNumbersFromCanvas(
   canvas: HTMLCanvasElement
 ): Promise<OcrCandidate[]> {
@@ -309,7 +265,6 @@ export async function recognizeNumbersFromCanvas(
     const ret = await withTimeout(worker.recognize(canvas), RECOGNIZE_TIMEOUT_MS, 'Recognize');
     return extractImeiCandidates(ret.data.text);
   } catch (err) {
-    // A hung/crashed worker must not be reused for the next attempt
     await resetOcrWorker();
     throw err;
   }

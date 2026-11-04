@@ -43,7 +43,7 @@ export function ConsignmentSlipDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='max-h-[92vh] overflow-y-auto sm:max-w-xl no-scrollbar no-scrollbar print:m-0 print:max-w-full print:p-0 print:border-0 print:shadow-none'>
+      <DialogContent className='max-h-[92dvh] overflow-y-auto sm:max-w-xl no-scrollbar no-scrollbar print:m-0 print:max-w-full print:p-0 print:border-0 print:shadow-none'>
         <DialogHeader className='print:hidden'>
           <DialogTitle>
             {isIntake ? t('consignments.intakeSlipTitle') : t('consignments.settlementSlipTitle')}

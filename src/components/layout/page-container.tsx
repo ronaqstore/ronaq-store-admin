@@ -62,9 +62,11 @@ export default async function PageContainer({
         className={cn(
           'flex min-h-0 min-w-0 flex-1 flex-col',
           hasHeader ? 'px-3 sm:px-4 md:px-6' : 'px-3 pt-3 sm:px-4 sm:pt-4 md:px-6 md:pt-6',
-          'pb-[calc(6rem+max(1rem,env(safe-area-inset-bottom)))] lg:pb-6',
+          'pb-[calc(5rem+max(1rem,calc(env(safe-area-inset-bottom)-14px)))] lg:pb-6',
 
-          fill ? 'overflow-hidden' : 'overflow-y-auto overscroll-y-contain no-scrollbar'
+          fill
+            ? 'overflow-hidden'
+            : 'overflow-y-auto overscroll-y-contain touch-pan-y [webkit-overflow-scrolling:touch] no-scrollbar'
         )}
       >
         <div
