@@ -286,15 +286,26 @@ export function CameraBarcodeScannerDialog({
     setWarningMessage(null);
 
     try {
-      // Crop central 80% width by 50% height
+      // 1. Try cropped central area first (fastest)
       const canvas = cropVideoToReticle(video, {
         xRatio: 0.1,
-        yRatio: 0.25,
+        yRatio: 0.2,
         widthRatio: 0.8,
-        heightRatio: 0.5
+        heightRatio: 0.6
       });
 
-      const found = await recognizeNumbersFromCanvas(canvas);
+      let found = await recognizeNumbersFromCanvas(canvas);
+
+      // 2. Fallback to full frame if tight crop missed the number
+      if (found.length === 0) {
+        const fullCanvas = cropVideoToReticle(video, {
+          xRatio: 0,
+          yRatio: 0,
+          widthRatio: 1,
+          heightRatio: 1
+        });
+        found = await recognizeNumbersFromCanvas(fullCanvas);
+      }
 
       if (found.length === 0) {
         setOcrCandidates([]);
@@ -309,8 +320,9 @@ export function CameraBarcodeScannerDialog({
           setWarningMessage(t('scanner.ocrChecksumWarning'));
         }
       }
-    } catch {
-      setWarningMessage(t('scanner.scanFailed'));
+    } catch (err) {
+      console.error('[OCR Error]', err);
+      setWarningMessage(t('scanner.ocrNoNumbersFound'));
     } finally {
       setIsOcrScanning(false);
     }

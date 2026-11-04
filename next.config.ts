@@ -58,13 +58,13 @@ const baseConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com chrome-extension:",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com https://cdn.jsdelivr.net chrome-extension:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com chrome-extension:",
               "img-src 'self' data: blob: https: chrome-extension:",
               "font-src 'self' data: https://fonts.gstatic.com chrome-extension:",
-              "connect-src 'self' data: https: http://localhost:* http://127.0.0.1:* ws: wss: chrome-extension:",
+              "connect-src 'self' data: blob: https: https://cdn.jsdelivr.net https://tessdata.projectnaptha.com http://localhost:* http://127.0.0.1:* ws: wss: chrome-extension:",
               "frame-src 'self' https://challenges.cloudflare.com https://www.google.com https://maps.google.com chrome-extension:",
-              "worker-src 'self' blob:",
+              "worker-src 'self' blob: https://cdn.jsdelivr.net",
               process.env.NODE_ENV === 'production'
                 ? "frame-ancestors 'self' chrome-extension:"
                 : "frame-ancestors 'self' http://localhost:* http://127.0.0.1:* chrome-extension: chrome-extension://*",

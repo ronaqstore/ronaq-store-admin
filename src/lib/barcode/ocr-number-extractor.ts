@@ -85,10 +85,7 @@ export function extractImeiCandidates(rawText: unknown): OcrCandidate[] {
     }
 
     // 1. Check for hyphen/space-separated digits within line (e.g. 354892-10-284759-1 or 354892 10 284759 1)
-    // Remove formatting between digits on the line
-    const normalizedLine = line
-      .replace(/(\d)[\s\-_]+(\d)/g, '$1$2')
-      .replace(/(\d)[\s\-_]+(\d)/g, '$1$2');
+    const normalizedLine = line.replace(/[\s\-_]/g, '');
 
     // Find all digit chunks with 15+ digits
     const digitChunks = normalizedLine.match(/\d{15,17}/g);
@@ -132,8 +129,8 @@ export function cropVideoToReticle(
 
   const sx = Math.max(0, Math.floor(vw * cropArea.xRatio));
   const sy = Math.max(0, Math.floor(vh * cropArea.yRatio));
-  const sWidth = Math.min(vw - sx, Math.floor(vw * cropArea.widthRatio));
-  const sHeight = Math.min(vh - sy, Math.floor(vh * cropArea.heightRatio));
+  const sWidth = Math.max(1, Math.min(vw - sx, Math.floor(vw * cropArea.widthRatio)));
+  const sHeight = Math.max(1, Math.min(vh - sy, Math.floor(vh * cropArea.heightRatio)));
 
   canvas.width = sWidth;
   canvas.height = sHeight;
@@ -146,19 +143,68 @@ export function cropVideoToReticle(
   return canvas;
 }
 
+// Shared worker cache for rapid OCR responses without repeatedly redownloading
+let cachedWorker: any = null;
+let workerInitPromise: Promise<any> | null = null;
+
+export async function getOcrWorker(): Promise<any> {
+  if (cachedWorker) {
+    return cachedWorker;
+  }
+
+  if (workerInitPromise) {
+    return workerInitPromise;
+  }
+
+  workerInitPromise = (async () => {
+    const { createWorker } = await import('tesseract.js');
+    const isBrowser = typeof window !== 'undefined';
+
+    try {
+      // Prefer self-hosted local assets if running in browser
+      const worker = await createWorker(
+        'eng',
+        1,
+        isBrowser
+          ? {
+              workerPath: '/tesseract/worker.min.js',
+              corePath: '/tesseract',
+              langPath: '/tesseract/lang-data/'
+            }
+          : undefined
+      );
+
+      await worker.setParameters({
+        tessedit_char_whitelist: '0123456789 -:IMEIimeiSlotSLOTSimSIM',
+        tessedit_pageseg_mode: '6'
+      });
+
+      cachedWorker = worker;
+      return worker;
+    } catch (localErr) {
+      console.warn('[OCR] Local assets worker init failed, attempting CDN fallback:', localErr);
+      const fallbackWorker = await createWorker('eng');
+      await fallbackWorker.setParameters({
+        tessedit_char_whitelist: '0123456789 -:IMEIimeiSlotSLOTSimSIM'
+      });
+      cachedWorker = fallbackWorker;
+      return fallbackWorker;
+    } finally {
+      workerInitPromise = null;
+    }
+  })();
+
+  return workerInitPromise;
+}
+
 /**
- * Runs client-side OCR on a canvas using dynamically imported tesseract.js.
+ * Runs client-side OCR on a canvas using cached tesseract.js worker.
  * Processes the cropped canvas to extract 15-digit IMEI candidates.
  */
 export async function recognizeNumbersFromCanvas(
   canvas: HTMLCanvasElement
 ): Promise<OcrCandidate[]> {
-  const { createWorker } = await import('tesseract.js');
-  const worker = await createWorker('eng');
-  try {
-    const ret = await worker.recognize(canvas);
-    return extractImeiCandidates(ret.data.text);
-  } finally {
-    await worker.terminate();
-  }
+  const worker = await getOcrWorker();
+  const ret = await worker.recognize(canvas);
+  return extractImeiCandidates(ret.data.text);
 }
