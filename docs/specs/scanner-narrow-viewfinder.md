@@ -12,11 +12,11 @@ horizontal strip instead.
 ## 2. Requirements (testable)
 | ID | Requirement |
 |----|-------------|
-| R1 | The viewfinder is a narrow strip: fixed height `VIEWFINDER_HEIGHT_PX = 100`, full width. |
+| R1 | The viewfinder is a narrow strip: fixed height `VIEWFINDER_HEIGHT_PX = 100`, full width. The outer viewport clips (`overflow-hidden`) a vertically centered, natural-aspect-ratio `<video>` surface so `html5-qrcode` sees undistorted `clientWidth`/`clientHeight` ratios. |
 | R2 | The reticle (scan box) is wide and short: width = 90% of viewfinder width capped at 460px; height = 60% of viewfinder height clamped to 50..90px (50px is the html5-qrcode minimum). It is horizontally and vertically centered. |
-| R3 | The barcode decoder (`qrbox`) uses exactly the R2 reticle, never larger than the viewfinder and never below the library minimum of 50px. |
+| R3 | The barcode decoder (`qrbox`) uses `getBarcodeQrboxSize(viewW, videoSurfaceH)` which sizes the reticle against `min(videoSurfaceH, VIEWFINDER_HEIGHT_PX)`, so the scan region is centered in the natural video frame and matches the visible strip without vertical squashing or exceeding the surface. |
 | R4 | The OCR guide box drawn on screen uses the same R2 reticle size, so what the user aligns is what is read. |
-| R5 | OCR crops **only the reticle area (+ small tolerance padding)** from the video. The crop is computed in video pixels and accounts for `object-cover` (the visible video is a centered, scaled crop of the real frame). |
+| R5 | OCR crops **only the reticle area (+ small tolerance padding)** from the video. The crop is computed in video pixels for the visible `viewW x VIEWFINDER_HEIGHT_PX` strip. |
 | R6 | OCR attempts: reticle crop (preprocessed) -> reticle crop (raw) -> full frame (preprocessed). Stops early on a Luhn-valid IMEI. (unchanged) |
 | R7 | Action buttons (switch camera / read numbers / flash) sit **below** the strip, not on top of it, so they never cover the reticle. |
 | R8 | Pure geometry has no DOM access and is covered by unit tests. |
