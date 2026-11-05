@@ -188,6 +188,7 @@ function Sidebar({
           data-sidebar='sidebar'
           data-slot='sidebar'
           data-mobile='true'
+          initialFocus={false}
           className='w-(--sidebar-width) gap-0 bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden pt-[env(safe-area-inset-top)] pb-[max(0.75rem,calc(env(safe-area-inset-bottom)-14px))]'
           style={
             {

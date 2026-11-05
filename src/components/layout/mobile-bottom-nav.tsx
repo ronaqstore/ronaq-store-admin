@@ -125,6 +125,7 @@ export function MobileBottomNav({ role }: MobileBottomNavProps) {
       <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
         <SheetContent
           side='bottom'
+          initialFocus={false}
           className='max-h-[75dvh] rounded-t-[var(--radius)] pb-[max(1rem,calc(env(safe-area-inset-bottom)-14px))]'
         >
           <div className='bg-muted mx-auto mt-1 mb-2 h-1 w-10 shrink-0 rounded-full' aria-hidden />

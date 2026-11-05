@@ -265,6 +265,7 @@ function Infobar({
           data-infobar='infobar'
           data-slot='infobar'
           data-mobile='true'
+          initialFocus={false}
           className='bg-sidebar text-sidebar-foreground w-(--infobar-width) p-0 [&>button]:hidden'
           style={
             {
