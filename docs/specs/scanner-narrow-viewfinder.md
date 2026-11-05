@@ -12,8 +12,8 @@ horizontal strip instead.
 ## 2. Requirements (testable)
 | ID | Requirement |
 |----|-------------|
-| R1 | The viewfinder is a narrow strip: fixed height `VIEWFINDER_HEIGHT_PX = 140`, full width. |
-| R2 | The reticle (scan box) is wide and short: width = 90% of viewfinder width capped at 460px; height = 50% of viewfinder height clamped to 50..90px (50px is the html5-qrcode minimum). It is horizontally and vertically centered. |
+| R1 | The viewfinder is a narrow strip: fixed height `VIEWFINDER_HEIGHT_PX = 100`, full width. |
+| R2 | The reticle (scan box) is wide and short: width = 90% of viewfinder width capped at 460px; height = 60% of viewfinder height clamped to 50..90px (50px is the html5-qrcode minimum). It is horizontally and vertically centered. |
 | R3 | The barcode decoder (`qrbox`) uses exactly the R2 reticle, never larger than the viewfinder and never below the library minimum of 50px. |
 | R4 | The OCR guide box drawn on screen uses the same R2 reticle size, so what the user aligns is what is read. |
 | R5 | OCR crops **only the reticle area (+ small tolerance padding)** from the video. The crop is computed in video pixels and accounts for `object-cover` (the visible video is a centered, scaled crop of the real frame). |
