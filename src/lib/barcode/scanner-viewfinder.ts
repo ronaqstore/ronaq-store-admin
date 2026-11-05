@@ -23,6 +23,14 @@ export function getReticleSize(viewWidth: number, viewHeight: number): Viewfinde
   return { width, height };
 }
 
+export function getBarcodeQrboxSize(viewWidth: number, videoSurfaceHeight: number): ViewfinderSize {
+  const effectiveHeight =
+    videoSurfaceHeight > 0
+      ? Math.min(videoSurfaceHeight, VIEWFINDER_HEIGHT_PX)
+      : VIEWFINDER_HEIGHT_PX;
+  return getReticleSize(viewWidth, effectiveHeight);
+}
+
 const FULL_FRAME: CropRatios = { xRatio: 0, yRatio: 0, widthRatio: 1, heightRatio: 1 };
 
 export function computeOcrCropRatios(params: ComputeOcrCropRatiosParams): CropRatios {

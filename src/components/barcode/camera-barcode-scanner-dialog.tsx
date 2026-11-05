@@ -30,6 +30,7 @@ import { getAudioContext, playScanBeep } from '@/lib/barcode/scanner-audio';
 import {
   VIEWFINDER_HEIGHT_PX,
   computeOcrCropRatios,
+  getBarcodeQrboxSize,
   getReticleSize
 } from '@/lib/barcode/scanner-viewfinder';
 import { ScannerControlsBar } from './scanner-controls-bar';
@@ -170,7 +171,7 @@ export function CameraBarcodeScannerDialog({
           {
             fps: 15,
             qrbox: (viewfinderWidth, viewfinderHeight) =>
-              getReticleSize(viewfinderWidth, viewfinderHeight)
+              getBarcodeQrboxSize(viewfinderWidth, viewfinderHeight)
           },
           (decodedText) => {
             handleScanSuccess(decodedText);
@@ -285,7 +286,7 @@ export function CameraBarcodeScannerDialog({
 
     try {
       const viewRect = video.getBoundingClientRect();
-      const viewSize = { width: viewRect.width, height: viewRect.height };
+      const viewSize = { width: viewRect.width, height: VIEWFINDER_HEIGHT_PX };
       const centerCrop = cropVideoToReticle(
         video,
         computeOcrCropRatios({
@@ -389,10 +390,11 @@ export function CameraBarcodeScannerDialog({
 
         <div className='relative flex flex-col items-center justify-center overflow-hidden rounded-xl bg-black/90 p-1'>
           <div
-            id={elementId}
             style={{ height: VIEWFINDER_HEIGHT_PX }}
-            className='w-full overflow-hidden rounded-lg [&_video]:h-full [&_video]:w-full [&_video]:object-cover'
-          />
+            className='relative flex w-full items-center justify-center overflow-hidden rounded-lg'
+          >
+            <div id={elementId} className='w-full shrink-0 [&_video]:w-full' />
+          </div>
 
           {scanType === 'ocr' && !isInitializing && !errorMessage && (
             <div

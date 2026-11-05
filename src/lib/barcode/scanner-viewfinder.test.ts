@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 import {
   VIEWFINDER_HEIGHT_PX,
   computeOcrCropRatios,
+  getBarcodeQrboxSize,
   getReticleSize
 } from './scanner-viewfinder.ts';
 
@@ -28,6 +29,20 @@ describe('scanner-viewfinder', () => {
       const normal = getReticleSize(320, VIEWFINDER_HEIGHT_PX);
       assert.ok(normal.width <= 320 && normal.height <= VIEWFINDER_HEIGHT_PX);
       assert.ok(getReticleSize(40, 40).width >= 50);
+    });
+  });
+
+  describe('getBarcodeQrboxSize (R3)', () => {
+    it('sizes qrbox against the visible 100px strip even when the natural video surface is taller', () => {
+      const qrbox = getBarcodeQrboxSize(400, 533);
+      assert.deepEqual(qrbox, { width: 360, height: 60 });
+    });
+
+    it('shrinks safely if the video surface is shorter than the strip', () => {
+      const qrbox = getBarcodeQrboxSize(400, 70);
+      assert.equal(qrbox.width, 360);
+      assert.equal(qrbox.height, 50);
+      assert.ok(qrbox.height <= 70);
     });
   });
 
