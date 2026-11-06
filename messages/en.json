@@ -151,6 +151,7 @@
     "movements": "Movements",
     "stockLevels": "Stock Levels",
     "imeiLookup": "IMEI 360° Lookup",
+    "deadStock": "Dead Stock & Aging",
     "stockAdjustments": "Stock Adjustments",
     "imeiSearch": "IMEI 360° Quick Lookup",
     "stockHistory": "Stock History",
@@ -908,6 +909,10 @@
     "imeiSearch": {
       "title": "IMEI 360° Quick Lookup",
       "description": "Complete phone lifecycle tracking from purchase to sale and warranty"
+    },
+    "deadStock": {
+      "title": "Dead Stock & Shelf Aging",
+      "description": "Track stock aging across 4 turnover stages (0–15d, 16–30d, 31–60d, 60+ days) and clear stagnant phones"
     },
     "adjustments": {
       "title": "Stock adjustments",
@@ -1775,6 +1780,7 @@
     "sales": "Sales",
     "stockAdjustments": "Stock Adjustments",
     "imeiSearch": "IMEI 360° Quick Lookup",
+    "deadStock": "Dead Stock & Shelf Aging Report",
     "supplierPayments": "Supplier Payments",
     "suppliers": "Suppliers",
     "subscriptions": "Subscriptions",
@@ -1971,6 +1977,13 @@
     "daysOnShelf": "{days} days on shelf",
     "defectNotes": "Defect Notes",
     "intakeCard": "Acquisition & Origin",
+    "imei1Label": "IMEI 1",
+    "imei2Label": "IMEI 2",
+    "brandCategory": "Brand / Category",
+    "modelSku": "Model / SKU",
+    "storageRam": "Storage / RAM",
+    "contact": "Contact",
+    "estMargin": "Est. Margin",
     "intakeType": "Acquisition Type",
     "typePurchase": "Wholesale Purchase",
     "typeConsignment": "Customer Amanat (Consignment)",
@@ -2003,6 +2016,76 @@
       "damaged": "Damaged",
       "lost": "Lost",
       "voided": "Voided"
+    }
+  },
+  "deadStock": {
+    "title": "Dead Stock & Shelf Aging (Maal-e-Dum)",
+    "description": "Filter and inspect stagnant devices by shelf aging buckets to prevent inventory loss.",
+    "refresh": "Refresh",
+    "refreshing": "Updating...",
+    "kpi": {
+      "deadStockAlertTitle": "Maal-e-Dum Warning: {count} phone(s) stagnant 60+ days!",
+      "deadStockAlertDesc": "Smartphones lose market value rapidly. You have {count} unit(s) locking up {value} in capital. Consider quick discounts or clearance.",
+      "filterDeadStockButton": "Show Dead Stock (60+d)",
+      "totalInStock": "Total In-Stock Phones",
+      "totalValue": "Total Capital in Stock",
+      "avgDays": "Avg Shelf Duration",
+      "deadStockRatio": "Dead Stock Ratio",
+      "daysUnit": "days"
+    },
+    "buckets": {
+      "b015": "0–15 Days",
+      "freshStock": "Fresh Stock",
+      "b1630": "16–30 Days",
+      "normalStock": "Normal Stock",
+      "b3160": "31–60 Days",
+      "slowMoving": "Slow Moving",
+      "b60plus": "60+ Days",
+      "deadStock": "Dead Stock (Maal-e-Dum)",
+      "units": "units",
+      "activeFilter": "Active Filter",
+      "capitalLocked": "Capital Blocked"
+    },
+    "filters": {
+      "searchPlaceholder": "Search phone, model, IMEI, or SKU...",
+      "condition": "Condition",
+      "allConditions": "All Conditions",
+      "conditionNew": "Brand New",
+      "conditionUsed": "Used",
+      "sortBy": "Sort By",
+      "sortAgeDesc": "Oldest Shelf Age First",
+      "sortAgeAsc": "Newest Intake First",
+      "sortCostDesc": "Highest Cost Value First",
+      "sortCostAsc": "Lowest Cost Value First",
+      "clearFilters": "Reset Filters",
+      "clearSearch": "Clear search"
+    },
+    "table": {
+      "phone": "Phone & Specs",
+      "imei": "IMEI / Serial",
+      "condition": "Condition",
+      "shelfAge": "Shelf Age",
+      "unitCost": "Purchase Cost",
+      "askingPrice": "Asking Price",
+      "intakeDate": "Received",
+      "actions": "Actions",
+      "adjustPrice": "Adjust Price",
+      "view360": "360° History",
+      "noAskingPrice": "Not set",
+      "atCost": "At cost price",
+      "imeiCopied": "IMEI copied to clipboard",
+      "copyImei": "Copy IMEI",
+      "copyFailed": "Failed to copy IMEI",
+      "sim2Label": "SIM2: {imei}",
+      "view360Title": "View 360° Phone Lifecycle"
+    },
+    "pagination": {
+      "showing": "Showing {start} to {end} of {total} phones"
+    },
+    "empty": {
+      "title": "No Matching Inventory",
+      "desc": "No phones match your active filters or aging criteria.",
+      "allClear": "Excellent! No devices are currently stagnant in this aging bracket."
     }
   },
   "kanban": {

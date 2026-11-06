@@ -151,6 +151,7 @@
     "movements": "حرکات",
     "stockLevels": "اسٹاک لیول",
     "imeiLookup": "آئی ایم ای آئی 360 لک اپ",
+    "deadStock": "ڈیڈ اسٹاک اور ایجنگ",
     "imeiSearch": "آئی ایم ای آئی 360 لک اپ",
     "stockAdjustments": "اسٹاک ایڈجسٹمنٹ",
     "stockHistory": "اسٹاک ہسٹری",
@@ -908,6 +909,10 @@
     "imeiSearch": {
       "title": "آئی ایم ای آئی 360 کوئیک لک اپ",
       "description": "خریداری سے لے کر فروخت اور وارنٹی تک مکمل موبائل ہسٹری ٹریک کریں"
+    },
+    "deadStock": {
+      "title": "ڈیڈ اسٹاک اور شیلف ایجنگ",
+      "description": "موبائل فونز کی شیلف پر موجودگی (0–15، 16–30، 31–60، 60+ دن) ٹریک کریں اور مالِ دم کلیئر کریں"
     },
     "adjustments": {
       "title": "اسٹاک ایڈجسٹمنٹ",
@@ -1775,6 +1780,7 @@
     "sales": "فروخت",
     "stockAdjustments": "اسٹاک ایڈجسٹمنٹس",
     "imeiSearch": "آئی ایم ای آئی 360 کوئیک لک اپ",
+    "deadStock": "ڈیڈ اسٹاک اور شیلف ایجنگ رپورٹ",
     "supplierPayments": "سپلائر ادائیگیاں",
     "suppliers": "سپلائرز",
     "subscriptions": "سبسکرپشنز",
@@ -1971,6 +1977,13 @@
     "daysOnShelf": "{days} دن دکان میں",
     "defectNotes": "نقص / ریمارکس",
     "intakeCard": "خریداری و آمد کا ذریعہ",
+    "imei1Label": "آئی ایم ای آئی 1",
+    "imei2Label": "آئی ایم ای آئی 2",
+    "brandCategory": "برانڈ / کیٹیگری",
+    "modelSku": "ماڈل / SKU",
+    "storageRam": "اسٹوریج / ریم",
+    "contact": "رابطہ",
+    "estMargin": "تخمینہ مارجن",
     "intakeType": "آمد کی قسم",
     "typePurchase": "ہول سیل پرچیز",
     "typeConsignment": "گاہک کی امانت (سیل آن بی ہاف)",
@@ -2003,6 +2016,76 @@
       "damaged": "خراب",
       "lost": "گمشدہ",
       "voided": "منسوخ"
+    }
+  },
+  "deadStock": {
+    "title": "ڈیڈ اسٹاک اور شیلف ایجنگ (مالِ دم)",
+    "description": "شیلف پر پھنسے موبائل فونز کو مدت کے حساب سے دیکھیں تاکہ قیمت گرنے سے پہلے کلیئر کیے جا سکیں۔",
+    "refresh": "ریفریش",
+    "refreshing": "اپ ڈیٹ ہو رہا ہے...",
+    "kpi": {
+      "deadStockAlertTitle": "مالِ دم الرٹ: {count} موبائل 60 دن سے زائد پرانے ہیں!",
+      "deadStockAlertDesc": "موبائل فون کی قیمت ہر ہفتے گرتی ہے۔ {count} فونز میں {value} کا سرمایہ پھنسا ہوا ہے۔ فوری ڈسکاؤنٹ یا کلیئرنس سیل دیں۔",
+      "filterDeadStockButton": "60+ دن کا مالِ دم دیکھیں",
+      "totalInStock": "کل موجود فونز",
+      "totalValue": "مجموعی لاگت سرمایہ",
+      "avgDays": "اوسط شیلف وقت",
+      "deadStockRatio": "ڈیڈ اسٹاک تناسب",
+      "daysUnit": "دن"
+    },
+    "buckets": {
+      "b015": "0–15 دن",
+      "freshStock": "تازہ اسٹاک",
+      "b1630": "16–30 دن",
+      "normalStock": "نارمل اسٹاک",
+      "b3160": "31–60 دن",
+      "slowMoving": "سست رفتاری",
+      "b60plus": "60+ دن",
+      "deadStock": "ڈیڈ اسٹاک (مالِ دم)",
+      "units": "فونز",
+      "activeFilter": "فعال فلٹر",
+      "capitalLocked": "پھنسا ہوا سرمایہ"
+    },
+    "filters": {
+      "searchPlaceholder": "فون کا نام، ماڈل، آئی ایم ای آئی یا SKU تلاش کریں...",
+      "condition": "حالت",
+      "allConditions": "تمام حالتیں",
+      "conditionNew": "نیا (ڈبہ پیک)",
+      "conditionUsed": "استعمال شدہ",
+      "sortBy": "ترتیب",
+      "sortAgeDesc": "سب سے پرانا پہلے",
+      "sortAgeAsc": "سب سے نیا پہلے",
+      "sortCostDesc": "زیادہ لاگت پہلے",
+      "sortCostAsc": "کم لاگت پہلے",
+      "clearFilters": "فلٹرز ختم کریں",
+      "clearSearch": "تلاش ختم کریں"
+    },
+    "table": {
+      "phone": "فون اور تفصیلات",
+      "imei": "آئی ایم ای آئی",
+      "condition": "حالت",
+      "shelfAge": "شیلف وقت",
+      "unitCost": "خریداری لاگت",
+      "askingPrice": "مانگی گئی قیمت",
+      "intakeDate": "آمد کی تاریخ",
+      "actions": "اقدامات",
+      "adjustPrice": "قیمت بدلیں",
+      "view360": "360° ہسٹری",
+      "noAskingPrice": "مقرر نہیں",
+      "atCost": "لاگت پر",
+      "imeiCopied": "آئی ایم ای آئی کاپی ہو گیا",
+      "copyImei": "آئی ایم ای آئی کاپی کریں",
+      "copyFailed": "آئی ایم ای آئی کاپی نہ ہو سکا",
+      "sim2Label": "سم 2: {imei}",
+      "view360Title": "360° ہسٹری دیکھیں"
+    },
+    "pagination": {
+      "showing": "{total} میں سے {start} تا {end} فونز دکھائے جا رہے ہیں"
+    },
+    "empty": {
+      "title": "کوئی فون نہیں ملا",
+      "desc": "منتخب کردہ فلٹر میں کوئی فون موجود نہیں۔",
+      "allClear": "شاندار! اس کیٹیگری میں کوئی پھنسا ہوا مالِ دم نہیں۔"
     }
   },
   "kanban": {

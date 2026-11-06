@@ -1,5 +1,11 @@
 import type { ReactNode } from 'react';
-import type { InventoryItemDTO, InventoryUnitDTO } from '@/lib/api/types';
+import type {
+  DeadStockAgingBucket,
+  DeadStockSummaryDto,
+  DeadStockUnitItemDto,
+  InventoryItemDTO,
+  InventoryUnitDTO
+} from '@/lib/api/types';
 
 export interface InventoryStockFilters {
   page?: number;
@@ -134,8 +140,70 @@ export interface SerializedUnitsFilterOptions {
 export interface EditInventoryUnitDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  unit: InventoryUnitDTO | null;
+  unit: InventoryUnitDTO | DeadStockUnitItemDto | null;
   brandName?: string | null;
+}
+
+export interface AgingBucketMeta {
+  bucket: DeadStockAgingBucket;
+  label: string;
+  badgeLabel: string;
+  riskLevel: 'fresh' | 'normal' | 'warning' | 'critical';
+  isDeadStock: boolean;
+  isSlowMoving: boolean;
+  borderClass: string;
+  bgLightClass: string;
+  textClass: string;
+  badgeVariant: 'default' | 'secondary' | 'destructive' | 'outline';
+}
+
+export interface DeadStockCalculatedMetrics {
+  totalInStockUnits: number;
+  totalStockValue: number;
+  deadStockCount: number;
+  deadStockCostValue: number;
+  averageDaysOnShelf: number;
+  deadStockCountPercent: number;
+  deadStockValuePercent: number;
+  isHighRisk: boolean;
+}
+
+export interface DiscountMarginInfo {
+  hasAskingPrice: boolean;
+  askingPricePaisa: number;
+  unitCostPaisa: number;
+  marginPaisa: number;
+  marginPercent: number;
+  isAboveCost: boolean;
+}
+
+export interface WarrantyBadgeInfo {
+  label: string;
+  variant: 'default' | 'secondary' | 'destructive' | 'outline';
+  detail?: string;
+  isActive: boolean;
+}
+
+export interface ProfitDisplayInfo {
+  hasSold: boolean;
+  profitPaisa: number;
+  marginPercent: number;
+  isProfitable: boolean;
+}
+
+export interface DeadStockKpiCardsProps {
+  summary?: DeadStockSummaryDto;
+  activeBucket: 'ALL' | DeadStockAgingBucket;
+  isLoading: boolean;
+  onBucketToggle: (bucket: DeadStockAgingBucket) => void;
+  onSelectDeadStock: () => void;
+}
+
+export interface ImeiSearchDeviceDetailsProps {
+  device: import('@/lib/api/types').ImeiDeviceInfoDto;
+  intake?: import('@/lib/api/types').ImeiIntakeInfoDto;
+  latestSale?: import('@/lib/api/types').ImeiSaleInfoDto | null;
+  onCopyImei: (imei: string) => void;
 }
 
 export interface RestoreUnitDialogProps {

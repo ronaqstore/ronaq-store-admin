@@ -151,6 +151,7 @@
     "movements": "حرکتونه",
     "stockLevels": "د موجودي کچه",
     "imeiLookup": "د IMEI 360 لټون",
+    "deadStock": "زوړ سټاک او ایجنګ",
     "imeiSearch": "د IMEI 360 لټون",
     "stockAdjustments": "د موجودي سمونونه",
     "stockHistory": "د موجودي تاریخچه",
@@ -908,6 +909,10 @@
     "imeiSearch": {
       "title": "د IMEI 360 چټک لټون",
       "description": "له پیرود څخه تر پلور او تضمین پورې د وسیلې بشپړ تاریخ وګورئ"
+    },
+    "deadStock": {
+      "title": "د زوړ سټاک راپور",
+      "description": "د ګرځنده ټیلیفونونو د وخت راپور وګورئ او زوړ سټاک (مالِ دم) وپلورئ"
     },
     "adjustments": {
       "title": "د ذخیرې سمونونه",
@@ -1775,6 +1780,7 @@
     "sales": "پلور",
     "stockAdjustments": "د ذخیرې سمونونه",
     "imeiSearch": "د IMEI 360 چټک لټون",
+    "deadStock": "د زوړ سټاک او ایجنګ راپور",
     "supplierPayments": "د عرضه کوونکي تادیات",
     "suppliers": "عرضه کوونکي",
     "subscriptions": "ګډونونه",
@@ -1971,6 +1977,13 @@
     "daysOnShelf": "{days} ورځې په پلورنځي کې",
     "defectNotes": "نیمګړتیاوې",
     "intakeCard": "د ترلاسه کولو سرچینه",
+    "imei1Label": "لومړی IMEI",
+    "imei2Label": "دویم IMEI",
+    "brandCategory": "برانډ / کټګوري",
+    "modelSku": "ماډل / SKU",
+    "storageRam": "ذخیره / ریم",
+    "contact": "اړیکه",
+    "estMargin": "تخمیني ګټه",
     "intakeType": "د رسیدلو ډول",
     "typePurchase": "د عمده پلور پیرود",
     "typeConsignment": "د پیرودونکي امانت",
@@ -2003,6 +2016,76 @@
       "damaged": "زیانمن شوی",
       "lost": "ورک شوی",
       "voided": "باطل شوی"
+    }
+  },
+  "deadStock": {
+    "title": "د زوړ سټاک راپور (مالِ دم)",
+    "description": "په المارۍ کې پاتې شوي ټیلیفونونه د وخت په اساس وګورئ او پر وخت يې وپلورئ.",
+    "refresh": "تازه کول",
+    "refreshing": "تازه کیږي...",
+    "kpi": {
+      "deadStockAlertTitle": "خبرداری: {count} ټیلیفونونه له 60 ورځو زیات پاتې دي!",
+      "deadStockAlertDesc": "د موبایلونو نرخونه ژر غورځیږي. ستاسو په {count} ټیلیفونونو کې {value} بند پاتې دي. رعایت وکړئ.",
+      "filterDeadStockButton": "د 60+ ورځو مال وښایاست",
+      "totalInStock": "ټول شته ټیلیفونونه",
+      "totalValue": "ټوله پانګه",
+      "avgDays": "اوسط ورځې",
+      "deadStockRatio": "د زاړه سټاک سلنه",
+      "daysUnit": "ورځې"
+    },
+    "buckets": {
+      "b015": "0–15 ورځې",
+      "freshStock": "تازه مال",
+      "b1630": "16–30 ورځې",
+      "normalStock": "نورمال مال",
+      "b3160": "31–60 ورځې",
+      "slowMoving": "ورو خرڅیدونکی",
+      "b60plus": "60+ ورځې",
+      "deadStock": "زوړ سټاک (مالِ دم)",
+      "units": "ټوټې",
+      "activeFilter": "فعال فلټر",
+      "capitalLocked": "بنده پانګه"
+    },
+    "filters": {
+      "searchPlaceholder": "د موبایل نوم، ماډل، IMEI یا SKU ولټوئ...",
+      "condition": "حالت",
+      "allConditions": "ټول حالتونه",
+      "conditionNew": "نوی (ډبه پیک)",
+      "conditionUsed": "استعمال شوی",
+      "sortBy": "ترتیب",
+      "sortAgeDesc": "تر ټولو پخوانی لومړی",
+      "sortAgeAsc": "تر ټولو نوی لومړی",
+      "sortCostDesc": "لوړه بیه لومړی",
+      "sortCostAsc": "ټیټه بیه لومړی",
+      "clearFilters": "فلټرونه پاک کړئ",
+      "clearSearch": "لټون پاک کړئ"
+    },
+    "table": {
+      "phone": "ټیلیفون او ځانګړتیاوې",
+      "imei": "IMEI کوډ",
+      "condition": "حالت",
+      "shelfAge": "په المارۍ کې وخت",
+      "unitCost": "د پیرودلو بیه",
+      "askingPrice": "د پلور بیه",
+      "intakeDate": "د ترلاسه کولو نېټه",
+      "actions": "کړنې",
+      "adjustPrice": "بیه بدله کړئ",
+      "view360": "360° تاریخچه",
+      "noAskingPrice": "نه دی ټاکل شوی",
+      "atCost": "په اصل بیه",
+      "imeiCopied": "IMEI کاپي شو",
+      "copyImei": "IMEI کاپي کړئ",
+      "copyFailed": "IMEI کاپي نه شو",
+      "sim2Label": "دویمه سیم: {imei}",
+      "view360Title": "360° تاریخچه وګورئ"
+    },
+    "pagination": {
+      "showing": "له {total} څخه {start} تر {end} ښودل کیږي"
+    },
+    "empty": {
+      "title": "هیڅ مال ونه موندل شو",
+      "desc": "په دې کټګورۍ کې هیڅ ټیلیفون نشته.",
+      "allClear": "ډیر ښه! په دې وخت کې هیڅ پاتې شوی ټیلیفون نشته."
     }
   },
   "kanban": {
