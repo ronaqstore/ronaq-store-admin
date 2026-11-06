@@ -180,10 +180,16 @@ export function EditInventoryUnitDialog({
               <div className='space-y-1.5'>
                 <Label htmlFor='unit-condition'>{t('inventory.condition')}</Label>
                 <Select value={condition} onValueChange={handleConditionChange}>
-                  <SelectTrigger id='unit-condition'>
-                    <SelectValue />
+                  <SelectTrigger id='unit-condition' className='h-9 w-full justify-between'>
+                    <SelectValue>
+                      {condition === 'NEW'
+                        ? t('inventory.conditionNew')
+                        : condition === 'USED'
+                          ? t('inventory.conditionUsed')
+                          : undefined}
+                    </SelectValue>
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className='w-(--anchor-width)'>
                     <SelectItem value='NEW'>{t('inventory.conditionNew')}</SelectItem>
                     <SelectItem value='USED'>{t('inventory.conditionUsed')}</SelectItem>
                   </SelectContent>

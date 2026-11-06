@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 import { staffKeys } from '../api/queries';
 import { createStaff, updateStaff } from '../api/service';
 import type { UserStatus } from '@/lib/api/types';
@@ -115,7 +116,7 @@ export function StaffDialog({ open, onOpenChange, staff, onSuccess }: StaffDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[440px]'>
+      <DialogContent className='sm:max-w-[460px]'>
         <form onSubmit={handleSubmit}>
           <DialogHeader className='text-start'>
             <DialogTitle>{staff ? t('editStaffTitle') : t('addStaffTitle')}</DialogTitle>
@@ -164,22 +165,46 @@ export function StaffDialog({ open, onOpenChange, staff, onSuccess }: StaffDialo
                 onValueChange={(val) => setRole(val as 'MANAGER' | 'SALESMAN')}
                 disabled={isSubmitting}
               >
-                <SelectTrigger id='staff-role'>
-                  <SelectValue placeholder={t('selectRole')} />
+                <SelectTrigger id='staff-role' className='h-10 w-full justify-between'>
+                  <SelectValue placeholder={t('selectRole')}>
+                    {role === 'SALESMAN' ? (
+                      <span className='flex items-center gap-2'>
+                        <Icons.lock className='h-3.5 w-3.5 text-amber-500 shrink-0' />
+                        <span className='font-medium text-foreground'>{t('roleSalesman')}</span>
+                      </span>
+                    ) : role === 'MANAGER' ? (
+                      <span className='flex items-center gap-2'>
+                        <Icons.check className='h-3.5 w-3.5 text-emerald-500 shrink-0' />
+                        <span className='font-medium text-foreground'>{t('roleManager')}</span>
+                      </span>
+                    ) : undefined}
+                  </SelectValue>
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='SALESMAN'>
-                    <div className='flex flex-col text-start'>
-                      <span className='font-medium'>{t('roleSalesman')}</span>
-                      <span className='text-[11px] text-muted-foreground'>
+                <SelectContent className='w-(--anchor-width) min-w-[320px]'>
+                  <SelectItem value='SALESMAN' className='py-2.5 pe-8 cursor-pointer'>
+                    <div className='flex flex-col text-start gap-1 whitespace-normal'>
+                      <div className='flex items-center gap-2 flex-wrap'>
+                        <Icons.lock className='h-3.5 w-3.5 text-amber-500 shrink-0' />
+                        <span className='font-medium text-foreground'>{t('roleSalesman')}</span>
+                        <span className='rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 text-[10px] font-medium'>
+                          {t('salesmanRestrictedTag')}
+                        </span>
+                      </div>
+                      <span className='text-xs text-muted-foreground leading-normal ps-5'>
                         {t('roleSalesmanDesc')}
                       </span>
                     </div>
                   </SelectItem>
-                  <SelectItem value='MANAGER'>
-                    <div className='flex flex-col text-start'>
-                      <span className='font-medium'>{t('roleManager')}</span>
-                      <span className='text-[11px] text-muted-foreground'>
+                  <SelectItem value='MANAGER' className='py-2.5 pe-8 cursor-pointer'>
+                    <div className='flex flex-col text-start gap-1 whitespace-normal'>
+                      <div className='flex items-center gap-2 flex-wrap'>
+                        <Icons.check className='h-3.5 w-3.5 text-emerald-500 shrink-0' />
+                        <span className='font-medium text-foreground'>{t('roleManager')}</span>
+                        <span className='rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 text-[10px] font-medium'>
+                          {t('managerStandardTag')}
+                        </span>
+                      </div>
+                      <span className='text-xs text-muted-foreground leading-normal ps-5'>
                         {t('roleManagerDesc')}
                       </span>
                     </div>
@@ -196,12 +221,34 @@ export function StaffDialog({ open, onOpenChange, staff, onSuccess }: StaffDialo
                   onValueChange={(val) => setStatus(val as UserStatus)}
                   disabled={isSubmitting}
                 >
-                  <SelectTrigger id='staff-status'>
-                    <SelectValue placeholder={t('selectStatus')} />
+                  <SelectTrigger id='staff-status' className='h-10 w-full justify-between'>
+                    <SelectValue placeholder={t('selectStatus')}>
+                      <span className='flex items-center gap-2'>
+                        <span
+                          className={cn(
+                            'h-2 w-2 rounded-full shrink-0',
+                            status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-amber-500'
+                          )}
+                        />
+                        <span className='font-medium text-foreground'>
+                          {status === 'ACTIVE' ? t('statusActive') : t('statusSuspended')}
+                        </span>
+                      </span>
+                    </SelectValue>
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='ACTIVE'>{t('statusActive')}</SelectItem>
-                    <SelectItem value='SUSPENDED'>{t('statusSuspended')}</SelectItem>
+                  <SelectContent className='w-(--anchor-width) min-w-[200px]'>
+                    <SelectItem value='ACTIVE' className='py-2.5 pe-8 cursor-pointer'>
+                      <div className='flex items-center gap-2'>
+                        <span className='h-2 w-2 rounded-full bg-emerald-500 shrink-0' />
+                        <span className='font-medium text-foreground'>{t('statusActive')}</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value='SUSPENDED' className='py-2.5 pe-8 cursor-pointer'>
+                      <div className='flex items-center gap-2'>
+                        <span className='h-2 w-2 rounded-full bg-amber-500 shrink-0' />
+                        <span className='font-medium text-foreground'>{t('statusSuspended')}</span>
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
