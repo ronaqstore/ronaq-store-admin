@@ -77,7 +77,12 @@ const saleMobileItem: MobileItemConfig<SaleDTO> = {
   title: (row) => row.saleNo,
   subtitle: (row) => row.customerName ?? 'Walk-in',
   badge: (row) => salePayBadge(row, staticT),
+  stockBadge: (row) => salePayBadge(row, staticT),
+  chips: (row) =>
+    [row.customerName ?? 'Walk-in', formatIsoDate(row.saleDate)].filter(Boolean) as string[],
   value: (row) => formatPkr(row.totalAmount),
+  valueLabel: 'Total',
+  secondaryValue: (row) => documentOutstandingMeta(row, staticT) || undefined,
   meta: [
     (row: SaleDTO) => formatIsoDate(row.saleDate),
     (row: SaleDTO) => documentOutstandingMeta(row, staticT)

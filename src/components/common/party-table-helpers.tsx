@@ -317,10 +317,25 @@ export function buildPartyMobileItem<T extends BasePartyRecord>(
     subtitle: (row) => (row.phone ? formatPkMobileLocal(row.phone) : undefined),
     badge: (row) => ({
       label: row.isActive ? t('status.active') : t('status.inactive'),
-      status: row.isActive ? 'ACTIVE' : 'INACTIVE'
+      status: row.isActive ? 'ACTIVE' : 'INACTIVE',
+      tone: row.isActive ? 'success' : 'neutral'
     }),
+    stockBadge: (row) => ({
+      label: row.isActive ? t('status.active') : t('status.inactive'),
+      status: row.isActive ? 'ACTIVE' : 'INACTIVE',
+      tone: row.isActive ? 'success' : 'neutral'
+    }),
+    chips: (row) =>
+      [
+        row.phone ? formatPkMobileLocal(row.phone) : null,
+        row.address ? row.address.trim() : null
+      ].filter(Boolean) as string[],
     value: (row) => formatPkr(partyCurrentBalance(row)),
     valueLabel: valueLabelFn,
+    meta: [
+      (row) => (row.phone ? formatPkMobileLocal(row.phone) : null),
+      (row) => (row.address ? row.address.trim() : null)
+    ],
     ariaLabel: (row) =>
       `${row.name}, ${row.phone ? formatPkMobileLocal(row.phone) : ''}, ${row.isActive ? 'Active' : 'Inactive'}`
   };

@@ -138,10 +138,16 @@ export function buildProductMobileItem(t: (key: string) => string): MobileItemCo
     },
     badge: (row) => ({
       label: row.isActive ? t('status.active') : t('status.inactive'),
-      status: row.isActive ? 'ACTIVE' : 'INACTIVE'
+      status: row.isActive ? 'ACTIVE' : 'INACTIVE',
+      tone: row.isActive ? 'success' : 'neutral'
     }),
+    chips: (row) => getProductSpecBadges(row),
     value: (row) => formatPkr(row.defaultSellingPrice),
-    ariaLabel: (row) => `${row.name}, ${row.isActive ? t('status.active') : t('status.inactive')}`
+    valueLabel: () => t('dukaan.product.sellingPrice'),
+    secondaryValue: (row) => `${row.quantityOnHand ?? 0} in stock`,
+    meta: [(row) => row.categoryName, (row) => (row.sku ? `SKU: ${row.sku}` : null)],
+    ariaLabel: (row) =>
+      `${row.name}, ${row.quantityOnHand ?? 0} in stock, ${formatPkr(row.defaultSellingPrice)}`
   };
 }
 
