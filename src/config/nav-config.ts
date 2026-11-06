@@ -103,6 +103,13 @@ const shopNavGroups: NavGroup[] = [
         items: []
       },
       {
+        title: 'nav.deadStock',
+        url: '/dashboard/dead-stock',
+        icon: 'clock',
+        isActive: false,
+        items: []
+      },
+      {
         title: 'nav.stockAdjustments',
         url: '/dashboard/stock-adjustments',
         icon: 'adjustments',

@@ -7,3 +7,4 @@ export {
   InventoryMovementsRoute
 } from './components/adjustments-list-route';
 export { ImeiSearchPage } from './components/imei-search-page';
+export { DeadStockReportPage } from './components/dead-stock-report-page';

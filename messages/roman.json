@@ -151,6 +151,7 @@
     "movements": "Animations",
     "stockLevels": "Stock level",
     "imeiLookup": "IMEI 360 Lookup",
+    "deadStock": "Dead Stock & Aging",
     "imeiSearch": "IMEI 360 Lookup",
     "stockAdjustments": "Stock adjustment",
     "stockHistory": "Stock history",
@@ -908,6 +909,10 @@
     "imeiSearch": {
       "title": "IMEI 360 Quick Lookup",
       "description": "Kharidari se lekar bikri aur warranty tak mukammal mobile history track karein"
+    },
+    "deadStock": {
+      "title": "Dead Stock & Shelf Aging",
+      "description": "Stock aging aur maal-e-dum (0-15d, 16-30d, 31-60d, 60+ din) track karein aur clearance karein"
     },
     "adjustments": {
       "title": "Stock adjustment",
@@ -1775,6 +1780,7 @@
     "sales": "Sale",
     "stockAdjustments": "Stock adjustments",
     "imeiSearch": "IMEI 360 Quick Lookup",
+    "deadStock": "Dead Stock & Shelf Aging Report",
     "supplierPayments": "Supplier Payments",
     "suppliers": "Suppliers",
     "subscriptions": "Subscriptions",
@@ -1971,6 +1977,13 @@
     "daysOnShelf": "{days} din dukan mein",
     "defectNotes": "Defect Notes",
     "intakeCard": "Kharidari aur Zariya",
+    "imei1Label": "IMEI 1",
+    "imei2Label": "IMEI 2",
+    "brandCategory": "Brand / Category",
+    "modelSku": "Model / SKU",
+    "storageRam": "Storage / RAM",
+    "contact": "Rabta",
+    "estMargin": "Est. Margin",
     "intakeType": "Aamad ki qisam",
     "typePurchase": "Wholesale Purchase",
     "typeConsignment": "Customer Amanat",
@@ -2003,6 +2016,76 @@
       "damaged": "Kharab",
       "lost": "Ghumshuda",
       "voided": "Mansookh"
+    }
+  },
+  "deadStock": {
+    "title": "Dead Stock & Shelf Aging (Maal-e-Dum)",
+    "description": "Showcase mein phansay hue mobile phones ko aging buckets ke sath check karein aur waqt par discount dein.",
+    "refresh": "Refresh",
+    "refreshing": "Update ho raha hai...",
+    "kpi": {
+      "deadStockAlertTitle": "Maal-e-Dum Alert: {count} phones 60+ din se showcase mein hain!",
+      "deadStockAlertDesc": "Smartphones ki value waqt ke sath girti hai. Aap ke {count} units mein {value} sarmaya atka hua hai. Foran discount offer karein.",
+      "filterDeadStockButton": "60+ Din Ka Maal-e-Dum Dekhein",
+      "totalInStock": "Dukan Mein Mojood Phones",
+      "totalValue": "Total Sarmaya (Cost)",
+      "avgDays": "Ausat Din (Shelf)",
+      "deadStockRatio": "Dead Stock Ratio",
+      "daysUnit": "din"
+    },
+    "buckets": {
+      "b015": "0–15 Din",
+      "freshStock": "Taza Stock",
+      "b1630": "16–30 Din",
+      "normalStock": "Normal Stock",
+      "b3160": "31–60 Din",
+      "slowMoving": "Slow Moving",
+      "b60plus": "60+ Din",
+      "deadStock": "Dead Stock (Maal-e-Dum)",
+      "units": "phones",
+      "activeFilter": "Active Filter",
+      "capitalLocked": "Phansa Hua Sarmaya"
+    },
+    "filters": {
+      "searchPlaceholder": "Phone name, model, IMEI, ya SKU search karein...",
+      "condition": "Halat",
+      "allConditions": "Tamam Halat",
+      "conditionNew": "Brand New",
+      "conditionUsed": "Used",
+      "sortBy": "Tarteeb",
+      "sortAgeDesc": "Sab Se Purana Pehle",
+      "sortAgeAsc": "Naya Maal Pehle",
+      "sortCostDesc": "Bari Qeemat Pehle",
+      "sortCostAsc": "Chhoti Qeemat Pehle",
+      "clearFilters": "Filters Reset Karein",
+      "clearSearch": "Search clear karein"
+    },
+    "table": {
+      "phone": "Phone & Specs",
+      "imei": "IMEI / Serial",
+      "condition": "Halat",
+      "shelfAge": "Showcase Waqt",
+      "unitCost": "Kharidari Cost",
+      "askingPrice": "Selling Qeemat",
+      "intakeDate": "Received Date",
+      "actions": "Actions",
+      "adjustPrice": "Qeemat Kam Karein",
+      "view360": "360° History",
+      "noAskingPrice": "Set nahi hai",
+      "atCost": "Cost price par",
+      "imeiCopied": "IMEI copy ho gaya",
+      "copyImei": "IMEI copy karein",
+      "copyFailed": "IMEI copy nahi ho saka",
+      "sim2Label": "SIM2: {imei}",
+      "view360Title": "360° History dekhein"
+    },
+    "pagination": {
+      "showing": "{total} mein se {start} se {end} phones"
+    },
+    "empty": {
+      "title": "Koi Phone Nahi Mila",
+      "desc": "Is filter ya bracket mein koi phone mojood nahi.",
+      "allClear": "Behtareen! Is aging bucket mein koi phansa hua phone nahi hai."
     }
   },
   "kanban": {
