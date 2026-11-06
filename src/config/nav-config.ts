@@ -169,6 +169,13 @@ const shopNavGroups: NavGroup[] = [
     label: 'nav.group.settings',
     items: [
       {
+        title: 'nav.staff',
+        url: '/dashboard/staff',
+        icon: 'teams',
+        isActive: false,
+        items: []
+      },
+      {
         title: 'nav.settings',
         url: '/dashboard/settings',
         icon: 'settings',
@@ -186,8 +193,37 @@ const shopNavGroups: NavGroup[] = [
   }
 ];
 
+const SALESMAN_ALLOWED_URLS = new Set([
+  '/dashboard/sales',
+  '/dashboard/customers',
+  '/dashboard/payments',
+  '/dashboard/products',
+  '/dashboard/inventory',
+  '/dashboard/imei-search',
+  '/dashboard/settings/appearance'
+]);
+
 export function getNavGroupsForRole(role: SessionRole | undefined): NavGroup[] {
   if (role === 'SUPER_ADMIN') return platformNavGroups;
+  if (role === 'SALESMAN') {
+    return shopNavGroups
+      .map((group) => ({
+        ...group,
+        items: group.items.filter((item) => SALESMAN_ALLOWED_URLS.has(item.url))
+      }))
+      .filter((group) => group.items.length > 0);
+  }
+  if (role === 'MANAGER') {
+    return shopNavGroups.map((group) => {
+      if (group.label === 'nav.group.settings') {
+        return {
+          ...group,
+          items: group.items.filter((item) => item.url !== '/dashboard/staff')
+        };
+      }
+      return group;
+    });
+  }
   return shopNavGroups;
 }
 

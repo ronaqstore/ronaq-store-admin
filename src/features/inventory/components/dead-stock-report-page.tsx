@@ -13,6 +13,7 @@ import {
   getAgingBucketMeta
 } from '../helpers/dead-stock-helpers';
 import { DeadStockKpiCards } from './dead-stock-kpi-cards';
+import { DeadStockPagination } from './dead-stock-pagination';
 import { EditInventoryUnitDialog } from './edit-inventory-unit-dialog';
 import { Icons } from '@/components/icons';
 import { Badge } from '@/components/ui/badge';
@@ -153,9 +154,7 @@ export function DeadStockReportPage() {
     }
   };
 
-  const handleView360 = (imei: string) => {
-    router.push(`/dashboard/imei-search?imei=${imei}`);
-  };
+  const handleView360 = (imei: string) => router.push(`/dashboard/imei-search?imei=${imei}`);
 
   const isFiltered =
     activeBucket !== 'ALL' ||
@@ -258,10 +257,9 @@ export function DeadStockReportPage() {
       <div className='rounded-lg border bg-card overflow-hidden shadow-xs'>
         {isLoading ? (
           <div className='p-8 space-y-4'>
-            <Skeleton className='h-10 w-full' />
-            <Skeleton className='h-10 w-full' />
-            <Skeleton className='h-10 w-full' />
-            <Skeleton className='h-10 w-full' />
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className='h-10 w-full' />
+            ))}
           </div>
         ) : items.length === 0 ? (
           <div className='flex flex-col items-center justify-center p-12 text-center'>
@@ -288,13 +286,19 @@ export function DeadStockReportPage() {
               <thead className='bg-muted/50 text-xs font-semibold text-muted-foreground border-b uppercase tracking-wider'>
                 <tr>
                   <th className='py-3 px-4'>#</th>
-                  <th className='py-3 px-4'>{t('table.phone')}</th>
-                  <th className='py-3 px-4'>{t('table.imei')}</th>
-                  <th className='py-3 px-4'>{t('table.condition')}</th>
-                  <th className='py-3 px-4'>{t('table.shelfAge')}</th>
-                  <th className='py-3 px-4'>{t('table.unitCost')}</th>
-                  <th className='py-3 px-4'>{t('table.askingPrice')}</th>
-                  <th className='py-3 px-4'>{t('table.intakeDate')}</th>
+                  {[
+                    'phone',
+                    'imei',
+                    'condition',
+                    'shelfAge',
+                    'unitCost',
+                    'askingPrice',
+                    'intakeDate'
+                  ].map((col) => (
+                    <th key={col} className='py-3 px-4'>
+                      {t(`table.${col}`)}
+                    </th>
+                  ))}
                   <th className='py-3 px-4 text-end'>{t('table.actions')}</th>
                 </tr>
               </thead>
@@ -462,41 +466,15 @@ export function DeadStockReportPage() {
           </div>
         )}
 
-        {pagination && pagination.totalPages > 1 && (
-          <div className='flex items-center justify-between border-t p-3 text-xs text-muted-foreground bg-muted/20'>
-            <div>
-              {t('pagination.showing', {
-                start: (pagination.page - 1) * pagination.pageSize + 1,
-                end: Math.min(pagination.page * pagination.pageSize, pagination.total),
-                total: pagination.total
-              })}
-            </div>
-            <div className='flex items-center gap-1'>
-              <Button
-                type='button'
-                variant='outline'
-                size='sm'
-                className='h-7 px-2 text-xs'
-                onClick={handlePagePrevious}
-                disabled={pagination.page <= 1}
-              >
-                <Icons.chevronLeft className='h-3.5 w-3.5' />
-              </Button>
-              <span className='px-2 font-mono'>
-                {pagination.page} / {pagination.totalPages}
-              </span>
-              <Button
-                type='button'
-                variant='outline'
-                size='sm'
-                className='h-7 px-2 text-xs'
-                onClick={handlePageNext}
-                disabled={pagination.page >= pagination.totalPages}
-              >
-                <Icons.chevronRight className='h-3.5 w-3.5' />
-              </Button>
-            </div>
-          </div>
+        {pagination && (
+          <DeadStockPagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            total={pagination.total}
+            totalPages={pagination.totalPages}
+            onPagePrevious={handlePagePrevious}
+            onPageNext={handlePageNext}
+          />
         )}
       </div>
 

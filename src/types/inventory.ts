@@ -228,3 +228,12 @@ export interface SerializedProductUnitsDialogsProps {
   onEditOpenChange: (open: boolean) => void;
   selectedUnitForEdit: InventoryUnitDTO | null;
 }
+
+export interface DeadStockPaginationProps {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  onPagePrevious: () => void;
+  onPageNext: () => void;
+}

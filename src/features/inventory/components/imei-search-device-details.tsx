@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import { formatPtaStatusLabel, formatWarrantyBadge } from '../helpers/imei-lookup-helpers';
 import { Icons } from '@/components/icons';
@@ -10,30 +9,30 @@ import { formatIsoDate } from '@/lib/dates';
 import { formatPkr } from '@/lib/money';
 import type { ImeiSearchDeviceDetailsProps } from '@/types/inventory';
 
-function renderStatusBadge(status: string) {
+function renderStatusBadge(status: string, t: (key: string) => string) {
   switch (status) {
     case 'IN_STOCK':
       return (
         <Badge className='bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'>
-          In Stock
+          {t('status.inStock')}
         </Badge>
       );
     case 'SOLD':
       return (
         <Badge className='bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30'>
-          Sold
+          {t('status.sold')}
         </Badge>
       );
     case 'DAMAGED':
       return (
         <Badge className='bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30'>
-          Damaged
+          {t('status.damaged')}
         </Badge>
       );
     case 'LOST':
       return (
         <Badge className='bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30'>
-          Lost
+          {t('status.lost')}
         </Badge>
       );
     default:
@@ -69,7 +68,7 @@ export function ImeiSearchDeviceDetails({
               <h2 className='text-xl md:text-2xl font-bold tracking-tight text-foreground'>
                 {device.productName}
               </h2>
-              {renderStatusBadge(device.status)}
+              {renderStatusBadge(device.status, t)}
               <Badge variant='outline'>{device.condition === 'NEW' ? 'NEW' : 'USED'}</Badge>
               <Badge variant='secondary'>{formatPtaStatusLabel(device.ptaStatus)}</Badge>
             </div>
@@ -212,14 +211,25 @@ export function ImeiSearchDeviceDetails({
                 {formatIsoDate(intake?.purchaseDate ?? intake?.intakeDate)}
               </span>
             </div>
-            <div className='flex justify-between pt-1'>
-              <span className='text-muted-foreground font-semibold'>
-                {intake?.type === 'CONSIGNMENT' ? t('agreedPayout') : t('unitCost')}:
-              </span>
-              <span className='text-sm font-bold text-foreground tabular-nums'>
-                {formatPkr(device.unitCost)}
-              </span>
-            </div>
+            {device.unitCost > 0 ? (
+              <div className='flex justify-between pt-1'>
+                <span className='text-muted-foreground font-semibold'>
+                  {intake?.type === 'CONSIGNMENT' ? t('agreedPayout') : t('unitCost')}:
+                </span>
+                <span className='text-sm font-bold text-foreground tabular-nums'>
+                  {formatPkr(device.unitCost)}
+                </span>
+              </div>
+            ) : (
+              <div className='flex justify-between pt-1'>
+                <span className='text-muted-foreground font-semibold'>
+                  {intake?.type === 'CONSIGNMENT' ? t('agreedPayout') : t('unitCost')}:
+                </span>
+                <span className='text-xs text-muted-foreground italic'>
+                  {t('costHidden') || 'Restricted'}
+                </span>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -231,7 +241,20 @@ export function ImeiSearchDeviceDetails({
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-2.5 text-xs'>
-            {latestSale ? (
+            {device.unitCost === 0 ? (
+              <div className='flex flex-col items-center justify-center py-6 text-center space-y-2'>
+                <div className='p-2 rounded-full bg-muted text-muted-foreground'>
+                  <Icons.lock className='h-5 w-5' />
+                </div>
+                <p className='font-semibold text-foreground'>
+                  {t('costHiddenTitle') || 'Profit Restricted'}
+                </p>
+                <p className='text-[11px] text-muted-foreground leading-snug'>
+                  {t('costHiddenDesc') ||
+                    'Unit purchase cost and store profits are visible to shop owners only.'}
+                </p>
+              </div>
+            ) : latestSale ? (
               <>
                 <div className='flex justify-between border-b border-border/50 pb-1.5'>
                   <span className='text-muted-foreground'>{t('saleNo')}:</span>
@@ -308,7 +331,20 @@ export function ImeiSearchDeviceDetails({
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-2.5 text-xs'>
-            {latestSale ? (
+            {device.unitCost === 0 ? (
+              <div className='flex flex-col items-center justify-center py-6 text-center space-y-2'>
+                <div className='p-2 rounded-full bg-muted text-muted-foreground'>
+                  <Icons.lock className='h-5 w-5' />
+                </div>
+                <p className='font-semibold text-foreground'>
+                  {t('costHiddenTitle') || 'Profit Restricted'}
+                </p>
+                <p className='text-[11px] text-muted-foreground leading-snug'>
+                  {t('costHiddenDesc') ||
+                    'Unit purchase cost and store profits are visible to shop owners only.'}
+                </p>
+              </div>
+            ) : latestSale ? (
               <>
                 <div className='flex justify-between border-b border-border/50 pb-1.5'>
                   <span className='text-muted-foreground'>{t('unitCost')}:</span>

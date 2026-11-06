@@ -1,4 +1,4 @@
-export type SessionRole = 'OWNER' | 'ADMIN' | 'SUPER_ADMIN';
+export type SessionRole = 'OWNER' | 'MANAGER' | 'SALESMAN' | 'ADMIN' | 'SUPER_ADMIN';
 
 export interface ListFilters {
   page?: number;
