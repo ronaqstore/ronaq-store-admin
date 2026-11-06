@@ -1,5 +1,24 @@
 import type { ReactNode } from 'react';
-import type { InventoryItemDTO, InventoryUnitDTO } from '@/lib/api/types';
+import type { InventoryItemDTO, InventoryUnitDTO, ResponseImeiLookupDto } from '@/lib/api/types';
+
+export interface WarrantyBadgeInfo {
+  label: string;
+  variant: 'default' | 'secondary' | 'destructive' | 'outline';
+  detail?: string;
+  isActive: boolean;
+}
+
+export interface ProfitDisplayInfo {
+  hasSold: boolean;
+  profitPaisa: number;
+  marginPercent: number;
+  isProfitable: boolean;
+}
+
+export interface ImeiSearchResultProps {
+  result: ResponseImeiLookupDto;
+  onCopyImei: (imei: string) => void;
+}
 
 export interface InventoryStockFilters {
   page?: number;

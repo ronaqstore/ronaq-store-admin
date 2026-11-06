@@ -1,4 +1,5 @@
 import type { ImeiSaleInfoDto } from '@/lib/api/types';
+import type { ProfitDisplayInfo, WarrantyBadgeInfo } from '@/types/inventory';
 
 export function formatPtaStatusLabel(status?: string | null): string {
   if (!status) return 'Not Specified';
@@ -16,13 +17,6 @@ export function formatPtaStatusLabel(status?: string | null): string {
     default:
       return status.replace(/_/g, ' ');
   }
-}
-
-export interface WarrantyBadgeInfo {
-  label: string;
-  variant: 'default' | 'secondary' | 'destructive' | 'outline';
-  detail?: string;
-  isActive: boolean;
 }
 
 export function formatWarrantyBadge(sale?: ImeiSaleInfoDto | null): WarrantyBadgeInfo {
@@ -69,13 +63,6 @@ export function formatWarrantyBadge(sale?: ImeiSaleInfoDto | null): WarrantyBadg
     detail: sale.warrantyEndsAt ? `Expired on ${sale.warrantyEndsAt}` : 'Expired',
     isActive: false
   };
-}
-
-export interface ProfitDisplayInfo {
-  hasSold: boolean;
-  profitPaisa: number;
-  marginPercent: number;
-  isProfitable: boolean;
 }
 
 export function calculateProfitDisplay(
