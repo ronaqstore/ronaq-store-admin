@@ -156,30 +156,7 @@ export function DeadStockReportPage() {
     sortBy !== 'ageDesc';
 
   return (
-    <div className='flex flex-col gap-6 p-4 md:p-6'>
-      <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
-        <div>
-          <div className='flex items-center gap-2'>
-            <Icons.clock className='h-6 w-6 text-primary' />
-            <h1 className='text-2xl font-bold tracking-tight'>{t('title')}</h1>
-          </div>
-          <p className='text-sm text-muted-foreground mt-1'>{t('description')}</p>
-        </div>
-        <div className='flex items-center gap-2'>
-          <Button
-            type='button'
-            variant='outline'
-            size='sm'
-            onClick={() => refetch()}
-            disabled={isFetching}
-            className='gap-1.5'
-          >
-            <Icons.spinner className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-            <span>{isFetching ? t('refreshing') : t('refresh')}</span>
-          </Button>
-        </div>
-      </div>
-
+    <div className='space-y-6'>
       <DeadStockKpiCards
         summary={summary}
         activeBucket={activeBucket}
@@ -198,6 +175,8 @@ export function DeadStockReportPage() {
         onSortChange={handleSortChange}
         isFiltered={isFiltered}
         onResetFilters={handleResetFilters}
+        onRefresh={() => refetch()}
+        isRefreshing={isFetching}
       />
 
       <div className='rounded-lg border bg-card overflow-hidden shadow-xs'>

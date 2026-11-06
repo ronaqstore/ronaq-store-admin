@@ -65,17 +65,6 @@ export function StaffPage() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
-        <div>
-          <h1 className='text-2xl font-bold tracking-tight text-foreground'>{t('pageTitle')}</h1>
-          <p className='text-sm text-muted-foreground'>{t('pageSubtitle')}</p>
-        </div>
-        <Button type='button' onClick={handleAddClick} className='w-full sm:w-auto'>
-          <Icons.add className='me-2 h-4 w-4' />
-          {t('addStaffButton')}
-        </Button>
-      </div>
-
       <Card className='border-sky-500/30 bg-sky-500/5 shadow-none'>
         <CardContent className='p-4 flex items-start gap-3'>
           <Icons.info className='h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5' />
@@ -94,9 +83,20 @@ export function StaffPage() {
       </Card>
 
       <Card className='shadow-none border-border/70'>
-        <CardHeader className='pb-3'>
-          <CardTitle className='text-base font-semibold'>{t('staffListTitle')}</CardTitle>
-          <CardDescription>{t('staffListDesc')}</CardDescription>
+        <CardHeader className='pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 space-y-0'>
+          <div>
+            <CardTitle className='text-base font-semibold'>{t('staffListTitle')}</CardTitle>
+            <CardDescription>{t('staffListDesc')}</CardDescription>
+          </div>
+          <Button
+            type='button'
+            onClick={handleAddClick}
+            size='sm'
+            className='gap-1.5 shrink-0 self-start sm:self-auto'
+          >
+            <Icons.add className='h-4 w-4' />
+            <span>{t('addStaffButton')}</span>
+          </Button>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -118,8 +118,8 @@ export function StaffPage() {
               </Button>
             </div>
           ) : (
-            <div className='rounded-md border border-border/60 overflow-hidden'>
-              <Table>
+            <div className='rounded-md border border-border/60 overflow-x-auto'>
+              <Table className='min-w-[650px]'>
                 <TableHeader>
                   <TableRow>
                     <TableHead className='text-start'>{t('name')}</TableHead>

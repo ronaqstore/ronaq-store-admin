@@ -118,20 +118,12 @@ export function ImeiSearchPage() {
   const latestSale = result?.latestSale;
 
   return (
-    <div className='flex flex-col gap-6 p-4 md:p-6'>
-      <div className='flex flex-col gap-1'>
-        <div className='flex items-center gap-2'>
-          <Icons.scan className='h-6 w-6 text-primary' />
-          <h1 className='text-2xl font-bold tracking-tight'>{t('title')}</h1>
-        </div>
-        <p className='text-sm text-muted-foreground'>{t('description')}</p>
-      </div>
-
+    <div className='space-y-6'>
       <Card className='border-border/80 bg-card/50 shadow-xs'>
         <CardContent className='p-4 md:p-6'>
           <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row gap-3'>
             <div className='relative flex-1'>
-              <Icons.search className='absolute left-3 top-3 h-4 w-4 text-muted-foreground' />
+              <Icons.search className='absolute inset-s-3 top-3 h-4 w-4 text-muted-foreground' />
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -143,7 +135,7 @@ export function ImeiSearchPage() {
                 <button
                   type='button'
                   onClick={handleClear}
-                  className='absolute right-3 top-3 text-muted-foreground hover:text-foreground text-xs p-0.5'
+                  className='absolute inset-e-3 top-3 text-muted-foreground hover:text-foreground text-xs p-0.5'
                   title={t('clear')}
                 >
                   <Icons.close className='h-4 w-4' />

@@ -248,4 +248,6 @@ export interface DeadStockFilterBarProps {
   onSortChange: (value: 'ageDesc' | 'ageAsc' | 'costDesc' | 'costAsc' | null) => void;
   isFiltered: boolean;
   onResetFilters: () => void;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }

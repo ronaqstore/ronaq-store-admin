@@ -23,7 +23,9 @@ export function DeadStockFilterBar({
   sortBy,
   onSortChange,
   isFiltered,
-  onResetFilters
+  onResetFilters,
+  onRefresh,
+  isRefreshing
 }: DeadStockFilterBarProps) {
   const t = useTranslations('deadStock');
 
@@ -83,6 +85,20 @@ export function DeadStockFilterBar({
           >
             <Icons.close className='me-1.5 h-3.5 w-3.5' />
             <span>{t('filters.reset')}</span>
+          </Button>
+        )}
+
+        {onRefresh && (
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            className='text-xs h-9 gap-1.5'
+          >
+            <Icons.spinner className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>{isRefreshing ? t('refreshing') : t('refresh')}</span>
           </Button>
         )}
       </div>

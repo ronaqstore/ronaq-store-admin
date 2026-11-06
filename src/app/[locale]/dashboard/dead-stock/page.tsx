@@ -22,11 +22,7 @@ export default async function Page() {
   }
 
   return (
-    <PageContainer
-      fill
-      pageTitle='pages.deadStock.title'
-      pageDescription='pages.deadStock.description'
-    >
+    <PageContainer pageTitle='pages.deadStock.title' pageDescription='pages.deadStock.description'>
       <Suspense fallback={<DataTableSkeleton rowCount={4} />}>
         <DeadStockReportPage />
       </Suspense>

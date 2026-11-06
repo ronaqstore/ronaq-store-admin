@@ -22,7 +22,7 @@ export default async function Page() {
   }
 
   return (
-    <PageContainer fill pageTitle='pages.staff.title' pageDescription='pages.staff.description'>
+    <PageContainer pageTitle='pages.staff.title' pageDescription='pages.staff.description'>
       <Suspense fallback={<DataTableSkeleton rowCount={4} />}>
         <StaffPage />
       </Suspense>
