@@ -4,8 +4,10 @@ import { getQueryClient } from '@/lib/query-client';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
 import { Suspense } from 'react';
 import { DataTableSkeleton } from '@/components/ui/table/data-table-skeleton';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { auth } from '@/auth';
+import { localize } from '@/lib/auth/routes';
+import { redirect } from 'next/navigation';
 
 export async function generateMetadata() {
   const t = await getTranslations('metadata');
@@ -16,6 +18,10 @@ export async function generateMetadata() {
 
 export default async function Page() {
   const session = await auth();
+  if (session?.user?.role === 'SALESMAN') {
+    const locale = await getLocale();
+    redirect(localize('/dashboard/sales', locale));
+  }
   const qc = getQueryClient();
 
   if (session?.accessToken) {

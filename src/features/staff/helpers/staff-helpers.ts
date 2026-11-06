@@ -1,4 +1,5 @@
 import type { UserRole, UserStatus } from '@/lib/api/types';
+export { canUserManageStaff, canUserViewCost, canUserCancelInvoices } from '@/lib/auth/permissions';
 
 export function getRoleLabel(role: UserRole | string): string {
   switch (role) {
@@ -37,18 +38,4 @@ export function getStatusBadgeVariant(
     default:
       return 'outline';
   }
-}
-
-export function canUserManageStaff(role?: UserRole | string): boolean {
-  return role === 'OWNER';
-}
-
-export function canUserViewCost(role?: UserRole | string): boolean {
-  if (!role) return false;
-  return role === 'OWNER' || role === 'MANAGER';
-}
-
-export function canUserCancelInvoices(role?: UserRole | string): boolean {
-  if (!role) return false;
-  return role === 'OWNER' || role === 'MANAGER';
 }

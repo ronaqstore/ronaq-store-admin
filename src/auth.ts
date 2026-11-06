@@ -5,6 +5,7 @@ import { authConfig } from '@/auth.config';
 import { isValidPkMobile, normalizePhone } from '@/lib/auth/phone';
 import { sessionTtlSeconds } from '@/lib/auth/session-ttl';
 import type { LoginResult, AuthResponseData, AuthResponseBody } from '@/types/auth';
+import type { AuthAccountRole } from '@/lib/auth/accounts';
 import { API_BASE_URL } from '@/constants/api';
 
 async function executeAuthPost(
@@ -50,7 +51,7 @@ async function tryOwnerLogin(
     id: data.user.id,
     name: data.user.name,
     phone: data.user.phone,
-    role: 'OWNER',
+    role: (data.user.role as AuthAccountRole) ?? 'OWNER',
     shopId: data.shopId ?? null,
     shopName: data.shop?.name ?? null,
     accessToken: data.accessToken,

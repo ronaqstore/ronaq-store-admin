@@ -2,6 +2,8 @@
 
 import type { ColumnDef } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
+import { canUserCancelInvoices } from '@/lib/auth/permissions';
 import { useMemo, useState } from 'react';
 import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
 import { Badge } from '@/components/ui/badge';
@@ -89,6 +91,8 @@ const saleMobileItem: MobileItemConfig<SaleDTO> = {
 export function SalesTable({ toolbarAction }: SalesTableProps) {
   const t = useT();
   const router = useRouter();
+  const { data: session } = useSession();
+  const canCancel = canUserCancelInvoices(session?.user?.role);
   const [peekCancelSale, setPeekCancelSale] = useState<SaleDTO | null>(null);
   const [peekReturnSale, setPeekReturnSale] = useState<SaleDTO | null>(null);
   const [peekWhatsAppSale, setPeekWhatsAppSale] = useState<SaleDTO | null>(null);
@@ -356,7 +360,7 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
                 }
               ]
             : []),
-          ...(!isCancelled && !hasReturns
+          ...(!isCancelled && !hasReturns && canCancel
             ? [
                 {
                   label: t('common.cancel'),
@@ -368,7 +372,7 @@ export function SalesTable({ toolbarAction }: SalesTableProps) {
         ];
       }
     }),
-    [router, t]
+    [router, t, canCancel]
   );
 
   return (

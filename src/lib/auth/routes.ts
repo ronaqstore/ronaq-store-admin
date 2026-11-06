@@ -43,8 +43,9 @@ export function homePathForRole(
   role: AuthAccountRole | string | undefined,
   locale: AppLocale | string = defaultLocale
 ): string {
-  const base = role === 'SUPER_ADMIN' ? PLATFORM_HOME : SHOP_HOME;
-  return localize(base, locale);
+  if (role === 'SUPER_ADMIN') return localize(PLATFORM_HOME, locale);
+  if (role === 'SALESMAN') return localize('/dashboard/sales', locale);
+  return localize(SHOP_HOME, locale);
 }
 
 export function shortcutPathForRole(

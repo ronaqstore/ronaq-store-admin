@@ -5,8 +5,10 @@ import { getQueryClient } from '@/lib/query-client';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
 import { Suspense } from 'react';
 import { DataTableSkeleton } from '@/components/ui/table/data-table-skeleton';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { auth } from '@/auth';
+import { localize } from '@/lib/auth/routes';
+import { redirect } from 'next/navigation';
 import type { IdPageProps } from '@/types';
 
 export async function generateMetadata() {
@@ -19,6 +21,10 @@ export async function generateMetadata() {
 export default async function Page({ params }: IdPageProps) {
   const { id } = await params;
   const session = await auth();
+  if (session?.user?.role === 'SALESMAN') {
+    const locale = await getLocale();
+    redirect(localize('/dashboard/sales', locale));
+  }
   const token = session?.accessToken;
   const qc = getQueryClient();
   if (token) {

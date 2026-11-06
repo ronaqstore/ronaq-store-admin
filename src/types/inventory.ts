@@ -237,3 +237,15 @@ export interface DeadStockPaginationProps {
   onPagePrevious: () => void;
   onPageNext: () => void;
 }
+
+export interface DeadStockFilterBarProps {
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  onClearSearch: () => void;
+  conditionFilter: 'ALL' | 'NEW' | 'USED';
+  onConditionChange: (value: 'ALL' | 'NEW' | 'USED' | null) => void;
+  sortBy: 'ageDesc' | 'ageAsc' | 'costDesc' | 'costAsc';
+  onSortChange: (value: 'ageDesc' | 'ageAsc' | 'costDesc' | 'costAsc' | null) => void;
+  isFiltered: boolean;
+  onResetFilters: () => void;
+}

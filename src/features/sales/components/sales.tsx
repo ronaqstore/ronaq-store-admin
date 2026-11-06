@@ -1,6 +1,8 @@
 'use client';
 
 import { useSuspenseQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
+import { canUserCancelInvoices } from '@/lib/auth/permissions';
 import { Link } from '@/i18n/navigation';
 import { useState } from 'react';
 import { FloatingActionButton } from '@/components/common/floating-action-button';
@@ -80,7 +82,9 @@ export function SalesListClient({ defaultOpenAdd = false }: SalesListClientProps
 
 export function SaleDetailClient({ id }: SaleDetailClientProps) {
   const { data } = useSuspenseQuery(saleQueryOptions(id));
+  const { data: session } = useSession();
   const t = useT();
+  const canCancel = canUserCancelInvoices(session?.user?.role);
 
   const [cancelOpen, setCancelOpen] = useState(false);
   const [returnOpen, setReturnOpen] = useState(false);
@@ -166,7 +170,7 @@ export function SaleDetailClient({ id }: SaleDetailClientProps) {
             </Button>
           )}
 
-          {!isCancelled && !hasReturns && (
+          {!isCancelled && !hasReturns && canCancel && (
             <Button
               type='button'
               variant='destructive'

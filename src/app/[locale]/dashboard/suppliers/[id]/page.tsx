@@ -1,6 +1,9 @@
 import PageContainer from '@/components/layout/page-container';
 import { SupplierLedgerClient, SupplierLedgerPrefetchRoute } from '@/features/suppliers';
-import { getTranslations } from 'next-intl/server';
+import { auth } from '@/auth';
+import { localize } from '@/lib/auth/routes';
+import { redirect } from 'next/navigation';
+import { getTranslations, getLocale } from 'next-intl/server';
 import type { IdPageProps } from '@/types';
 
 export async function generateMetadata() {
@@ -11,6 +14,11 @@ export async function generateMetadata() {
 }
 
 export default async function Page({ params }: IdPageProps) {
+  const session = await auth();
+  if (session?.user?.role === 'SALESMAN') {
+    const locale = await getLocale();
+    redirect(localize('/dashboard/sales', locale));
+  }
   const { id } = await params;
 
   return (
