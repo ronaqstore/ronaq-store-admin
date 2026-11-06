@@ -101,7 +101,7 @@ export function ImeiSearchPage() {
     const resolvedImei = sanitized.success ? sanitized.imei : scannedCode.trim();
     setInputValue(resolvedImei);
     handleSearch(resolvedImei);
-    toast.success(`Scanned: ${resolvedImei}`);
+    toast.success(t('scannedSuccess', { imei: resolvedImei }));
   };
 
   const handleCopyImei = async (imeiToCopy: string) => {
@@ -109,7 +109,7 @@ export function ImeiSearchPage() {
       await navigator.clipboard.writeText(imeiToCopy);
       toast.success(t('copied'));
     } catch {
-      toast.error('Failed to copy IMEI');
+      toast.error(t('copyFailed'));
     }
   };
 

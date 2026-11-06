@@ -40,7 +40,8 @@ const shouldCheckExports = !checkOnlyImports;
 const r = new Reporter("Unused Imports & Exports Audit", { emoji: "🧹" });
 
 function normPath(p) {
-  return path.normalize(path.resolve(p)).toLowerCase().replace(/\\/g, "/");
+  const resolved = path.normalize(path.resolve(p)).replace(/\\/g, "/");
+  return process.platform === "win32" ? resolved.toLowerCase() : resolved;
 }
 
 function resolveModule(fromFile, source) {

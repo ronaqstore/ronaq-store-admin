@@ -902,3 +902,31 @@ export interface ApiResponseBodyError {
   error?: string;
   message?: string | string[];
 }
+
+export type UserRole = 'OWNER' | 'MANAGER' | 'SALESMAN';
+export type UserStatus = 'ACTIVE' | 'SUSPENDED';
+
+export interface StaffUserDto {
+  id: string;
+  name: string;
+  phone: string;
+  role: 'MANAGER' | 'SALESMAN';
+  status: UserStatus;
+  shopId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateStaffInput {
+  name: string;
+  phone: string;
+  password: string;
+  role: 'MANAGER' | 'SALESMAN';
+}
+
+export interface UpdateStaffInput {
+  name?: string;
+  role?: 'MANAGER' | 'SALESMAN';
+  status?: UserStatus;
+  password?: string;
+}
