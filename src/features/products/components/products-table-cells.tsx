@@ -8,11 +8,7 @@ import { useT } from '@/i18n/use-t';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/constants/placeholders';
 import { formatEmpty } from '@/lib/format-empty';
 import { formatPkr } from '@/lib/dukaan/numbers';
-import {
-  formatAuthenticity,
-  formatPtaStatus,
-  getProductSpecBadges
-} from '@/lib/products/product-specs';
+import { formatAuthenticity, formatPtaStatus } from '@/lib/products/product-specs';
 import { StatusBadge, type DetailConfig, type MobileItemConfig } from '@/components/data-table';
 import { t as staticT } from '@/i18n/static-t';
 import { productsQueryKeys } from '../api/queries';
@@ -130,12 +126,24 @@ export function buildProductMobileItem(t: (key: string) => string): MobileItemCo
     imageUrl: (row) => productCoverUrl(row),
     title: (row) => row.name,
     subtitle: (row) => {
-      const specs = getProductSpecBadges(row);
-      const parts = [row.brandName, ...specs].filter(Boolean);
+      const parts = [
+        row.brandName,
+        row.ram && row.storage
+          ? `${row.ram} / ${row.storage}`
+          : row.ram
+            ? `${row.ram} RAM`
+            : row.storage
+      ].filter(Boolean) as string[];
       return parts.length > 0
         ? parts.join(' · ')
         : row.categoryName || (row.isActive ? t('status.active') : t('status.inactive'));
     },
+    meta: [
+      (row) => (row.color?.trim() ? row.color.trim() : null),
+      (row) => `${row.quantityOnHand ?? 0} ${t('dukaan.product.stock')}`,
+      (row) => formatPtaStatus(row.ptaStatus),
+      (row) => formatAuthenticity(row.authenticity)
+    ],
     badge: (row) => ({
       label: row.isActive ? t('status.active') : t('status.inactive'),
       status: row.isActive ? 'ACTIVE' : 'INACTIVE'

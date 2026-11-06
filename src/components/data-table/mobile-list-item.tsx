@@ -103,7 +103,7 @@ export function MobileListItem<TData>({
               ) : null}
               {(metaItems.length > 0 || badge) && (
                 <div className='mt-1 flex min-w-0 flex-wrap items-center gap-1.5'>
-                  {metaItems.slice(0, 2).map((item, i) => (
+                  {metaItems.slice(0, 4).map((item, i) => (
                     <span key={i} className='text-muted-foreground text-[11px]'>
                       {i > 0 ? <span className='me-1.5'>·</span> : null}
                       {item}
