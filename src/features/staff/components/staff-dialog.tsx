@@ -44,7 +44,7 @@ export function StaffDialog({ open, onOpenChange, staff, onSuccess }: StaffDialo
     if (staff) {
       setName(staff.name);
       setPhone(staff.phone);
-      setRole(staff.role);
+      setRole(staff.role === 'OWNER' ? 'MANAGER' : staff.role);
       setStatus(staff.status);
       setPassword('');
       setErrorMessage(null);

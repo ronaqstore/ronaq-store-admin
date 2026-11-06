@@ -22,8 +22,8 @@ export default async function Page() {
   }
 
   return (
-    <PageContainer pageTitle='pages.staff.title' pageDescription='pages.staff.description'>
-      <Suspense fallback={<DataTableSkeleton rowCount={4} />}>
+    <PageContainer fill pageTitle='pages.staff.title' pageDescription='pages.staff.description'>
+      <Suspense fallback={<DataTableSkeleton rowCount={4} columnCount={5} />}>
         <StaffPage />
       </Suspense>
     </PageContainer>

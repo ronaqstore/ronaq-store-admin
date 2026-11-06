@@ -910,7 +910,7 @@ export interface StaffUserDto {
   id: string;
   name: string;
   phone: string;
-  role: 'MANAGER' | 'SALESMAN';
+  role: UserRole;
   status: UserStatus;
   shopId: string;
   createdAt: string;

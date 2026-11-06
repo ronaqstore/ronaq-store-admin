@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { PLATFORM_HOME } from '@/lib/auth/routes';
 import { normalizePhone } from '@/lib/auth/phone';
+import { resolveAuthErrorMessage } from '@/lib/auth/auth-error-codes';
 import type { LoginValues } from '@/types/auth';
 import { BaseLoginForm } from './base-login-form';
 
@@ -26,13 +27,13 @@ export function PlatformAdminLoginForm() {
     });
 
     if (result?.error) {
-      return t('auth.platformAdminError');
+      return resolveAuthErrorMessage(result.code, t, true);
     }
 
     const session = await getSession();
     if (session?.user?.role !== 'SUPER_ADMIN') {
       await signOut({ redirect: false });
-      return t('auth.platformAdminError');
+      return t('auth.notPlatformAdmin');
     }
 
     router.replace(PLATFORM_HOME);

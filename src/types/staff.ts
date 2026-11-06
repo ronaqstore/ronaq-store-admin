@@ -23,3 +23,18 @@ export interface StaffDialogProps {
   staff: StaffUserDto | null;
   onSuccess?: () => void;
 }
+
+export interface StaffCellActionProps {
+  staff: StaffUserDto;
+  onEdit: (staff: StaffUserDto) => void;
+  onToggleStatus: (staff: StaffUserDto) => void;
+  isLoading?: boolean;
+}
+
+export interface StaffPermissionsCellProps {
+  role: string;
+}
+
+export interface StaffStatusCellProps {
+  status: string;
+}
