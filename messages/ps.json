@@ -1218,7 +1218,7 @@
     "addressPlaceholder": "لکه: زب پلازا، ټیمېرګره بلاک سي",
     "addressHint": "لیکل شوې پته چې پیرودونکي یې لولي (لکه په نوم لیکنه کې).",
     "location": "د نقشې موقعیت",
-    "locationPlaceholder": "ټیمېرګره، پلازا، سړک ولټوئ… (پاکستان)",
+    "locationPlaceholder": "ټیمېرګره، پلازا، سړک ولټوئ… (خیبر پښتونخوا)",
     "locationHint": "اختیاري. ولټوئ او له لیست څخه ځای وټاکئ — یوازې لیکل پن نه ساتي.",
     "locationPickRequired": "د لټون له لیست څخه ځای وټاکئ. یوازې متن مه لیکئ.",
     "locationSearching": "ځایونه لټول کیږي…",
@@ -1259,7 +1259,7 @@
     "bannerUploadFailed": "بینر اپلوډ نشو",
     "bannerRemoved": "د دوکان بینر لرې شو",
     "bannerRemoveFailed": "بینر لرې نشو",
-    "googleMapsPlaceholder": "په پاکستان کې موقعیت ولټوئ او وټاکئ"
+    "googleMapsPlaceholder": "په خیبر پښتونخوا کې موقعیت ولټوئ او وټاکئ"
   },
   "account": {
     "title": "حساب",

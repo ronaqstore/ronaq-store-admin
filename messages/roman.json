@@ -1218,7 +1218,7 @@
     "addressPlaceholder": "Maslan: Zab plaza, Timergara block C",
     "addressHint": "Likha huwa pata jo Customer parhein (registration jaisa).",
     "location": "Maps ka maqam",
-    "locationPlaceholder": "Timergara, plaza, gali Talash karein… (Pakistan)",
+    "locationPlaceholder": "Timergara, plaza, gali Talash karein… (KPK)",
     "locationHint": "Ikhtiyari. Talash karein phir fehrist se jagah muntakhib karein — sirf likhne se pin Mehfooz nahi hoga.",
     "locationPickRequired": "Talash ki fehrist se jagah muntakhib karein. sirf matan na likhein.",
     "locationSearching": "Jagahein Talash ho rahi hain…",
@@ -1259,7 +1259,7 @@
     "bannerUploadFailed": "Banner upload nahi ho saka",
     "bannerRemoved": "Shop banner hata diya gaya",
     "bannerRemoveFailed": "Banner nahi hataya ja saka",
-    "googleMapsPlaceholder": "Pakistan mein maqam Talash kar ke muntakhib karein"
+    "googleMapsPlaceholder": "KPK mein maqam Talash kar ke muntakhib karein"
   },
   "account": {
     "title": "Account",

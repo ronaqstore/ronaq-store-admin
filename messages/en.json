@@ -1218,7 +1218,7 @@
     "addressPlaceholder": "e.g. Zab Plaza, Timergara Block C",
     "addressHint": "Written address customers read (same idea as registration).",
     "location": "Map location",
-    "locationPlaceholder": "Search Timergara, plaza, street… (Pakistan)",
+    "locationPlaceholder": "Search Timergara, plaza, street… (KPK)",
     "locationHint": "Optional. Type to search, then select a place from the list — typing alone will not save a pin.",
     "locationPickRequired": "Select a place from the search list. Do not only type text.",
     "locationSearching": "Searching places…",
@@ -1259,7 +1259,7 @@
     "bannerUploadFailed": "Failed to upload banner",
     "bannerRemoved": "Shop banner removed",
     "bannerRemoveFailed": "Failed to remove banner",
-    "googleMapsPlaceholder": "Search and pick a Pakistan location"
+    "googleMapsPlaceholder": "Search and pick a KPK location"
   },
   "account": {
     "title": "Account",
