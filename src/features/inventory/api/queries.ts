@@ -1,5 +1,10 @@
 import { keepPreviousData, queryOptions } from '@tanstack/react-query';
-import { listInventoryAdjustments, listInventoryStock, listInventoryUnits } from './service';
+import {
+  listInventoryAdjustments,
+  listInventoryStock,
+  listInventoryUnits,
+  lookupImei
+} from './service';
 import { compactFilters } from '@/lib/api/compact-filters';
 import type {
   InventoryAdjustmentsFilters,
@@ -16,7 +21,8 @@ export const inventoryKeys = {
   movements: (filters?: InventoryAdjustmentsFilters) =>
     [...inventoryKeys.all, 'movements', filters] as const,
   units: (productId: string, status?: string, search?: string, page?: number, pageSize?: number) =>
-    [...inventoryKeys.all, 'units', productId, status, search, page, pageSize] as const
+    [...inventoryKeys.all, 'units', productId, status, search, page, pageSize] as const,
+  imeiLookup: (imei?: string) => [...inventoryKeys.all, 'imeiLookup', imei?.trim()] as const
 };
 
 export const inventoryStockQueryOptions = (filters: InventoryStockFilters = {}, token?: string) => {
@@ -50,4 +56,11 @@ export const inventoryUnitsQueryOptions = (
   queryOptions({
     queryKey: inventoryKeys.units(productId, status, search, extra?.page, extra?.pageSize),
     queryFn: () => listInventoryUnits(productId, status, search, token, extra)
+  });
+
+export const imeiLookupQueryOptions = (imei?: string, token?: string) =>
+  queryOptions({
+    queryKey: inventoryKeys.imeiLookup(imei),
+    queryFn: () => (imei && imei.trim().length > 0 ? lookupImei(imei.trim(), token) : null),
+    enabled: Boolean(imei && imei.trim().length > 0)
   });

@@ -7,6 +7,7 @@ import type {
   InventoryItemDTO,
   InventoryUnitDTO,
   PaginatedResponse,
+  ResponseImeiLookupDto,
   ResponseResolveScanDto,
   UpdateInventoryUnitInput
 } from '@/lib/api/types';
@@ -51,6 +52,14 @@ export async function resolveScan(code: string, token?: string): Promise<Respons
     return apiRequest<ResponseResolveScanDto>(`/inventory/resolve-scan${qs}`, undefined, token);
   }
   return appFetch<ResponseResolveScanDto>(`/api/inventory/resolve-scan${qs}`);
+}
+
+export async function lookupImei(imei: string, token?: string): Promise<ResponseImeiLookupDto> {
+  const qs = buildQueryString({ imei: imei.trim() });
+  if (token) {
+    return apiRequest<ResponseImeiLookupDto>(`/inventory/imei-lookup${qs}`, undefined, token);
+  }
+  return appFetch<ResponseImeiLookupDto>(`/api/inventory/imei-lookup${qs}`);
 }
 
 export async function listInventoryStock(

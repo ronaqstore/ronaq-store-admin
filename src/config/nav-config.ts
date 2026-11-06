@@ -95,6 +95,14 @@ const shopNavGroups: NavGroup[] = [
         items: []
       },
       {
+        title: 'nav.imeiLookup',
+        url: '/dashboard/imei-search',
+        icon: 'scan',
+        shortcut: ['i', 'm'],
+        isActive: false,
+        items: []
+      },
+      {
         title: 'nav.stockAdjustments',
         url: '/dashboard/stock-adjustments',
         icon: 'adjustments',

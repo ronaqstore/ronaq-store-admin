@@ -406,6 +406,88 @@ export interface ResponseResolveScanDto {
   message?: string;
 }
 
+export interface ImeiDeviceInfoDto {
+  id: string;
+  productId: string;
+  productName: string;
+  brandName?: string | null;
+  categoryName?: string | null;
+  model?: string | null;
+  color?: string | null;
+  storage?: string | null;
+  ram?: string | null;
+  sku?: string | null;
+  barcode?: string | null;
+  ptaStatus?: string | null;
+  imei1: string;
+  imei2?: string | null;
+  condition: string;
+  status: string;
+  unitCost: number;
+  askingPrice?: number | null;
+  effectivePrice?: number | null;
+  batteryHealth?: number | null;
+  defectNotes?: string | null;
+  createdAt: string;
+  daysOnShelf: number;
+}
+
+export interface ImeiIntakeInfoDto {
+  type: 'PURCHASE' | 'CONSIGNMENT';
+  purchaseId?: string | null;
+  purchaseNo?: string | null;
+  purchaseDate?: string | null;
+  supplierInvoiceRef?: string | null;
+  supplierId?: string | null;
+  supplierName?: string | null;
+  supplierPhone?: string | null;
+  consignmentId?: string | null;
+  consignmentNo?: string | null;
+  intakeDate?: string | null;
+  consignorName?: string | null;
+  consignorPhone?: string | null;
+  agreedPayout?: number | null;
+}
+
+export interface ImeiSaleInfoDto {
+  saleId: string;
+  saleNo: string;
+  saleDate: string;
+  saleStatus: string;
+  customerId?: string | null;
+  customerName?: string | null;
+  customerPhone?: string | null;
+  salePrice: number;
+  profitAmount: number;
+  profitMarginPercent: number;
+  warrantyType: 'SHOP_WARRANTY' | 'OFFICIAL_WARRANTY' | 'NO_WARRANTY';
+  warrantyDays?: number | null;
+  warrantyEndsAt?: string | null;
+  warrantyDaysLeft?: number | null;
+  isWarrantyActive: boolean;
+}
+
+export interface ImeiTimelineEventDto {
+  id: string;
+  date: string;
+  type: string;
+  title: string;
+  description: string;
+  referenceType?: string | null;
+  referenceId?: string | null;
+  referenceNo?: string | null;
+}
+
+export interface ResponseImeiLookupDto {
+  found: boolean;
+  device?: ImeiDeviceInfoDto;
+  intake?: ImeiIntakeInfoDto;
+  latestSale?: ImeiSaleInfoDto | null;
+  salesHistory: ImeiSaleInfoDto[];
+  timeline: ImeiTimelineEventDto[];
+  message?: string;
+}
+
 export type InventoryMovementType =
   | 'ADJUSTMENT'
   | 'DAMAGED'

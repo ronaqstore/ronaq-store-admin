@@ -6,3 +6,4 @@ export {
   StockAdjustmentsRoute,
   InventoryMovementsRoute
 } from './components/adjustments-list-route';
+export { ImeiSearchPage } from './components/imei-search-page';
