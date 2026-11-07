@@ -29,7 +29,9 @@ export const createProductFormSchema = (t: Translator) =>
       .nullable(),
     lowStockThreshold: z.coerce
       .number({ error: t('validation.lowStockThresholdRequired') })
-      .min(0, t('validation.valueNonNegative')),
+      .min(0, t('validation.valueNonNegative'))
+      .optional()
+      .nullable(),
     isActive: z.boolean().optional(),
     isPublished: z.boolean().optional(),
     publicDescription: z.string().optional().nullable(),

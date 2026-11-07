@@ -297,7 +297,6 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
                       type='number'
                       min={0}
                       max={INPUT_LIMITS.lowStockMax}
-                      required
                       placeholder={t('lowStockThresholdPlaceholder')}
                     />
                   )}
