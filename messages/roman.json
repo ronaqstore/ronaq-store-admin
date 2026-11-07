@@ -630,6 +630,7 @@
       "imageTypeError": "JPEG, PNG ya WebP image istemal karein",
       "imageLimitExceeded": "Aik product ki maximum 5 images ho sakti hain.",
       "uploadImage": "Image Upload karein",
+      "takePhoto": "Camera kholein",
       "uploading": "Up load ho raha hai...",
       "uploadQueued": "Queue mein intizaar",
       "removeImage": "Image hata dein",

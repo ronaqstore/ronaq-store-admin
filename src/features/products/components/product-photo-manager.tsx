@@ -39,6 +39,7 @@ export function ProductPhotoManager({
   const t = useTranslations('dukaan.product');
   const tCommon = useTranslations('common');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const uploadQueueRef = useRef<Promise<void>>(Promise.resolve());
   const reservedSlotsRef = useRef(0);
@@ -169,24 +170,42 @@ export function ProductPhotoManager({
           <h3 className='text-sm font-medium'>{t('images')}</h3>
           <p className='text-xs text-muted-foreground'>{t('imagesHint')}</p>
         </div>
-        <Button
-          type='button'
-          variant='outline'
-          size='sm'
-          className='shrink-0'
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <IconPlus className='me-2 h-4 w-4' />
-          {t('uploadImage')}
-        </Button>
-        <input
-          ref={fileInputRef}
-          type='file'
-          accept='image/*'
-          multiple
-          className='hidden'
-          onChange={handleFileSelect}
-        />
+        <div className='flex shrink-0 items-center gap-2'>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            onClick={() => cameraInputRef.current?.click()}
+          >
+            <Icons.camera className='me-2 h-4 w-4' />
+            {t('takePhoto')}
+          </Button>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <IconPlus className='me-2 h-4 w-4' />
+            {t('uploadImage')}
+          </Button>
+          <input
+            ref={cameraInputRef}
+            type='file'
+            accept='image/*'
+            capture='environment'
+            className='hidden'
+            onChange={handleFileSelect}
+          />
+          <input
+            ref={fileInputRef}
+            type='file'
+            accept='image/*'
+            multiple
+            className='hidden'
+            onChange={handleFileSelect}
+          />
+        </div>
       </div>
       {uploadTasks.length > 0 ? (
         <p

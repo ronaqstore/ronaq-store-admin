@@ -638,6 +638,7 @@
       "imageTypeError": "JPEG، PNG یا WebP انځور وکاروئ",
       "imageLimitExceeded": "یو محصول تر ۵ پورې انځورونه لرلای شي.",
       "uploadImage": "تصویر اپ لوڈ کریں",
+      "takePhoto": "کمره",
       "uploading": "اپ لوڈ ہو رہا ہے...",
       "uploadQueued": "د اپلوډ په کتار کې",
       "removeImage": "تصویر ہٹائیں",

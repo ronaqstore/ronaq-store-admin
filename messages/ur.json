@@ -633,6 +633,7 @@
       "imageTypeError": "JPEG، PNG یا WebP تصویر استعمال کریں",
       "imageLimitExceeded": "ایک پروڈکٹ میں زیادہ سے زیادہ ۵ تصاویر ہو سکتی ہیں۔",
       "uploadImage": "تصویر اپ لوڈ کریں",
+      "takePhoto": "کیمرہ",
       "uploading": "اپ لوڈ ہو رہا ہے...",
       "uploadQueued": "اپ لوڈ کے انتظار میں",
       "removeImage": "تصویر ہٹائیں",

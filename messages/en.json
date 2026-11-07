@@ -634,6 +634,7 @@
       "imageTypeError": "Use a JPEG, PNG, or WebP image",
       "imageLimitExceeded": "A product can have up to 5 photos.",
       "uploadImage": "Upload",
+      "takePhoto": "Camera",
       "uploading": "Uploading…",
       "uploadQueued": "Waiting in queue",
       "removeImage": "Remove",
