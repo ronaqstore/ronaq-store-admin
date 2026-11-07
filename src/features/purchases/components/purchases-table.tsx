@@ -101,7 +101,12 @@ const purchaseMobileItem: MobileItemConfig<PurchaseDTO> = {
   title: (row) => row.purchaseNo,
   subtitle: (row) => row.supplierInvoiceRef || row.supplierName || '—',
   badge: (row) => purchasePayBadge(row, staticT),
+  stockBadge: (row) => purchasePayBadge(row, staticT),
+  chips: (row) =>
+    [row.supplierName ?? 'Supplier', formatIsoDate(row.purchaseDate)].filter(Boolean) as string[],
   value: (row) => formatPkr(row.totalAmount),
+  valueLabel: 'Total',
+  secondaryValue: (row) => documentOutstandingMeta(row, staticT) || undefined,
   meta: [(row) => formatIsoDate(row.purchaseDate), (row) => documentOutstandingMeta(row, staticT)],
   ariaLabel: (row) => `${row.purchaseNo}, ${row.supplierName ?? ''}, ${formatPkr(row.totalAmount)}`
 };

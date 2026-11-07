@@ -69,9 +69,13 @@ export interface MobileItemConfig<TData> {
   title: (row: TData) => React.ReactNode;
   subtitle?: (row: TData) => React.ReactNode;
   badge?: (row: TData) => MobileBadge | null | undefined;
+  stockBadge?: (row: TData) => MobileBadge | null | undefined;
+  chips?: (row: TData) => React.ReactNode[];
   value?: (row: TData) => React.ReactNode;
   valueClassName?: (row: TData) => string | undefined;
   valueLabel?: string | ((row: TData) => string | undefined);
+  secondaryValue?: (row: TData) => React.ReactNode;
+  secondaryValueLabel?: string | ((row: TData) => string | undefined);
   meta?: Array<(row: TData) => React.ReactNode>;
   ariaLabel?: (row: TData) => string;
 }

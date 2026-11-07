@@ -71,6 +71,30 @@ export function buildMobileItemFromTable<TData>(
   const layouts = table.getAllColumns().map(metaOf);
   const slots = resolveMobileSlots(layouts);
 
+  const badgeResolver = slots.badgeColumnId
+    ? (row: TData) => {
+        const col = columnById(table, slots.badgeColumnId);
+        if (!col) return null;
+        const raw = readValue(row, col.columnDef);
+        if (raw == null || raw === '') return null;
+        if (typeof raw === 'boolean') {
+          return {
+            label: t
+              ? raw
+                ? t('status.active')
+                : t('status.inactive')
+              : raw
+                ? 'Active'
+                : 'Inactive',
+            status: raw ? 'ACTIVE' : 'INACTIVE',
+            tone: raw ? ('success' as const) : ('neutral' as const)
+          };
+        }
+        const label = formatLabel(String(raw));
+        return { label, status: String(raw) };
+      }
+    : undefined;
+
   return {
     leading: slots.leading ?? 'icon',
     title: (row) => {
@@ -85,29 +109,8 @@ export function buildMobileItemFromTable<TData>(
           return formatByType(readValue(row, col.columnDef), col.columnDef.meta?.type, t);
         }
       : undefined,
-    badge: slots.badgeColumnId
-      ? (row) => {
-          const col = columnById(table, slots.badgeColumnId);
-          if (!col) return null;
-          const raw = readValue(row, col.columnDef);
-          if (raw == null || raw === '') return null;
-          if (typeof raw === 'boolean') {
-            return {
-              label: t
-                ? raw
-                  ? t('status.active')
-                  : t('status.inactive')
-                : raw
-                  ? 'Active'
-                  : 'Inactive',
-              status: raw ? 'ACTIVE' : 'INACTIVE',
-              tone: raw ? ('success' as const) : ('neutral' as const)
-            };
-          }
-          const label = formatLabel(String(raw));
-          return { label, status: String(raw) };
-        }
-      : undefined,
+    badge: badgeResolver,
+    stockBadge: badgeResolver,
     value: slots.valueColumnId
       ? (row) => {
           const col = columnById(table, slots.valueColumnId);
