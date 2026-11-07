@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { SHOP_HOME, canAccessPath, delocalize } from '@/lib/auth/routes';
 import { normalizePhone } from '@/lib/auth/phone';
+import { resolveAuthErrorMessage } from '@/lib/auth/auth-error-codes';
 import type { LoginValues } from '@/types/auth';
 import { BaseLoginForm } from './base-login-form';
 
@@ -35,14 +36,14 @@ export function LoginForm() {
     });
 
     if (result?.error) {
-      return t('auth.invalidCredentials');
+      return resolveAuthErrorMessage(result.code, t, false);
     }
 
     const session = await getSession();
     const role = session?.user?.role;
     if (role !== 'OWNER') {
       await signOut({ redirect: false });
-      return t('auth.invalidCredentials');
+      return t('auth.notShopOwner');
     }
 
     const target =

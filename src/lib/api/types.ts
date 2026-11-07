@@ -488,6 +488,75 @@ export interface ResponseImeiLookupDto {
   message?: string;
 }
 
+export type DeadStockAgingBucket = '0-15' | '16-30' | '31-60' | '60+';
+
+export interface DeadStockQueryFilters {
+  bucket?: 'ALL' | DeadStockAgingBucket;
+  condition?: 'ALL' | 'NEW' | 'USED';
+  brandId?: string;
+  search?: string;
+  sortBy?: 'ageDesc' | 'ageAsc' | 'costDesc' | 'costAsc';
+  page?: number;
+  pageSize?: number;
+}
+
+export interface DeadStockBucketItemDto {
+  bucket: DeadStockAgingBucket;
+  label: string;
+  count: number;
+  costValue: number;
+}
+
+export interface DeadStockSummaryDto {
+  totalInStockUnits: number;
+  totalStockValue: number;
+  deadStockCount: number;
+  deadStockCostValue: number;
+  averageDaysOnShelf: number;
+  buckets: DeadStockBucketItemDto[];
+}
+
+export interface DeadStockUnitItemDto {
+  id: string;
+  productId: string;
+  productName: string;
+  brandName?: string | null;
+  categoryName?: string | null;
+  model?: string | null;
+  color?: string | null;
+  storage?: string | null;
+  ram?: string | null;
+  ptaStatus?: string | null;
+  sku?: string | null;
+  imei1: string;
+  imei2?: string | null;
+  condition: string;
+  batteryHealth?: number | null;
+  defectNotes?: string | null;
+  unitCost: number;
+  askingPrice?: number | null;
+  effectivePrice: number;
+  intakeDate: string;
+  daysOnShelf: number;
+  agingBucket: DeadStockAgingBucket;
+  sourceType: 'PURCHASE' | 'CONSIGNMENT';
+  sourceName?: string | null;
+  referenceNo?: string | null;
+}
+
+export interface DeadStockItemsPaginationDto {
+  items: DeadStockUnitItemDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface ResponseDeadStockReportDto {
+  summary: DeadStockSummaryDto;
+  pagination: DeadStockItemsPaginationDto;
+}
+
 export type InventoryMovementType =
   | 'ADJUSTMENT'
   | 'DAMAGED'
@@ -832,4 +901,32 @@ export interface ProxyOptions {
 export interface ApiResponseBodyError {
   error?: string;
   message?: string | string[];
+}
+
+export type UserRole = 'OWNER' | 'MANAGER' | 'SALESMAN';
+export type UserStatus = 'ACTIVE' | 'SUSPENDED';
+
+export interface StaffUserDto {
+  id: string;
+  name: string;
+  phone: string;
+  role: UserRole;
+  status: UserStatus;
+  shopId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateStaffInput {
+  name: string;
+  phone: string;
+  password: string;
+  role: 'MANAGER' | 'SALESMAN';
+}
+
+export interface UpdateStaffInput {
+  name?: string;
+  role?: 'MANAGER' | 'SALESMAN';
+  status?: UserStatus;
+  password?: string;
 }

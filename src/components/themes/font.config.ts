@@ -1,6 +1,5 @@
 import { GeistMono } from 'geist/font/mono';
 import { GeistSans } from 'geist/font/sans';
-import { Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from 'next/font/google';
 
 import '@fontsource/architects-daughter/400.css';
 import '@fontsource/dm-sans/400.css';
@@ -44,25 +43,4 @@ import '@fontsource/space-mono/700.css';
 import '@/styles/font-variables.css';
 import { cn } from '@/lib/utils';
 
-export const notoNastaliqUrdu = Noto_Nastaliq_Urdu({
-  subsets: ['arabic', 'latin'],
-  weight: ['400', '700'],
-  variable: '--font-noto-nastaliq',
-  display: 'swap',
-  preload: false
-});
-
-export const notoNaskhArabic = Noto_Naskh_Arabic({
-  subsets: ['arabic', 'latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-noto-naskh',
-  display: 'swap',
-  preload: false
-});
-
-export const fontVariables = cn(
-  GeistSans.variable,
-  GeistMono.variable,
-  notoNastaliqUrdu.variable,
-  notoNaskhArabic.variable
-);
+export const fontVariables = cn(GeistSans.variable, GeistMono.variable);

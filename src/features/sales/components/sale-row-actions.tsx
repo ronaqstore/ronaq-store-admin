@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
+import { useSession } from 'next-auth/react';
+import { canUserCancelInvoices } from '@/lib/auth/permissions';
 import { Icons } from '@/components/icons';
 import { RowActionsMenu } from '@/components/common/row-actions-menu';
 import type { RowAction } from '@/types/dukaan';
@@ -22,6 +24,8 @@ const SaleWhatsAppShareDialog = dynamic(
 );
 
 export function SaleRowActions({ sale }: SaleRowActionsProps) {
+  const { data: session } = useSession();
+  const canCancel = canUserCancelInvoices(session?.user?.role);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [returnOpen, setReturnOpen] = useState(false);
   const [whatsAppOpen, setWhatsAppOpen] = useState(false);
@@ -44,12 +48,16 @@ export function SaleRowActions({ sale }: SaleRowActionsProps) {
             icon: Icons.chevronLeft,
             onClick: () => setReturnOpen(true)
           },
-          {
-            label: 'Cancel',
-            icon: Icons.close,
-            variant: 'destructive',
-            onClick: () => setCancelOpen(true)
-          }
+          ...(canCancel
+            ? [
+                {
+                  label: 'Cancel',
+                  icon: Icons.close,
+                  variant: 'destructive' as const,
+                  onClick: () => setCancelOpen(true)
+                }
+              ]
+            : [])
         ] satisfies RowAction[])
       : [])
   ];

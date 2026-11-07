@@ -313,7 +313,23 @@ export function ConsignmentsTable({ toolbarAction }: ConsignmentsTableProps) {
         tone:
           row.status === 'SETTLED' ? 'success' : row.status === 'CANCELLED' ? 'danger' : 'warning'
       }),
+      stockBadge: (row) => ({
+        label: t(
+          `consignments.status${row.status === 'IN_CUSTODY' ? 'InCustody' : row.status === 'SOLD' ? 'Sold' : row.status === 'SETTLED' ? 'Settled' : row.status === 'RETURNED_TO_OWNER' ? 'Returned' : 'Cancelled'}`
+        ),
+        tone:
+          row.status === 'SETTLED' ? 'success' : row.status === 'CANCELLED' ? 'danger' : 'warning'
+      }),
+      chips: (row) =>
+        [
+          row.consignorName,
+          row.imei1 ? `IMEI: ...${row.imei1.slice(-4)}` : null,
+          formatIsoDate(row.intakeDate)
+        ].filter(Boolean) as string[],
       value: (row) => formatPkr(row.agreedPayout),
+      valueLabel: 'Payout',
+      secondaryValue: (row) =>
+        row.targetSellingPrice ? `Target: ${formatPkr(row.targetSellingPrice)}` : null,
       meta: [
         (row) => `${t('inventory.imeiLabel')} ${row.imei1}`,
         (row) => formatIsoDate(row.intakeDate)

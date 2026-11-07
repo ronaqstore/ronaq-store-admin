@@ -69,6 +69,7 @@ export interface AuthUserSummary {
   id: string;
   name: string;
   phone: string;
+  role?: string;
 }
 
 export interface AuthShopSummary {

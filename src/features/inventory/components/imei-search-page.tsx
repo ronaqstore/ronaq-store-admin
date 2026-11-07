@@ -79,24 +79,26 @@ export function ImeiSearchPage() {
     const resolvedImei = sanitized.success ? sanitized.imei : scannedCode.trim();
     setInputValue(resolvedImei);
     handleSearch(resolvedImei);
+    toast.success(t('scannedSuccess', { imei: resolvedImei }));
   };
 
-  const handleCopyImei = (imei: string) => {
-    if (navigator?.clipboard) {
-      navigator.clipboard.writeText(imei);
+  const handleCopyImei = async (imeiToCopy: string) => {
+    try {
+      await navigator.clipboard.writeText(imeiToCopy);
       toast.success(t('copied'));
+    } catch {
+      toast.error(t('copyFailed'));
     }
   };
 
   return (
-    <div className='flex flex-1 flex-col gap-6 p-4 md:p-6 max-w-7xl mx-auto w-full'>
-      <Card className='border-border/60 shadow-sm'>
+    <div className='space-y-6'>
+      <Card className='border-border/80 bg-card/50 shadow-xs'>
         <CardContent className='p-4 md:p-6'>
-          <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row gap-3 items-stretch'>
+          <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row gap-3'>
             <div className='relative flex-1'>
               <Icons.search className='absolute inset-s-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
               <Input
-                type='text'
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder={t('inputPlaceholder')}
@@ -116,68 +118,64 @@ export function ImeiSearchPage() {
             </div>
 
             <div className='flex items-center gap-2'>
-              <ImeiCameraScanButton
-                onScan={handleCameraScan}
-                mode='imei'
-                title={t('scanWithCamera')}
-                className='h-10 w-10 shrink-0'
-              />
-              <Button
-                type='submit'
-                disabled={!inputValue.trim() || isFetching}
-                className='min-w-28'
-              >
+              <Button type='submit' disabled={!inputValue.trim() || isFetching} className='gap-2'>
                 {isFetching ? (
                   <>
-                    <Icons.spinner className='me-2 h-4 w-4 animate-spin' />
-                    {t('searching')}
+                    <Icons.spinner className='h-4 w-4 animate-spin' />
+                    <span>{t('searching')}</span>
                   </>
                 ) : (
                   <>
-                    <Icons.search className='me-2 h-4 w-4' />
-                    {t('search')}
+                    <Icons.search className='h-4 w-4' />
+                    <span>{t('search')}</span>
                   </>
                 )}
               </Button>
+
+              <ImeiCameraScanButton
+                onScan={handleCameraScan}
+                className='h-9 w-9'
+                title={t('scanWithCamera')}
+              />
+
+              {activeImei && (
+                <Button type='button' variant='ghost' onClick={handleClear}>
+                  {t('clear')}
+                </Button>
+              )}
             </div>
           </form>
         </CardContent>
       </Card>
 
       {isLoading && (
-        <div className='space-y-6'>
-          <div className='flex items-center justify-between'>
-            <Skeleton className='h-8 w-64' />
-            <Skeleton className='h-6 w-24' />
-          </div>
+        <div className='space-y-4'>
+          <Skeleton className='h-32 w-full rounded-xl' />
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
             <Skeleton className='h-48 rounded-xl' />
             <Skeleton className='h-48 rounded-xl' />
             <Skeleton className='h-48 rounded-xl' />
             <Skeleton className='h-48 rounded-xl' />
           </div>
-          <Skeleton className='h-64 rounded-xl' />
         </div>
       )}
 
       {!isLoading && !activeImei && (
-        <Card className='border-dashed border-2 bg-muted/20 text-center py-12 px-6'>
-          <CardContent className='flex flex-col items-center justify-center space-y-4'>
-            <div className='h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary'>
-              <Icons.scan className='h-7 w-7' />
+        <Card className='border-dashed border-2 border-border/80 bg-muted/10 p-12 text-center'>
+          <div className='flex flex-col items-center justify-center max-w-md mx-auto space-y-3'>
+            <div className='p-3 rounded-full bg-primary/10 text-primary'>
+              <Icons.scan className='h-8 w-8' />
             </div>
-            <div className='space-y-2 max-w-md'>
-              <h3 className='text-lg font-semibold tracking-tight'>{t('emptyStateTitle')}</h3>
-              <p className='text-sm text-muted-foreground leading-relaxed'>{t('emptyStateDesc')}</p>
-            </div>
-          </CardContent>
+            <h3 className='text-lg font-semibold'>{t('emptyStateTitle')}</h3>
+            <p className='text-sm text-muted-foreground leading-relaxed'>{t('emptyStateDesc')}</p>
+          </div>
         </Card>
       )}
 
       {!isLoading && activeImei && result && !result.found && (
-        <Card className='border-destructive/30 bg-destructive/[0.03] p-6'>
-          <div className='flex items-start gap-4'>
-            <div className='p-2 rounded-full bg-destructive/10 text-destructive shrink-0'>
+        <Card className='border-destructive/40 bg-destructive/5 p-8 text-center'>
+          <div className='flex flex-col items-center justify-center max-w-md mx-auto space-y-3'>
+            <div className='p-3 rounded-full bg-destructive/10 text-destructive'>
               <Icons.warning className='h-6 w-6' />
             </div>
             <div className='space-y-2'>

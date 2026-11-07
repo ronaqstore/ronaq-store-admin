@@ -1,19 +1,12 @@
 import type { ReactNode } from 'react';
-import type { InventoryItemDTO, InventoryUnitDTO, ResponseImeiLookupDto } from '@/lib/api/types';
-
-export interface WarrantyBadgeInfo {
-  label: string;
-  variant: 'default' | 'secondary' | 'destructive' | 'outline';
-  detail?: string;
-  isActive: boolean;
-}
-
-export interface ProfitDisplayInfo {
-  hasSold: boolean;
-  profitPaisa: number;
-  marginPercent: number;
-  isProfitable: boolean;
-}
+import type {
+  DeadStockAgingBucket,
+  DeadStockSummaryDto,
+  DeadStockUnitItemDto,
+  InventoryItemDTO,
+  InventoryUnitDTO,
+  ResponseImeiLookupDto
+} from '@/lib/api/types';
 
 export interface ImeiSearchResultProps {
   result: ResponseImeiLookupDto;
@@ -153,8 +146,63 @@ export interface SerializedUnitsFilterOptions {
 export interface EditInventoryUnitDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  unit: InventoryUnitDTO | null;
+  unit: InventoryUnitDTO | DeadStockUnitItemDto | null;
   brandName?: string | null;
+}
+
+export interface AgingBucketMeta {
+  bucket: DeadStockAgingBucket;
+  label: string;
+  badgeLabel: string;
+  riskLevel: 'fresh' | 'normal' | 'warning' | 'critical';
+  isDeadStock: boolean;
+  isSlowMoving: boolean;
+  borderClass: string;
+  bgLightClass: string;
+  textClass: string;
+  badgeVariant: 'default' | 'secondary' | 'destructive' | 'outline';
+}
+
+export interface DeadStockCalculatedMetrics {
+  totalInStockUnits: number;
+  totalStockValue: number;
+  deadStockCount: number;
+  deadStockCostValue: number;
+  averageDaysOnShelf: number;
+  deadStockCountPercent: number;
+  deadStockValuePercent: number;
+  isHighRisk: boolean;
+}
+
+export interface DiscountMarginInfo {
+  hasAskingPrice: boolean;
+  askingPricePaisa: number;
+  unitCostPaisa: number;
+  marginPaisa: number;
+  marginPercent: number;
+  isAboveCost: boolean;
+}
+
+export interface WarrantyBadgeInfo {
+  label: string;
+  variant: 'default' | 'secondary' | 'destructive' | 'outline';
+  detail?: string;
+  isActive: boolean;
+}
+
+export interface ProfitDisplayInfo {
+  hasSold: boolean;
+  profitPaisa: number;
+  marginPercent: number;
+  isProfitable: boolean;
+}
+
+export interface DeadStockKpiCardsProps {
+  summary?: DeadStockSummaryDto;
+  activeBucket: 'ALL' | DeadStockAgingBucket;
+  isLoading: boolean;
+  onBucketToggle: (bucket: DeadStockAgingBucket) => void;
+  onSelectDeadStock: () => void;
 }
 
 export interface RestoreUnitDialogProps {
@@ -178,4 +226,27 @@ export interface SerializedProductUnitsDialogsProps {
   editOpen: boolean;
   onEditOpenChange: (open: boolean) => void;
   selectedUnitForEdit: InventoryUnitDTO | null;
+}
+
+export interface DeadStockPaginationProps {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  onPagePrevious: () => void;
+  onPageNext: () => void;
+}
+
+export interface DeadStockFilterBarProps {
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  onClearSearch: () => void;
+  conditionFilter: 'ALL' | 'NEW' | 'USED';
+  onConditionChange: (value: 'ALL' | 'NEW' | 'USED' | null) => void;
+  sortBy: 'ageDesc' | 'ageAsc' | 'costDesc' | 'costAsc';
+  onSortChange: (value: 'ageDesc' | 'ageAsc' | 'costDesc' | 'costAsc' | null) => void;
+  isFiltered: boolean;
+  onResetFilters: () => void;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }

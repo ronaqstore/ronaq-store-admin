@@ -3,10 +3,12 @@ import { appFetch } from '@/lib/api/app-fetch';
 import type {
   CreateInventoryAdjustmentInput,
   CreateInventoryAdjustmentResult,
+  DeadStockQueryFilters,
   InventoryAdjustmentDTO,
   InventoryItemDTO,
   InventoryUnitDTO,
   PaginatedResponse,
+  ResponseDeadStockReportDto,
   ResponseImeiLookupDto,
   ResponseResolveScanDto,
   UpdateInventoryUnitInput
@@ -121,4 +123,23 @@ export async function updateInventoryUnit(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input)
   });
+}
+
+export async function getDeadStockReport(
+  filters: DeadStockQueryFilters = {},
+  token?: string
+): Promise<ResponseDeadStockReportDto> {
+  const qs = buildQueryString({
+    ...(filters.bucket && filters.bucket !== 'ALL' ? { bucket: filters.bucket } : {}),
+    ...(filters.condition && filters.condition !== 'ALL' ? { condition: filters.condition } : {}),
+    ...(filters.brandId ? { brandId: filters.brandId } : {}),
+    ...(filters.search ? { search: filters.search } : {}),
+    ...(filters.sortBy ? { sortBy: filters.sortBy } : {}),
+    ...(filters.page != null ? { page: filters.page } : {}),
+    ...(filters.pageSize != null ? { pageSize: filters.pageSize } : {})
+  });
+  if (token) {
+    return apiRequest<ResponseDeadStockReportDto>(`/inventory/dead-stock${qs}`, undefined, token);
+  }
+  return appFetch<ResponseDeadStockReportDto>(`/api/inventory/dead-stock${qs}`);
 }

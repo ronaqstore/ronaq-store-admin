@@ -1,11 +1,20 @@
-import NextAuth from 'next-auth';
+import NextAuth, { CredentialsSignin } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
 import { authConfig } from '@/auth.config';
 import { isValidPkMobile, normalizePhone } from '@/lib/auth/phone';
 import { sessionTtlSeconds } from '@/lib/auth/session-ttl';
+import { AUTH_ERROR_CODES, type AuthFailureCode } from '@/lib/auth/auth-error-codes';
 import type { LoginResult, AuthResponseData, AuthResponseBody } from '@/types/auth';
+import type { AuthAccountRole } from '@/lib/auth/accounts';
 import { API_BASE_URL } from '@/constants/api';
+
+class AuthFailureError extends CredentialsSignin {
+  constructor(code: AuthFailureCode) {
+    super();
+    this.code = code;
+  }
+}
 
 async function executeAuthPost(
   endpoint: string,
@@ -13,9 +22,10 @@ async function executeAuthPost(
   password: string,
   rememberMe: boolean,
   turnstileToken: string
-): Promise<AuthResponseData | null> {
+): Promise<AuthResponseData> {
+  let res: Response;
   try {
-    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+    res = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -23,18 +33,63 @@ async function executeAuthPost(
         password,
         rememberMe,
         ...(turnstileToken ? { turnstileToken } : {})
-      })
+      }),
+      signal: AbortSignal.timeout(15000)
     });
-
-    if (!res.ok) return null;
-
-    const json = (await res.json()) as AuthResponseBody;
-    const data = json?.data;
-    if (!data?.accessToken) return null;
-    return data;
   } catch {
-    return null;
+    throw new AuthFailureError(AUTH_ERROR_CODES.SERVER_WAKING_UP);
   }
+
+  if (!res.ok) {
+    if (res.status === 429) {
+      throw new AuthFailureError(AUTH_ERROR_CODES.RATE_LIMITED);
+    }
+    if (res.status === 401) {
+      throw new AuthFailureError(AUTH_ERROR_CODES.INVALID_CREDENTIALS);
+    }
+    if (res.status >= 500) {
+      throw new AuthFailureError(AUTH_ERROR_CODES.SERVER_WAKING_UP);
+    }
+    if (res.status === 403) {
+      try {
+        const json = (await res.json()) as { error?: string; message?: string | string[] };
+        const text =
+          `${json?.error ?? ''} ${Array.isArray(json?.message) ? json.message.join(' ') : (json?.message ?? '')}`.toLowerCase();
+        if (text.includes('shop') || text.includes('subscription')) {
+          throw new AuthFailureError(AUTH_ERROR_CODES.SHOP_SUSPENDED);
+        }
+        if (text.includes('platform admin') || text.includes('staff') || text.includes('admin')) {
+          throw new AuthFailureError(AUTH_ERROR_CODES.ADMIN_DISABLED);
+        }
+        throw new AuthFailureError(AUTH_ERROR_CODES.ACCOUNT_SUSPENDED);
+      } catch (err) {
+        if (err instanceof AuthFailureError) throw err;
+        throw new AuthFailureError(AUTH_ERROR_CODES.SHOP_SUSPENDED);
+      }
+    }
+    if (res.status === 400) {
+      try {
+        const json = (await res.json()) as { error?: string; message?: string | string[] };
+        const text =
+          `${json?.error ?? ''} ${Array.isArray(json?.message) ? json.message.join(' ') : (json?.message ?? '')}`.toLowerCase();
+        if (text.includes('turnstile') || text.includes('human verification')) {
+          throw new AuthFailureError(AUTH_ERROR_CODES.TURNSTILE_FAILED);
+        }
+        throw new AuthFailureError(AUTH_ERROR_CODES.VALIDATION_ERROR);
+      } catch (err) {
+        if (err instanceof AuthFailureError) throw err;
+        throw new AuthFailureError(AUTH_ERROR_CODES.VALIDATION_ERROR);
+      }
+    }
+    throw new AuthFailureError(AUTH_ERROR_CODES.UNKNOWN_ERROR);
+  }
+
+  const json = (await res.json()) as AuthResponseBody;
+  const data = json?.data;
+  if (!data?.accessToken) {
+    throw new AuthFailureError(AUTH_ERROR_CODES.SERVER_WAKING_UP);
+  }
+  return data;
 }
 
 async function tryOwnerLogin(
@@ -42,15 +97,17 @@ async function tryOwnerLogin(
   password: string,
   rememberMe: boolean,
   turnstileToken: string
-): Promise<LoginResult | null> {
+): Promise<LoginResult> {
   const data = await executeAuthPost('/auth/login', phone, password, rememberMe, turnstileToken);
-  if (!data?.accessToken || !data.user) return null;
+  if (!data.accessToken || !data.user) {
+    throw new AuthFailureError(AUTH_ERROR_CODES.SERVER_WAKING_UP);
+  }
 
   return {
     id: data.user.id,
     name: data.user.name,
     phone: data.user.phone,
-    role: 'OWNER',
+    role: (data.user.role as AuthAccountRole) ?? 'OWNER',
     shopId: data.shopId ?? null,
     shopName: data.shop?.name ?? null,
     accessToken: data.accessToken,
@@ -66,7 +123,7 @@ async function tryPlatformAdminLogin(
   password: string,
   rememberMe: boolean,
   turnstileToken: string
-): Promise<LoginResult | null> {
+): Promise<LoginResult> {
   const data = await executeAuthPost(
     '/auth/platform-admin/login',
     phone,
@@ -74,7 +131,9 @@ async function tryPlatformAdminLogin(
     rememberMe,
     turnstileToken
   );
-  if (!data?.accessToken || !data.admin) return null;
+  if (!data.accessToken || !data.admin) {
+    throw new AuthFailureError(AUTH_ERROR_CODES.SERVER_WAKING_UP);
+  }
 
   return {
     id: data.admin.id,
@@ -113,7 +172,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(raw) {
         const parsed = credentialsSchema.safeParse(raw);
-        if (!parsed.success) return null;
+        if (!parsed.success) {
+          throw new AuthFailureError(AUTH_ERROR_CODES.VALIDATION_ERROR);
+        }
 
         const phone = normalizePhone(parsed.data.phone);
         const {

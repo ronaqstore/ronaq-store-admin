@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
+
 :root {
   --font-sans: var(--font-geist-sans), 'Geist Sans', ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), 'Geist Mono', ui-monospace, monospace;
@@ -15,8 +17,6 @@
   --font-merriweather: 'Merriweather', ui-serif, Georgia, serif;
   --font-playfair-display: 'Playfair Display', ui-serif, Georgia, serif;
   --font-urdu:
-    var(--font-noto-nastaliq), 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting',
-    Tahoma, sans-serif;
-  --font-pashto:
-    var(--font-noto-naskh), 'Noto Naskh Arabic', 'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+    'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', Tahoma, sans-serif;
+  --font-pashto: 'Noto Naskh Arabic', 'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
 }

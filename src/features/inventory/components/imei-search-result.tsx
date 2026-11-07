@@ -235,9 +235,13 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
               <span className='text-muted-foreground font-semibold'>
                 {intake?.type === 'CONSIGNMENT' ? t('agreedPayout') : t('unitCost')}:
               </span>
-              <span className='text-sm font-bold text-foreground tabular-nums'>
-                {formatPkr(device.unitCost)}
-              </span>
+              {device.unitCost > 0 ? (
+                <span className='text-sm font-bold text-foreground tabular-nums'>
+                  {formatPkr(device.unitCost)}
+                </span>
+              ) : (
+                <span className='text-xs text-muted-foreground italic'>{t('costHidden')}</span>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -250,7 +254,17 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-2.5 text-xs'>
-            {latestSale ? (
+            {device.unitCost === 0 ? (
+              <div className='flex flex-col items-center justify-center py-6 text-center space-y-2'>
+                <div className='p-2 rounded-full bg-muted text-muted-foreground'>
+                  <Icons.lock className='h-5 w-5' />
+                </div>
+                <p className='font-semibold text-foreground'>{t('costHiddenTitle')}</p>
+                <p className='text-[11px] text-muted-foreground leading-snug'>
+                  {t('costHiddenDesc')}
+                </p>
+              </div>
+            ) : latestSale ? (
               <>
                 <div className='flex justify-between border-b border-border/50 pb-1.5'>
                   <span className='text-muted-foreground'>{t('saleNo')}:</span>
@@ -327,7 +341,17 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-2.5 text-xs'>
-            {latestSale ? (
+            {device.unitCost === 0 ? (
+              <div className='flex flex-col items-center justify-center py-6 text-center space-y-2'>
+                <div className='p-2 rounded-full bg-muted text-muted-foreground'>
+                  <Icons.lock className='h-5 w-5' />
+                </div>
+                <p className='font-semibold text-foreground'>{t('costHiddenTitle')}</p>
+                <p className='text-[11px] text-muted-foreground leading-snug'>
+                  {t('costHiddenDesc')}
+                </p>
+              </div>
+            ) : latestSale ? (
               <>
                 <div className='flex justify-between border-b border-border/50 pb-1.5'>
                   <span className='text-muted-foreground'>{t('unitCost')}:</span>

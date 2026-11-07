@@ -315,11 +315,20 @@ export function InventoryTable({ toolbarAction }: InventoryTableProps) {
     leadingIcon: Icons.box,
     title: (row) => row.name,
     subtitle: (row) => `${formatLabel(row.trackingType)} · ${row.categoryName ?? '—'}`,
+    stockBadge: (row) =>
+      row.lowStock
+        ? { label: 'Low stock', status: 'OVERDUE', tone: 'danger' }
+        : { label: 'In stock', status: 'ACTIVE', tone: 'success' },
     badge: (row) =>
       row.lowStock
         ? { label: 'Low stock', status: 'OVERDUE', tone: 'danger' }
-        : { label: 'OK', status: 'ACTIVE', tone: 'success' },
+        : { label: 'In stock', status: 'ACTIVE', tone: 'success' },
+    chips: (row) =>
+      [formatLabel(row.trackingType), row.categoryName, row.brandName].filter(Boolean) as string[],
     value: (row) => `${row.inStock} in stock`,
+    valueLabel: () => t('table.col.qty'),
+    secondaryValue: (row) => formatPkr(row.stockValue),
+    secondaryValueLabel: () => t('table.col.cost'),
     meta: [(row) => formatPkr(row.stockValue)],
     ariaLabel: (row) => `${row.name}, ${row.inStock} in stock, ${formatPkr(row.stockValue)}`
   };

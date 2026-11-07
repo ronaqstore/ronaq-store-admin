@@ -57,3 +57,4 @@ export * from './media';
 export * from './query-sync';
 export * from './marketplace';
 export * from './barcode';
+export * from './staff';

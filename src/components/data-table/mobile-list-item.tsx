@@ -27,9 +27,17 @@ export function MobileListItem<TData>({
   const title = config.title(row);
   const subtitle = config.subtitle?.(row);
   const badge = config.badge?.(row);
+  const stockBadge = config.stockBadge?.(row);
+  const cardBadge = badge ?? stockBadge;
+  const chips = config.chips?.(row);
   const value = config.value?.(row);
   const valueLabel =
     typeof config.valueLabel === 'function' ? config.valueLabel(row) : config.valueLabel;
+  const secondaryValue = config.secondaryValue?.(row);
+  const secondaryValueLabel =
+    typeof config.secondaryValueLabel === 'function'
+      ? config.secondaryValueLabel(row)
+      : config.secondaryValueLabel;
   const metaItems = (config.meta ?? [])
     .map((fn) => fn(row))
     .filter((node) => node != null && node !== false && node !== '');
@@ -93,13 +101,32 @@ export function MobileListItem<TData>({
           <div
             className={cn(
               'flex min-w-0 gap-3',
-              isCard ? 'flex-col items-stretch' : 'items-start justify-between'
+              isCard ? 'flex-col items-stretch h-full' : 'items-start justify-between'
             )}
           >
             <div className='min-w-0 flex-1'>
-              <p className={cn('truncate text-sm font-semibold', actionsSlot && 'pe-9')}>{title}</p>
-              {subtitle != null ? (
-                <p className='text-muted-foreground truncate text-xs'>{subtitle}</p>
+              <p
+                className={cn(
+                  'text-sm font-semibold',
+                  isCard ? 'line-clamp-2' : 'truncate',
+                  actionsSlot && !isCard && 'pe-9'
+                )}
+              >
+                {title}
+              </p>
+              {chips && chips.length > 0 ? (
+                <div className='mt-1 flex flex-wrap items-center gap-1'>
+                  {chips.filter(Boolean).map((chip, idx) => (
+                    <span
+                      key={idx}
+                      className='inline-flex items-center rounded-md border border-border/70 bg-muted/50 px-1.5 py-0.5 text-[10px] font-medium text-foreground'
+                    >
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+              ) : subtitle != null ? (
+                <p className='text-muted-foreground truncate text-xs mt-0.5'>{subtitle}</p>
               ) : null}
               {(metaItems.length > 0 || badge) && (
                 <div className='mt-1 flex min-w-0 flex-wrap items-center gap-1.5'>
@@ -109,13 +136,15 @@ export function MobileListItem<TData>({
                       {item}
                     </span>
                   ))}
-                  {badge ? (
-                    <StatusBadge
-                      status={badge.status ?? badge.label}
-                      label={badge.label}
-                      tone={badge.tone}
-                    />
-                  ) : null}
+                </div>
+              )}
+              {!isCard && badge && (
+                <div className='mt-1 flex items-center'>
+                  <StatusBadge
+                    status={badge.status ?? badge.label}
+                    label={badge.label}
+                    tone={badge.tone}
+                  />
                 </div>
               )}
             </div>
@@ -125,21 +154,43 @@ export function MobileListItem<TData>({
                 className={cn(
                   'shrink-0',
                   isCard
-                    ? 'flex items-baseline justify-between gap-2'
+                    ? 'mt-auto pt-2 flex items-baseline justify-between gap-2 border-t border-border/40'
                     : 'ms-1 w-[5.5rem] text-end sm:w-24'
                 )}
               >
-                <p
-                  className={cn(
-                    'truncate text-sm font-semibold tabular-nums',
-                    !isCard && 'text-end',
-                    config.valueClassName?.(row)
-                  )}
-                >
-                  {value}
-                </p>
-                {valueLabel ? (
-                  <p className='text-muted-foreground truncate text-[10px]'>{valueLabel}</p>
+                <div className='min-w-0 flex-1'>
+                  <p
+                    className={cn(
+                      'truncate text-sm font-bold tabular-nums',
+                      !isCard && 'text-end',
+                      config.valueClassName?.(row)
+                    )}
+                  >
+                    {value}
+                  </p>
+                  {valueLabel ? (
+                    <p className='text-muted-foreground truncate text-[10px]'>{valueLabel}</p>
+                  ) : null}
+                </div>
+                {isCard && secondaryValue != null ? (
+                  <div className='shrink-0 text-end'>
+                    <p className='text-xs font-semibold tabular-nums text-foreground'>
+                      {secondaryValue}
+                    </p>
+                    {secondaryValueLabel ? (
+                      <p className='text-muted-foreground truncate text-[10px]'>
+                        {secondaryValueLabel}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : isCard && cardBadge ? (
+                  <div className='shrink-0'>
+                    <StatusBadge
+                      status={cardBadge.status ?? cardBadge.label}
+                      label={cardBadge.label}
+                      tone={cardBadge.tone}
+                    />
+                  </div>
                 ) : null}
               </div>
             ) : null}

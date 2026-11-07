@@ -8,7 +8,11 @@ import { useT } from '@/i18n/use-t';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/constants/placeholders';
 import { formatEmpty } from '@/lib/format-empty';
 import { formatPkr } from '@/lib/dukaan/numbers';
-import { formatAuthenticity, formatPtaStatus } from '@/lib/products/product-specs';
+import {
+  formatAuthenticity,
+  formatPtaStatus,
+  getProductSpecBadges
+} from '@/lib/products/product-specs';
 import { StatusBadge, type DetailConfig, type MobileItemConfig } from '@/components/data-table';
 import { t as staticT } from '@/i18n/static-t';
 import { productsQueryKeys } from '../api/queries';
@@ -142,14 +146,21 @@ export function buildProductMobileItem(t: (key: string) => string): MobileItemCo
       (row) => (row.color?.trim() ? row.color.trim() : null),
       (row) => `${row.quantityOnHand ?? 0} ${t('dukaan.product.stock')}`,
       (row) => formatPtaStatus(row.ptaStatus),
-      (row) => formatAuthenticity(row.authenticity)
+      (row) => formatAuthenticity(row.authenticity),
+      (row) => row.categoryName,
+      (row) => (row.sku ? `SKU: ${row.sku}` : null)
     ],
     badge: (row) => ({
       label: row.isActive ? t('status.active') : t('status.inactive'),
-      status: row.isActive ? 'ACTIVE' : 'INACTIVE'
+      status: row.isActive ? 'ACTIVE' : 'INACTIVE',
+      tone: row.isActive ? 'success' : 'neutral'
     }),
+    chips: (row) => getProductSpecBadges(row),
     value: (row) => formatPkr(row.defaultSellingPrice),
-    ariaLabel: (row) => `${row.name}, ${row.isActive ? t('status.active') : t('status.inactive')}`
+    valueLabel: () => t('dukaan.product.sellingPrice'),
+    secondaryValue: (row) => `${row.quantityOnHand ?? 0} in stock`,
+    ariaLabel: (row) =>
+      `${row.name}, ${row.quantityOnHand ?? 0} in stock, ${formatPkr(row.defaultSellingPrice)}`
   };
 }
 

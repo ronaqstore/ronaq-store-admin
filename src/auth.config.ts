@@ -1,5 +1,10 @@
 import type { NextAuthConfig } from 'next-auth';
-import { readAuthRole, readOptionalString, readRequiredString } from '@/lib/auth/session-claims';
+import {
+  extractRoleFromAccessToken,
+  readAuthRole,
+  readOptionalString,
+  readRequiredString
+} from '@/lib/auth/session-claims';
 import { SESSION_TTL_SECONDS } from '@/lib/auth/session-ttl';
 
 export const authConfig = {
@@ -22,6 +27,13 @@ export const authConfig = {
         token.subscriptionEndsAt = user.subscriptionEndsAt;
         token.subscriptionStatus = user.subscriptionStatus;
         token.sessionExpiresAt = user.sessionExpiresAt;
+      }
+
+      if (typeof token.accessToken === 'string') {
+        const roleFromJwt = extractRoleFromAccessToken(token.accessToken);
+        if (roleFromJwt) {
+          token.role = roleFromJwt;
+        }
       }
 
       if (trigger === 'update' && session) {
@@ -67,7 +79,11 @@ export const authConfig = {
       }
 
       session.user.id = token.sub;
-      session.user.role = readAuthRole(token.role);
+      const extractedRole =
+        typeof token.accessToken === 'string'
+          ? extractRoleFromAccessToken(token.accessToken)
+          : undefined;
+      session.user.role = extractedRole ?? readAuthRole(token.role);
       session.user.shopId = readOptionalString(token.shopId);
       session.user.shopName = readOptionalString(token.shopName);
       session.user.subscriptionEndsAt = readOptionalString(token.subscriptionEndsAt);
