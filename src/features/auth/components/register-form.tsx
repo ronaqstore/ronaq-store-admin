@@ -301,7 +301,7 @@ export function RegisterForm({ title, description, footer }: RegisterFormProps) 
                 <input
                   ref={logoInputRef}
                   type='file'
-                  accept='image/jpeg,image/png,image/webp'
+                  accept='image/*'
                   className='hidden'
                   onChange={handleLogoFileChange}
                 />

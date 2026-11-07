@@ -24,6 +24,10 @@ import type { ProductImageUploadTask, ProductPhotoManagerProps } from '@/types/p
 
 const MAX_PRODUCT_IMAGES = 5;
 
+function isSupportedImage(file: File): boolean {
+  return file.type === '' || file.type.startsWith('image/');
+}
+
 export function ProductPhotoManager({
   productId,
   images,
@@ -84,10 +88,12 @@ export function ProductPhotoManager({
           setUploadTasks((current) =>
             current.map((item) => (item.id === task.id ? { ...item, status: 'preparing' } : item))
           );
-          if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+          if (!isSupportedImage(file)) {
             throw new AppError(t('imageTypeError'));
           }
-          const resizedFile = await prepareProductImage(file);
+          const resizedFile = await prepareProductImage(file).catch(() => {
+            throw new AppError(t('imageTypeError'));
+          });
           prepared = true;
 
           if (!productId) {
@@ -176,7 +182,7 @@ export function ProductPhotoManager({
         <input
           ref={fileInputRef}
           type='file'
-          accept='image/jpeg,image/png,image/webp'
+          accept='image/*'
           multiple
           className='hidden'
           onChange={handleFileSelect}

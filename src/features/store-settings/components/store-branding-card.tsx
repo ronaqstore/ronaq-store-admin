@@ -136,7 +136,7 @@ export function StoreBrandingCard({ settings }: StoreBrandingCardProps) {
             <input
               ref={bannerInputRef}
               type='file'
-              accept='image/jpeg,image/png,image/webp'
+              accept='image/*'
               className='hidden'
               onChange={handleBannerSelect}
             />
@@ -182,7 +182,7 @@ export function StoreBrandingCard({ settings }: StoreBrandingCardProps) {
               <input
                 ref={logoInputRef}
                 type='file'
-                accept='image/jpeg,image/png,image/webp'
+                accept='image/*'
                 className='hidden'
                 onChange={handleLogoSelect}
               />
