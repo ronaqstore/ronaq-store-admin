@@ -78,12 +78,12 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
   };
 
   return (
-    <div className='space-y-6'>
-      <Card className='border-border/70 bg-card/60 shadow-none'>
-        <CardContent className='p-5 flex flex-col md:flex-row md:items-center justify-between gap-4'>
-          <div className='space-y-1.5'>
+    <div className='min-w-0 space-y-4 overflow-x-clip sm:space-y-6'>
+      <Card className='min-w-0 border-border/70 bg-card/60 shadow-none'>
+        <CardContent className='flex min-w-0 flex-col justify-between gap-4 p-4 sm:p-5 md:flex-row md:items-center'>
+          <div className='min-w-0 space-y-1.5'>
             <div className='flex flex-wrap items-center gap-2'>
-              <h2 className='text-xl md:text-2xl font-bold tracking-tight text-foreground'>
+              <h2 className='min-w-0 break-words text-xl font-bold tracking-tight text-foreground md:text-2xl'>
                 {device.productName}
               </h2>
               {renderStatusBadge(device.status)}
@@ -93,14 +93,16 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
               <Badge variant='secondary'>{formatPtaStatusLabel(device.ptaStatus)}</Badge>
             </div>
 
-            <div className='flex flex-wrap items-center gap-3 text-sm text-muted-foreground font-mono'>
-              <div className='flex items-center gap-1.5'>
+            <div className='flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 font-mono text-sm text-muted-foreground'>
+              <div className='flex min-w-0 max-w-full flex-wrap items-center gap-1.5'>
                 <span>{t('imei1Label')}</span>
-                <span className='font-semibold text-foreground'>{device.imei1}</span>
+                <span className='min-w-0 break-all font-semibold text-foreground'>
+                  {device.imei1}
+                </span>
                 <button
                   type='button'
                   onClick={() => onCopyImei(device.imei1)}
-                  className='hover:text-foreground ms-1 p-0.5'
+                  className='ms-1 shrink-0 p-0.5 hover:text-foreground'
                   title={t('copyImei')}
                 >
                   <Icons.copy className='h-3.5 w-3.5' />
@@ -108,13 +110,15 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
               </div>
 
               {device.imei2 ? (
-                <div className='flex items-center gap-1.5 border-s border-border ps-3'>
+                <div className='flex min-w-0 max-w-full flex-wrap items-center gap-1.5 border-s border-border ps-3'>
                   <span>{t('imei2Label')}</span>
-                  <span className='font-semibold text-foreground'>{device.imei2}</span>
+                  <span className='min-w-0 break-all font-semibold text-foreground'>
+                    {device.imei2}
+                  </span>
                   <button
                     type='button'
                     onClick={() => onCopyImei(device.imei2 ?? '')}
-                    className='hover:text-foreground ms-1 p-0.5'
+                    className='ms-1 shrink-0 p-0.5 hover:text-foreground'
                     title={t('copyImei')}
                   >
                     <Icons.copy className='h-3.5 w-3.5' />
@@ -124,7 +128,7 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
             </div>
           </div>
 
-          <div className='text-start md:text-end shrink-0'>
+          <div className='shrink-0 text-start md:text-end'>
             <p className='text-xs text-muted-foreground'>{t('shelfTime')}</p>
             <p className='text-base font-semibold text-foreground'>
               {t('daysOnShelf', { days: device.daysOnShelf })}
@@ -133,7 +137,7 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
         </CardContent>
       </Card>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+      <div className='grid min-w-0 grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4'>
         <Card className='shadow-none border-border/70 flex flex-col justify-between'>
           <CardHeader className='pb-3'>
             <CardTitle className='text-sm font-semibold flex items-center gap-2 text-foreground'>
@@ -142,30 +146,32 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-2.5 text-xs'>
-            <div className='flex justify-between border-b border-border/50 pb-1.5'>
+            <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
               <span className='text-muted-foreground'>{t('brandCategoryLabel')}</span>
-              <span className='font-medium text-foreground'>
+              <span className='min-w-0 break-words text-start font-medium text-foreground sm:text-end'>
                 {device.brandName ?? '—'} · {device.categoryName ?? '—'}
               </span>
             </div>
-            <div className='flex justify-between border-b border-border/50 pb-1.5'>
+            <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
               <span className='text-muted-foreground'>{t('modelSkuLabel')}</span>
-              <span className='font-medium text-foreground font-mono'>
+              <span className='min-w-0 break-all text-start font-mono font-medium text-foreground sm:text-end'>
                 {device.model ?? '—'} / {device.sku ?? '—'}
               </span>
             </div>
-            <div className='flex justify-between border-b border-border/50 pb-1.5'>
+            <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
               <span className='text-muted-foreground'>{t('storageRamLabel')}</span>
-              <span className='font-medium text-foreground'>
+              <span className='min-w-0 break-words text-start font-medium text-foreground sm:text-end'>
                 {device.storage ?? '—'} / {device.ram ?? '—'}
               </span>
             </div>
-            <div className='flex justify-between border-b border-border/50 pb-1.5'>
+            <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
               <span className='text-muted-foreground'>{t('color')}:</span>
-              <span className='font-medium text-foreground'>{device.color ?? '—'}</span>
+              <span className='min-w-0 break-words text-start font-medium text-foreground sm:text-end'>
+                {device.color ?? '—'}
+              </span>
             </div>
             {device.batteryHealth != null ? (
-              <div className='flex justify-between border-b border-border/50 pb-1.5'>
+              <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
                 <span className='text-muted-foreground'>{t('battery')}:</span>
                 <span className='font-semibold text-emerald-600 dark:text-emerald-400'>
                   {device.batteryHealth}%
@@ -191,7 +197,7 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-2.5 text-xs'>
-            <div className='flex justify-between border-b border-border/50 pb-1.5'>
+            <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
               <span className='text-muted-foreground'>{t('intakeType')}:</span>
               <Badge variant='outline' className='text-[10px]'>
                 {intake?.type === 'CONSIGNMENT' ? t('typeConsignment') : t('typePurchase')}
@@ -201,13 +207,13 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
               <span className='text-muted-foreground'>
                 {intake?.type === 'CONSIGNMENT' ? t('consignor') : t('supplier')}:
               </span>
-              <span className='font-semibold text-foreground text-end'>
+              <span className='min-w-0 break-words text-start font-semibold text-foreground sm:text-end'>
                 {intake?.type === 'CONSIGNMENT'
                   ? (intake?.consignorName ?? '—')
                   : (intake?.supplierName ?? '—')}
               </span>
             </div>
-            <div className='flex justify-between border-b border-border/50 pb-1.5'>
+            <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
               <span className='text-muted-foreground'>{t('contactLabel')}</span>
               <span className='font-mono text-muted-foreground'>
                 {intake?.type === 'CONSIGNMENT'
@@ -215,23 +221,23 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
                   : (intake?.supplierPhone ?? '—')}
               </span>
             </div>
-            <div className='flex justify-between border-b border-border/50 pb-1.5'>
+            <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
               <span className='text-muted-foreground'>
                 {intake?.type === 'CONSIGNMENT' ? t('consignmentNo') : t('purchaseNo')}:
               </span>
-              <span className='font-mono font-medium text-foreground'>
+              <span className='min-w-0 break-all text-start font-mono font-medium text-foreground sm:text-end'>
                 {intake?.type === 'CONSIGNMENT'
                   ? (intake?.consignmentNo ?? '—')
                   : (intake?.purchaseNo ?? '—')}
               </span>
             </div>
-            <div className='flex justify-between border-b border-border/50 pb-1.5'>
+            <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
               <span className='text-muted-foreground'>{t('intakeDate')}:</span>
               <span className='font-medium text-foreground'>
                 {formatIsoDate(intake?.purchaseDate ?? intake?.intakeDate)}
               </span>
             </div>
-            <div className='flex justify-between pt-1'>
+            <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 pt-1'>
               <span className='text-muted-foreground font-semibold'>
                 {intake?.type === 'CONSIGNMENT' ? t('agreedPayout') : t('unitCost')}:
               </span>
@@ -266,25 +272,25 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
               </div>
             ) : latestSale ? (
               <>
-                <div className='flex justify-between border-b border-border/50 pb-1.5'>
+                <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
                   <span className='text-muted-foreground'>{t('saleNo')}:</span>
-                  <span className='font-mono font-semibold text-foreground'>
+                  <span className='min-w-0 break-all text-start font-mono font-semibold text-foreground sm:text-end'>
                     {latestSale.saleNo}
                   </span>
                 </div>
-                <div className='flex justify-between border-b border-border/50 pb-1.5'>
+                <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
                   <span className='text-muted-foreground'>{t('saleDate')}:</span>
                   <span className='font-medium text-foreground'>
                     {formatIsoDate(latestSale.saleDate)}
                   </span>
                 </div>
-                <div className='flex justify-between border-b border-border/50 pb-1.5'>
+                <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
                   <span className='text-muted-foreground'>{t('customer')}:</span>
-                  <span className='font-semibold text-foreground text-end'>
+                  <span className='min-w-0 break-words text-start font-semibold text-foreground sm:text-end'>
                     {latestSale.customerName ?? t('walkInCustomer')}
                   </span>
                 </div>
-                <div className='flex justify-between border-b border-border/50 pb-1.5'>
+                <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
                   <span className='text-muted-foreground'>{t('salePrice')}:</span>
                   <span className='text-sm font-bold text-foreground tabular-nums'>
                     {formatPkr(latestSale.salePrice)}
@@ -353,13 +359,13 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
               </div>
             ) : latestSale ? (
               <>
-                <div className='flex justify-between border-b border-border/50 pb-1.5'>
+                <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
                   <span className='text-muted-foreground'>{t('unitCost')}:</span>
                   <span className='font-medium text-foreground tabular-nums'>
                     {formatPkr(device.unitCost)}
                   </span>
                 </div>
-                <div className='flex justify-between border-b border-border/50 pb-1.5'>
+                <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 border-b border-border/50 pb-1.5'>
                   <span className='text-muted-foreground'>{t('salePrice')}:</span>
                   <span className='font-medium text-foreground tabular-nums'>
                     {formatPkr(latestSale.salePrice)}
@@ -377,7 +383,7 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
                     {formatPkr(latestSale.profitAmount)}
                   </span>
                 </div>
-                <div className='flex justify-between pt-1'>
+                <div className='flex min-w-0 flex-wrap justify-between gap-x-2 gap-y-0.5 pt-1'>
                   <span className='text-muted-foreground font-semibold'>{t('profitMargin')}:</span>
                   <span
                     className={`text-sm font-bold tabular-nums ${
@@ -430,20 +436,25 @@ export function ImeiSearchResult({ result, onCopyImei }: ImeiSearchResultProps) 
                     {getTimelineIcon(event.type)}
                   </div>
                   <div className='bg-muted/30 rounded-lg p-3.5 border border-border/50 hover:border-border transition-colors'>
-                    <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1'>
-                      <div className='flex items-center gap-2'>
-                        <span className='text-sm font-semibold text-foreground'>{event.title}</span>
+                    <div className='mb-1 flex min-w-0 flex-col justify-between gap-1 sm:flex-row sm:items-center'>
+                      <div className='flex min-w-0 flex-wrap items-center gap-2'>
+                        <span className='min-w-0 break-words text-sm font-semibold text-foreground'>
+                          {event.title}
+                        </span>
                         {event.referenceNo ? (
-                          <Badge variant='outline' className='font-mono text-[10px]'>
+                          <Badge
+                            variant='outline'
+                            className='max-w-full break-all font-mono text-[10px]'
+                          >
                             {event.referenceNo}
                           </Badge>
                         ) : null}
                       </div>
-                      <span className='text-xs text-muted-foreground font-mono'>
+                      <span className='break-words font-mono text-xs text-muted-foreground'>
                         {formatDateTime(event.date)}
                       </span>
                     </div>
-                    <p className='text-xs text-muted-foreground'>{event.description}</p>
+                    <p className='break-words text-xs text-muted-foreground'>{event.description}</p>
                   </div>
                 </div>
               ))}
