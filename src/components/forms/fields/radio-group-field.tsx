@@ -9,10 +9,17 @@ import {
   FieldSet
 } from '@/components/ui/field';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { cn } from '@/lib/utils';
 import { useFieldContext, useFieldInvalid } from '@/lib/form-context';
 import type { RadioGroupFieldProps } from '@/types';
 
-export function RadioGroupField({ label, description, required, options }: RadioGroupFieldProps) {
+export function RadioGroupField({
+  label,
+  description,
+  required,
+  options,
+  className
+}: RadioGroupFieldProps) {
   const field = useFieldContext<string>();
   const isInvalid = useFieldInvalid();
 
@@ -28,14 +35,14 @@ export function RadioGroupField({ label, description, required, options }: Radio
         value={field.state.value}
         onValueChange={field.handleChange}
         onBlur={field.handleBlur}
-        className='flex flex-wrap gap-x-6 gap-y-2'
+        className={cn('flex flex-wrap gap-x-6 gap-y-2', className)}
       >
         {options.map((opt) => (
           <Field
             key={opt.value}
             orientation='horizontal'
             data-invalid={isInvalid}
-            className='w-auto'
+            className={className ? 'w-full min-w-0 sm:w-auto' : 'w-auto'}
           >
             <RadioGroupItem
               value={opt.value}
@@ -44,7 +51,10 @@ export function RadioGroupField({ label, description, required, options }: Radio
               aria-invalid={isInvalid}
               aria-describedby={isInvalid ? `${field.name}-error` : undefined}
             />
-            <FieldLabel htmlFor={`${field.name}-${opt.value}`} className='font-normal'>
+            <FieldLabel
+              htmlFor={`${field.name}-${opt.value}`}
+              className={cn('font-normal', className && 'min-w-0 flex-1')}
+            >
               {opt.label}
             </FieldLabel>
           </Field>

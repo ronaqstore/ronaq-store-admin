@@ -107,7 +107,7 @@ export const SaleLineCard = withForm({
           };
         }}
         children={({ isPhone, productId, authenticity, unitCondition, warrantyDays }) => (
-          <div className='relative grid gap-2 rounded-lg border p-3 sm:pe-24 md:grid-cols-4'>
+          <div className='relative grid min-w-0 gap-2 rounded-lg border p-3 sm:pe-24 md:grid-cols-4'>
             {canRemove && (
               <Button
                 type='button'
@@ -189,7 +189,7 @@ export const SaleLineCard = withForm({
               </div>
             ) : null}
             {isPhone && productId ? (
-              <div className='md:col-span-4 space-y-3'>
+              <div className='min-w-0 space-y-3 md:col-span-4'>
                 <form.Field
                   name={`lines[${index}].inventory_unit_id`}
                   children={(subField) => {
@@ -218,6 +218,7 @@ export const SaleLineCard = withForm({
                         label={t('dukaan.sale.shopWarranty')}
                         required
                         description={t('dukaan.sale.shopWarrantyHelp')}
+                        className='grid grid-cols-2 gap-x-3 gap-y-2 sm:flex sm:flex-wrap sm:gap-x-6'
                         options={[
                           {
                             value: '1',

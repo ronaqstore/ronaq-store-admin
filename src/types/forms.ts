@@ -43,6 +43,7 @@ export interface FileUploadFieldProps extends BaseFieldProps {
 }
 
 export interface RadioGroupFieldProps extends BaseFieldProps {
+  className?: string;
   options: FormFieldOption[];
 }
 

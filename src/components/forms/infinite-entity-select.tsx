@@ -140,17 +140,20 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
             aria-expanded={open}
             aria-controls={LIST_ID}
             className={cn(
-              'w-full justify-between font-normal',
+              'w-full min-w-0 justify-between font-normal',
               !value && 'text-muted-foreground',
               className
             )}
           />
         }
       >
-        <span className='truncate'>{displayLabel}</span>
+        <span className='min-w-0 flex-1 truncate text-start'>{displayLabel}</span>
         <Icons.chevronsUpDown className='ms-2 size-4 shrink-0 opacity-50' />
       </PopoverTrigger>
-      <PopoverContent className='w-(--anchor-width) p-0' align='start'>
+      <PopoverContent
+        className='w-(--anchor-width) min-w-0 max-w-[calc(100dvw-2rem)] p-0'
+        align='start'
+      >
         <Command shouldFilter={false}>
           <CommandInput
             placeholder={effSearchPlaceholder}
@@ -179,7 +182,7 @@ export function InfiniteEntitySelect<T extends NamedEntity>({
                           value === item.id ? 'opacity-100' : 'opacity-0'
                         )}
                       />
-                      <span className='truncate'>{item.name}</span>
+                      <span className='min-w-0 flex-1 truncate'>{item.name}</span>
                     </CommandItem>
                   ))}
                 </CommandGroup>
