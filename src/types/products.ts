@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { Dispatch, ReactNode, SetStateAction } from 'react';
 import type { ProductDTO, ProductImageDTO } from '@/lib/api/types';
 import type { EntityStatusConfirm } from '@/types/common';
 
@@ -29,6 +29,12 @@ export interface CreateProductApiResponse {
 export interface PendingProductImageFile {
   id: string;
   file: File;
+}
+
+export interface ProductImageUploadTask {
+  id: string;
+  previewUrl: string;
+  status: 'queued' | 'preparing' | 'uploading';
 }
 
 export interface ProductFormPageProps {
@@ -64,9 +70,10 @@ export interface ProductFormSidebarFields {
 export interface ProductFormSidebarProps {
   productId?: string;
   images: ProductImageDTO[];
-  onImagesChange: (images: ProductImageDTO[]) => void;
+  onImagesChange: Dispatch<SetStateAction<ProductImageDTO[]>>;
   onAddPendingFile: (file: File, id: string) => void;
   onRemovePendingFile: (id: string) => void;
+  onImageUploadsChange: (isUploading: boolean) => void;
   saving: boolean;
   isEdit: boolean;
   onCancel: () => void;
@@ -77,9 +84,10 @@ export interface ProductFormSidebarProps {
 export interface ProductPhotoManagerProps {
   productId?: string;
   images: ProductImageDTO[];
-  onChange: (images: ProductImageDTO[]) => void;
+  onChange: Dispatch<SetStateAction<ProductImageDTO[]>>;
   onAddPendingFile?: (file: File, id: string) => void;
   onRemovePendingFile?: (imageId: string) => void;
+  onUploadsChange: (isUploading: boolean) => void;
 }
 
 export interface ProductsHeaderActionProps {

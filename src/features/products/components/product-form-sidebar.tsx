@@ -11,6 +11,7 @@ export function ProductFormSidebar({
   onImagesChange,
   onAddPendingFile,
   onRemovePendingFile,
+  onImageUploadsChange,
   saving,
   isEdit,
   onCancel,
@@ -27,6 +28,7 @@ export function ProductFormSidebar({
           onChange={onImagesChange}
           onAddPendingFile={onAddPendingFile}
           onRemovePendingFile={onRemovePendingFile}
+          onUploadsChange={onImageUploadsChange}
         />
       </section>
 

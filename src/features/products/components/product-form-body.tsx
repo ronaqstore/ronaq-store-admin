@@ -53,6 +53,7 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
   });
   const [images, setImages] = useState<ProductImageDTO[]>([]);
   const [pendingFiles, setPendingFiles] = useState<PendingProductImageFile[]>([]);
+  const [isImageUploading, setIsImageUploading] = useState(false);
   const [formApiError, setFormApiError] = useState<string | null>(null);
   const [brandLabel, setBrandLabel] = useState(product?.brandName ?? '');
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
@@ -155,7 +156,7 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
     handleBrandChange(newBrand.id, { id: newBrand.id, name: newBrand.name });
   };
 
-  const saving = createProduct.isPending || updateProduct.isPending;
+  const saving = createProduct.isPending || updateProduct.isPending || isImageUploading;
 
   return (
     <>
@@ -428,6 +429,7 @@ export function ProductFormBody({ productId, product }: ProductFormBodyProps) {
             onImagesChange={setImages}
             onAddPendingFile={handleAddPendingFile}
             onRemovePendingFile={handleRemovePendingFile}
+            onImageUploadsChange={setIsImageUploading}
             saving={saving}
             isEdit={isEdit}
             onCancel={handleCancel}
